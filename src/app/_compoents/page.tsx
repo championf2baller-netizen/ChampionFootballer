@@ -10,7 +10,7 @@ import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
 import heroPlayers from '@/Components/images/222.png';
 import image9 from '@/Components/images/1stpicc.png';
-import image10 from '@/Components/images/2ndpicc.png';
+import image10 from '@/Components/images/2ndpicc.jpeg';
 import image11 from '@/Components/images/3rdpicc.png';
 import image12 from '@/Components/images/4thpicc.png';
 import LogoNavbar from './logonavbar';
