@@ -2762,7 +2762,7 @@ export default function AllMatches() {
                                         }}
                                     >
                                         {match.archived && (
-                                            <Chip label="Canceled by Admin" size="small" sx={{ position: 'absolute', top: 40, left: '50%', transform: 'translateX(-50%)', zIndex: 10, backgroundColor: '#b91c1c', color: 'white', fontWeight: 'bold' }} />
+                                            <Chip label="Cancelled by Admin" size="small" sx={{ position: 'absolute', top: 40, left: '50%', transform: 'translateX(-50%)', zIndex: 10, backgroundColor: '#b91c1c', color: 'white', fontWeight: 'bold' }} />
                                         )}
 
                                         {/* Match Title Header */}

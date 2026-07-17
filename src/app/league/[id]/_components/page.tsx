@@ -429,7 +429,7 @@ const LEADERBOARD_METRIC_CONFIG = [
         label: 'CONTRIBUTION INDEX %',
         icon: Imapct,
         infoSummary: 'Shows overall contribution as a percentage.',
-        infoFormula: 'Averages each player’s match impact percentage from RESULT_PUBLISHED matches for the selected league/season.',
+        infoFormula: "Measures a player's contribution towards winning matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions or the selected league and season.",
     },
 ] as const;
 
@@ -5501,7 +5501,7 @@ export default function LeagueDetailPage() {
                                                             {/* Archived label */}
                                                             {match.archived && (
                                                                 <Chip
-                                                                    label="Canceled by Admin"
+                                                                    label="Cancelled by Admin"
                                                                     size="small"
                                                                     sx={{
                                                                         position: 'absolute',

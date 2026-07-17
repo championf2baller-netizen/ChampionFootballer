@@ -1925,7 +1925,17 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
 
             <>
               <Typography sx={{ fontSize: { xs: 13, sm: 19 }, fontWeight: 600, lineHeight: 1.1, mb: 0 }}>
-                <span style={{ color: primaryColor }}>
+                <span
+                  style={{
+                    color: teamInsights
+                      ? teamInsights.predicted === 'home'
+                        ? '#00a77f'
+                        : teamInsights.predicted === 'away'
+                          ? '#c95c1a'
+                          : '#fff'
+                      : '#00a77f'
+                  }}
+                >
                   {teamInsights
                     ? teamInsights.predicted === 'home'
                       ? homeTeamName
@@ -1944,7 +1954,17 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
               </Typography>
               <Typography sx={{ fontSize: { xs: 12.5, sm: 19 }, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>
                 Predicted score is{' '}
-                <span style={{ color: primaryColor }}>
+                <span
+                  style={{
+                    color: teamInsights
+                      ? teamInsights.predicted === 'home'
+                        ? '#00a77f'
+                        : teamInsights.predicted === 'away'
+                          ? '#c95c1a'
+                          : primaryColor
+                      : '#00a77f'
+                  }}
+                >
                   {teamInsights ? teamInsights.predictedScore : '\u2014'}
                 </span>
               </Typography>

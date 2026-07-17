@@ -13,20 +13,29 @@ function LogoNavbar() {
           width: '100%',
           backgroundColor: '#101010',
           display: 'flex',
-          justifyContent: { xs: 'center', md: 'flex-start' },
           py: 1,
           px: { xs: 2, md: 7 }
         }}
       >
-        <Box sx={{ width: { xs: 250, sm: 340, md: 700 }, mx: { xs: 'auto', md: 0 } }}>
-          <Image
-            src={Layer}
-            alt="Champion Footballer Logo"
-            width={700}
-            height={130}
-            style={{ width: '100%', height: 'auto' }}
-            priority
-          />
+        <Box
+          sx={{
+            maxWidth: '1280px',
+            width: '100%',
+            mx: 'auto',
+            display: 'flex',
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }}
+        >
+          <Box sx={{ width: { xs: 250, sm: 340, md: 700 } }}>
+            <Image
+              src={Layer}
+              alt="Champion Footballer Logo"
+              width={700}
+              height={130}
+              style={{ width: '100%', height: 'auto' }}
+              priority
+            />
+          </Box>
         </Box>
       </Box>
       
@@ -34,10 +43,11 @@ function LogoNavbar() {
       <Box sx={{ px: { xs: 2, md: 7 }, py: 1, width: '100%', backgroundColor: '#101010' }}>
         <Box
           sx={{
+            maxWidth: '1280px',
             width: '100%',
+            mx: 'auto',
             height: 'var(--header-divider-height)',
             backgroundColor: 'var(--header-divider-color)',
-           
           }}
         />
       </Box>

@@ -215,6 +215,27 @@ export default function WorldRankingTable() {
     if (filters.country) {
       base = base.filter(p => (p.country || '').toLowerCase() === filters.country!.toLowerCase());
     }
+    if (filters.positionType) {
+      const targetType = filters.positionType.toLowerCase();
+      base = base.filter(p => {
+        const pt = (p.positionType || '').toLowerCase();
+        const pos = (p.position || '').toLowerCase();
+        
+        if (targetType === 'goalkeeper' || targetType === 'gk') {
+          return pt === 'goalkeeper' || pt === 'gk' || pos === 'gk' || pos.includes('gk') || pos.includes('goalkeeper');
+        }
+        if (targetType === 'defender' || targetType === 'df') {
+          return pt === 'defender' || pt === 'df' || ['cb', 'rb', 'lb', 'rwb', 'lwb'].includes(pos) || pos.includes('back') || pos.includes('defender');
+        }
+        if (targetType === 'midfielder' || targetType === 'md' || targetType === 'mf') {
+          return pt === 'midfielder' || pt === 'md' || pt === 'mf' || ['cm', 'cdm', 'cam', 'rm', 'lm', 'midfielder'].includes(pos) || pos.includes('midfielder');
+        }
+        if (targetType === 'forward' || targetType === 'fw') {
+          return pt === 'forward' || pt === 'fw' || ['st', 'cf', 'rf', 'lf', 'rw', 'lw'].includes(pos) || pos.includes('striker') || pos.includes('forward') || pos.includes('winger');
+        }
+        return false;
+      });
+    }
 
     // Compute tie-aware ranks based on current mode metric (competition ranking: 1,2,2,4)
     const metricKey: 'avgXP' | 'totalXP' = filters.mode === 'avg' ? 'avgXP' : 'totalXP';
@@ -244,7 +265,7 @@ export default function WorldRankingTable() {
     });
     // Attach the computed rank for later use (render)
     return base.map(p => ({ ...p, rank: rankMap.get(p.id) ?? p.rank } as WorldRankingPlayer));
-  }, [data, search, sort, filters.mode, filters.country]);
+  }, [data, search, sort, filters.mode, filters.country, filters.positionType]);
 
   const toggleSort = (key: SortKey) => {
     setSort(prev => {

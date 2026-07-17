@@ -1471,7 +1471,7 @@ export default function CareerPage() {
 
   // ------------- AGGREGATION (supports forced modes) -------------
   const { performanceData, groupingType } = useMemo(() => {
-    const base = chartMatches.filter(m => !!m.playerStats);
+    const base = chartMatches.filter(m => !!m.playerStats && calcPoints(m.playerStats) > 0);
     if (!base.length) {
       return {
         performanceData: [] as PerformanceRow[],
@@ -3705,7 +3705,7 @@ export default function CareerPage() {
                                       return (
                                         <Box
                                           sx={{
-                                            position: isMobile ? 'fixed' : 'absolute',
+                                            position: isMobile ? 'fixed' : 'relative',
                                             ...(isMobile ? {
                                               top: '50%',
                                               left: '50%',
@@ -4105,14 +4105,37 @@ export default function CareerPage() {
                                   labelLine={false}
                                 />
                                 <Tooltip
-                                  contentStyle={{
-                                    background: themeColors.surfaceAlt,
-                                    border: `1px solid ${themeColors.border}`,
-                                    borderRadius: 4,
-                                    color: themeColors.text,
-                                    fontSize: 10,
+                                  content={({ active, payload }) => {
+                                    if (!active || !payload || !payload.length) return null;
+                                    const entry = payload[0];
+                                    const item = entry.payload;
+                                    const name = entry.name;
+                                    const value = entry.value;
+                                    const color = item.color || entry.color || themeColors.text;
+                                    return (
+                                      <Box
+                                        sx={{
+                                          background: themeColors.surfaceAlt,
+                                          border: `1px solid ${themeColors.border}`,
+                                          borderRadius: 1,
+                                          p: 1.2,
+                                          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                                          pointerEvents: 'none',
+                                        }}
+                                      >
+                                        <Typography
+                                          sx={{
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            color: color,
+                                            textTransform: 'uppercase',
+                                          }}
+                                        >
+                                          {name} : {value}%
+                                        </Typography>
+                                      </Box>
+                                    );
                                   }}
-                                  formatter={(value: unknown, name: unknown) => [`${value}%`, String(name ?? '')]}
                                 />
                               </PieChart>
                             </ResponsiveContainer>

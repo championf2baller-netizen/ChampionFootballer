@@ -55,10 +55,11 @@ export default function LandingPage() {
           py: { xs: 4, md: 2 },
         }}
       >
-        <Grid container spacing={{ xs: 3, md: 4 }}>
-          {/* Left Side - 8 columns */}
-          <Grid item xs={12} md={8}>
-            <Box sx={{ color: 'white' }}>
+        <Box sx={{ maxWidth: '1280px', mx: 'auto', width: '100%' }}>
+          <Grid container spacing={{ xs: 3, md: 4 }}>
+            {/* Left Side - 8 columns */}
+            <Grid item xs={12} md={8}>
+              <Box sx={{ color: 'white' }}>
               {/* Heading */}
               <Typography
                 className="landing-hero-display"
@@ -364,6 +365,7 @@ export default function LandingPage() {
             </Modal>
           </Grid>
         </Grid>
+        </Box>
       </Box>
 
       {/* Rest of the page with background */}
@@ -377,7 +379,7 @@ export default function LandingPage() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          px: { xs: 2, md: 3 },
+          px: { xs: 2, md: 7 },
 
         }}
       >
@@ -385,7 +387,9 @@ export default function LandingPage() {
         {/* Separate images box — anchored bottom-center on md+, centered and stacked on small screens */}
         <Box
           sx={{
-            width: { xs: '100%', md: 'auto' },
+            width: '100%',
+            maxWidth: '1280px',
+            mx: 'auto',
             display: 'flex',
             justifyContent: 'center',
             px: { xs: 2, md: 0 },

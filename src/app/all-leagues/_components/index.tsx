@@ -1812,6 +1812,36 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         <Grid container spacing={3} sx={{ mt: 0, minWidth: 0 }}>
           <Grid item xs={12} md={6} sx={{ minWidth: 0 }}>
             <Box component="form" noValidate autoComplete="off" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+             
+                <FormControl fullWidth>
+                <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ color: '#E5E7EB' }}>
+                  League name
+                </Typography>
+                <TextField
+                  fullWidth
+                  value={name}
+                  onChange={(e) => {
+                    const raw = e.target.value || ''
+                    const cleaned = raw.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 30)
+                    setName(cleaned)
+                  }}
+                  disabled={!canManageLeagueSettings}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      color: '#E5E7EB',
+                      '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
+                      '&.Mui-focused fieldset': { borderColor: '#0388E3' },
+                    },
+                    '& .MuiInputBase-input': { color: '#E5E7EB' },
+                  }}
+                  InputLabelProps={{ sx: { color: '#9CA3AF' } }}
+                  FormHelperTextProps={{ sx: { color: '#E5E7EB' } }}
+                  inputProps={{ maxLength: 30 }}
+                  helperText="Max 30 characters, letters/numbers only"
+                />
+              </FormControl>
+              
               {/* Season Selector */}
               {seasons.length > 0 && (
                 <FormControl fullWidth>
@@ -1902,34 +1932,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 </Typography>
               </FormControl>
 
-              <FormControl fullWidth>
-                <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ color: '#E5E7EB' }}>
-                  League name
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={name}
-                  onChange={(e) => {
-                    const raw = e.target.value || ''
-                    const cleaned = raw.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 30)
-                    setName(cleaned)
-                  }}
-                  disabled={!canManageLeagueSettings}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      color: '#E5E7EB',
-                      '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
-                      '&.Mui-focused fieldset': { borderColor: '#0388E3' },
-                    },
-                    '& .MuiInputBase-input': { color: '#E5E7EB' },
-                  }}
-                  InputLabelProps={{ sx: { color: '#9CA3AF' } }}
-                  FormHelperTextProps={{ sx: { color: '#E5E7EB' } }}
-                  inputProps={{ maxLength: 30 }}
-                  helperText="Max 30 characters, letters/numbers only"
-                />
-              </FormControl>
+           
 
               {/* League Display Picture */}
               <FormControl fullWidth>
