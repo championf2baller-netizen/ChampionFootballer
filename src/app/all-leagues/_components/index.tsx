@@ -5776,7 +5776,7 @@ function AllLeagues() {
                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, height: '100%' }}>
                             {/* League Title */}
                             <Typography sx={{
-                              color: isCompleted ? '#111827' : 'white',
+                              color: isCompleted ? '#111827' : '#E56B16',
                               fontFamily: 'var(--font-geist-anton), "Anton", sans-serif !important',
                               fontSize: { xs: '28px', sm: '32px', md: '36px' },
 
