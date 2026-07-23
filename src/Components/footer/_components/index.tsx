@@ -52,6 +52,7 @@ export default function Footer() {
               href="https://x.com/champf2baller"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="X Twitter"
               size="small"
               sx={{
                 color: 'white',
@@ -69,6 +70,7 @@ export default function Footer() {
               href="https://www.instagram.com/champf2baller/"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Instagram"
               size="small"
               sx={{
                 color: '#fff',

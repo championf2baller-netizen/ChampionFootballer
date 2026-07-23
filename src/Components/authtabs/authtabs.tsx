@@ -1195,6 +1195,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 endAdornment: (
                   <IconButton
                     onClick={() => setShowLoginPassword((show) => !show)}
+                    aria-label="toggle password visibility"
                     edge="end"
                     size="small"
                     sx={{ color: "#000" }}
@@ -1456,6 +1457,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   endAdornment: (
                     <IconButton
                       onClick={() => setShowRegisterPassword((show) => !show)}
+                      aria-label="toggle password visibility"
                       edge="end"
                       size="small"
                       sx={{ color: '#000' }}
@@ -1486,6 +1488,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   endAdornment: (
                     <IconButton
                       onClick={() => setShowRegisterConfirmPassword((show) => !show)}
+                      aria-label="toggle password visibility"
                       edge="end"
                       size="small"
                       sx={{ color: '#000' }}
@@ -2065,7 +2068,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 }}
                 InputProps={{
                   endAdornment: (
-                    <IconButton onClick={() => setShowForgotNewPassword(v => !v)} edge="end" size="small" sx={{ color: '#757575' }}>
+                    <IconButton onClick={() => setShowForgotNewPassword(v => !v)} aria-label="toggle password visibility" edge="end" size="small" sx={{ color: '#757575' }}>
                       {showForgotNewPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   ),
@@ -2105,7 +2108,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 }}
                 InputProps={{
                   endAdornment: (
-                    <IconButton onClick={() => setShowForgotConfirmPassword(v => !v)} edge="end" size="small" sx={{ color: '#757575' }}>
+                    <IconButton onClick={() => setShowForgotConfirmPassword(v => !v)} aria-label="toggle password visibility" edge="end" size="small" sx={{ color: '#757575' }}>
                       {showForgotConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   ),

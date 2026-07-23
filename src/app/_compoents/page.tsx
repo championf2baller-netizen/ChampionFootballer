@@ -345,6 +345,7 @@ export default function LandingPage() {
                   {/* Close button */}
                   <IconButton
                     onClick={() => setIsJoinModalOpen(false)}
+                    aria-label="Close modal"
                     sx={{
                       position: 'absolute',
                       right: 8,
