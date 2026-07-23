@@ -1438,7 +1438,11 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
   };
 
   if (!dataLoaded) {
-    return <ViewTeamPopupLoadingSkeleton />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 350 }}>
+        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+      </Box>
+    );
   }
 
   // Teams not created: only show pitch + message (no shirts)

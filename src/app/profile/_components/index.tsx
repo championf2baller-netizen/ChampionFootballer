@@ -511,7 +511,11 @@ const PlayerProfileCard = () => {
   ])
 
   if (authLoading) {
-    return <ProfileSettingsLoadingSkeleton />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+      </Box>
+    );
   }
 
   // Note: Do not auto-change playing style on position type change.

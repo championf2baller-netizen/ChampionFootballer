@@ -18,6 +18,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  CircularProgress,
   // Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -3345,7 +3346,9 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 
         <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
           {loading ? (
-            <NotificationMenuLoadingSkeleton />
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+              <CircularProgress size={28} sx={{ color: '#00ff88' }} />
+            </Box>
           ) : notifications.length === 0 ? (
             <Box sx={{ p: 4, textAlign: 'center', color: '#666' }}>
               <NotificationsIcon sx={{ fontSize: 48, color: '#ccc', mb: 1 }} />

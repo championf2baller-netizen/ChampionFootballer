@@ -974,7 +974,11 @@ export default function RewardsPage() {
   const totalRewardsXP = myBadges.reduce((sum, badge) => sum + (badge.count * badge.xp), 0);
 
   if (loading) {
-    return <RewardsLoadingSkeleton />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+      </Box>
+    );
   }
 
   if (error) {

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, MenuItem, Divider, Menu, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, Typography, Paper, Button, MenuItem, Divider, Menu, ListItemIcon, ListItemText, CircularProgress } from '@mui/material';
 import { ChevronDown, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/lib/hooks';
@@ -527,7 +527,9 @@ export default function LeaderBoardPage() {
       </Box>
       <Typography variant="h5" sx={{ mb: 2 }}>Top 5 Players</Typography>
       {loading ? (
-        <LeaderBoardLoadingSkeleton compact />
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 6 }}>
+          <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+        </Box>
       ) : !selectedLeague ? (
         <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.06)', color: 'white' }}>
           <Typography className="empty-state-message" variant="body1">No active leagues available for leaderboard.</Typography>

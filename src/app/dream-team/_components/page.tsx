@@ -1,7 +1,7 @@
 'use client';
   
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Box, Typography, Menu, MenuItem, ListItemIcon, ListItemText, Button } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, ListItemIcon, ListItemText, Button, CircularProgress } from '@mui/material';
 import { useAuth } from '@/lib/hooks';
 import fieldImg from '@/Components/images/ground.webp';
 import { Trophy, ChevronDown } from 'lucide-react';
@@ -606,7 +606,9 @@ const DreamTeamPage = () => {
       </Menu>
 
       {loading ? (
-        <DreamTeamLoadingSkeleton compact />
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+          <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+        </Box>
       ) : (
         <>
           {/* Field (image) */}

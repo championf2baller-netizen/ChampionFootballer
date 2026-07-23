@@ -321,7 +321,11 @@ export default function WorldRankingTable() {
   }, [loading, filtered.length]);
 
   if (loading && !data) {
-    return <WorldRankingLoadingSkeleton />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+      </Box>
+    );
   }
 
   const formatNum = (n: number | undefined | null, opts: { decimals?: number } = {}) => {

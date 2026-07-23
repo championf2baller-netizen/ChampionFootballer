@@ -24,23 +24,23 @@ import FontDebugMonitor from "@/Components/FontDebugMonitor";
 //  pointing to /assets/fonts/ would return 404 on production).
 const woodfordBournePro = localFont({
   src: [
-    { path: '../../public/assets/fonts/WoodfordBournePro-Thin.woff2',        weight: '100', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ThinItalic.woff2',  weight: '100', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ExtraLight.woff2',  weight: '200', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ExtLtIta.woff2',    weight: '200', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Light.woff2',       weight: '300', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Thin.woff2', weight: '100', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-ThinItalic.woff2', weight: '100', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-ExtraLight.woff2', weight: '200', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-ExtLtIta.woff2', weight: '200', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Light.woff2', weight: '300', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-LightItalic.woff2', weight: '300', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Regular.woff2',     weight: '400', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Italic.woff2',      weight: '400', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Medium.woff2',      weight: '500', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-MedIta.woff2',      weight: '500', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-SemiBold.woff2',    weight: '600', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-SemBdIta.woff2',    weight: '600', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Bold.woff2',        weight: '700', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-BoldItalic.woff2',  weight: '700', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Black.woff2',       weight: '900', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Italic.woff2', weight: '400', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-MedIta.woff2', weight: '500', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-SemiBold.woff2', weight: '600', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-SemBdIta.woff2', weight: '600', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Bold.woff2', weight: '700', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-BoldItalic.woff2', weight: '700', style: 'italic' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Black.woff2', weight: '900', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-BlackItalic.woff2', weight: '900', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Ultra.woff2',       weight: '950', style: 'normal' },
+    { path: '../../public/assets/fonts/WoodfordBournePro-Ultra.woff2', weight: '950', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-UltraItalic.woff2', weight: '950', style: 'italic' },
   ],
   variable: '--font-woodford-bourne-pro',
@@ -53,7 +53,7 @@ const bebasNeue = Bebas_Neue({
   variable: '--font-bebas-neue'
 });
 
-const anton = Anton({ 
+const anton = Anton({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-geist-anton'
@@ -100,8 +100,8 @@ export default function RootLayout({
 }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   let apiHostname: string | null = null;
-  try { apiHostname = new URL(apiUrl).hostname; } catch {}
-  
+  try { apiHostname = new URL(apiUrl).hostname; } catch { }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -115,7 +115,7 @@ export default function RootLayout({
           </>
         )}
       </head>
-      <body 
+      <body
         className={`${woodfordBournePro.variable} ${geistSans.variable} ${geistMono.variable} ${anton.variable} ${inter.variable} ${bebasNeue.variable} ${oswald.variable} ${leagueSpartan.variable} antialiased`}
         style={{ fontFamily: "var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif" }}
       >
@@ -128,7 +128,7 @@ export default function RootLayout({
           <AuthCheck />
           <LayoutContent>
             {children}
-            <Footer/>
+            <Footer />
           </LayoutContent>
           <ToasterProvider /> {/* mount once */}
           <PerformanceMonitor /> {/* Performance monitoring in dev mode */}

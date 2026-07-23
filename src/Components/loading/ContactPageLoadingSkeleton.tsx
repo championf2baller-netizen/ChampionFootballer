@@ -1,19 +1,9 @@
+import { Box, CircularProgress } from '@mui/material';
+
 export default function ContactPageLoadingSkeleton() {
   return (
-    <div className="contact-page-loading-shell" role="status" aria-live="polite" aria-busy="true">
-      <div className="route-loading-bone contact-page-loading-card">
-        <div className="route-loading-bone contact-page-loading-title" />
-        <div className="route-loading-bone contact-page-loading-subtitle" />
-
-        <div className="contact-page-loading-input-row">
-          <div className="route-loading-bone contact-page-loading-input" />
-          <div className="route-loading-bone contact-page-loading-input" />
-        </div>
-
-        <div className="route-loading-bone contact-page-loading-input" />
-        <div className="route-loading-bone contact-page-loading-textarea" />
-        <div className="route-loading-bone contact-page-loading-button" />
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8, minHeight: 300 }}>
+      <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+    </Box>
   );
 }

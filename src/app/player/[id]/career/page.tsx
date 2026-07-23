@@ -3376,7 +3376,9 @@ export default function CareerPage() {
           {/* Main Content */}
           <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 } }}>
             {loading ? (
-              <PlayerCareerLoadingSkeleton />
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+                <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+              </Box>
             ) : (
               <Box>
                 {/* Performance Over Time Chart */}

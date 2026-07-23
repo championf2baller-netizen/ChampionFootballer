@@ -2456,13 +2456,19 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         </IconButton>
                     </DialogTitle>
                     <DialogContent sx={{ ...dialogContentSx, minHeight: '200px' }}>
-                        <MatchStatsPopupLoadingSkeleton mode="score" />
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                            <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+                        </Box>
                     </DialogContent>
                 </Dialog>
             );
         }
 
-        const inner = <MatchStatsPopupLoadingSkeleton mode="stats" />;
+        const inner = (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+            </Box>
+        );
         if (typeof open === 'boolean') {
             return (
                 <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg" scroll="paper" keepMounted PaperProps={{ sx: dialogPaperSx }}>
@@ -2492,9 +2498,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         {error ? (
                             <Alert severity="error" sx={{ bgcolor: 'rgba(244,67,54,0.1)', color: '#ffcdd2', border: '1px solid rgba(244,67,54,0.3)' }}>{error}</Alert>
                         ) : (
-                            <Typography variant="body1" sx={{ color: '#E5E7EB', mb: 2 }}>Loading match detailsâ€¦</Typography>
+                            <Typography variant="body1" sx={{ color: '#E5E7EB', mb: 2 }}>Loading match details…</Typography>
                         )}
-                        {!error && <MatchStatsPopupLoadingSkeleton mode="score" />}
+                        {!error && (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                                <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+                            </Box>
+                        )}
                     </DialogContent>
                 </Dialog>
             );
