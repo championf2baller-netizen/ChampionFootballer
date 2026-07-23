@@ -8,11 +8,11 @@ import Layer from '@/Components/images/championfootballnewlogo.webp';
 import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
-import heroPlayers from '@/Components/images/222.png';
-import image9 from '@/Components/images/1stpicc.jpeg';
-import image10 from '@/Components/images/2ndpicc.png';
-import image11 from '@/Components/images/3rdpicc.png';
-import image12 from '@/Components/images/4thpicc.png';
+import heroPlayers from '@/Components/images/222.webp';
+import image9 from '@/Components/images/1stpicc.webp';
+import image10 from '@/Components/images/2ndpicc.webp';
+import image11 from '@/Components/images/3rdpicc.webp';
+import image12 from '@/Components/images/4thpicc.webp';
 import LogoNavbar from './logonavbar';
 
 
@@ -155,6 +155,8 @@ export default function LandingPage() {
                   height={500}
                   style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
                   priority
+                  fetchPriority="high"
+                  sizes="(max-width: 768px) 100vw, 780px"
                 />
               </Box>
 

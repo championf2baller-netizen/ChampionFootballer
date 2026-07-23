@@ -24,24 +24,12 @@ import FontDebugMonitor from "@/Components/FontDebugMonitor";
 //  pointing to /assets/fonts/ would return 404 on production).
 const woodfordBournePro = localFont({
   src: [
-    { path: '../../public/assets/fonts/WoodfordBournePro-Thin.woff2', weight: '100', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ThinItalic.woff2', weight: '100', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ExtraLight.woff2', weight: '200', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-ExtLtIta.woff2', weight: '200', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Light.woff2', weight: '300', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-LightItalic.woff2', weight: '300', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Regular.woff2', weight: '400', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Italic.woff2', weight: '400', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Medium.woff2', weight: '500', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-MedIta.woff2', weight: '500', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-SemiBold.woff2', weight: '600', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-SemBdIta.woff2', weight: '600', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Bold.woff2', weight: '700', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-BoldItalic.woff2', weight: '700', style: 'italic' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Black.woff2', weight: '900', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-BlackItalic.woff2', weight: '900', style: 'italic' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Ultra.woff2', weight: '950', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-UltraItalic.woff2', weight: '950', style: 'italic' },
   ],
   variable: '--font-woodford-bourne-pro',
   display: 'swap',
@@ -50,42 +38,49 @@ const woodfordBournePro = localFont({
 const bebasNeue = Bebas_Neue({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-bebas-neue'
+  variable: '--font-bebas-neue',
+  display: 'swap',
 });
 
 const anton = Anton({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-geist-anton'
+  variable: '--font-geist-anton',
+  display: 'swap',
 });
 
 const oswald = Oswald({
   weight: ['200', '300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-oswald',
+  display: 'swap',
 });
 
 const leagueSpartan = League_Spartan({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-league-spartan',
+  display: 'swap',
 });
 
 const inter = Inter({
   weight: ['400', '600'],
   style: ['normal', 'italic'],
   subsets: ['latin'],
-  variable: '--font-inter'
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 const geistSans = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
+  display: 'swap',
 });
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -105,13 +100,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta httpEquiv="Pragma" content="no-cache" />
-        <meta httpEquiv="Expires" content="0" />
         {apiHostname && (
           <>
             <link rel="dns-prefetch" href={`//${apiHostname}`} />
-            <link rel="preconnect" href={apiUrl} crossOrigin="use-credentials" />
+            <link rel="preconnect" href={apiUrl} crossOrigin="anonymous" />
           </>
         )}
       </head>
@@ -132,7 +124,6 @@ export default function RootLayout({
           </LayoutContent>
           <ToasterProvider /> {/* mount once */}
           <PerformanceMonitor /> {/* Performance monitoring in dev mode */}
-          <FontDebugMonitor /> {/* Production console diagnostics for font loading */}
           {process.env.NODE_ENV !== 'production' && <RealtimeLatency />}
         </Providers>
       </body>
