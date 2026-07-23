@@ -125,10 +125,12 @@ function invalidateEverywhere(resourceType?: MutationDetail['resourceType'], res
 
 export default function GlobalCacheSync() {
   useEffect(() => {
-    if (NO_CACHE_MODE) {
-      invalidateEverywhere(undefined, null);
-      clearBrowserCaches().catch(() => undefined);
-    }
+    const timer = setTimeout(() => {
+      if (NO_CACHE_MODE) {
+        invalidateEverywhere(undefined, null);
+        clearBrowserCaches().catch(() => undefined);
+      }
+    }, 3500);
 
     const onMutation = (event: Event) => {
       const detail = (event as CustomEvent<MutationDetail>).detail || {};
@@ -162,6 +164,7 @@ export default function GlobalCacheSync() {
     window.addEventListener('vote-updated', onEntityEvent as EventListener);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('data-mutated', onMutation as EventListener);
       window.removeEventListener('match-created', onEntityEvent as EventListener);
       window.removeEventListener('match-updated', onEntityEvent as EventListener);

@@ -183,18 +183,12 @@ export function setupPerformanceMonitoring() {
 
 // Initialize all production optimizations
 export function initProductionOptimizations() {
-  if (!IS_PRODUCTION) return;
+  if (!IS_PRODUCTION || typeof window === 'undefined') return;
 
-  perfLog('Initializing production optimizations...');
-
-  // 1. Setup performance monitoring
-  setupPerformanceMonitoring();
-
-  // 2. Prefetch critical endpoints
-  prefetchCriticalEndpoints();
-
-  // 3. Register service worker (optional)
-  // registerServiceWorker(); // Uncomment when sw.js is ready
-
-  perfLog('Production optimizations initialized');
+  setTimeout(() => {
+    perfLog('Initializing production optimizations...');
+    setupPerformanceMonitoring();
+    prefetchCriticalEndpoints();
+    perfLog('Production optimizations initialized');
+  }, 4000);
 }
