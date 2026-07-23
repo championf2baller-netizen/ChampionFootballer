@@ -152,6 +152,7 @@ export default function LandingPage() {
                   style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
                   priority
                   fetchPriority="high"
+                  decoding="async"
                   sizes="(max-width: 768px) 100vw, 780px"
                 />
               </Box>
