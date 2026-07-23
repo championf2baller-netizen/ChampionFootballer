@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
   
   // Advanced performance optimizations
   experimental: {
-    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lucide-react', 'react-icons'],
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lucide-react', 'react-icons', '@mui/x-date-pickers', 'date-fns', 'dayjs'],
     // Parallel server compiles/traces can only be used when build workers are available.
     // Default to disabled to avoid build-time errors on platforms without workers.
     parallelServerCompiles: enableParallel,
