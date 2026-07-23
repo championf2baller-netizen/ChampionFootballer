@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
   generateEtags: false,
   
   // Output optimization
-  output: 'standalone', // Optimize for deployment
+  // output: 'standalone', // Optimize for deployment
   // Removed dynamic outputFileTracing override (unsupported key warning)
   
   // Headers for better performance and security

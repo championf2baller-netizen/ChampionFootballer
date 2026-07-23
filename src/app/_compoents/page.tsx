@@ -4,10 +4,6 @@ import { Box, Paper, Typography, Button, Card, Modal, IconButton, Grid } from '@
 import CloseIcon from '@mui/icons-material/Close';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import Layer from '@/Components/images/championfootballnewlogo.webp';
-import NewImg from '@/Components/images/Done1.webp';
-import Newimg from '@/Components/images/Done2.webp';
-import mobile from '@/Components/images/mobile.webp';
 import heroPlayers from '@/Components/images/222.webp';
 import image9 from '@/Components/images/1stpicc.webp';
 import image10 from '@/Components/images/2ndpicc.webp';
@@ -21,7 +17,7 @@ import { useState } from 'react';
 // Lazy load heavy components
 const AuthTabs = dynamic(() => import('@/Components/authtabs/authtabs'), {
   loading: () => <Box sx={{ p: 2, textAlign: 'center', color: 'white' }}>Loading...</Box>,
-  ssr: true
+  ssr: false
 });
 
 const AuthSocialButtons = dynamic(() => import('@/Components/AuthSocialButtons'), {
@@ -318,53 +314,55 @@ export default function LandingPage() {
               </Paper>
             </Box>
             {/* Join Modal - Popup for registration */}
-            <Modal
-              open={isJoinModalOpen}
-              onClose={() => setIsJoinModalOpen(false)}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Paper
-                elevation={8}
+            {isJoinModalOpen && (
+              <Modal
+                open={isJoinModalOpen}
+                onClose={() => setIsJoinModalOpen(false)}
                 sx={{
-                  width: { xs: '92vw', sm: '600px', md: '730px' },
-                  maxWidth: '92vw',
-                  height: { xs: '90vh', md: '1129px' },
-                  maxHeight: '90vh',
-                  overflowY: 'auto',
-                  borderRadius: '15px',
-                  bgcolor: '#f5f6f6',
-                  p: { xs: 3, md: 4 },
-                  position: 'relative',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                  '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari/Opera
-                  scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                  msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                {/* Close button */}
-                <IconButton
-                  onClick={() => setIsJoinModalOpen(false)}
+                <Paper
+                  elevation={8}
                   sx={{
-                    position: 'absolute',
-                    right: 8,
-                    top: 8,
-                    color: 'grey.500',
-                    '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+                    width: { xs: '92vw', sm: '600px', md: '730px' },
+                    maxWidth: '92vw',
+                    height: { xs: '90vh', md: '1129px' },
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    borderRadius: '15px',
+                    bgcolor: '#f5f6f6',
+                    p: { xs: 3, md: 4 },
+                    position: 'relative',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                    '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari/Opera
+                    scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                    msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
                   }}
                 >
-                  <CloseIcon />
-                </IconButton>
+                  {/* Close button */}
+                  <IconButton
+                    onClick={() => setIsJoinModalOpen(false)}
+                    sx={{
+                      position: 'absolute',
+                      right: 8,
+                      top: 8,
+                      color: 'grey.500',
+                      '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
 
-                {/* Auth Tabs - Register form */}
-                <Box sx={{ width: '100%', overflow: 'visible' }}>
-                  <AuthTabs showLogin={false} onToggleForm={() => { }} />
-                </Box>
-              </Paper>
-            </Modal>
+                  {/* Auth Tabs - Register form */}
+                  <Box sx={{ width: '100%', overflow: 'visible' }}>
+                    <AuthTabs showLogin={false} onToggleForm={() => { }} />
+                  </Box>
+                </Paper>
+              </Modal>
+            )}
           </Grid>
         </Grid>
         </Box>

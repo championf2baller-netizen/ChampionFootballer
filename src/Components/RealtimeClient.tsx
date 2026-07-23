@@ -4,7 +4,10 @@ import { ensureRealtime } from '@/lib/realtime';
 
 export default function RealtimeClient() {
   useEffect(() => {
-    ensureRealtime();
+    const timer = setTimeout(() => {
+      ensureRealtime();
+    }, 2500);
+    return () => clearTimeout(timer);
   }, []);
   return null;
 }
