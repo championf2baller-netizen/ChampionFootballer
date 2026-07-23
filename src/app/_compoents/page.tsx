@@ -9,6 +9,10 @@ import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
 import heroPlayers from '@/Components/images/222.png';
+import heroTopBg from '@/Components/images/hero_top_bg.png';
+import heroGridOrange from '@/Components/images/hero_grid_orange.png';
+import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
+import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
 import image9 from '@/Components/images/1stpicc.jpeg';
 import image10 from '@/Components/images/2ndpicc.png';
 import image11 from '@/Components/images/3rdpicc.png';
@@ -59,167 +63,135 @@ export default function LandingPage() {
           <Grid container spacing={{ xs: 3, md: 4 }}>
             {/* Left Side - 8 columns */}
             <Grid item xs={12} md={8}>
-              <Box sx={{ color: 'white' }}>
-                {/* Heading */}
-                <Typography
-                  className="landing-hero-display"
-                  sx={{
-                    fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                    fontWeight: 400,
-                    fontSize: { xs: 'clamp(1.15rem, 6.5vw, 1.55rem)', md: '38px' },
-                    lineHeight: { xs: 1.1, md: '100%' },
-                    letterSpacing: '0%',
-                    color: '#FFFFFF',
-                    mb: { xs: 1.5, md: -4 },
-                    mt: { xs: 0, md: 1 },
-                    textTransform: 'uppercase',
-                    width: '100%',
-                    maxWidth: { md: '817px' },
-                    height: { xs: 'auto', md: '81px' },
-                    whiteSpace: { xs: 'normal', md: 'nowrap' },
-                    wordBreak: 'break-word',
-                    overflow: 'visible',
-                  }}
-                >
-                  YOUR RANKING. YOUR STATS. YOUR GLORY.
-                </Typography>
-
-                {/* Description */}
-                {/* <Typography
+              <Box
                 sx={{
-                  fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                  fontWeight: '500 !important',
-                  fontSize: { xs: '0.86rem', md: '18px' },
-                  // fontStyle: 'italic !important',
-                  lineHeight: { xs: '1.4', md: '23px' },  
-                  letterSpacing: '0% !important',
-                  color: 'orange',
-                  width: '100%',
-                  maxWidth: { md: '100%' },
-                  height: { xs: 'auto', md: '49px' },
-                  mb: { xs: 2.5, md: 2 },
+                  color: 'white',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: { xs: 1.5, md: 2 },
+                  mb: { xs: 2, md: 0 },
                 }}
               >
-                Create your matches, track your stats, and rise through the rankings<br />
-                Champion Footballer is your ultimate hub for football, performance, and bragging rights!
-              </Typography> */}
-                <Typography
-                  sx={{
-                    fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                    fontWeight: '500 !important',
-                    fontSize: { xs: '0.86rem', md: '18px' },
-                    lineHeight: { xs: '1.4', md: '23px' },
-                    letterSpacing: '0% !important',
-                    color: '#00A86B',
-                    width: '100%',
-                    maxWidth: { md: '100%' },
-                    height: { xs: 'auto', md: '49px' },
-                    mb: { xs: 2.5, md: 2 },
-                    display: { xs: 'none', md: 'block' }, // 👈 yeh add karo
-                  }}
-                >
-                  Create your matches, track your stats, and rise through the rankings<br />
-                  Champion Footballer is your ultimate hub for football, performance, and bragging rights!
-                </Typography>
-                {/* Mobile only */}
-                <Typography
-                  sx={{
-                    fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                    fontWeight: '500 !important',
-                    fontSize: '0.86rem',
-                    lineHeight: '1.4',
-                    letterSpacing: '0% !important',
-                    color: '#00A86B',
-                    textAlign: 'center',
-                    width: '100%',
-                    mb: 2.5,
-                    display: { xs: 'block', md: 'none' }, // 👈 sirf mobile pe show
-                  }}
-                >
-                  {/* Apna mobile text yahan likhna */}
-                  Create your matches, track your stats, and rise through the rankings.
-                  Champion Footballer is your ultimate hub for football, performance, and bragging rights!
-                </Typography>
-                {/* Hero image with three football players */}
+                {/* Top Hero Banner */}
                 <Box
                   sx={{
+                    position: 'relative',
                     width: '100%',
-                    maxWidth: { xs: '100%', md: '750px' },
-                    mb: { xs: 2, md: 3 },
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    aspectRatio: { xs: '16/9.5', md: '16/9' },
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
                   }}
                 >
                   <Image
-                    src={heroPlayers}
-                    alt="Football Players"
-                    width={780}
-                    height={500}
-                    style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+                    src={heroTopBg}
+                    alt="Create your matches, track your stats, and rise through the rankings"
+                    fill
                     priority
+                    sizes="(max-width: 900px) 100vw, 65vw"
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
                   />
                 </Box>
 
-                {/* Bottom Text */}
+                {/* Bottom 2x2 Grid Collage */}
                 <Box
                   sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'baseline',
-                    justifyContent: { xs: 'center', md: 'flex-start' },
-                    mt: { xs: 0.5, md: -3.5 },
-                    whiteSpace: { xs: 'normal', md: 'nowrap' },
-                    flexWrap: { xs: 'wrap', md: 'nowrap' },
-                    gap: 0,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: { xs: 1.5, md: 2 },
                     width: '100%',
-                    maxWidth: { xs: '100%', md: '826px' },
-                    height: { xs: 'auto', md: '90px' },
-                    textAlign: { xs: 'center', md: 'left' }
                   }}
                 >
-                  <Typography
-                    component="span"
-                    className="landing-hero-display"
+                  {/* Top Left Grid Image: Orange Players Celebrating */}
+                  <Box
                     sx={{
-                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                      fontWeight: '400 !important',
-                      fontSize: { xs: '1rem', md: '31px' },
-                      lineHeight: { xs: 1.05, md: '100% !important' },
-                      letterSpacing: '0% !important',
-                      textTransform: 'uppercase',
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '1.45/1',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    I GOT 99 PROBLEMS
-                  </Typography>
-                  <Typography
-                    component="span"
-                    className="landing-hero-display"
+                    <Image
+                      src={heroGridOrange}
+                      alt="Players Celebrating"
+                      fill
+                      sizes="(max-width: 900px) 50vw, 32vw"
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                  </Box>
+
+                  {/* Top Right Grid Image: Team Squad Posing */}
+                  <Box
                     sx={{
-                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                      fontWeight: '400 !important',
-                      fontSize: { xs: '1.05rem', md: '40px' },
-                      lineHeight: { xs: 1.05, md: '100% !important' },
-                      letterSpacing: '0% !important',
-                      textTransform: 'uppercase',
-                      ml: { xs: 0.35, md: 1 },
-                      mt: { xs: 0, md: 1 },
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '1.45/1',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    BUT WINNING
-                  </Typography>   <Typography
-                    component="span"
-                    className="landing-hero-display"
+                    <Image
+                      src={heroGridTeam1}
+                      alt="Football Team Squad"
+                      fill
+                      sizes="(max-width: 900px) 50vw, 32vw"
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                  </Box>
+
+                  {/* Bottom Left Grid Container: Black Box with White Text */}
+                  <Box
                     sx={{
-                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                      fontWeight: '400 !important',
-                      fontSize: { xs: '1.05rem', md: '44px' },
-                      lineHeight: { xs: 1.05, md: '100% !important' },
-                      letterSpacing: '0% !important',
-                      textTransform: 'uppercase',
-                      ml: { xs: 0.35, md: 1 },
-                      mt: { xs: 0, md: 1 },
+                      width: '100%',
+                      aspectRatio: '1.45/1',
+                      backgroundColor: '#000000',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      p: { xs: 1.5, sm: 2, md: 3 },
+                      textAlign: 'center',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    AIN'T ONE!
-                  </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: 'var(--font-geist-anton), Anton, var(--font-woodford-bourne-pro), var(--font-inter), sans-serif !important',
+                        fontWeight: '900 !important',
+                        fontSize: { xs: '0.85rem', sm: '1.15rem', md: '1.45rem' },
+                        lineHeight: { xs: 1.15, md: 1.2 },
+                        color: '#FFFFFF',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.02em',
+                      }}
+                    >
+                      I GOT 99 PROBLEMS BUT WINNING AIN'T ONE!
+                    </Typography>
+                  </Box>
+
+                  {/* Bottom Right Grid Image: Team Victory */}
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '100%',
+                      aspectRatio: '1.45/1',
+                      borderRadius: '4px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                    }}
+                  >
+                    <Image
+                      src={heroGridTeam2}
+                      alt="Team Celebrating Victory"
+                      fill
+                      sizes="(max-width: 900px) 50vw, 32vw"
+                      style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    />
+                  </Box>
                 </Box>
               </Box>
             </Grid>
