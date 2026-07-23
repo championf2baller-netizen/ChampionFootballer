@@ -24,12 +24,9 @@ import FontDebugMonitor from "@/Components/FontDebugMonitor";
 //  pointing to /assets/fonts/ would return 404 on production).
 const woodfordBournePro = localFont({
   src: [
-    { path: '../../public/assets/fonts/WoodfordBournePro-Light.woff2', weight: '300', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Regular.woff2', weight: '400', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Medium.woff2', weight: '500', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-SemiBold.woff2', weight: '600', style: 'normal' },
     { path: '../../public/assets/fonts/WoodfordBournePro-Bold.woff2', weight: '700', style: 'normal' },
-    { path: '../../public/assets/fonts/WoodfordBournePro-Black.woff2', weight: '900', style: 'normal' },
   ],
   variable: '--font-woodford-bourne-pro',
   display: 'swap',
@@ -40,6 +37,7 @@ const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
   variable: '--font-bebas-neue',
   display: 'swap',
+  preload: false,
 });
 
 const anton = Anton({
@@ -54,6 +52,7 @@ const oswald = Oswald({
   subsets: ['latin'],
   variable: '--font-oswald',
   display: 'swap',
+  preload: false,
 });
 
 const leagueSpartan = League_Spartan({
@@ -61,6 +60,7 @@ const leagueSpartan = League_Spartan({
   subsets: ['latin'],
   variable: '--font-league-spartan',
   display: 'swap',
+  preload: false,
 });
 
 const inter = Inter({
@@ -75,12 +75,14 @@ const geistSans = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
   display: 'swap',
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
   display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
