@@ -50,14 +50,14 @@ const anton = Anton({
 });
 
 const oswald = Oswald({
-  weight: ['200', '300', '400', '500', '600', '700'],
+  weight: ['400', '600'],
   subsets: ['latin'],
   variable: '--font-oswald',
   display: 'swap',
 });
 
 const leagueSpartan = League_Spartan({
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '600'],
   subsets: ['latin'],
   variable: '--font-league-spartan',
   display: 'swap',

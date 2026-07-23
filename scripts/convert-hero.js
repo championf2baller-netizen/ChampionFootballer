@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const imgDir = path.join(process.cwd(), 'src', 'Components', 'images');
 
-async function convertImage(fileName, quality = 82) {
+async function convertImage(fileName, quality = 80) {
   const inputPath = path.join(imgDir, fileName);
   const parsed = path.parse(fileName);
   const outputPath = path.join(imgDir, parsed.name + '.webp');
@@ -26,8 +26,7 @@ async function convertImage(fileName, quality = 82) {
 }
 
 async function main() {
-  await convertImage('logonavbar.png', 80);
-  await convertImage('championfootballnewlogo.png', 80);
+  await convertImage('bgall.png', 75);
 }
 
 main().catch(err => console.error(err));

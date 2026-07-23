@@ -4,7 +4,7 @@ import Navbar from "@/Components/Navbar/navbar";
 // import Footer from "@/Components/footer/footer";
 // import Mainbg from '@/Components/images/mainbg.webp'
 // import Mainbg from '@/Components/images/newbg.png'
-import Mainbg from '@/Components/images/bgall.png'
+import Mainbg from '@/Components/images/bgall.webp'
 import { usePathname } from 'next/navigation';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
