@@ -97,40 +97,38 @@ function invalidateEverywhere(resourceType?: MutationDetail['resourceType'], res
     // no-op
   }
 
-  try { clearFastCache('league'); } catch {}
-  try { clearFastCache('match'); } catch {}
-  try { clearFastCache('leaderboard'); } catch {}
+  try { clearFastCache('league'); } catch { }
+  try { clearFastCache('match'); } catch { }
+  try { clearFastCache('leaderboard'); } catch { }
 
-  try { clearInstantCache('league'); } catch {}
-  try { clearInstantCache('match'); } catch {}
-  try { clearInstantCache('leaderboard'); } catch {}
+  try { clearInstantCache('league'); } catch { }
+  try { clearInstantCache('match'); } catch { }
+  try { clearInstantCache('leaderboard'); } catch { }
 
-  try { invalidateChunkedCache('leagues'); } catch {}
-  try { invalidateChunkedCache('matches'); } catch {}
-  try { invalidateChunkedCache('matches_league'); } catch {}
-  try { invalidateChunkedCache('players'); } catch {}
+  try { invalidateChunkedCache('leagues'); } catch { }
+  try { invalidateChunkedCache('matches'); } catch { }
+  try { invalidateChunkedCache('matches_league'); } catch { }
+  try { invalidateChunkedCache('players'); } catch { }
 
-  try { invalidateOptimizedFetchCache(/\/leagues/i); } catch {}
-  try { invalidateOptimizedFetchCache(/\/matches/i); } catch {}
-  try { invalidateOptimizedFetchCache(/\/leaderboard/i); } catch {}
-  try { invalidateOptimizedFetchCache(/\/world-ranking/i); } catch {}
-  try { invalidateOptimizedFetchCache(/\/players\/.*\/stats/i); } catch {}
+  try { invalidateOptimizedFetchCache(/\/leagues/i); } catch { }
+  try { invalidateOptimizedFetchCache(/\/matches/i); } catch { }
+  try { invalidateOptimizedFetchCache(/\/leaderboard/i); } catch { }
+  try { invalidateOptimizedFetchCache(/\/world-ranking/i); } catch { }
+  try { invalidateOptimizedFetchCache(/\/players\/.*\/stats/i); } catch { }
 
-  try { cacheManager.clearCache('leagues_cache'); } catch {}
-  try { cacheManager.clearCache('matches_cache'); } catch {}
-  try { cacheManager.clearCache('leaderboard_cache'); } catch {}
+  try { cacheManager.clearCache('leagues_cache'); } catch { }
+  try { cacheManager.clearCache('matches_cache'); } catch { }
+  try { cacheManager.clearCache('leaderboard_cache'); } catch { }
 
   clearLocalStorageFamilies(resourceId);
 }
 
 export default function GlobalCacheSync() {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (NO_CACHE_MODE) {
-        invalidateEverywhere(undefined, null);
-        clearBrowserCaches().catch(() => undefined);
-      }
-    }, 3500);
+    if (NO_CACHE_MODE) {
+      invalidateEverywhere(undefined, null);
+      clearBrowserCaches().catch(() => undefined);
+    }
 
     const onMutation = (event: Event) => {
       const detail = (event as CustomEvent<MutationDetail>).detail || {};
@@ -164,7 +162,6 @@ export default function GlobalCacheSync() {
     window.addEventListener('vote-updated', onEntityEvent as EventListener);
 
     return () => {
-      clearTimeout(timer);
       window.removeEventListener('data-mutated', onMutation as EventListener);
       window.removeEventListener('match-created', onEntityEvent as EventListener);
       window.removeEventListener('match-updated', onEntityEvent as EventListener);

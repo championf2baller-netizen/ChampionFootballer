@@ -199,13 +199,13 @@ const normalizeUserData = (data: User): UserDataShape => {
 }
 
 const GoogleIcon = () => (
-<svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-  <path fill="none" d="M0 0h48v48H0z"/>
-</svg>
+  <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    <path fill="none" d="M0 0h48v48H0z" />
+  </svg>
 )
 
 const FacebookIcon = () => (
@@ -257,7 +257,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false)
   const [forgotStep, setForgotStep] = useState<1 | 2 | 3 | 4>(1) // 1=email, 2=otp, 3=new password, 4=success
   const [forgotEmail, setForgotEmail] = useState("")
-  const [forgotOtp, setForgotOtp] = useState(["" , "", "", "", ""])
+  const [forgotOtp, setForgotOtp] = useState(["", "", "", "", ""])
   const [forgotNewPassword, setForgotNewPassword] = useState("")
   const [forgotConfirmPassword, setForgotConfirmPassword] = useState("")
   const [showForgotNewPassword, setShowForgotNewPassword] = useState(false)
@@ -341,8 +341,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       "& fieldset": { borderColor: "#404040", borderWidth: '1px' },
       "&:hover fieldset": { borderColor: "#404040" },
       "&.Mui-focused fieldset": { borderColor: "#404040" },
-      "& input": { 
-        color: "#000", 
+      "& input": {
+        color: "#000",
         fontSize: "0.95rem",
         height: "100%",
         boxSizing: "border-box",
@@ -618,21 +618,21 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       const sts = State.getStatesOfCountry(selectedCountryCode) || []
       const cts = City.getCitiesOfCountry(selectedCountryCode) || []
       const uniqueNames = new Set<string>()
-      
+
       sts.forEach(s => {
         if (s && s.name) {
           const name = normalizeLocationName(s.name) || s.name
           if (name) uniqueNames.add(name)
         }
       })
-      
+
       cts.forEach(c => {
         if (c && c.name) {
           const name = normalizeLocationName(c.name) || c.name
           if (name) uniqueNames.add(name)
         }
       })
-      
+
       return Array.from(uniqueNames).sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))
     } catch (e) {
       console.error(e)
@@ -651,7 +651,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
   const handleStateSelect = (name: string) => {
     setRegisterData(prev => ({ ...prev, state: name, city: name }))
-    
+
     // Set selectedStateCode for backwards compatibility with legacy draft logic
     if (selectedCountryCode) {
       const allSts = State.getStatesOfCountry(selectedCountryCode) || []
@@ -701,14 +701,14 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           // Use the helper functions to normalize data
           const normalizedUser = normalizeUserForStorage(result.data)
           const userData = normalizeUserData(result.data)
-          
+
           // Save auth data
           const saved = authStorage.saveAuthExact(normalizedUser, userData, result.token)
           console.log("[AuthTabs] Token saved:", saved)
-          
+
           // Wait for cookies to be set properly
           await new Promise(resolve => setTimeout(resolve, 100))
-          
+
           // Verify token was saved
           const token = Cookies.get('token')
           console.log("[AuthTabs] Token verification:", {
@@ -717,7 +717,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           })
         }
         toast.success(result.message || "Login successful!")
-        
+
         // Small delay before redirect to ensure cookies are set
         setTimeout(() => {
           window.location.href = "/home"
@@ -847,14 +847,14 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           // Use the helper functions to normalize data
           const normalizedUser = normalizeUserForStorage(result.data)
           const userData = normalizeUserData(result.data)
-          
+
           // Save auth data
           const saved = authStorage.saveAuthExact(normalizedUser, userData, result.token)
           console.log("[AuthTabs] Token saved:", saved)
-          
+
           // Wait for cookies to be set properly
           await new Promise(resolve => setTimeout(resolve, 100))
-          
+
           // Verify token was saved
           const token = Cookies.get('token')
           console.log("[AuthTabs] Token verification:", {
@@ -863,7 +863,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           })
         }
         toast.success(result.message || "Registration successful!")
-        
+
         // Small delay before redirect to ensure cookies are set
         setTimeout(() => {
           window.location.href = "/home"
@@ -1195,7 +1195,6 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 endAdornment: (
                   <IconButton
                     onClick={() => setShowLoginPassword((show) => !show)}
-                    aria-label="toggle password visibility"
                     edge="end"
                     size="small"
                     sx={{ color: "#000" }}
@@ -1235,7 +1234,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
               <Button
                 variant="text"
                 onClick={handleForgotPassword}
-               sx={{
+                sx={{
                   color: "white",
                   textTransform: "none",
                   fontSize: "0.85rem",
@@ -1397,7 +1396,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                                 />
                               ) : null}
                               <Box component='span' sx={{ color: '#000' }}>
-                                 {phone}
+                                {phone}
                               </Box>
                             </Box>
                           )
@@ -1457,7 +1456,6 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   endAdornment: (
                     <IconButton
                       onClick={() => setShowRegisterPassword((show) => !show)}
-                      aria-label="toggle password visibility"
                       edge="end"
                       size="small"
                       sx={{ color: '#000' }}
@@ -1488,7 +1486,6 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   endAdornment: (
                     <IconButton
                       onClick={() => setShowRegisterConfirmPassword((show) => !show)}
-                      aria-label="toggle password visibility"
                       edge="end"
                       size="small"
                       sx={{ color: '#000' }}
@@ -2068,7 +2065,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 }}
                 InputProps={{
                   endAdornment: (
-                    <IconButton onClick={() => setShowForgotNewPassword(v => !v)} aria-label="toggle password visibility" edge="end" size="small" sx={{ color: '#757575' }}>
+                    <IconButton onClick={() => setShowForgotNewPassword(v => !v)} edge="end" size="small" sx={{ color: '#757575' }}>
                       {showForgotNewPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   ),
@@ -2108,7 +2105,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 }}
                 InputProps={{
                   endAdornment: (
-                    <IconButton onClick={() => setShowForgotConfirmPassword(v => !v)} aria-label="toggle password visibility" edge="end" size="small" sx={{ color: '#757575' }}>
+                    <IconButton onClick={() => setShowForgotConfirmPassword(v => !v)} edge="end" size="small" sx={{ color: '#757575' }}>
                       {showForgotConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   ),
@@ -2184,7 +2181,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       {/* Email Verification Dialog (after registration) */}
       <Dialog
         open={verifyDialogOpen}
-        onClose={() => {}} /* prevent closing by clicking outside */
+        onClose={() => { }} /* prevent closing by clicking outside */
         maxWidth="xs"
         fullWidth
         PaperProps={{
@@ -2233,7 +2230,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           ) : (
             <>
               <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.4rem', fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.5 }}>
-                Registration Successful! 
+                Registration Successful!
               </Typography>
               <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem', fontFamily: 'var(--font-woodford-bourne-pro)', mb: 1 }}>
                 Welcome to CF.

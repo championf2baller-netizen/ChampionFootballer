@@ -4,11 +4,15 @@ import { Box, Paper, Typography, Button, Card, Modal, IconButton, Grid } from '@
 import CloseIcon from '@mui/icons-material/Close';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import heroPlayers from '@/Components/images/222.webp';
-import image9 from '@/Components/images/1stpicc.webp';
-import image10 from '@/Components/images/2ndpicc.webp';
-import image11 from '@/Components/images/3rdpicc.webp';
-import image12 from '@/Components/images/4thpicc.webp';
+import Layer from '@/Components/images/championfootballnewlogo.webp';
+import NewImg from '@/Components/images/Done1.webp';
+import Newimg from '@/Components/images/Done2.webp';
+import mobile from '@/Components/images/mobile.webp';
+import heroPlayers from '@/Components/images/222.png';
+import image9 from '@/Components/images/1stpicc.jpeg';
+import image10 from '@/Components/images/2ndpicc.png';
+import image11 from '@/Components/images/3rdpicc.png';
+import image12 from '@/Components/images/4thpicc.png';
 import LogoNavbar from './logonavbar';
 
 
@@ -17,7 +21,7 @@ import { useState } from 'react';
 // Lazy load heavy components
 const AuthTabs = dynamic(() => import('@/Components/authtabs/authtabs'), {
   loading: () => <Box sx={{ p: 2, textAlign: 'center', color: 'white' }}>Loading...</Box>,
-  ssr: false
+  ssr: true
 });
 
 const AuthSocialButtons = dynamic(() => import('@/Components/AuthSocialButtons'), {
@@ -56,32 +60,32 @@ export default function LandingPage() {
             {/* Left Side - 8 columns */}
             <Grid item xs={12} md={8}>
               <Box sx={{ color: 'white' }}>
-              {/* Heading */}
-              <Typography
-                className="landing-hero-display"
-                sx={{
-                  fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                  fontWeight: 400,
-                  fontSize: { xs: 'clamp(1.15rem, 6.5vw, 1.55rem)', md: '38px' },
-                  lineHeight: { xs: 1.1, md: '100%' },
-                  letterSpacing: '0%',
-                  color: '#FFFFFF',
-                  mb: { xs: 1.5, md: -4 },
-                  mt: { xs: 0, md: 1 },
-                  textTransform: 'uppercase',
-                  width: '100%',
-                  maxWidth: { md: '817px' },
-                  height: { xs: 'auto', md: '81px' },
-                  whiteSpace: { xs: 'normal', md: 'nowrap' },
-                  wordBreak: 'break-word',
-                  overflow: 'visible',
-                }}
-              >
-                YOUR RANKING. YOUR STATS. YOUR GLORY.
-              </Typography>
+                {/* Heading */}
+                <Typography
+                  className="landing-hero-display"
+                  sx={{
+                    fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
+                    fontWeight: 400,
+                    fontSize: { xs: 'clamp(1.15rem, 6.5vw, 1.55rem)', md: '38px' },
+                    lineHeight: { xs: 1.1, md: '100%' },
+                    letterSpacing: '0%',
+                    color: '#FFFFFF',
+                    mb: { xs: 1.5, md: -4 },
+                    mt: { xs: 0, md: 1 },
+                    textTransform: 'uppercase',
+                    width: '100%',
+                    maxWidth: { md: '817px' },
+                    height: { xs: 'auto', md: '81px' },
+                    whiteSpace: { xs: 'normal', md: 'nowrap' },
+                    wordBreak: 'break-word',
+                    overflow: 'visible',
+                  }}
+                >
+                  YOUR RANKING. YOUR STATS. YOUR GLORY.
+                </Typography>
 
-              {/* Description */}
-              {/* <Typography
+                {/* Description */}
+                {/* <Typography
                 sx={{
                   fontFamily: 'var(--font-inter), Inter, sans-serif !important',
                   fontWeight: '500 !important',
@@ -99,223 +103,219 @@ export default function LandingPage() {
                 Create your matches, track your stats, and rise through the rankings<br />
                 Champion Footballer is your ultimate hub for football, performance, and bragging rights!
               </Typography> */}
-              <Typography
-                sx={{
-                  fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                  fontWeight: '500 !important',
-                  fontSize: { xs: '0.86rem', md: '18px' },
-                  lineHeight: { xs: '1.4', md: '23px' },
-                  letterSpacing: '0% !important',
-                  color: '#00A86B',
-                  width: '100%',
-                  maxWidth: { md: '100%' },
-                  height: { xs: 'auto', md: '49px' },
-                  mb: { xs: 2.5, md: 2 },
-                  display: { xs: 'none', md: 'block' }, // 👈 yeh add karo
-                }}
-              >
-                Create your matches, track your stats, and rise through the rankings<br />
-                Champion Footballer is your ultimate hub for football, performance, and bragging rights!
-              </Typography>
-              {/* Mobile only */}
-              <Typography
-                sx={{
-                  fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                  fontWeight: '500 !important',
-                  fontSize: '0.86rem',
-                  lineHeight: '1.4',
-                  letterSpacing: '0% !important',
-                  color: '#00A86B',
-                  textAlign: 'center',
-                  width: '100%',
-                  mb: 2.5,
-                  display: { xs: 'block', md: 'none' }, // 👈 sirf mobile pe show
-                }}
-              >
-                {/* Apna mobile text yahan likhna */}
-                Create your matches, track your stats, and rise through the rankings.
-                Champion Footballer is your ultimate hub for football, performance, and bragging rights!
-              </Typography>
-              {/* Hero image with three football players */}
-              <Box
-                sx={{
-                  width: '100%',
-                  maxWidth: { xs: '100%', md: '750px' },
-                  mb: { xs: 2, md: 3 },
-                }}
-              >
-                <Image
-                  src={heroPlayers}
-                  alt="Football Players"
-                  width={780}
-                  height={500}
-                  style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
-                  priority
-                  fetchPriority="high"
-                  decoding="async"
-                  sizes="(max-width: 768px) 100vw, 780px"
-                />
-              </Box>
-
-              {/* Bottom Text */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'baseline',
-                  justifyContent: { xs: 'center', md: 'flex-start' },
-                  mt: { xs: 0.5, md: -3.5 },
-                  whiteSpace: { xs: 'normal', md: 'nowrap' },
-                  flexWrap: { xs: 'wrap', md: 'nowrap' },
-                  gap: 0,
-                  width: '100%',
-                  maxWidth: { xs: '100%', md: '826px' },
-                  height: { xs: 'auto', md: '90px' },
-                  textAlign: { xs: 'center', md: 'left' }
-                }}
-              >
-                <Typography
-                  component="span"
-                  className="landing-hero-display"
-                  sx={{
-                    fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                    fontWeight: '400 !important',
-                    fontSize: { xs: '1rem', md: '31px' },
-                    lineHeight: { xs: 1.05, md: '100% !important' },
-                    letterSpacing: '0% !important',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  I GOT 99 PROBLEMS
-                </Typography>
-                <Typography
-                  component="span"
-                  className="landing-hero-display"
-                  sx={{
-                    fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                    fontWeight: '400 !important',
-                    fontSize: { xs: '1.05rem', md: '40px' },
-                    lineHeight: { xs: 1.05, md: '100% !important' },
-                    letterSpacing: '0% !important',
-                    textTransform: 'uppercase',
-                    ml: { xs: 0.35, md: 1 },
-                    mt: { xs: 0, md: 1 },
-                  }}
-                >
-                  BUT WINNING
-                </Typography>   <Typography
-                  component="span"
-                  className="landing-hero-display"
-                  sx={{
-                    fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
-                    fontWeight: '400 !important',
-                    fontSize: { xs: '1.05rem', md: '44px' },
-                    lineHeight: { xs: 1.05, md: '100% !important' },
-                    letterSpacing: '0% !important',
-                    textTransform: 'uppercase',
-                    ml: { xs: 0.35, md: 1 },
-                    mt: { xs: 0, md: 1 },
-                  }}
-                >
-                  AIN'T ONE!
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Right Side - 4 columns (Auth Form) */}
-          <Grid item xs={12} md={4}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'stretch',
-                height: '100%',
-                mt: { xs: 1, md: 0 },
-
-              }}
-            >
-              {/* Top Text */}
-              <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, mb: 1 }}>
                 <Typography
                   sx={{
                     fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                    fontWeight: '600 !important',
-                    fontSize: { xs: '1rem', md: '23px' },
-                    lineHeight: { xs: '1.3', md: '35px' },
+                    fontWeight: '500 !important',
+                    fontSize: { xs: '0.86rem', md: '18px' },
+                    lineHeight: { xs: '1.4', md: '23px' },
                     letterSpacing: '0% !important',
-                    color: 'white',
-                    textAlign: { xs: 'center', md: 'right' },
-                    maxWidth: { xs: '100%', md: '355px' },
+                    color: '#00A86B',
                     width: '100%',
-                    mt: { xs: 0, md: 1 },
-                    whiteSpace: { xs: 'nowrap', md: 'normal' },
+                    maxWidth: { md: '100%' },
+                    height: { xs: 'auto', md: '49px' },
+                    mb: { xs: 2.5, md: 2 },
+                    display: { xs: 'none', md: 'block' }, // 👈 yeh add karo
                   }}
                 >
-                  The best football app
-                  <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
-                    <br />
-                  </Box>
-                  <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
-                    {' '}
-                  </Box>
-                  on the planet!
+                  Create your matches, track your stats, and rise through the rankings<br />
+                  Champion Footballer is your ultimate hub for football, performance, and bragging rights!
                 </Typography>
-              </Box>
-
-              {/* Join Button */}
-              <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, mb: { xs: 1.5, md: 1 } }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    if (showLogin) {
-                      setIsJoinModalOpen(true);
-                    } else {
-                      setShowLogin(true);
-                    }
-                  }}
+                {/* Mobile only */}
+                <Typography
                   sx={{
-                    color: 'white',
-                    textTransform: 'none',
-                    fontSize: { xs: '0.95rem', md: '1rem' },
-                    width: { xs: '100%', md: 'auto' },
-                    height: { xs: '40px', md: 'auto' },
-
-                    border: '1px solid #FFFFFF',
-
-                    '&:hover': {
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      border: '1px solid #FFFFFF',
-                    },
-                    borderRadius: '7px',
-                    px: { xs: 3, md: 4 },
-
+                    fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                    fontWeight: '500 !important',
+                    fontSize: '0.86rem',
+                    lineHeight: '1.4',
+                    letterSpacing: '0% !important',
+                    color: '#00A86B',
+                    textAlign: 'center',
+                    width: '100%',
+                    mb: 2.5,
+                    display: { xs: 'block', md: 'none' }, // 👈 sirf mobile pe show
                   }}
                 >
-                  {showLogin ? 'Join' : 'Login'}
-                </Button>
-              </Box>
+                  {/* Apna mobile text yahan likhna */}
+                  Create your matches, track your stats, and rise through the rankings.
+                  Champion Footballer is your ultimate hub for football, performance, and bragging rights!
+                </Typography>
+                {/* Hero image with three football players */}
+                <Box
+                  sx={{
+                    width: '100%',
+                    maxWidth: { xs: '100%', md: '750px' },
+                    mb: { xs: 2, md: 3 },
+                  }}
+                >
+                  <Image
+                    src={heroPlayers}
+                    alt="Football Players"
+                    width={780}
+                    height={500}
+                    style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+                    priority
+                  />
+                </Box>
 
-              {/* Auth Form */}
-              <Paper
-                elevation={0}
+                {/* Bottom Text */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'baseline',
+                    justifyContent: { xs: 'center', md: 'flex-start' },
+                    mt: { xs: 0.5, md: -3.5 },
+                    whiteSpace: { xs: 'normal', md: 'nowrap' },
+                    flexWrap: { xs: 'wrap', md: 'nowrap' },
+                    gap: 0,
+                    width: '100%',
+                    maxWidth: { xs: '100%', md: '826px' },
+                    height: { xs: 'auto', md: '90px' },
+                    textAlign: { xs: 'center', md: 'left' }
+                  }}
+                >
+                  <Typography
+                    component="span"
+                    className="landing-hero-display"
+                    sx={{
+                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
+                      fontWeight: '400 !important',
+                      fontSize: { xs: '1rem', md: '31px' },
+                      lineHeight: { xs: 1.05, md: '100% !important' },
+                      letterSpacing: '0% !important',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    I GOT 99 PROBLEMS
+                  </Typography>
+                  <Typography
+                    component="span"
+                    className="landing-hero-display"
+                    sx={{
+                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
+                      fontWeight: '400 !important',
+                      fontSize: { xs: '1.05rem', md: '40px' },
+                      lineHeight: { xs: 1.05, md: '100% !important' },
+                      letterSpacing: '0% !important',
+                      textTransform: 'uppercase',
+                      ml: { xs: 0.35, md: 1 },
+                      mt: { xs: 0, md: 1 },
+                    }}
+                  >
+                    BUT WINNING
+                  </Typography>   <Typography
+                    component="span"
+                    className="landing-hero-display"
+                    sx={{
+                      fontFamily: 'var(--font-geist-anton), Anton, sans-serif !important',
+                      fontWeight: '400 !important',
+                      fontSize: { xs: '1.05rem', md: '44px' },
+                      lineHeight: { xs: 1.05, md: '100% !important' },
+                      letterSpacing: '0% !important',
+                      textTransform: 'uppercase',
+                      ml: { xs: 0.35, md: 1 },
+                      mt: { xs: 0, md: 1 },
+                    }}
+                  >
+                    AIN'T ONE!
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Right Side - 4 columns (Auth Form) */}
+            <Grid item xs={12} md={4}>
+              <Box
                 sx={{
-                  bgcolor: 'transparent',
-                  boxShadow: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  height: '100%',
+                  mt: { xs: 1, md: 0 },
+
                 }}
               >
-                <Box sx={{ width: '100%', overflow: 'visible', mb: 2 }}>
-                  <AuthTabs showLogin={showLogin} onToggleForm={() => setShowLogin(!showLogin)} />
+                {/* Top Text */}
+                <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, mb: 1 }}>
+                  <Typography
+                    sx={{
+                      fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                      fontWeight: '600 !important',
+                      fontSize: { xs: '1rem', md: '23px' },
+                      lineHeight: { xs: '1.3', md: '35px' },
+                      letterSpacing: '0% !important',
+                      color: 'white',
+                      textAlign: { xs: 'center', md: 'right' },
+                      maxWidth: { xs: '100%', md: '355px' },
+                      width: '100%',
+                      mt: { xs: 0, md: 1 },
+                      whiteSpace: { xs: 'nowrap', md: 'normal' },
+                    }}
+                  >
+                    The best football app
+                    <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                      <br />
+                    </Box>
+                    <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                      {' '}
+                    </Box>
+                    on the planet!
+                  </Typography>
                 </Box>
-                {showLogin ? (
-                  <Box>
-                    <AuthSocialButtons />
+
+                {/* Join Button */}
+                <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, mb: { xs: 1.5, md: 1 } }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      if (showLogin) {
+                        setIsJoinModalOpen(true);
+                      } else {
+                        setShowLogin(true);
+                      }
+                    }}
+                    sx={{
+                      color: 'white',
+                      textTransform: 'none',
+                      fontSize: { xs: '0.95rem', md: '1rem' },
+                      width: { xs: '100%', md: 'auto' },
+                      height: { xs: '40px', md: 'auto' },
+
+                      border: '1px solid #FFFFFF',
+
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.1)',
+                        border: '1px solid #FFFFFF',
+                      },
+                      borderRadius: '7px',
+                      px: { xs: 3, md: 4 },
+
+                    }}
+                  >
+                    {showLogin ? 'Join' : 'Login'}
+                  </Button>
+                </Box>
+
+                {/* Auth Form */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    bgcolor: 'transparent',
+                    boxShadow: 'none',
+                  }}
+                >
+                  <Box sx={{ width: '100%', overflow: 'visible', mb: 2 }}>
+                    <AuthTabs showLogin={showLogin} onToggleForm={() => setShowLogin(!showLogin)} />
                   </Box>
-                ) : null}
-              </Paper>
-            </Box>
-            {/* Join Modal - Popup for registration */}
-            {isJoinModalOpen && (
+                  {showLogin ? (
+                    <Box>
+                      <AuthSocialButtons />
+                    </Box>
+                  ) : null}
+                </Paper>
+              </Box>
+              {/* Join Modal - Popup for registration */}
               <Modal
                 open={isJoinModalOpen}
                 onClose={() => setIsJoinModalOpen(false)}
@@ -346,7 +346,6 @@ export default function LandingPage() {
                   {/* Close button */}
                   <IconButton
                     onClick={() => setIsJoinModalOpen(false)}
-                    aria-label="Close modal"
                     sx={{
                       position: 'absolute',
                       right: 8,
@@ -364,9 +363,8 @@ export default function LandingPage() {
                   </Box>
                 </Paper>
               </Modal>
-            )}
+            </Grid>
           </Grid>
-        </Grid>
         </Box>
       </Box>
 

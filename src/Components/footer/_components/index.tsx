@@ -37,13 +37,13 @@ export default function Footer() {
       background: 'linear-gradient(90deg, #727272 0%, #3b3b3b 50%, #020202 100%)',
       color: 'white',
       boxShadow: '0 -2px 24px 0 rgba(30, 58, 138, 0.12)',
-     
+
     }}>
-       {/* Deleted App Download Section */}
+      {/* Deleted App Download Section */}
       <Container maxWidth="md">
         <Stack spacing={3} alignItems="center" justifyContent="center">
           {/* App download section */}
-         
+
 
           {/* Social Icons */}
           <Stack direction="row" spacing={4}>
@@ -52,7 +52,6 @@ export default function Footer() {
               href="https://x.com/champf2baller"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="X Twitter"
               size="small"
               sx={{
                 color: 'white',
@@ -70,7 +69,6 @@ export default function Footer() {
               href="https://www.instagram.com/champf2baller/"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Instagram"
               size="small"
               sx={{
                 color: '#fff',

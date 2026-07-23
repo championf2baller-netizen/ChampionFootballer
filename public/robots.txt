@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://championfootballer.co.uk/sitemap.xml

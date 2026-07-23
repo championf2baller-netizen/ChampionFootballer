@@ -9,7 +9,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const nextConfig: NextConfig = {
   // Enable production optimizations
   reactStrictMode: true,
-  
+
   // Disable caching in development for fresh changes on refresh
   onDemandEntries: {
     // Period (in ms) where the server will keep pages in the buffer
@@ -17,27 +17,27 @@ const nextConfig: NextConfig = {
     // Number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: process.env.NODE_ENV === 'production' ? 5 : 2,
   },
-  
+
   // Use a custom dist dir to avoid Windows EPERM issues on .next/trace
   // Can be overridden via NEXT_DIST_DIR if needed
   // Use default .next to avoid EPERM trace file in custom dir with spaces in path on Windows
   distDir: process.env.NEXT_DIST_DIR || '.next',
-  
+
   // Optimize bundle splitting and minification
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn']
     } : false,
   },
-  
+
   // SWC minification is default in Next 15; explicit flag removed
-  
+
   // Image optimization with aggressive settings
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 31536000,
+    minimumCacheTTL: 0,
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
@@ -53,10 +53,10 @@ const nextConfig: NextConfig = {
       { protocol: 'http', hostname: '127.0.0.1', port: '5000', pathname: '/**' },
     ],
   },
-  
+
   // Advanced performance optimizations
   experimental: {
-    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lucide-react', 'react-icons', '@mui/x-date-pickers', 'date-fns', 'dayjs'],
+    optimizePackageImports: ['@mui/material', '@mui/icons-material', 'lucide-react', 'react-icons'],
     // Parallel server compiles/traces can only be used when build workers are available.
     // Default to disabled to avoid build-time errors on platforms without workers.
     parallelServerCompiles: enableParallel,
@@ -74,17 +74,17 @@ const nextConfig: NextConfig = {
     // Root fix: do not ignore TS errors; surface them for real fixes
     ignoreBuildErrors: false,
   },
-  
+
   // Optimize loading speed
   poweredByHeader: false,
-  
+
   // Generate static error pages
   generateEtags: false,
-  
+
   // Output optimization
-  // output: 'standalone', // Optimize for deployment
+  output: 'standalone', // Optimize for deployment
   // Removed dynamic outputFileTracing override (unsupported key warning)
-  
+
   // Headers for better performance and security
   async headers() {
     return [

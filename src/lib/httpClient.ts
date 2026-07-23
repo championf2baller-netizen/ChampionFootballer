@@ -42,6 +42,28 @@ export function getPerformanceMetrics() {
 // Request timeout handler
 const DEFAULT_TIMEOUT = IS_PRODUCTION ? PRODUCTION_TIMEOUT : 30000;
 
+// DNS Prefetch for production
+if (DNS_PREFETCH_ENABLED) {
+  try {
+    const apiDomain = new URL(API_BASE_URL).hostname;
+    const link = document.createElement('link');
+    link.rel = 'dns-prefetch';
+    link.href = `//${apiDomain}`;
+    document.head.appendChild(link);
+
+    // Also add preconnect for faster connection
+    const preconnect = document.createElement('link');
+    preconnect.rel = 'preconnect';
+    preconnect.href = API_BASE_URL;
+    preconnect.crossOrigin = 'use-credentials';
+    document.head.appendChild(preconnect);
+
+    console.log(`🚀 DNS prefetch enabled for: ${apiDomain}`);
+  } catch (e) {
+    console.warn('DNS prefetch setup failed:', e);
+  }
+}
+
 function timeoutPromise<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([
     promise,

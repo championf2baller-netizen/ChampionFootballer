@@ -3,6 +3,8 @@
 import { Provider } from 'react-redux';
 import { makeStore, AppStore } from './store';
 import { useRef } from 'react';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const storeRef = useRef<AppStore | null>(null);
@@ -11,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
   return (
     <Provider store={storeRef.current}>
-      {children}
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        {children}
+      </LocalizationProvider>
     </Provider>
   );
 }

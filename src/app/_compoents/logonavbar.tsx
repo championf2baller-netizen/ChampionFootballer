@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Image from 'next/image';
-import Layer from '@/Components/images/logonavbar.webp';
+import Layer from '@/Components/images/logonavbar.png';
 
 function LogoNavbar() {
   return (
@@ -34,12 +34,11 @@ function LogoNavbar() {
               height={130}
               style={{ width: '100%', height: 'auto' }}
               priority
-              fetchPriority="high"
             />
           </Box>
         </Box>
       </Box>
-      
+
       {/* Orange Bottom Bar */}
       <Box sx={{ px: { xs: 2, md: 7 }, py: 1, width: '100%', backgroundColor: '#101010' }}>
         <Box
@@ -52,9 +51,9 @@ function LogoNavbar() {
           }}
         />
       </Box>
-      
+
       {/* Dark Blue Bar */}
-     
+
     </>
   );
 }
