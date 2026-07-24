@@ -8,29 +8,38 @@ import Layer from '@/Components/images/championfootballnewlogo.webp';
 import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
-import heroPlayers from '@/Components/images/222.png';
-import heroTopBg from '@/Components/images/hero_top_bg.png';
-import heroGridOrange from '@/Components/images/hero_grid_orange.png';
-import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
-import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
-import image9 from '@/Components/images/1stpicc.jpeg';
-import image10 from '@/Components/images/2ndpicc.png';
-import image11 from '@/Components/images/3rdpicc.png';
-import image12 from '@/Components/images/4thpicc.png';
+import heroTopBg from '@/Components/images/hero_top_bg.webp';
+import heroGridOrange from '@/Components/images/hero_grid_orange.webp';
+import heroGridTeam1 from '@/Components/images/hero_grid_team1.webp';
+import heroGridTeam2 from '@/Components/images/hero_grid_team2.webp';
+import image9 from '@/Components/images/1stpicc.webp';
+import image10 from '@/Components/images/2ndpicc.webp';
+import image11 from '@/Components/images/3rdpicc.webp';
+import image12 from '@/Components/images/4thpicc.webp';
 import LogoNavbar from './logonavbar';
 
 
 import { useState } from 'react';
 
-// Lazy load heavy components
+// Lazy load heavy components with exact reserved height fallback to prevent CLS (Cumulative Layout Shift)
 const AuthTabs = dynamic(() => import('@/Components/authtabs/authtabs'), {
-  loading: () => <Box sx={{ p: 2, textAlign: 'center', color: 'white' }}>Loading...</Box>,
-  ssr: true
+  loading: () => (
+    <Box
+      sx={{
+        width: '100%',
+        height: { xs: '180px', md: '170px' },
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    />
+  ),
+  ssr: true,
 });
 
 const AuthSocialButtons = dynamic(() => import('@/Components/AuthSocialButtons'), {
-  loading: () => <Box sx={{ p: 1 }} />,
-  ssr: false
+  loading: () => <Box sx={{ width: '100%', height: '140px' }} />,
+  ssr: false,
 });
 
 export default function LandingPage() {
@@ -275,6 +284,9 @@ export default function LandingPage() {
                   sx={{
                     bgcolor: 'transparent',
                     boxShadow: 'none',
+                    minHeight: { xs: '330px', md: '350px' },
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
                   <Box sx={{ width: '100%', overflow: 'visible', mb: 2 }}>

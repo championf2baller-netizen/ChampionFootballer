@@ -17,7 +17,7 @@ type MutationDetail = {
 };
 
 const NO_CACHE_MODE = !['0', 'false', 'no', 'off'].includes(
-  (process.env.NEXT_PUBLIC_NO_CACHE || 'true').toLowerCase()
+  (process.env.NEXT_PUBLIC_NO_CACHE || 'false').toLowerCase()
 );
 
 const PRESERVED_LOCAL_STORAGE_KEYS = new Set([

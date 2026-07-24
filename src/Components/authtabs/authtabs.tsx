@@ -39,7 +39,7 @@ import Link from "next/link"
 import { authStorage, type UserDataShape, type UserProfile } from "@/lib/authStorage"
 import { buildSocialAuthUrl, getClientApiBaseUrl } from "@/lib/clientApiBase"
 import type { User } from "@/types/user"
-import { Country, State, City } from 'country-state-city'
+import type { ICountry, IState, ICity } from 'country-state-city'
 import {
   formatPhoneDigitRule,
   getPhoneDigitRuleByIsoCode,
@@ -591,11 +591,29 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
     setPhoneError(getPhoneValidationError(trimmed))
   }, [registerData.phone, selectedPhoneRule.max, getPhoneValidationError])
 
+  // Lazy-load heavy location database only when register tab is active
+  const [locationLib, setLocationLib] = useState<{
+    Country: typeof import('country-state-city').Country
+    State: typeof import('country-state-city').State
+    City: typeof import('country-state-city').City
+  } | null>(null)
+
+  useEffect(() => {
+    if (tabValue === 1 && !locationLib) {
+      import('country-state-city').then(mod => {
+        setLocationLib({ Country: mod.Country, State: mod.State, City: mod.City })
+      })
+    }
+  }, [tabValue, locationLib])
+
   // Derived lists from country-state-city library
-  const countries = Country.getAllCountries()
+  const countries = useMemo(
+    () => (locationLib ? locationLib.Country.getAllCountries() : []),
+    [locationLib]
+  )
   const states = useMemo(
-    () => (selectedCountryCode ? State.getStatesOfCountry(selectedCountryCode) : []),
-    [selectedCountryCode],
+    () => (selectedCountryCode && locationLib ? locationLib.State.getStatesOfCountry(selectedCountryCode) : []),
+    [selectedCountryCode, locationLib],
   )
 
   const getCountryFlagUrl = (isoCode: string): string => {
@@ -613,10 +631,10 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
   }
 
   const registerCitiesAndStates = useMemo(() => {
-    if (!selectedCountryCode) return []
+    if (!selectedCountryCode || !locationLib) return []
     try {
-      const sts = State.getStatesOfCountry(selectedCountryCode) || []
-      const cts = City.getCitiesOfCountry(selectedCountryCode) || []
+      const sts = locationLib.State.getStatesOfCountry(selectedCountryCode) || []
+      const cts = locationLib.City.getCitiesOfCountry(selectedCountryCode) || []
       const uniqueNames = new Set<string>()
 
       sts.forEach(s => {
@@ -638,7 +656,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       console.error(e)
       return []
     }
-  }, [selectedCountryCode])
+  }, [selectedCountryCode, locationLib])
 
   // Handlers for Select components; store name in registerData, code in local state
   const handleCountrySelect = (code: string) => {
@@ -653,8 +671,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
     setRegisterData(prev => ({ ...prev, state: name, city: name }))
 
     // Set selectedStateCode for backwards compatibility with legacy draft logic
-    if (selectedCountryCode) {
-      const allSts = State.getStatesOfCountry(selectedCountryCode) || []
+    if (selectedCountryCode && locationLib) {
+      const allSts = locationLib.State.getStatesOfCountry(selectedCountryCode) || []
       const matched = allSts.find(s => (normalizeLocationName(s.name) || s.name) === name)
       setSelectedStateCode(matched?.isoCode || "")
     } else {

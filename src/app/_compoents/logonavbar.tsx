@@ -2,7 +2,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import Image from 'next/image';
-import Layer from '@/Components/images/logonavbar.png';
+import Layer from '@/Components/images/logonavbar.webp';
 
 function LogoNavbar() {
   return (
