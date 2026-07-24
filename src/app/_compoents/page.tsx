@@ -92,15 +92,21 @@ export default function LandingPage() {
                     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
                   }}
                 >
-                  <Image
+                  <img
                     src="/assets/images/hero_top_bg.webp"
                     alt="Create your matches, track your stats, and rise through the rankings"
-                    fill
-                    priority
-                    loading="eager"
                     fetchPriority="high"
-                    sizes="(max-width: 480px) 420px, (max-width: 768px) 640px, (max-width: 1200px) 90vw, 1200px"
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    loading="eager"
+                    decoding="async"
+                    style={{
+                      position: 'absolute',
+                      height: '100%',
+                      width: '100%',
+                      top: 0,
+                      left: 0,
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                    }}
                   />
                 </Box>
 

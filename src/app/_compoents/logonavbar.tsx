@@ -27,15 +27,15 @@ function LogoNavbar() {
           }}
         >
           <Box sx={{ width: { xs: 250, sm: 340, md: 700 } }}>
-            <Image
+            <img
               src="/assets/images/logonavbar.webp"
               alt="Champion Footballer Logo"
               width={700}
               height={130}
-              sizes="(max-width: 600px) 250px, (max-width: 900px) 340px, 700px"
-              style={{ width: '100%', height: 'auto' }}
-              priority
               fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              style={{ width: '100%', height: 'auto', display: 'block' }}
             />
           </Box>
         </Box>
