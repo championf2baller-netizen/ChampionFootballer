@@ -1421,17 +1421,17 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
               )}
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0, alignItems: 'flex-start', minWidth: 0 }}>
                 <Typography
+                  noWrap
                   sx={{
                     fontSize: getLeagueLabelFontSize(getDisplayLeagueName(selectedLeague)),
                     fontWeight: 600,
-                    lineHeight: '100%',
+                    lineHeight: 1.2,
                     letterSpacing: '0%',
                     textTransform: 'capitalize',
                     maxWidth: '100%',
-                    overflow: 'visible',
-                    textOverflow: 'clip',
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                     fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   }}
                 >

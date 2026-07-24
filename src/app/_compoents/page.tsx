@@ -92,8 +92,8 @@ export default function LandingPage() {
                     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
                   }}
                 >
-                  <img
-                    src="/assets/images/hero_top_bg.webp"
+                  <Image
+                    src={heroTopBg}
                     alt="Create your matches, track your stats, and rise through the rankings"
                     fetchPriority="high"
                     loading="eager"
@@ -130,7 +130,7 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridOrange}
+                      src={heroGridOrange.src}
                       alt="Players Celebrating"
                       fill
                       loading="lazy"
@@ -151,7 +151,7 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridTeam1}
+                      src={heroGridTeam1.src}
                       alt="Football Team Squad"
                       fill
                       loading="lazy"
@@ -200,7 +200,7 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridTeam2}
+                      src={heroGridTeam2.src}
                       alt="Team Celebrating Victory"
                       fill
                       loading="lazy"

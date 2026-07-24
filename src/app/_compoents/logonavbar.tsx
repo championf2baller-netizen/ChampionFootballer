@@ -27,8 +27,8 @@ function LogoNavbar() {
           }}
         >
           <Box sx={{ width: { xs: 250, sm: 340, md: 700 } }}>
-            <img
-              src="/assets/images/logonavbar.webp"
+            <Image
+              src={Layer.src}
               alt="Champion Footballer Logo"
               width={700}
               height={130}
