@@ -89,6 +89,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/assets/images/hero_top_bg.webp" as="image" type="image/webp" fetchPriority="high" />
+        <link rel="preload" href="/assets/images/logonavbar.webp" as="image" type="image/webp" fetchPriority="high" />
         {apiHostname && (
           <>
             <link rel="dns-prefetch" href={`//${apiHostname}`} />

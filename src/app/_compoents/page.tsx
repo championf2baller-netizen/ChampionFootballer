@@ -93,7 +93,7 @@ export default function LandingPage() {
                   }}
                 >
                   <Image
-                    src={heroTopBg}
+                    src="/assets/images/hero_top_bg.webp"
                     alt="Create your matches, track your stats, and rise through the rankings"
                     fill
                     priority
@@ -101,7 +101,6 @@ export default function LandingPage() {
                     fetchPriority="high"
                     sizes="(max-width: 480px) 420px, (max-width: 768px) 640px, (max-width: 1200px) 90vw, 1200px"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    quality={70}
                   />
                 </Box>
 

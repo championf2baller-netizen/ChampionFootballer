@@ -28,7 +28,7 @@ function LogoNavbar() {
         >
           <Box sx={{ width: { xs: 250, sm: 340, md: 700 } }}>
             <Image
-              src={Layer}
+              src="/assets/images/logonavbar.webp"
               alt="Champion Footballer Logo"
               width={700}
               height={130}
@@ -36,7 +36,6 @@ function LogoNavbar() {
               style={{ width: '100%', height: 'auto' }}
               priority
               fetchPriority="high"
-              quality={80}
             />
           </Box>
         </Box>
