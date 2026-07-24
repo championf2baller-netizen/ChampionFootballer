@@ -189,9 +189,9 @@ export default function LandingPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      borderRadius: '4px',
+                      // borderRadius: '4px',
                       overflow: 'hidden',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                      // boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
                     <Image
