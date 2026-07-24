@@ -1,21 +1,12 @@
 import type { Metadata } from "next";
 import { Anton, Inter, Geist, Geist_Mono, Bebas_Neue, Oswald, League_Spartan } from "next/font/google";
 import localFont from 'next/font/local';
-import dynamic from 'next/dynamic';
 import "./globals.css";
 import "./bones/registry";
 import { Providers } from "@/lib/providers";
 import LayoutContent from './LayoutContent';
 import Footer from "@/Components/footer/_components";
-
-// Dynamically load non-critical client utilities to minimize layout.js bundle size (saves >29 KiB JS)
-const AuthCheck = dynamic(() => import('@/Components/AuthCheck'), { ssr: false });
-const ToasterProvider = dynamic(() => import('@/Components/ToasterProvider'), { ssr: false });
-const AuthBootstrap = dynamic(() => import('@/Components/AuthBootstrap'), { ssr: false });
-const ProductionOptimizer = dynamic(() => import('@/Components/ProductionOptimizer'), { ssr: false });
-const FetchAuthMonitor = dynamic(() => import('@/Components/FetchAuthMonitor'), { ssr: false });
-const RealtimeClient = dynamic(() => import('@/Components/RealtimeClient'), { ssr: false });
-const GlobalCacheSync = dynamic(() => import('@/Components/GlobalCacheSync'), { ssr: false });
+import ClientAppServices from "@/Components/ClientAppServices";
 
 // Woodford Bourne Pro loaded via next/font/local so it is bundled into
 // /_next/static/ and works correctly in standalone/production deployments
@@ -110,17 +101,11 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif" }}
       >
         <Providers>
-          <ProductionOptimizer /> {/* Initialize production optimizations */}
-          <FetchAuthMonitor /> {/* Global fetch auth injection & debug */}
-          <RealtimeClient /> {/* Start SSE connection for realtime updates */}
-          <GlobalCacheSync /> {/* Keep caches aligned across all routes on data mutations */}
-          <AuthBootstrap />
-          <AuthCheck />
+          <ClientAppServices />
           <LayoutContent>
             {children}
             <Footer />
           </LayoutContent>
-          <ToasterProvider /> {/* mount once */}
         </Providers>
       </body>
     </html>
