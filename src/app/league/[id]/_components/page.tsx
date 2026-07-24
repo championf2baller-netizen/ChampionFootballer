@@ -5452,7 +5452,7 @@ export default function LeagueDetailPage() {
                                                         px: { xs: 0.45, sm: 0.75 },
                                                         height: { xs: '24px', sm: '28px' },
                                                         minHeight: { xs: '24px', sm: '28px' },
-                                                        borderRadius: '50px',
+                                                        borderRadius: '7px',
                                                         whiteSpace: 'nowrap',
                                                         width: '100%',
                                                         minWidth: 0,
@@ -5831,7 +5831,7 @@ export default function LeagueDetailPage() {
                                                                                                         fontWeight: 600,
                                                                                                         fontSize: '0.95rem',
                                                                                                         padding: '14px 20px',
-                                                                                                        borderRadius: '12px',
+                                                                                                        borderRadius: '2px',
                                                                                                         boxShadow: '0 4px 20px rgba(249, 115, 22, 0.5)',
                                                                                                     },
                                                                                                 });

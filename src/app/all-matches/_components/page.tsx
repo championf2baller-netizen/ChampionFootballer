@@ -2883,7 +2883,7 @@ export default function AllMatches() {
                                                             px: { xs: 0.45, sm: 0.75 },
                                                             height: { xs: '24px', sm: '28px' },
                                                             minHeight: { xs: '24px', sm: '28px' },
-                                                            borderRadius: '50px',
+                                                            borderRadius: '7px',
                                                             whiteSpace: 'nowrap',
                                                             width: '100%',
                                                             minWidth: 0,
