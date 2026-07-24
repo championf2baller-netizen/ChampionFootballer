@@ -451,83 +451,78 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     }
   }, [seasonsList, selectedLeague?.id]);
 
-  // Helper: determine if a league is completed (exclude from dropdown)
+  // Helper: determine if a league is completed (exclude from dropdown / home page)
   const leagueIsCompleted = (l: LeagueWithComputed): boolean => {
-    if (homeLeagueHasRunningSeason(l)) return false;
+    if (!l) return false;
 
-    // Prefer backend-computed season-based completion status
-    if (l?.computedStatus?.isCompleted === true) return true;
+    // 1) Explicit root-level completion, lock, archive, or inactive flags
+    if (l.archived === true) return true;
+    if (l.active === false) return true;
+    if (l.isCompleted === true || l.isComplete === true || l.isLocked === true) return true;
 
-    // If there are any missing items (e.g., pending stats), do NOT treat as completed
-    const missingArr = Array.isArray(l?.computedStatus?.missing) ? l.computedStatus!.missing! : [];
-    if (missingArr.length > 0) return false;
-
-    // If we have counters, prefer them to decide completion:
-    // require matchesPlayed >= maxGames when maxGames is provided (> 0)
-    const toNum = (v: unknown): number | undefined => {
-      const n = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v) : NaN);
-      return Number.isFinite(n) ? n : undefined;
-    };
-    const playedFromComputed = toNum(l?.computedStatus?.matchesPlayed) ?? toNum(l?.computedStatus?.gamesPlayed);
-    const playedFromList = undefined; // not available reliably here
-    const played = playedFromComputed ?? playedFromList;
-    const maxG = toNum(l?.computedStatus?.maxGames) ?? toNum(l?.maxGames);
-
-    // Ported logic from All Leagues: derive completion from matches list when available
-    if (Array.isArray(l.matches)) {
-      const matches = l.matches ?? [];
-      const completedCount = matches.reduce((acc, m) => {
-        const status = typeof m.status === 'string' ? m.status.toLowerCase() : '';
-        const endedByStatus = status === 'completed' || status === 'finished' || status === 'ended';
-        const endedByFlag = m.active === false;
-        const endedByEnd = Boolean(m.end);
-        return acc + (endedByStatus || endedByFlag || endedByEnd ? 1 : 0);
-      }, 0);
-      if (typeof maxG === 'number' && maxG > 0) {
-        if (completedCount < maxG) return false; // not complete yet
-        // completed by matches threshold -> consider complete (missing already checked above)
-        return true;
-      }
-    }
-
-    if (typeof maxG === 'number' && maxG > 0 && typeof played === 'number') {
-      if (played < maxG) {
-        // Even if backend flags it completed/locked, do NOT treat as completed until maxGames reached
-        return false;
-      }
-      // Counters meet threshold and missing is empty -> complete
-      return true;
-    }
-
-    // Primary: explicit completion flags coming from backend
-    if (l?.computedStatus?.isComplete === true) return true;
-    if (l?.computedStatus?.locked === true) return true;
-    if (l?.isComplete === true) return true;
-    if (l?.isCompleted === true) return true;
-    if (l?.isLocked === true) return true;
-
-    // Backward-compat: infer completion from status/active when flags are absent
+    // 2) Explicit completion status strings
     const sRaw = (l?.status ?? '').toString();
     const s = sRaw.trim().toUpperCase();
     const completionStatuses = new Set([
+      'COMPLETED',
+      'COMPLETE',
+      'FINISHED',
+      'ENDED',
+      'CLOSED',
+      'INACTIVE',
       'RESULT_PUBLISHED',
       'RESULT_UPLOADED',
       'RESULT_COMPLETE',
       'RESULT_FINISHED',
       'RESULT_ENDED',
       'RESULT_DONE',
-      'COMPLETED'
     ]);
     if (completionStatuses.has(s)) return true;
-    if (typeof l?.active === 'boolean' && l.active === false) return true;
+
+    // 3) Backend-computed status completion flags
+    if (
+      l?.computedStatus?.isCompleted === true ||
+      l?.computedStatus?.isComplete === true ||
+      l?.computedStatus?.locked === true
+    ) {
+      return true;
+    }
+
+    // 4) Check matches threshold if maxGames is present
+    const toNum = (v: unknown): number | undefined => {
+      const n = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v) : NaN);
+      return Number.isFinite(n) ? n : undefined;
+    };
+    const maxG = toNum(l?.computedStatus?.maxGames) ?? toNum(l?.maxGames);
+    if (Array.isArray(l.matches) && typeof maxG === 'number' && maxG > 0) {
+      const matches = l.matches;
+      const completedCount = matches.reduce((acc, m) => {
+        const status = typeof m.status === 'string' ? m.status.toLowerCase() : '';
+        const endedByStatus = status === 'completed' || status === 'finished' || status === 'ended' || status === 'result_published';
+        const endedByFlag = m.active === false;
+        const endedByEnd = Boolean(m.end);
+        return acc + (endedByStatus || endedByFlag || endedByEnd ? 1 : 0);
+      }, 0);
+      if (completedCount >= maxG) return true;
+    }
+
+    // 5) Season-level completion fallback: if seasons exist, and NONE are active while at least one is completed
+    const seasons = Array.isArray(l.seasons) ? l.seasons : [];
+    if (seasons.length > 0) {
+      const hasActiveSeason = seasons.some(isHomeActiveSeason);
+      const hasCompletedSeason = seasons.some(isHomeCompletedSeason);
+      if (!hasActiveSeason && hasCompletedSeason) return true;
+    }
+
     return false;
   };
 
   const shouldShowLeagueInDropdown = (l: LeagueWithComputed): boolean => {
+    if (!l) return false;
     if (l.archived === true) return false;
-    if (homeLeagueHasRunningSeason(l)) return true;
-    if (l.active === true) return !leagueIsCompleted(l);
-    return !leagueIsCompleted(l);
+    if (l.active === false) return false;
+    if (leagueIsCompleted(l)) return false;
+    return true;
   };
 
   // Helper to compare leagues by most recent change
@@ -880,19 +875,18 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
             ? [...minimalList, optimisticCreatedLeague]
             : minimalList;
           const visibleList = combinedList.filter(shouldShowLeagueInDropdown);
-          const selectionList = visibleList.length > 0 ? visibleList : combinedList;
 
           setSelectedLeague((prev) => {
             if (prev) {
-              const existing = selectionList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
-              if (existing) return existing;
+              const existing = visibleList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
+              if (existing && shouldShowLeagueInDropdown(existing)) return existing;
             }
 
             const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            const preferred = storedId ? selectionList.find(l => String(l.id) === String(storedId)) || null : null;
+            const preferred = storedId ? visibleList.find(l => String(l.id) === String(storedId)) || null : null;
             if (preferred) return preferred;
 
-            const latest = [...selectionList].sort((a, b) => timeOf(b) - timeOf(a))[0];
+            const latest = [...visibleList].sort((a, b) => timeOf(b) - timeOf(a))[0];
             return latest || null;
           });
         }
@@ -1277,6 +1271,16 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     });
     return arr;
   }, [userLeagues, selectedLeague]);
+
+  // Ensure active selection remains strictly valid and active (non-completed)
+  useEffect(() => {
+    if (selectedLeague && !shouldShowLeagueInDropdown(selectedLeague)) {
+      const nextActive = sortedUserLeagues[0] || null;
+      setSelectedLeague(nextActive);
+    } else if (!selectedLeague && sortedUserLeagues.length > 0) {
+      setSelectedLeague(sortedUserLeagues[0]);
+    }
+  }, [selectedLeague, sortedUserLeagues]);
 
   const leagueDropdownOptions = React.useMemo(() => {
     const rawOptions = sortedUserLeagues.flatMap((league) => {
