@@ -36,7 +36,7 @@ function LogoNavbar() {
               style={{ width: '100%', height: 'auto' }}
               priority
               fetchPriority="high"
-              unoptimized
+              quality={80}
             />
           </Box>
         </Box>

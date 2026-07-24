@@ -101,7 +101,7 @@ export default function LandingPage() {
                     fetchPriority="high"
                     sizes="(max-width: 600px) 100vw, (max-width: 900px) 90vw, 65vw"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    unoptimized
+                    quality={75}
                   />
                 </Box>
 
@@ -128,10 +128,10 @@ export default function LandingPage() {
                       src={heroGridOrange}
                       alt="Players Celebrating"
                       fill
-                      priority
+                      loading="lazy"
                       sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      unoptimized
+                      quality={75}
                     />
                   </Box>
 
@@ -149,10 +149,10 @@ export default function LandingPage() {
                       src={heroGridTeam1}
                       alt="Football Team Squad"
                       fill
-                      priority
+                      loading="lazy"
                       sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      unoptimized
+                      quality={75}
                     />
                   </Box>
 
@@ -198,10 +198,10 @@ export default function LandingPage() {
                       src={heroGridTeam2}
                       alt="Team Celebrating Victory"
                       fill
-                      priority
+                      loading="lazy"
                       sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      unoptimized
+                      quality={75}
                     />
                   </Box>
                 </Box>

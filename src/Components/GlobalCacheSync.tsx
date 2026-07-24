@@ -126,8 +126,10 @@ function invalidateEverywhere(resourceType?: MutationDetail['resourceType'], res
 export default function GlobalCacheSync() {
   useEffect(() => {
     if (NO_CACHE_MODE) {
-      invalidateEverywhere(undefined, null);
-      clearBrowserCaches().catch(() => undefined);
+      setTimeout(() => {
+        invalidateEverywhere(undefined, null);
+        clearBrowserCaches().catch(() => undefined);
+      }, 1000);
     }
 
     const onMutation = (event: Event) => {
