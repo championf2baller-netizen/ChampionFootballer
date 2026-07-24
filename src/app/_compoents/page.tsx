@@ -99,9 +99,9 @@ export default function LandingPage() {
                     priority
                     loading="eager"
                     fetchPriority="high"
-                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 90vw, 65vw"
+                    sizes="(max-width: 480px) 420px, (max-width: 768px) 640px, (max-width: 1200px) 90vw, 1200px"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
-                    quality={75}
+                    quality={70}
                   />
                 </Box>
 

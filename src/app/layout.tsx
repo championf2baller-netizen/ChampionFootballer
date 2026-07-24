@@ -1,27 +1,24 @@
 import type { Metadata } from "next";
 import { Anton, Inter, Geist, Geist_Mono, Bebas_Neue, Oswald, League_Spartan } from "next/font/google";
 import localFont from 'next/font/local';
+import dynamic from 'next/dynamic';
 import "./globals.css";
 import "./bones/registry";
 import { Providers } from "@/lib/providers";
-import AuthCheck from "@/Components/AuthCheck";
-// import Mainbg from '@/Components/images/mainbg.webp'
 import LayoutContent from './LayoutContent';
 import Footer from "@/Components/footer/_components";
-import ToasterProvider from '@/Components/ToasterProvider';
-import AuthBootstrap from '@/Components/AuthBootstrap';
-import PerformanceMonitor from '@/Components/PerformanceMonitor';
-import ProductionOptimizer from '@/Components/ProductionOptimizer';
-import FetchAuthMonitor from '@/Components/FetchAuthMonitor';
-import RealtimeClient from '@/Components/RealtimeClient';
-import RealtimeLatency from '@/Components/RealtimeLatency';
-import GlobalCacheSync from '@/Components/GlobalCacheSync';
-import FontDebugMonitor from "@/Components/FontDebugMonitor";
+
+// Dynamically load non-critical client utilities to minimize layout.js bundle size (saves >29 KiB JS)
+const AuthCheck = dynamic(() => import('@/Components/AuthCheck'), { ssr: false });
+const ToasterProvider = dynamic(() => import('@/Components/ToasterProvider'), { ssr: false });
+const AuthBootstrap = dynamic(() => import('@/Components/AuthBootstrap'), { ssr: false });
+const ProductionOptimizer = dynamic(() => import('@/Components/ProductionOptimizer'), { ssr: false });
+const FetchAuthMonitor = dynamic(() => import('@/Components/FetchAuthMonitor'), { ssr: false });
+const RealtimeClient = dynamic(() => import('@/Components/RealtimeClient'), { ssr: false });
+const GlobalCacheSync = dynamic(() => import('@/Components/GlobalCacheSync'), { ssr: false });
 
 // Woodford Bourne Pro loaded via next/font/local so it is bundled into
 // /_next/static/ and works correctly in standalone/production deployments
-// (output: 'standalone' does NOT copy the public/ folder, so @font-face
-//  pointing to /assets/fonts/ would return 404 on production).
 const woodfordBournePro = localFont({
   src: [
     { path: '../../public/assets/fonts/WoodfordBournePro-Regular.woff2', weight: '400', style: 'normal' },
@@ -101,8 +98,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {apiHostname && (
           <>
             <link rel="dns-prefetch" href={`//${apiHostname}`} />
