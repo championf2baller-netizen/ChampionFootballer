@@ -28,14 +28,15 @@ function LogoNavbar() {
         >
           <Box sx={{ width: { xs: 250, sm: 340, md: 700 } }}>
             <Image
-              src={Layer.src}
+              src={Layer}
               alt="Champion Footballer Logo"
               width={700}
               height={130}
-              fetchPriority="high"
-              loading="eager"
-              decoding="async"
+              sizes="(max-width: 600px) 340px, 700px"
               style={{ width: '100%', height: 'auto', display: 'block' }}
+              priority
+              fetchPriority="high"
+              quality={95}
             />
           </Box>
         </Box>

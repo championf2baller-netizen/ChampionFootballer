@@ -8,10 +8,10 @@ import Layer from '@/Components/images/championfootballnewlogo.webp';
 import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
-import heroTopBg from '@/Components/images/hero_top_bg.webp';
-import heroGridOrange from '@/Components/images/hero_grid_orange.webp';
-import heroGridTeam1 from '@/Components/images/hero_grid_team1.webp';
-import heroGridTeam2 from '@/Components/images/hero_grid_team2.webp';
+import heroTopBg from '@/Components/images/hero_top_bg.png';
+import heroGridOrange from '@/Components/images/hero_grid_orange.png';
+import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
+import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
 import image9 from '@/Components/images/1stpicc.webp';
 import image10 from '@/Components/images/2ndpicc.webp';
 import image11 from '@/Components/images/3rdpicc.webp';
@@ -95,18 +95,13 @@ export default function LandingPage() {
                   <Image
                     src={heroTopBg}
                     alt="Create your matches, track your stats, and rise through the rankings"
-                    fetchPriority="high"
+                    fill
+                    priority
                     loading="eager"
-                    decoding="async"
-                    style={{
-                      position: 'absolute',
-                      height: '100%',
-                      width: '100%',
-                      top: 0,
-                      left: 0,
-                      objectFit: 'cover',
-                      objectPosition: 'center',
-                    }}
+                    fetchPriority="high"
+                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 90vw, 1920px"
+                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    quality={100}
                   />
                 </Box>
 
@@ -130,13 +125,13 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridOrange.src}
+                      src={heroGridOrange}
                       alt="Players Celebrating"
                       fill
                       loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
+                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={75}
+                      quality={100}
                     />
                   </Box>
 
@@ -151,13 +146,13 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridTeam1.src}
+                      src={heroGridTeam1}
                       alt="Football Team Squad"
                       fill
                       loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
+                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={75}
+                      quality={100}
                     />
                   </Box>
 
@@ -200,13 +195,13 @@ export default function LandingPage() {
                     }}
                   >
                     <Image
-                      src={heroGridTeam2.src}
+                      src={heroGridTeam2}
                       alt="Team Celebrating Victory"
                       fill
                       loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
+                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={75}
+                      quality={100}
                     />
                   </Box>
                 </Box>
@@ -491,14 +486,14 @@ export default function LandingPage() {
                       src={f.img}
                       alt={f.title}
                       fill
-                      sizes="(max-width: 600px) 90vw, 25vw"
+                      sizes="(max-width: 600px) 90vw, 400px"
                       style={{
                         objectFit: 'contain',
                         objectPosition: 'center center',
                         padding: '8px 14px',
                       }}
                       loading="lazy"
-                      placeholder="blur"
+                      quality={100}
                     />
                   </Box>
                 </Box>
