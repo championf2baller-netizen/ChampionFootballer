@@ -159,36 +159,100 @@ interface PlayerStatsData {
   allYears?: Array<number | string>;
 }
 
-const isLeagueActiveForFilter = (l: LeagueWithMatches): boolean => {
-  if (!l) return false;
-  if (l.archived === true) return false;
-  if (l.active === false) return false;
+const getLeagueCreatedYear = (l: {
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
+  matches?: Array<{ date?: string }>;
+  seasons?: Array<{ startDate?: string; endDate?: string }>;
+}): string | null => {
+  if (!l) return null;
 
-  const status = typeof l.status === 'string' ? l.status.trim().toLowerCase() : '';
-  if (
-    status === 'completed' ||
-    status === 'inactive' ||
-    status === 'archived' ||
-    status.includes('archiv') ||
-    status.includes('inactiv') ||
-    status.includes('deactiv')
-  ) return false;
-
-  if (l.computedStatus?.isComplete === true || l.computedStatus?.isCompleted === true) return false;
-
-  const max = typeof l.maxGames === 'number' ? l.maxGames : 0;
-  if (max > 0 && Array.isArray(l.matches)) {
-    const completedCount = l.matches.reduce((acc, m) => {
-      const st = typeof m.status === 'string' ? m.status.toLowerCase() : '';
-      const endedByStatus = st === 'completed' || st === 'finished' || st === 'ended' || st === 'result_published' || st === 'result_uploaded';
-      const endedByEnd = Boolean(m.end);
-      return acc + (endedByStatus || endedByEnd ? 1 : 0);
-    }, 0);
-    if (completedCount >= max) return false;
+  if (l.createdAt) {
+    const y = dayjs(l.createdAt).year();
+    if (Number.isFinite(y) && y >= 1900 && y <= 3000) return String(y);
   }
 
+  let earliest: number | null = null;
+  if (Array.isArray(l.matches)) {
+    l.matches.forEach((m) => {
+      if (m?.date) {
+        const y = dayjs(m.date).year();
+        if (Number.isFinite(y) && y >= 1900 && y <= 3000) {
+          if (earliest === null || y < earliest) earliest = y;
+        }
+      }
+    });
+  }
+  if (Array.isArray(l.seasons)) {
+    l.seasons.forEach((s) => {
+      if (s?.startDate) {
+        const y = dayjs(s.startDate).year();
+        if (Number.isFinite(y) && y >= 1900 && y <= 3000) {
+          if (earliest === null || y < earliest) earliest = y;
+        }
+      }
+    });
+  }
+  if (l.updatedAt) {
+    const y = dayjs(l.updatedAt).year();
+    if (Number.isFinite(y) && y >= 1900 && y <= 3000) {
+      if (earliest === null || y < earliest) earliest = y;
+    }
+  }
+
+  return earliest !== null ? String(earliest) : null;
+};
+
+const getLeagueYears = (l: {
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
+  matches?: Array<{ date?: string }>;
+  seasons?: Array<{ startDate?: string; endDate?: string }>;
+}): string[] => {
+  if (!l) return [];
+  const years = new Set<string>();
+  const createdY = getLeagueCreatedYear(l);
+  if (createdY) years.add(createdY);
+
+  if (Array.isArray(l.matches)) {
+    l.matches.forEach((m) => {
+      if (m?.date) {
+        const y = dayjs(m.date).year();
+        if (Number.isFinite(y) && y >= 1900 && y <= 3000) years.add(String(y));
+      }
+    });
+  }
+
+  if (Array.isArray(l.seasons)) {
+    l.seasons.forEach((s) => {
+      if (s?.startDate) {
+        const y = dayjs(s.startDate).year();
+        if (Number.isFinite(y) && y >= 1900 && y <= 3000) years.add(String(y));
+      }
+      if (s?.endDate) {
+        const y = dayjs(s.endDate).year();
+        if (Number.isFinite(y) && y >= 1900 && y <= 3000) years.add(String(y));
+      }
+    });
+  }
+
+  return Array.from(years);
+};
+
+const isLeagueInYear = (l: LeagueWithMatches, yearStr: string): boolean => {
+  if (!yearStr || yearStr === 'all') return true;
+  const createdY = getLeagueCreatedYear(l);
+  if (createdY === yearStr) return true;
+  return getLeagueYears(l).includes(yearStr);
+};
+
+const isLeagueValidForPerformance = (l: LeagueWithMatches): boolean => {
+  if (!l) return false;
+  if (l.archived === true) return false;
   return true;
 };
+
+const isLeagueActiveForFilter = isLeagueValidForPerformance;
 
 // Helper to safely extract name without using any
 type MaybeNameObj = { name?: unknown };
@@ -713,30 +777,24 @@ export default function CareerPage() {
   // Make sure data is initialized before leaguesForYear
   const { data: rawData, filters } = useSelector((s: RootState) => s.playerStats);
   const data: PlayerStatsData | undefined = rawData ?? undefined;
+  const [careerData, setCareerData] = useState<PlayerStatsData | null>(null);
 
   // Ensure leaguesForYear is defined for dropdown usage
   const leaguesForYear: LeagueWithMatches[] = useMemo(() => {
-    const list: LeagueWithMatches[] = Array.isArray(data?.leagues)
-      ? (data?.leagues as LeagueWithMatches[])
-      : [];
+    const list: LeagueWithMatches[] = Array.isArray(data?.leagues) && data.leagues.length > 0
+      ? (data.leagues as LeagueWithMatches[])
+      : (Array.isArray(careerData?.leagues) ? (careerData.leagues as LeagueWithMatches[]) : []);
     if (list.length === 0) return [];
 
+    const validList = list.filter(isLeagueValidForPerformance);
+
     if (!filters.year || filters.year === 'all') {
-      return list.filter(
-        (l) =>
-          isLeagueActiveForFilter(l) &&
-          Array.isArray(l.matches)
-      );
+      return validList;
     }
 
     const effectiveYear = String(filters.year);
-    return list.filter(
-      (l) =>
-        isLeagueActiveForFilter(l) &&
-        Array.isArray(l.matches) &&
-        (l.matches as LeagueMatch[]).some((m) => dayjs(m.date).year().toString() === effectiveYear)
-    );
-  }, [data?.leagues, filters.year]);
+    return validList.filter((l) => isLeagueInYear(l, effectiveYear));
+  }, [data?.leagues, careerData?.leagues, filters.year]);
   const { user, token, loading: authLoading } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -760,7 +818,6 @@ export default function CareerPage() {
   const leaguesFromRedux = useSelector((state: RootState) => state.playerStats.data?.leagues) as LeagueWithMatches[] | undefined;
   const [availableLeagues, setAvailableLeagues] = useState<LeagueWithMatches[]>([]);
   const [refreshNonce, setRefreshNonce] = useState(0);
-  const [careerData, setCareerData] = useState<PlayerStatsData | null>(null);
   const [playerName, setPlayerName] = useState<string>('');
   const [playerPosition, setPlayerPosition] = useState<string>('');
 
@@ -777,12 +834,18 @@ export default function CareerPage() {
 
   // Extract available leagues from Redux state or data
   useEffect(() => {
-    if (leaguesFromRedux && leaguesFromRedux.length > 0) {
-      setAvailableLeagues(leaguesFromRedux.filter(isLeagueActiveForFilter));
-    } else if (data?.leagues) {
-      setAvailableLeagues((data.leagues as LeagueWithMatches[]).filter(isLeagueActiveForFilter));
+    const sourceLeagues = ((leaguesFromRedux && leaguesFromRedux.length > 0
+      ? leaguesFromRedux
+      : (data?.leagues || careerData?.leagues || [])) as LeagueWithMatches[])
+      .filter(isLeagueValidForPerformance);
+
+    if (!filters.year || filters.year === 'all') {
+      setAvailableLeagues(sourceLeagues);
+    } else {
+      const yearStr = String(filters.year);
+      setAvailableLeagues(sourceLeagues.filter((l) => isLeagueInYear(l, yearStr)));
     }
-  }, [leaguesFromRedux, data]);
+  }, [leaguesFromRedux, data?.leagues, careerData?.leagues, filters.year]);
 
   useEffect(() => {
     if (!filters.leagueId || filters.leagueId === 'all') return;
@@ -2538,12 +2601,20 @@ export default function CareerPage() {
     };
     (data?.allYears || data?.years || []).forEach(addYear);
     (careerData?.allYears || careerData?.years || []).forEach(addYear);
+
+    const sourceLeagues = ((data?.leagues || careerData?.leagues || []) as LeagueWithMatches[]).filter(isLeagueValidForPerformance);
+    sourceLeagues.forEach((l) => {
+      getLeagueYears(l).forEach((y) => years.add(y));
+    });
+
     allLeagueMatches.forEach((m) => {
-      const y = dayjs(m.date).year();
-      if (Number.isFinite(y)) years.add(String(y));
+      if (m?.date) {
+        const y = dayjs(m.date).year();
+        if (Number.isFinite(y)) years.add(String(y));
+      }
     });
     return Array.from(years).sort((a, b) => Number(b) - Number(a));
-  }, [careerData?.allYears, careerData?.years, data?.allYears, data?.years, allLeagueMatches]);
+  }, [careerData?.allYears, careerData?.years, data?.allYears, data?.years, data?.leagues, careerData?.leagues, allLeagueMatches]);
 
   useEffect(() => {
     if (loading) return;

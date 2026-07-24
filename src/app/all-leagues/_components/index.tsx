@@ -3333,16 +3333,47 @@ function AllLeagues() {
       if (leagueLiveUpdatingId === String(l.id)) return true;
       return completionTab === 'completed' ? isLeagueCompleted(l) : isLeagueLive(l);
     });
+    const getLeagueYearsHelper = (l: Record<string, unknown>): string[] => {
+      const years = new Set<string>();
+      if (Array.isArray(l.matches)) {
+        l.matches.forEach((m: { date?: string }) => {
+          if (m?.date) {
+            const y = new Date(m.date).getFullYear();
+            if (Number.isFinite(y) && y >= 1900) years.add(String(y));
+          }
+        });
+      }
+      if (Array.isArray(l.seasons)) {
+        l.seasons.forEach((s: { startDate?: string; endDate?: string }) => {
+          if (s?.startDate) {
+            const y = new Date(s.startDate).getFullYear();
+            if (Number.isFinite(y) && y >= 1900) years.add(String(y));
+          }
+          if (s?.endDate) {
+            const y = new Date(s.endDate).getFullYear();
+            if (Number.isFinite(y) && y >= 1900) years.add(String(y));
+          }
+        });
+      }
+      const cDate = String(l.createdAt || '').trim();
+      if (cDate) {
+        const y = new Date(cDate).getFullYear();
+        if (Number.isFinite(y) && y >= 1900) years.add(String(y));
+      }
+      const uDate = String(l.updatedAt || '').trim();
+      if (uDate) {
+        const y = new Date(uDate).getFullYear();
+        if (Number.isFinite(y) && y >= 1900) years.add(String(y));
+      }
+      return Array.from(years);
+    };
+
     const byYear = selectedYear === 'all'
       ? byCompletion
       : byCompletion.filter(l => {
-        // Try createdAt first, then updatedAt as fallback
-        const dateStr = (l.createdAt || l.updatedAt || '').trim();
-        if (!dateStr) return true; // Show undated leagues in all year views
-        const t = Date.parse(dateStr);
-        if (!Number.isFinite(t)) return true; // Show unparseable dates in all views
-        const y = new Date(t).getFullYear();
-        return String(y) === selectedYear;
+        const years = getLeagueYearsHelper(l as unknown as Record<string, unknown>);
+        if (years.length === 0) return true; // Show undated leagues in all views
+        return years.includes(selectedYear);
       });
 
     const term = searchTerm.trim().toLowerCase();

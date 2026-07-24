@@ -38,7 +38,7 @@ import ShieldImg from '@/Components/images/shield.png';
 import DarkHorseImg from '@/Components/images/darkhourse.png';
 import TrofiiImg from '@/Components/images/trofii.png';
 import Image, { StaticImageData } from 'next/image';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { useAuth } from '@/lib/hooks';
 import { playerAPI } from '@/lib/api';
 import GoatImg from '@/Components/images/goat.png';
@@ -129,6 +129,8 @@ type LeagueMatch = {
 };
 
 type LeagueWithMatchesTyped = {
+    updatedAt: string | number | Date | Dayjs | null | undefined;
+    createdAt: any;
     id: string;
     name: string;
     matches?: LeagueMatch[];
@@ -149,33 +151,7 @@ function hasMatches(l: unknown): l is LeagueWithMatchesTyped {
 
 function isLeagueActiveForFilter(l: LeagueWithMatchesTyped): boolean {
     if (!l) return false;
-
     if (l.archived === true) return false;
-    if (l.active === false) return false;
-
-    const status = typeof l.status === 'string' ? l.status.trim().toLowerCase() : '';
-    if (
-        status === 'completed' ||
-        status === 'inactive' ||
-        status === 'archived' ||
-        status.includes('archiv') ||
-        status.includes('inactiv') ||
-        status.includes('deactiv')
-    ) return false;
-
-    if (l.computedStatus?.isComplete === true || l.computedStatus?.isCompleted === true) return false;
-
-    const max = typeof l.maxGames === 'number' ? l.maxGames : 0;
-    if (max > 0 && Array.isArray(l.matches)) {
-        const completedCount = l.matches.reduce((acc, m) => {
-            const st = typeof m.status === 'string' ? m.status.toLowerCase() : '';
-            const endedByStatus = st === 'completed' || st === 'finished' || st === 'ended' || st === 'result_published' || st === 'result_uploaded';
-            const endedByEnd = Boolean(m.end);
-            return acc + (endedByStatus || endedByEnd ? 1 : 0);
-        }, 0);
-        if (completedCount >= max) return false;
-    }
-
     return true;
 }
 
@@ -1660,10 +1636,12 @@ export default function PlayerStatsPage() {
 
         // compute valid leagues for the selected year
         const list = ((data?.leagues || []) as LeagueWithMatchesTyped[]).filter((l) =>
-            isLeagueActiveForFilter(l) &&
+            l && l.archived !== true &&
             (val === 'all'
                 ? hasMatches(l)
-                : hasMatches(l) && (l.matches || []).some(m => dayjs(m.date).year().toString() === val))
+                : (l.matches || []).some(m => dayjs(m.date).year().toString() === val) ||
+                  (l.createdAt ? dayjs(l.createdAt).year().toString() === val : false) ||
+                  (l.updatedAt ? dayjs(l.updatedAt).year().toString() === val : false))
         );
 
         // preserve league if possible, else select latest league for that year (or 'all')
