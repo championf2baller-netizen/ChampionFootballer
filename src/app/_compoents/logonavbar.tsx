@@ -35,6 +35,7 @@ function LogoNavbar() {
               sizes="(max-width: 600px) 250px, (max-width: 900px) 340px, 700px"
               style={{ width: '100%', height: 'auto' }}
               priority
+              fetchPriority="high"
             />
           </Box>
         </Box>

@@ -119,7 +119,6 @@ export default function LandingPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      // borderRadius: '4px',
                       overflow: 'hidden',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
@@ -128,7 +127,8 @@ export default function LandingPage() {
                       src={heroGridOrange}
                       alt="Players Celebrating"
                       fill
-                      sizes="(max-width: 900px) 50vw, 32vw"
+                      priority
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
                     />
                   </Box>
@@ -139,7 +139,6 @@ export default function LandingPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      // borderRadius: '4px',
                       overflow: 'hidden',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
@@ -148,7 +147,8 @@ export default function LandingPage() {
                       src={heroGridTeam1}
                       alt="Football Team Squad"
                       fill
-                      sizes="(max-width: 900px) 50vw, 32vw"
+                      priority
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
                     />
                   </Box>
@@ -158,15 +158,11 @@ export default function LandingPage() {
                     sx={{
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      // backgroundColor: '#000000',
-                      // borderRadius: '4px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       p: { xs: 1.5, sm: 2, md: 3 },
                       textAlign: 'center',
-                      // border: '1px solid rgba(255, 255, 255, 0.08)',
-                      // boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
                     <Typography
@@ -180,11 +176,11 @@ export default function LandingPage() {
                         letterSpacing: '0.02em',
                       }}
                     >
-                      I GOT 99 PROBLEMS BUT WINNING AIN'T ONE!
+                      I GOT 99 PROBLEMS BUT WINNING AIN&apos;T ONE!
                     </Typography>
                   </Box>
 
-                  {/* Bottom Right Grid Image: Team Victory */}
+                  {/* Bottom Right Grid Image: Team Victory around Ball */}
                   <Box
                     sx={{
                       position: 'relative',
@@ -199,7 +195,8 @@ export default function LandingPage() {
                       src={heroGridTeam2}
                       alt="Team Celebrating Victory"
                       fill
-                      sizes="(max-width: 900px) 50vw, 32vw"
+                      priority
+                      sizes="(max-width: 600px) 50vw, (max-width: 900px) 50vw, 32vw"
                       style={{ objectFit: 'cover', objectPosition: 'center' }}
                     />
                   </Box>
