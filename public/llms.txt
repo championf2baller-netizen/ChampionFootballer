@@ -1,0 +1,9 @@
+# Champion Footballer
+
+Champion Footballer is the ultimate football management platform for creating leagues, tracking player stats, and organizing matches.
+
+## Core Features
+- [Home Dashboard](https://championfootballer.co.uk/home)
+- [All Leagues](https://championfootballer.co.uk/all-leagues)
+- [All Players](https://championfootballer.co.uk/all-players)
+- [All Matches](https://championfootballer.co.uk/all-matches)

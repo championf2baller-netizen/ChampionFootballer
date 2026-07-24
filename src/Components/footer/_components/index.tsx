@@ -66,6 +66,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               size="small"
+              aria-label="X (formerly Twitter)"
               sx={{
                 color: 'white',
                 bgcolor: '#00A77F',
@@ -83,6 +84,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               size="small"
+              aria-label="Instagram"
               sx={{
                 color: '#fff',
                 bgcolor: '#00A77F',

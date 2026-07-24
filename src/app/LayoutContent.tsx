@@ -14,7 +14,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div
+      <main
+        id="main-content"
+        role="main"
         style={{
           backgroundImage: isMainPage ? 'none' : `url(${Mainbg.src})`,
           backgroundPosition: 'center',
@@ -31,7 +33,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         {!isMainPage && <Navbar />}
         {children}
         {/* {!isMainPage && <Footer />} */}
-      </div>
+      </main>
     </>
   );
 }

@@ -67,8 +67,11 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('google')} 
         className="auth-social-btn"
+        aria-label="Continue with Google"
         style={{
           ...buttonStyle,
+          color: '#000000',
+          fontWeight: '600',
           border: '1px solid #404040'
         }}
         onMouseEnter={(e) => {
@@ -91,21 +94,23 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('facebook')} 
         className="auth-social-btn"
+        aria-label="Continue with Facebook"
         style={{
           ...buttonStyle,
-          backgroundColor: '#1877f2',
-          border: '1px solid #1877f2',
-          color: '#ffffff'
+          backgroundColor: '#0866FF',
+          border: '1px solid #0866FF',
+          color: '#FFFFFF',
+          fontWeight: '700'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#166fe5';
-          e.currentTarget.style.borderColor = '#166fe5';
+          e.currentTarget.style.backgroundColor = '#0052cc';
+          e.currentTarget.style.borderColor = '#0052cc';
           e.currentTarget.style.transform = 'translateY(-1px)';
-          e.currentTarget.style.boxShadow = '0 2px 8px rgba(24,119,242,0.3)';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(8,102,255,0.4)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#1877f2';
-          e.currentTarget.style.borderColor = '#1877f2';
+          e.currentTarget.style.backgroundColor = '#0866FF';
+          e.currentTarget.style.borderColor = '#0866FF';
           e.currentTarget.style.transform = 'translateY(0)';
           e.currentTarget.style.boxShadow = 'none';
         }}
@@ -117,14 +122,16 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('apple')} 
         className="auth-social-btn"
+        aria-label="Continue with Apple"
         style={{
           ...buttonStyle,
           backgroundColor: '#000000',
           border: '1px solid #ffffff',
-          color: '#ffffff'
+          color: '#ffffff',
+          fontWeight: '600'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#333333';
+          e.currentTarget.style.backgroundColor = '#222222';
           e.currentTarget.style.border = '1px solid #ffffff';
           e.currentTarget.style.transform = 'translateY(-1px)';
           e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
