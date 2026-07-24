@@ -1923,7 +1923,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
               mx: { xs: 0, sm: 10 },
             }}
           >
-            <Typography sx={{ fontSize: { xs: 14, sm: 19 }, fontWeight: 600, color: '#00a77f', lineHeight: 1.1, mb: 0 }}>
+            <Typography sx={{ fontSize: { xs: 14, sm: 19 }, fontWeight: 600, color: '#FF007F', lineHeight: 1.1, mb: 0 }}>
               Match Predictions
             </Typography>
 
