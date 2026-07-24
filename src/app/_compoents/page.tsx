@@ -97,6 +97,7 @@ export default function LandingPage() {
                     alt="Create your matches, track your stats, and rise through the rankings"
                     fill
                     priority
+                    fetchPriority="high"
                     sizes="(max-width: 900px) 100vw, 65vw"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
                   />
@@ -300,15 +301,17 @@ export default function LandingPage() {
                 </Paper>
               </Box>
               {/* Join Modal - Popup for registration */}
-              <Modal
-                open={isJoinModalOpen}
-                onClose={() => setIsJoinModalOpen(false)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              {isJoinModalOpen && (
+                <Modal
+                  open={isJoinModalOpen}
+                  onClose={() => setIsJoinModalOpen(false)}
+                  keepMounted={false}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
                 <Paper
                   elevation={8}
                   sx={{
@@ -347,6 +350,7 @@ export default function LandingPage() {
                   </Box>
                 </Paper>
               </Modal>
+              )}
             </Grid>
           </Grid>
         </Box>
