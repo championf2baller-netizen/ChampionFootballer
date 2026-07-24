@@ -1,9 +1,20 @@
 # Champion Footballer
 
-Champion Footballer is the ultimate football management platform for creating leagues, tracking player stats, and organizing matches.
+> Champion Footballer is the ultimate football management platform for creating leagues, tracking player stats, organizing matches, and viewing real-time player leaderboards.
 
-## Core Features
-- [Home Dashboard](https://championfootballer.co.uk/home)
-- [All Leagues](https://championfootballer.co.uk/all-leagues)
-- [All Players](https://championfootballer.co.uk/all-players)
-- [All Matches](https://championfootballer.co.uk/all-matches)
+Champion Footballer provides comprehensive tools for amateur and professional football players, league managers, and fans to track performance metrics, manage match schedules, and calculate player ratings dynamically.
+
+## Core Features & Navigation
+
+- [Home Dashboard](https://championfootballer.co.uk/home): Central dashboard displaying user stats, active leagues, and quick actions.
+- [All Leagues](https://championfootballer.co.uk/all-leagues): Browse, search, filter, and join football leagues.
+- [All Players](https://championfootballer.co.uk/all-players): Explore player profiles, career statistics, and individual ratings.
+- [All Matches](https://championfootballer.co.uk/all-matches): View upcoming fixtures, match details, and match results.
+- [Leaderboard](https://championfootballer.co.uk/leader-board): Official rankings, top scorers, and player leaderboards.
+
+## Platform Information
+
+- [Terms & Conditions](https://championfootballer.co.uk/terms): Platform terms of service and usage rules.
+- [Privacy Policy](https://championfootballer.co.uk/privacy): Data privacy policies and user data handling.
+- [Contact Us](https://championfootballer.co.uk/contact): Support channel and contact form for inquiries.
+- [About Us](https://championfootballer.co.uk/about): Overview of Champion Footballer platform mission and features.
