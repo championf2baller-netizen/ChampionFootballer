@@ -97,8 +97,9 @@ export default function LandingPage() {
                     alt="Create your matches, track your stats, and rise through the rankings"
                     fill
                     priority
+                    loading="eager"
                     fetchPriority="high"
-                    sizes="(max-width: 900px) 100vw, 65vw"
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 90vw, 65vw"
                     style={{ objectFit: 'cover', objectPosition: 'center' }}
                   />
                 </Box>
