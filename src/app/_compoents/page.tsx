@@ -77,7 +77,7 @@ export default function LandingPage() {
                   color: 'white',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: { xs: 1.5, md: 2 },
+                  // gap: { xs: 1.5, md: 2 },
                   mb: { xs: 2, md: 0 },
                 }}
               >
@@ -86,7 +86,7 @@ export default function LandingPage() {
                   sx={{
                     position: 'relative',
                     width: '100%',
-                    borderRadius: '6px',
+                    // borderRadius: '6px',
                     overflow: 'hidden',
                     aspectRatio: { xs: '16/9.5', md: '16/9' },
                     boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
@@ -109,7 +109,7 @@ export default function LandingPage() {
                   sx={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: { xs: 1.5, md: 2 },
+                    // gap: { xs: 1.5, md: 2 },
                     width: '100%',
                   }}
                 >
@@ -119,7 +119,7 @@ export default function LandingPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      borderRadius: '4px',
+                      // borderRadius: '4px',
                       overflow: 'hidden',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
@@ -139,7 +139,7 @@ export default function LandingPage() {
                       position: 'relative',
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      borderRadius: '4px',
+                      // borderRadius: '4px',
                       overflow: 'hidden',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
@@ -158,15 +158,15 @@ export default function LandingPage() {
                     sx={{
                       width: '100%',
                       aspectRatio: '1.45/1',
-                      backgroundColor: '#000000',
-                      borderRadius: '4px',
+                      // backgroundColor: '#000000',
+                      // borderRadius: '4px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       p: { xs: 1.5, sm: 2, md: 3 },
                       textAlign: 'center',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+                      // border: '1px solid rgba(255, 255, 255, 0.08)',
+                      // boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
                     <Typography
@@ -313,44 +313,44 @@ export default function LandingPage() {
                     justifyContent: 'center',
                   }}
                 >
-                <Paper
-                  elevation={8}
-                  sx={{
-                    width: { xs: '92vw', sm: '600px', md: '730px' },
-                    maxWidth: '92vw',
-                    height: { xs: '90vh', md: '1129px' },
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                    borderRadius: '15px',
-                    bgcolor: '#f5f6f6',
-                    p: { xs: 3, md: 4 },
-                    position: 'relative',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-                    '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari/Opera
-                    scrollbarWidth: 'none', // Hide scrollbar for Firefox
-                    msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
-                  }}
-                >
-                  {/* Close button */}
-                  <IconButton
-                    onClick={() => setIsJoinModalOpen(false)}
+                  <Paper
+                    elevation={8}
                     sx={{
-                      position: 'absolute',
-                      right: 8,
-                      top: 8,
-                      color: 'grey.500',
-                      '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+                      width: { xs: '92vw', sm: '600px', md: '730px' },
+                      maxWidth: '92vw',
+                      height: { xs: '90vh', md: '1129px' },
+                      maxHeight: '90vh',
+                      overflowY: 'auto',
+                      borderRadius: '15px',
+                      bgcolor: '#f5f6f6',
+                      p: { xs: 3, md: 4 },
+                      position: 'relative',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                      '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari/Opera
+                      scrollbarWidth: 'none', // Hide scrollbar for Firefox
+                      msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
                     }}
                   >
-                    <CloseIcon />
-                  </IconButton>
+                    {/* Close button */}
+                    <IconButton
+                      onClick={() => setIsJoinModalOpen(false)}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: 'grey.500',
+                        '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
 
-                  {/* Auth Tabs - Register form */}
-                  <Box sx={{ width: '100%', overflow: 'visible' }}>
-                    <AuthTabs showLogin={false} onToggleForm={() => { }} />
-                  </Box>
-                </Paper>
-              </Modal>
+                    {/* Auth Tabs - Register form */}
+                    <Box sx={{ width: '100%', overflow: 'visible' }}>
+                      <AuthTabs showLogin={false} onToggleForm={() => { }} />
+                    </Box>
+                  </Paper>
+                </Modal>
               )}
             </Grid>
           </Grid>
