@@ -12,10 +12,10 @@ import heroTopBg from '@/Components/images/hero_top_bg.png';
 import heroGridOrange from '@/Components/images/hero_grid_orange.png';
 import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
 import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
-import image9 from '@/Components/images/1stpicc.webp';
-import image10 from '@/Components/images/2ndpicc.webp';
-import image11 from '@/Components/images/3rdpicc.webp';
-import image12 from '@/Components/images/4thpicc.webp';
+import image9 from '@/Components/images/1stpicc.jpeg';
+import image10 from '@/Components/images/2ndpicc.png';
+import image11 from '@/Components/images/3rdpicc.png';
+import image12 from '@/Components/images/4thpicc.png';
 import LogoNavbar from './logonavbar';
 
 
