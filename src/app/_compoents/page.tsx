@@ -100,7 +100,7 @@ export default function LandingPage() {
                     loading="eager"
                     fetchPriority="high"
                     sizes="(max-width: 600px) 100vw, (max-width: 1200px) 90vw, 1920px"
-                    style={{ objectFit: 'cover', objectPosition: 'center' }}
+                    style={{ objectFit: 'cover', objectPosition: 'left center' }}
                     quality={100}
                   />
                 </Box>

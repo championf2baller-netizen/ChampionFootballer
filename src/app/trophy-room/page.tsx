@@ -242,7 +242,7 @@ const bottomTrophies: Omit<TrophyType, 'winner' | 'winnerId' | 'leagueId' | 'lea
   { title: 'King Playmaker', description: 'Player With The Highest Number Of Goals Assisted', image: KingPlayMakerImg, color: '#FF007F' },
   { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: 'blue' },
   { title: 'Dark Horse', description: 'Player Outside Of The Top 3 League Position With The Highest Frequency Of MOTM Votes', image: DarkHorseImg, color: '#e10600' },
-  { title: 'Star Keeper', description: 'Goalkeeper With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: '#00d1c1' },
+  { title: 'Star Keeper', description: 'Player With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: '#00d1c1' },
 ];
 
 // Combined trophies array for backwards compatibility

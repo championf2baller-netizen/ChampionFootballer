@@ -93,7 +93,7 @@ const TROPHY_META: Array<Omit<TrophyType, 'winner' | 'winnerId' | 'leagueId' | '
   { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: '#00BFFF' },
   { title: 'The Dark Horse', description: 'Player Outside Of The Top 3 League Position With The Highest Frequency Of MOTM Votes', image: DarkHorseImg, color: '#607D8B' },
   // New
-  { title: 'Star Keeper', description: 'Goalkeeper With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: BLUE_HEX },
+  { title: 'Star Keeper', description: 'Player With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: BLUE_HEX },
 ];
 
 // Backward-compatibility title aliases
@@ -187,7 +187,7 @@ const TrophyCard = ({ title, description, image, color, winner, onButtonClick }:
     </Button>
   </Paper>
 );
-  
+
 
 export default function TrophyRoom({ leagueId }: { leagueId: string }) {
   const { user, token } = useAuth();
@@ -341,13 +341,13 @@ export default function TrophyRoom({ leagueId }: { leagueId: string }) {
         stats: { goals: Number(data.stats?.goals ?? 0), assists: Number(data.stats?.assists ?? 0) },
         skills: data.skills
           ? {
-              dribbling: Number(data.skills.dribbling ?? 0),
-              shooting: Number(data.skills.shooting ?? 0),
-              passing: Number(data.skills.passing ?? 0),
-              pace: Number(data.skills.pace ?? 0),
-              defending: Number(data.skills.defending ?? 0),
-              physical: Number(data.skills.physical ?? 0),
-            }
+            dribbling: Number(data.skills.dribbling ?? 0),
+            shooting: Number(data.skills.shooting ?? 0),
+            passing: Number(data.skills.passing ?? 0),
+            pace: Number(data.skills.pace ?? 0),
+            defending: Number(data.skills.defending ?? 0),
+            physical: Number(data.skills.physical ?? 0),
+          }
           : undefined,
         xp: Number(data.xp ?? data.player?.xp ?? 0),
         cleanSheets: Number(data.cleanSheets ?? 0),
@@ -542,7 +542,7 @@ export default function TrophyRoom({ leagueId }: { leagueId: string }) {
                 overflowY: 'auto',
                 position: 'relative'
               }}>
-                <Typography sx={{ fontWeight: 800, mb: 1, fontSize: { xs: '0.75rem', sm: '0.95rem' , md: '0.8rem' }, letterSpacing: 0.3 }}>Last 10 games</Typography>
+                <Typography sx={{ fontWeight: 800, mb: 1, fontSize: { xs: '0.75rem', sm: '0.95rem', md: '0.8rem' }, letterSpacing: 0.3 }}>Last 10 games</Typography>
                 <Stack direction="column" spacing={1}>
                   {(quickView.lastFive ?? []).slice(0, 10).map((m, idx) => (
                     <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

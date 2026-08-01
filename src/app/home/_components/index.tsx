@@ -2664,9 +2664,9 @@ export default function PlayerDashboard() {
                 <Box sx={{
                   mx: 'auto',
                   display: 'flex',
-                  alignItems: { xs: 'stretch', sm: 'center' },
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  gap: { xs: 1, sm: 0 },
+                  alignItems: 'stretch',
+                  flexDirection: 'row',
+                  gap: 0,
                   justifyContent: 'center',
                   width: '100%',
                   maxWidth: { xs: '100%', md: 350 },
@@ -2679,22 +2679,24 @@ export default function PlayerDashboard() {
                     size="small"
                     variant="outlined"
                     sx={{
-                      backgroundColor: '#DEDCDC',
-                      borderRadius: { xs: '12px', sm: '12px 0 0 12px' },
+                      backgroundColor: '#fff',
+                      borderRadius: '6px 0 0 6px',
                       flex: 1,
-                      width: '100%',
-                      minWidth: { xs: '100%', sm: 0 },
+                      minWidth: 0,
                       '& .MuiOutlinedInput-root': {
+                        color: '#111',
+                        height: { xs: 42, md: 42 },
                         '& fieldset': { border: 'none' },
                         '&:hover fieldset': { border: 'none' },
                         '&.Mui-focused fieldset': { border: 'none' }
                       },
                       '& .MuiInputBase-input': {
-                        height: { xs: 38, md: 42 },
+                        height: '42px',
                         padding: { xs: '0 10px', md: '0 12px' },
-                        fontSize: { xs: '12px', md: '14px' }
+                        fontSize: { xs: '13px', md: '14px' }
                       },
                       '& .MuiInputBase-input::placeholder': {
+                        color: 'rgba(0,0,0,0.55)',
                         fontSize: { xs: '12px', md: '13px' },
                         opacity: 1
                       }
@@ -2703,29 +2705,21 @@ export default function PlayerDashboard() {
                   <Button
                     variant="contained"
                     sx={{
-                      background: '#00A77F',
-                      borderRadius: { xs: '12px', sm: '0 12px 12px 0' },
-                      '&:hover': { background: '#00A77F' },
+                      background: '#00A896',
+                      borderRadius: '0 6px 6px 0',
+                      '&:hover': { background: '#008c7a' },
                       py: 0,
-                      width: { xs: '100%', sm: 'auto' },
-                      minWidth: { xs: 0, sm: 120 },
-                      height: { xs: 40, md: 42 },
-                      fontSize: { xs: '16px', sm: '16px', md: '17px' },
+                      minWidth: { xs: 110, sm: 120 },
+                      height: { xs: 42, md: 42 },
+                      fontSize: { xs: '15px', sm: '16px', md: '17px' },
                       flexShrink: 0,
-                      fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                      color: 'white',
+                      fontFamily: 'Arial, Helvetica, sans-serif',
                       fontWeight: 600,
-                      lineHeight: '100%',
-                      letterSpacing: '0%',
-                      textTransform: 'capitalize',
+                      textTransform: 'none',
+                      whiteSpace: 'nowrap'
                     }}
                     onClick={handleJoinLeague}
-                    startIcon={
-                      <Box sx={{ display: { xs: 'none', sm: 'inline-flex' } }}>
-                        <svg className="w-5 h-5" fill="white" viewBox="0 0 24 24">
-                          <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 10h-3v3h-2v-3h-3v-2h3v-3h2v3h3v2z" />
-                        </svg>
-                      </Box>
-                    }
                   >
                     Join League
                   </Button>

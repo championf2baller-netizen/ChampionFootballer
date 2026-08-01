@@ -47,9 +47,10 @@ const baseTitleSx: SystemStyleObject<Theme> = {
 };
 
 const baseDividerSx: SystemStyleObject<Theme> = {
-  width: '100%',
-  marginLeft: 0,
-  marginRight: 0,
+  width: '100vw',
+  position: 'relative',
+  left: '50%',
+  transform: 'translateX(-50%)',
   height: 'var(--header-divider-height)',
   background: 'var(--header-divider-color)',
   mb: { xs: 0.5, md: 2 },
@@ -79,8 +80,10 @@ export default function PageHeader({
     : {};
   const dividerBaseSx: SystemStyleObject<Theme> = fullBleed
     ? {
-        width: 'auto',
-        mx: { xs: -2, sm: -3, md: -3 },
+        width: '100vw',
+        position: 'relative',
+        left: '50%',
+        transform: 'translateX(-50%)',
         height: 'var(--header-divider-height)',
         background: 'var(--header-divider-color)',
         mb: { xs: 2, md: 2 },

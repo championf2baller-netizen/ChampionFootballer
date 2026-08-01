@@ -1812,8 +1812,8 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         <Grid container spacing={3} sx={{ mt: 0, minWidth: 0 }}>
           <Grid item xs={12} md={6} sx={{ minWidth: 0 }}>
             <Box component="form" noValidate autoComplete="off" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-             
-                <FormControl fullWidth>
+
+              <FormControl fullWidth>
                 <Typography variant="subtitle1" fontWeight="medium" gutterBottom sx={{ color: '#E5E7EB' }}>
                   League name
                 </Typography>
@@ -1841,7 +1841,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   helperText="Max 30 characters, letters/numbers only"
                 />
               </FormControl>
-              
+
               {/* Season Selector */}
               {seasons.length > 0 && (
                 <FormControl fullWidth>
@@ -1932,7 +1932,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 </Typography>
               </FormControl>
 
-           
+
 
               {/* League Display Picture */}
               <FormControl fullWidth>
@@ -5512,7 +5512,7 @@ function AllLeagues() {
         </Box>
 
         {/* Leagues List - Card Format */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7 , mt:4}}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7, mt: 4 }}>
           {loading ? (
             <AllLeaguesLoadingSkeleton compact />
           ) : leagues.length === 0 ? (
@@ -6046,7 +6046,7 @@ function AllLeagues() {
                               <Button
                                 size="small"
                                 disabled={isCreatingSeason || isCompleted}
-                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22 }} /> : undefined}
+                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: 'blue' }} /> : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openCreateSeasonConfirm(league);
@@ -6059,14 +6059,14 @@ function AllLeagues() {
                                   minHeight: 28,
                                   borderRadius: 1,
                                   textTransform: 'none',
-                                  color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
+                                  color: isCompleted ? '#111827' : 'blue',
                                   fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
                                   fontWeight: 600,
                                   fontSize: { xs: '10px', sm: '16px' },
                                   textDecoration: 'underline',
                                   textUnderlineOffset: '3px',
                                   '& .MuiButton-startIcon .MuiSvgIcon-root': {
-                                    color: '#ffffff',
+                                    color: 'blue',
                                   },
                                   // color: isCompleted ? '#ffffff' : '#d1fae5',
                                   // border: isCompleted ? '1px solid #111827' : '1px solid rgba(39,171,131,0.85)',
@@ -6296,7 +6296,7 @@ function AllLeagues() {
                   const canManageArchivedLeague = isLeagueAdminForCurrentUser(league);
                   const hasCustomLeagueImage = typeof league?.image === 'string' && league.image.trim().length > 0;
                   const leagueActionLoading = archivedLeagueActionId === String(league.id);
-                  
+
                   const leagueAdmin = (league.members || []).find((m) => m.id === league.adminId)
                     || (league.administrators || []).find((a) => a.id === league.adminId)
                     || (league.administrators || [])[0];
@@ -6304,7 +6304,7 @@ function AllLeagues() {
                     ? `${leagueAdmin.firstName || ''} ${leagueAdmin.lastName || ''}`.trim()
                     : '';
                   const leagueAdminName = foundAdminName || (league as any).adminName || 'Not available';
-                  
+
                   return (
                     <Box
                       key={league.id}
@@ -6682,7 +6682,7 @@ function AllLeagues() {
                       const seasonMatches = (league.matches || []).filter((m) => String(m.seasonId || '') === String(season.id)).length;
                       const seasonPlayersCount = (season.members?.length || season.players?.length || 0);
                       const seasonActionLoading = archivedSeasonActionId === `${league.id}:${season.id}`;
-                      
+
                       const leagueAdmin = (league.members || []).find((m) => m.id === league.adminId)
                         || (league.administrators || []).find((a) => a.id === league.adminId)
                         || (league.administrators || [])[0];

@@ -73,8 +73,14 @@ import submitresult from '@/Components/images/submitresult.png';
 import trophyroomandrewards from '@/Components/images/trophyroomandrewards.png';
 import trackperformance from '@/Components/images/trackperformance.png';
 import individualstats from '@/Components/images/individualstats.png';
-import player from '@/Components/images/profile-user.png'
-import logoutpic from '@/Components/images/logout.png'
+import player from '@/Components/images/profile-user.png';
+import logoutpic from '@/Components/images/logout.png';
+import GoalsIcon from '@/Components/images/goal.png';
+import AssistIcon from '@/Components/images/Assist.png';
+import MOTMIcon from '@/Components/images/MOTM.png';
+import ImpactIcon from '@/Components/images/imapct.png';
+import CleanSheetIcon from '@/Components/images/cleansheet.png';
+import MentalityIcon from '@/Components/images/metality.png';
 import { useAuth } from '@/lib/hooks';
 import React from 'react';
 import toast from 'react-hot-toast';
@@ -4259,7 +4265,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Image src={leaguesetting.src} alt='League Settings' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box> */}
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             3. Create a New Match
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4272,7 +4282,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Image src={matchdetails.src} alt='League Progress' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             4. Confirm Your Availability
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4285,7 +4299,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Image src={availability.src} alt='Match Management' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
            5. Team Selection
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4298,7 +4316,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Image src={teamsection.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             6. Play the Match
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4311,7 +4333,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Image src={playmatch.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             7. Submit the Match Result
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4320,7 +4346,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <Image src={submitresult.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             8. Add Your Individual Stats
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4329,7 +4359,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <Image src={individualstats.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             9. Track Your Performance
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4338,7 +4372,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
             <Image src={trackperformance.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
           </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
+          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '24px', md: '32px' },
+            mb: 2,
+            color: '#111827' }}>
             10. Trophy Room and Awards
           </Typography>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -4405,13 +4443,14 @@ Important Management Controls:          </Typography>
                 case 'Winning Team Bonus': return <CheckCircleOutlineIcon sx={{ color: '#00a896', fontSize: '1.25rem' }} />;
                 case 'Draw': return <HandshakeOutlinedIcon sx={{ color: '#e56a16', fontSize: '1.25rem' }} />;
                 case 'Losing Team Consolation': return <HighlightOffIcon sx={{ color: '#f87171', fontSize: '1.25rem' }} />;
-                case 'Man of the Match (MOTM)': return <Star sx={{ color: '#F59E0B', fontSize: 18 }} />;
-                case 'Clean Sheets (Goalkeeper)': return <ShieldOutlinedIcon sx={{ color: '#00a896', fontSize: '1.25rem' }} />;
-                case 'Goal Scored': return <SportsSoccerOutlinedIcon sx={{ color: '#fff', fontSize: '1.25rem' }} />;
-                case 'Assist': return <StarOutlineIcon sx={{ color: '#00a896', fontSize: '1.25rem' }} />;
-                case 'Man of the Match Votes': return <ThumbUpOutlinedIcon sx={{ color: '#f87171', fontSize: '1.25rem' }} />;
-                case 'Defensive Impact': return <ShieldOutlinedIcon sx={{ color: '#B0B0B0', fontSize: '1.25rem' }} />;
-                case '+ Mentality': return <PsychologyOutlinedIcon sx={{ color: '#9B59B6', fontSize: '1.25rem' }} />;
+                case 'Man of the Match (MOTM)': return <Image src={MOTMIcon} alt="MOTM" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Clean Sheets':
+                case 'Clean Sheets (Goalkeeper)': return <Image src={CleanSheetIcon} alt="Clean Sheets" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Goal Scored': return <Image src={GoalsIcon} alt="Goal Scored" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Assist': return <Image src={AssistIcon} alt="Assist" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Man of the Match Votes': return <Image src={MOTMIcon} alt="MOTM Votes" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Defensive Impact': return <Image src={ImpactIcon} alt="Defensive Impact" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case '+ Mentality': return <Image src={MentalityIcon} alt="+ Mentality" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 default: return null;
               }
             };
@@ -4456,7 +4495,7 @@ Important Management Controls:          </Typography>
                       { action: 'Draw', desc: 'Drawing a match', winning: '15 xp', losing: '15 xp', isMerged: true, points: '1 Point' },
                       { action: 'Losing Team Consolation', desc: 'Losing a match', winning: '', isWinningEmpty: true, losing: '10 xp', points: '0 Points' },
                       { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '10 xp', losing: '5 xp', points: '0 Points' },
-                      { action: 'Clean Sheets (Goalkeeper)', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '5 xp', losing: '5 xp', isMerged: true, points: '0 Points' },
+                      { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '5 xp', losing: '5 xp', isMerged: true, points: '0 Points' },
                       { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '3 xp', losing: '2 xp', points: '0 Points' },
                       { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '1 xp', points: '0 Points' },
                       { action: 'Man of the Match Votes', desc: 'Player receiving individual count of votes per match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
