@@ -647,6 +647,19 @@ export default function LeagueDetailPage() {
         if (value.includes('goalkeeper') || value.includes('(gk)') || value === 'gk') return 'Goalkeeper';
 
         if (
+            value.includes('midfielder') ||
+            value.includes('mid') ||
+            value === 'cm' || value.includes('(cm)') ||
+            value === 'cdm' || value.includes('(cdm)') ||
+            value === 'cam' || value.includes('(cam)') ||
+            value === 'rm' || value.includes('(rm)') ||
+            value === 'lm' || value.includes('(lm)') ||
+            value === 'mf'
+        ) {
+            return 'Midfielder';
+        }
+
+        if (
             value.includes('defender') ||
             value.includes('back') ||
             value.includes('wing-back') ||
@@ -654,20 +667,10 @@ export default function LeagueDetailPage() {
             value === 'rb' || value.includes('(rb)') ||
             value === 'lb' || value.includes('(lb)') ||
             value === 'rwb' || value.includes('(rwb)') ||
-            value === 'lwb' || value.includes('(lwb)')
+            value === 'lwb' || value.includes('(lwb)') ||
+            value === 'df'
         ) {
             return 'Defender';
-        }
-
-        if (
-            value.includes('midfielder') ||
-            value === 'cm' || value.includes('(cm)') ||
-            value === 'cdm' || value.includes('(cdm)') ||
-            value === 'cam' || value.includes('(cam)') ||
-            value === 'rm' || value.includes('(rm)') ||
-            value === 'lm' || value.includes('(lm)')
-        ) {
-            return 'Midfielder';
         }
 
         if (
@@ -679,7 +682,8 @@ export default function LeagueDetailPage() {
             value === 'rf' || value.includes('(rf)') ||
             value === 'lf' || value.includes('(lf)') ||
             value === 'rw' || value.includes('(rw)') ||
-            value === 'lw' || value.includes('(lw)')
+            value === 'lw' || value.includes('(lw)') ||
+            value === 'fw' || value === 'wg'
         ) {
             return 'Forward';
         }
@@ -4729,7 +4733,7 @@ export default function LeagueDetailPage() {
                                                     pl: { xs: 1.5, sm: 2.5, md: 4 },
                                                     display: 'block',
                                                 }}>
-                                                    <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                                                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'left !important' }}>
                                                         STYLE
                                                     </Typography>
                                                 </Box>
@@ -4739,15 +4743,15 @@ export default function LeagueDetailPage() {
 
                                                 {/* View Stats Header */}
                                                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, textAlign: 'center' }}>
-                                                    <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                                                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
                                                         {isMobile ? 'STATS' : 'VIEW STATS'}
                                                     </Typography>
                                                 </Box>
 
                                                 {/* XP Points Header */}
                                                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
-                                                    <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
-                                                        CAREER xp
+                                                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                                                        CAREER XP
                                                     </Typography>
                                                 </Box>
                                             </Box>

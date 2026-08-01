@@ -2822,6 +2822,7 @@ export default function CareerPage() {
                     position: 'relative',
                     zIndex: 1500,
                     isolation: 'isolate',
+                    mt: { xs: -6, md: 0 }
                   }}
                 >
                   <TextField
@@ -3445,7 +3446,7 @@ export default function CareerPage() {
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 } }}>
+          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: -8, md: 0 } }}>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
                 <CircularProgress size={40} sx={{ color: '#00ff88' }} />

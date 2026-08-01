@@ -78,7 +78,7 @@ interface Match {
   awayTeamUsers: User[];
   manOfTheMatchVotes: Record<string, string>;
   playerStats: Record<string, { goals: number; assists: number }>;
-  status: 'RESULT_PUBLISHED' | 'SCHEDULED' | 'ONGOING';
+  status: 'RESULT_PUBLISHED' | 'RESULT_UPLOADED' | 'SCHEDULED' | 'ONGOING' | string;
   active?: boolean;
   end?: string | Date;
   seasonId?: string;
@@ -90,6 +90,7 @@ interface Season {
   seasonNumber: number;
   name: string;
   isActive: boolean;
+  status?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -642,24 +643,70 @@ const calculatePlayerStats = (league: League): Record<string, PlayerStats> => {
 //   return result;
 // };
 
-// SIMPLIFY: Final standing = maxGames reached (no extra stats completeness check)
-const isFinalLeagueStanding = (league: League): boolean => {
-  const max = Number(league?.maxGames ?? 0);
-  const completedCount = countCompletedMatches(league);
-  if (max > 0) {
-    const result = completedCount >= max;
-    console.debug('[TrophyRoom] isFinalLeagueStanding(max rule)', {
-      leagueId: league?.id, name: league?.name, maxGames: max, completedCount, result,
-    });
-    return result;
+// SIMPLIFY: Final standing = displaySeason completed/inactive, maxGames reached, or all matches played & scores updated for selected season
+const isFinalLeagueStanding = (
+  league: League | null,
+  seasonId?: string | null,
+  displaySeason?: Season | null,
+  leagueSeasons?: Season[]
+): boolean => {
+  // Signal 1: Check currently selected display season
+  if (displaySeason) {
+    const sStatus = (displaySeason.status || '').toString().toLowerCase();
+    if (sStatus === 'completed' || sStatus === 'finished' || sStatus === 'inactive') {
+      return true;
+    }
+    if (displaySeason.isActive === false && (displaySeason.seasonNumber > 0 || Boolean(seasonId))) {
+      return true;
+    }
+    if ((displaySeason as any).isComplete === true || (displaySeason as any).isCompleted === true) {
+      return true;
+    }
   }
-  // Fallback rule when backend doesn't provide maxGames
-  const total = league.matches?.length ?? 0;
-  const allCompleted = total > 0 && (league.matches ?? []).every(m => m.status === 'RESULT_PUBLISHED');
-  console.debug('[TrophyRoom] isFinalLeagueStanding(fallback all-completed rule)', {
-    leagueId: league?.id, name: league?.name, totalMatches: total, completedCount, allCompleted,
-  });
-  return allCompleted;
+
+  // Signal 2: Check target season from leagueSeasons array
+  if (seasonId && seasonId !== 'all' && Array.isArray(leagueSeasons) && leagueSeasons.length > 0) {
+    const targetSeason = leagueSeasons.find(s => String(s.id) === String(seasonId));
+    if (targetSeason) {
+      const sStatus = (targetSeason.status || '').toString().toLowerCase();
+      if (sStatus === 'completed' || sStatus === 'finished' || targetSeason.isActive === false) {
+        return true;
+      }
+      if ((targetSeason as any).isComplete === true || (targetSeason as any).isCompleted === true) {
+        return true;
+      }
+    }
+  }
+
+  // Signal 3: Check league completion flags
+  if (league) {
+    if (league.isComplete === true || league.isCompleted === true || league.computedStatus?.isComplete === true || league.computedStatus?.isCompleted === true) {
+      return true;
+    }
+    const lStatus = (league.status || '').toString().toUpperCase();
+    if (lStatus === 'COMPLETED' || lStatus === 'FINISHED' || lStatus === 'INACTIVE' || league.active === false || league.archived === true) {
+      return true;
+    }
+  }
+
+  // Signal 4: Check match counts if matches array is present
+  if (league && Array.isArray(league.matches) && league.matches.length > 0) {
+    const matches = (seasonId && seasonId !== 'all')
+      ? league.matches.filter(m => String(m.seasonId) === String(seasonId))
+      : league.matches;
+
+    if (matches.length > 0) {
+      const completedCount = matches.filter(
+        m => m.status === 'RESULT_PUBLISHED' || m.status === 'RESULT_UPLOADED' || (m.homeTeamGoals != null && m.awayTeamGoals != null && String(m.status) !== 'SCHEDULED')
+      ).length;
+      const max = Number(league.maxGames ?? 0);
+
+      if (max > 0 && completedCount >= max) return true;
+      if (completedCount >= matches.length) return true;
+    }
+  }
+
+  return false;
 };
 
 // ADD: quick counter for completed matches
@@ -1937,7 +1984,7 @@ export default function GlobalTrophyRoom() {
 
   // Get currently selected league
   const selectedLeague = selectedLeagueId && selectedLeagueId !== 'all'
-    ? leagues.find(l => l.id === selectedLeagueId)
+    ? (allLeagues.find(l => String(l.id) === String(selectedLeagueId)) || leagues.find(l => String(l.id) === String(selectedLeagueId)) || null)
     : null;
 
   // Fetch seasons for the selected league
@@ -2228,28 +2275,22 @@ export default function GlobalTrophyRoom() {
 
   // Add debug + flags for the standing label
   const selectedLeagueFlags = useMemo(() => {
-    if (!selectedLeague) return null;
-    const completedCount = countCompletedMatches(selectedLeague, selectedSeasonId);
-    const max = Number(selectedLeague.maxGames ?? 0);
-    const final = isFinalLeagueStanding(selectedLeague);
-    const statuses = Array.from(new Set((selectedLeague.matches ?? []).map(m => m.status)));
+    const final = isFinalLeagueStanding(selectedLeague, selectedSeasonId, displaySeason, leagueSeasons);
+    const completedCount = selectedLeague ? countCompletedMatches(selectedLeague, selectedSeasonId) : 0;
+    const max = Number(selectedLeague?.maxGames ?? 0);
+    const statuses = Array.from(new Set((selectedLeague?.matches ?? []).map(m => m.status)));
 
     console.debug('[Standing Label]', {
-      leagueId: selectedLeague.id,
-      name: selectedLeague.name,
+      leagueId: selectedLeague?.id,
+      name: selectedLeague?.name,
       seasonId: selectedSeasonId,
       maxGames: max,
       completedCount,
       statuses,
       final,
     });
-    if (!final) {
-      console.debug('[Standing Label] Not final yet', {
-        missingToMaxGames: Math.max(0, max - completedCount),
-      });
-    }
     return { final, completedCount, max, statuses };
-  }, [selectedLeague, selectedSeasonId]);
+  }, [selectedLeague, selectedSeasonId, displaySeason, leagueSeasons]);
 
   const lastUpdatedAtMs = useMemo(() => {
     const winnerTrophies = trophiesToDisplayBase.filter((t) => hasTrophyWinner(t));
@@ -2607,11 +2648,9 @@ export default function GlobalTrophyRoom() {
                     <Typography sx={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>
                       Standings:
                     </Typography>
-                    {selectedLeague && (
-                      <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>
-                        {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
-                      </Typography>
-                    )}
+                    <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>
+                      {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>

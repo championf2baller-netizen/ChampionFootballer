@@ -1665,32 +1665,35 @@ const PlayerProfileCard = () => {
                 </Grid>
               </Grid>
 
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                justifyContent="space-between"
-                spacing={{ xs: 1.25, sm: 1 }}
-                sx={{ mt: 4, px: { xs: 1.25, sm: 3, md: 6 } }}
-              >
+              <Box sx={{ mt: 4, px: { xs: 1.25, sm: 3, md: 6 } }}>
+                {/* Top Full-Width Button: Update Profile */}
                 <Button
                   variant="contained"
-                  color="error"
-                  onClick={handleDeleteProfile}
+                  onClick={() => void handleUpdateProfile()}
+                  disabled={isUpdating}
+                  startIcon={isUpdating ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : null}
                   sx={{
                     borderRadius: 1,
-                    px: 4,
-                    width: { xs: '100%', sm: 220 },
+                    px: { xs: 2, sm: 3 },
+                    width: '100%',
                     height: 44,
-                    fontWeight: 600,
+                    fontSize: { xs: '14px', sm: '15px' },
+                    background: themeColors.primaryGradient,
+                    fontWeight: 700,
+                    mb: { xs: 2, sm: 2.5 }, // Space between update button and buttons below
+                    '&:hover': { opacity: .9 }
                   }}
                 >
-                  Delete Account
+                  {isUpdating ? "Updating..." : "Update Profile"}
                 </Button>
 
+                {/* Bottom Row: Previous & Delete Account (Smaller Width) */}
                 <Stack
                   direction="row"
-                  spacing={1}
-                  justifyContent={{ xs: 'space-between', sm: 'flex-end' }}
-                  sx={{ width: { xs: '100%', sm: 'auto' } }}
+                  spacing={{ xs: 1, sm: 1.5 }}
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ width: '100%' }}
                 >
                   <Button
                     variant="outlined"
@@ -1698,9 +1701,11 @@ const PlayerProfileCard = () => {
                     startIcon={<ArrowBack />}
                     sx={{
                       borderRadius: 1,
-                      px: 3,
+                      px: { xs: 1, sm: 3 },
                       width: { xs: '48%', sm: 220 },
                       height: 44,
+                      fontSize: { xs: '12px', sm: '14px' },
+                      whiteSpace: 'nowrap',
                       borderColor: themeColors.primary,
                       color: themeColors.text,
                       fontWeight: 600,
@@ -1709,25 +1714,25 @@ const PlayerProfileCard = () => {
                   >
                     Previous
                   </Button>
+
                   <Button
                     variant="contained"
-                    onClick={() => void handleUpdateProfile()}
-                    disabled={isUpdating}
-                    startIcon={isUpdating ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : null}
+                    color="error"
+                    onClick={handleDeleteProfile}
                     sx={{
                       borderRadius: 1,
-                      px: 3,
+                      px: { xs: 1, sm: 3 },
                       width: { xs: '48%', sm: 220 },
                       height: 44,
-                      background: themeColors.primaryGradient,
-                      fontWeight: 700,
-                      '&:hover': { opacity: .9 }
+                      fontSize: { xs: '12px', sm: '14px' },
+                      whiteSpace: 'nowrap',
+                      fontWeight: 600,
                     }}
                   >
-                    {isUpdating ? "Updating..." : "Update Profile"}
+                    Delete Account
                   </Button>
                 </Stack>
-              </Stack>
+              </Box>
             </StyledPaper>
             {/* Avatar Options Modal */}
             <Modal open={avatarOptionsOpen} onClose={() => setAvatarOptionsOpen(false)}>

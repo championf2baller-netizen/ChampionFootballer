@@ -83,6 +83,14 @@ export const getPositionShortForm = (position: unknown): string => {
     'attacking midfielder': 'CAM',
     'right midfielder': 'RM',
     'left midfielder': 'LM',
+    'defensive mid': 'CDM',
+    'central mid': 'CM',
+    'attacking mid': 'CAM',
+    'right mid': 'RM',
+    'left mid': 'LM',
+    'midfielder': 'MF',
+    'defender': 'DF',
+    'forward': 'FW',
     'striker': 'ST',
     'center forward': 'CF',
     'right forward': 'RF',
@@ -115,8 +123,8 @@ export const getPositionShortForm = (position: unknown): string => {
   }
 
   // Handle substring matches
-  if (lower.includes('goalkeeper')) return 'GK';
-  if (lower.includes('center-back')) return 'CB';
+  if (lower.includes('goalkeeper') || lower === 'gk') return 'GK';
+  if (lower.includes('center-back') || lower.includes('centre-back')) return 'CB';
   if (lower.includes('right-back')) return 'RB';
   if (lower.includes('left-back')) return 'LB';
   if (lower.includes('wing-back')) {
@@ -124,13 +132,19 @@ export const getPositionShortForm = (position: unknown): string => {
     if (lower.includes('left')) return 'LWB';
     return 'WB';
   }
-  if (lower.includes('midfielder')) {
-    if (lower.includes('defensive')) return 'CDM';
-    if (lower.includes('attacking')) return 'CAM';
-    if (lower.includes('central')) return 'CM';
-    if (lower.includes('right')) return 'RM';
-    if (lower.includes('left')) return 'LM';
+  if (lower.includes('midfielder') || lower.includes('mid')) {
+    if (lower.includes('defensive') || lower.includes('cdm')) return 'CDM';
+    if (lower.includes('attacking') || lower.includes('cam')) return 'CAM';
+    if (lower.includes('central') || lower.includes('cm')) return 'CM';
+    if (lower.includes('right') || lower.includes('rm')) return 'RM';
+    if (lower.includes('left') || lower.includes('lm')) return 'LM';
     return 'MF';
+  }
+  if (lower.includes('defender') || lower.includes('back')) {
+    if (lower.includes('center') || lower.includes('centre')) return 'CB';
+    if (lower.includes('right')) return 'RB';
+    if (lower.includes('left')) return 'LB';
+    return 'DF';
   }
   if (lower.includes('winger')) {
     if (lower.includes('right')) return 'RW';
@@ -139,7 +153,7 @@ export const getPositionShortForm = (position: unknown): string => {
   }
   if (lower.includes('striker')) return 'ST';
   if (lower.includes('forward')) {
-    if (lower.includes('center')) return 'CF';
+    if (lower.includes('center') || lower.includes('centre')) return 'CF';
     if (lower.includes('right')) return 'RF';
     if (lower.includes('left')) return 'LF';
     return 'FW';

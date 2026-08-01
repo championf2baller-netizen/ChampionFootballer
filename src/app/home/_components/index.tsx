@@ -2679,7 +2679,7 @@ export default function PlayerDashboard() {
                     size="small"
                     variant="outlined"
                     sx={{
-                      backgroundColor: '#fff',
+                      backgroundColor: '#dedcdD',
                       borderRadius: '6px 0 0 6px',
                       flex: 1,
                       minWidth: 0,
