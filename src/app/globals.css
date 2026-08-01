@@ -411,7 +411,7 @@ input:-webkit-autofill:active {
 
 .league-table-sticky-name {
   position: sticky;
-  left: 50px;
+  left: 28px;
   z-index: 2;
   background-color: inherit;
   box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6);
@@ -2895,7 +2895,7 @@ input:-webkit-autofill:active {
 
 .league-table-sticky-name {
   position: sticky !important;
-  left: 50px !important;
+  left: 28px !important;
   z-index: 9 !important;
   background-color: inherit !important;
   transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
