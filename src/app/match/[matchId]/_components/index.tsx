@@ -949,7 +949,15 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                 <Typography sx={{ color: '#fff', m: 0, fontWeight: 500, fontSize: { xs: 12, sm: 14, md: 18 }, lineHeight: 1 }}>
                   Admin Only Edits
                 </Typography>
-                <Edit sx={{ color: '#00a77f', fontSize: { xs: 20, sm: 24, md: 28 } }} aria-label="Edit" />
+                <Box
+                  sx={{
+                    width: { xs: 20, sm: 24, md: 28 },
+                    height: { xs: 20, sm: 24, md: 28 },
+                    backgroundColor: '#00a77f',
+                    mask: `url(${EditImg.src}) no-repeat center / contain`,
+                    WebkitMask: `url(${EditImg.src}) no-repeat center / contain`,
+                  }}
+                />
               </Box>
             )}
           </Box>
@@ -1124,14 +1132,14 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                               color: 'white',
                               fontWeight: 500,
                               fontSize: { xs: 14, sm: 14, md: 17 },
-                              pl: { xs: 1, sm: 2, md: 3 },
+                              pl: { xs: 1.5, sm: 2, md: 3 },
                               pr: { xs: 0.5, sm: 1.5, md: 2 },
                               textTransform: 'uppercase',
                               position: 'sticky',
                               left: 0,
                               zIndex: 3,
                               bgcolor: '#2b2b2b',
-                            }}>Player</Box>
+                            }}>PLAYERS</Box>
                             <Box sx={{
                               color: 'white',
                               fontWeight: '500',
