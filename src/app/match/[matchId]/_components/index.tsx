@@ -147,11 +147,15 @@ type MatchStatLite = {
 const isGuestLastName = (lastName?: string): boolean =>
   String(lastName ?? '').trim().toLowerCase() === 'guest';
 
+const isUserLastName = (lastName?: string): boolean =>
+  String(lastName ?? '').trim().toLowerCase() === 'user';
+
 const formatPlayerDisplayName = (player: { firstName?: string; lastName?: string; isGuest?: boolean }): string => {
   const first = String(player.firstName ?? '').trim();
-  const last = String(player.lastName ?? '').trim();
+  const rawLast = String(player.lastName ?? '').trim();
+  const last = isUserLastName(rawLast) ? '' : rawLast;
 
-  if (isGuestLastName(last)) {
+  if (isGuestLastName(rawLast)) {
     return first ? `${first.toUpperCase()} (GUEST)` : '(GUEST)';
   }
 

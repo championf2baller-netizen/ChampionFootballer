@@ -312,15 +312,28 @@ const formatPlayerName = (firstName?: string, lastName?: string): string => {
     return fullName;
 };
 
-// Match player-card naming format: FirstName + last initial (e.g., "Alex K.")
+// Match player-card naming format: FirstName + last initial in UPPERCASE (e.g., "RUHEL U.", "MUHIB")
 const formatPlayerCardStyleName = (firstName?: string, lastName?: string): string => {
-    const fullName = `${firstName || ''} ${lastName || ''}`.trim();
-    if (!fullName) return 'Player Name';
-    const parts = fullName.split(/\s+/).filter(Boolean);
-    const firstNameOnly = parts[0] || '';
-    const lastInitial = parts.length > 1 ? parts[parts.length - 1].charAt(0).toUpperCase() : '';
-    if (!firstNameOnly) return 'Player Name';
-    return lastInitial ? `${firstNameOnly} ${lastInitial}.` : firstNameOnly;
+    const cleanFirst = String(firstName || '').trim();
+    const cleanLast = String(lastName || '').trim();
+    const isUser = cleanLast.toLowerCase() === 'user';
+    const effectiveLast = isUser ? '' : cleanLast;
+
+    if (!cleanFirst && !effectiveLast) return 'PLAYER NAME';
+
+    const parts = cleanFirst.split(/\s+/).filter(Boolean);
+    const actualFirst = parts[0] || '';
+    const extraLast = parts.slice(1).join(' ');
+
+    const finalLast = (extraLast + ' ' + effectiveLast).trim();
+    const finalLastIsUser = finalLast.toLowerCase() === 'user';
+    const realLast = finalLastIsUser ? '' : finalLast;
+
+    const firstUpper = actualFirst.toUpperCase();
+    if (!realLast) return firstUpper || 'PLAYER NAME';
+
+    const lastInitial = realLast.charAt(0).toUpperCase();
+    return lastInitial ? `${firstUpper} ${lastInitial}.` : firstUpper;
 };
 
 const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): string | null => {
@@ -6942,7 +6955,10 @@ export default function LeagueDetailPage() {
                                                                                     mb: 0,
                                                                                 }}
                                                                             >
-                                                                                {player.name}
+                                                                                {formatPlayerCardStyleName(
+                                                                                    leaderboardMember?.firstName || player.name.split(' ')[0],
+                                                                                    leaderboardMember?.lastName || player.name.split(' ').slice(1).join(' ')
+                                                                                )}
                                                                             </Typography>
                                                                             {(player.positionType && player.positionType.toLowerCase() !== 'player' && player.positionType !== '-') && (
                                                                                 <Typography
