@@ -518,28 +518,42 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                       <Button
                         variant="contained"
                         color="secondary"
-                        startIcon={<Add />}
                         onClick={() => {
                           setShouldShowAdminGoals(true);
                           setStatsDialogOpen(true);
                         }}
                         disabled={!seasonActive}
                         sx={{
+                          position: "relative",
                           bgcolor: "#2B2B2B",
                           color: "white",
                           fontWeight: "bold",
                           border: '1px solid #e16419',
                           "&:hover": { bgcolor: "#2B2B2B" },
-                          fontSize: { xs: "0.5rem", sm: "0.6rem", md: "0.7rem", lg: "0.8rem" },
+                          fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
                           px: { xs: 1, sm: 1.5, md: 2 },
-                          py: { xs: 0.1, sm: 0.2, md: 0.3, lg: 0.5 },
-                          width: { xs: 120, sm: 140, md: 180 },
+                          py: { xs: 0.4, sm: 0.5, md: 0.6 },
+                          width: { xs: 125, sm: 145, md: 175 },
                           minWidth: 0,
-                          whiteSpace: { xs: "normal", md: "nowrap" },
+                          whiteSpace: "nowrap",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
                         }}
                       >
-                        Add Score
+                        <Add
+                          sx={{
+                            position: "absolute",
+                            left: { xs: 8, sm: 10, md: 12 },
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            fontSize: { xs: 16, sm: 18, md: 20 },
+                          }}
+                        />
+                        <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
+                          ADD SCORE
+                        </Box>
                       </Button>
                     )
                   )}
@@ -547,28 +561,42 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                     <Button
                       variant="contained"
                       color="primary"
-                      startIcon={<Add />}
                       onClick={() => {
                         setShouldShowAdminGoals(false);
                         setStatsDialogOpen(true);
                       }}
                       disabled={!seasonActive}
                       sx={{
+                        position: "relative",
                         bgcolor: "#2B2B2B",
                         color: "white",
                         fontWeight: "bold",
                         border: '1px solid #e16419',
                         "&:hover": { bgcolor: "#2B2B2B" },
-                        fontSize: { xs: "0.5rem", sm: "0.6rem", md: "0.7rem", lg: "0.8rem" },
+                        fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
                         px: { xs: 1, sm: 1.5, md: 2 },
-                        py: { xs: 0.1, sm: 0.2, md: 0.3, lg: 0.5 },
-                        width: { xs: 120, sm: 140, md: 180 },
+                        py: { xs: 0.4, sm: 0.5, md: 0.6 },
+                        width: { xs: 125, sm: 145, md: 175 },
                         minWidth: 0,
-                        whiteSpace: { xs: "normal", md: "nowrap" },
+                        whiteSpace: "nowrap",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
                       }}
                     >
-                      Add Your Stats
+                      <Add
+                        sx={{
+                          position: "absolute",
+                          left: { xs: 8, sm: 10, md: 12 },
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          fontSize: { xs: 16, sm: 18, md: 20 },
+                        }}
+                      />
+                      <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
+                        ADD YOUR STATS
+                      </Box>
                     </Button>
                   )}
                 </>
@@ -608,28 +636,42 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                   <Button
                     variant="contained"
                     color="secondary"
-                    startIcon={<Add />}
                     onClick={() => {
                       setShouldShowAdminGoals(true);
                       setStatsDialogOpen(true);
                     }}
                     disabled={!seasonActive}
                     sx={{
+                      position: "relative",
                       bgcolor: "#2B2B2B",
                       color: "white",
                       fontWeight: "bold",
                       border: '1px solid #e16419',
                       "&:hover": { bgcolor: "#2B2B2B" },
-                      fontSize: { xs: "0.5rem", sm: "0.6rem", md: "0.7rem", lg: "0.8rem" },
+                      fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
                       px: { xs: 1, sm: 1.5, md: 2 },
-                      py: { xs: 0.1, sm: 0.2, md: 0.3, lg: 0.5 },
-                      width: { xs: 120, sm: 140, md: 180 },
+                      py: { xs: 0.4, sm: 0.5, md: 0.6 },
+                      width: { xs: 125, sm: 145, md: 175 },
                       minWidth: 0,
-                      whiteSpace: { xs: "normal", md: "nowrap" },
+                      whiteSpace: "nowrap",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
                     }}
                   >
-                    ADD Score
+                    <Add
+                      sx={{
+                        position: "absolute",
+                        left: { xs: 8, sm: 10, md: 12 },
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontSize: { xs: 16, sm: 18, md: 20 },
+                      }}
+                    />
+                    <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
+                      ADD SCORE
+                    </Box>
                   </Button>
                 )}
                 
@@ -637,28 +679,42 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                 <Button
                   variant="contained"
                   color="primary"
-                  startIcon={<Add />}
                   onClick={() => {
                     setShouldShowAdminGoals(false);
                     setStatsDialogOpen(true);
                   }}
                   disabled={!seasonActive}
                   sx={{
+                    position: "relative",
                     bgcolor: "#2B2B2B",
                     color: "white",
                     fontWeight: "bold",
                     border: '1px solid #e16419',
                     "&:hover": { bgcolor: "#2B2B2B" },
-                    fontSize: { xs: "0.5rem", sm: "0.6rem", md: "0.7rem", lg: "0.8rem" },
+                    fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
                     px: { xs: 1, sm: 1.5, md: 2 },
-                    py: { xs: 0.1, sm: 0.2, md: 0.3, lg: 0.5 },
-                    width: { xs: 120, sm: 140, md: 180 },
+                    py: { xs: 0.4, sm: 0.5, md: 0.6 },
+                    width: { xs: 125, sm: 145, md: 175 },
                     minWidth: 0,
-                    whiteSpace: { xs: "normal", md: "nowrap" },
+                    whiteSpace: "nowrap",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
                   }}
                 >
-                  Add Your Stats
+                  <Add
+                    sx={{
+                      position: "absolute",
+                      left: { xs: 8, sm: 10, md: 12 },
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      fontSize: { xs: 16, sm: 18, md: 20 },
+                    }}
+                  />
+                  <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
+                    ADD YOUR STATS
+                  </Box>
                 </Button>
               </>
             )}

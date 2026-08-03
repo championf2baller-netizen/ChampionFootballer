@@ -152,12 +152,17 @@ const formatPlayerDisplayName = (player: { firstName?: string; lastName?: string
   const last = String(player.lastName ?? '').trim();
 
   if (isGuestLastName(last)) {
-    return first ? `${first} (Guest)` : '(Guest)';
+    return first ? `${first.toUpperCase()} (GUEST)` : '(GUEST)';
   }
 
-  const full = `${first} ${last}`.trim();
-  if (!full) return player.isGuest ? '(Guest)' : 'Player';
-  return player.isGuest ? `${full} (Guest)` : full;
+  if (!first && !last) return player.isGuest ? '(GUEST)' : 'PLAYER';
+
+  const firstUpper = first.toUpperCase();
+  if (!last) return player.isGuest ? `${firstUpper} (GUEST)` : firstUpper;
+
+  const lastInitial = last[0] ? `${last[0].toUpperCase()}.` : '';
+  const formatted = lastInitial ? `${firstUpper} ${lastInitial}` : firstUpper;
+  return player.isGuest ? `${formatted} (GUEST)` : formatted;
 };
 
 const normalizeEntityId = (value: unknown): string => String(value ?? '').trim();
@@ -907,9 +912,9 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
               tabIndex={0}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
             >
-              <Groups sx={{ color: '#fff', fontSize: { xs: 22, sm: 26, md: 50 } }} />
-              <Typography sx={{ color: '#fff', mt: 1, fontWeight: 600, fontSize: { xs: 14, sm: 16, md: 18 } }}>
-                Teams View
+              <Groups sx={{ color: '#fff', fontSize: { xs: 24, sm: 28, md: 32 } }} />
+              <Typography sx={{ color: '#fff', m: 0, fontWeight: 600, fontSize: { xs: 14, sm: 16, md: 18 }, lineHeight: 1 }}>
+                View Teams
               </Typography>
             </Box>
             {isAdmin && (
@@ -928,40 +933,19 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 0.5,
+                  gap: 0.75,
                   cursor: 'pointer',
                   opacity: 1,
                   '&:hover': { opacity: 0.8 },
-                  // bgcolor: adminEditMode ? 'rgba(255,255,255,0.15)' : 'transparent',
-                  px: 1.5,
+                  px: 1,
                   py: 0.5,
-                  // borderRadius: 2,
-                  // border: adminEditMode ? '1px solid rgba(255,255,255,0.3)' : '1px solid transparent',
                   transition: 'all 0.2s',
                 }}
               >
-                <Typography sx={{ color: '#fff', mt: 1.5, fontWeight: 500, fontSize: { xs: 12, sm: 14, md: 18 } }}>
+                <Typography sx={{ color: '#fff', m: 0, fontWeight: 500, fontSize: { xs: 12, sm: 14, md: 18 }, lineHeight: 1 }}>
                   Admin Only Edits
                 </Typography>
-                <Box
-                  component="span"
-                  sx={{
-                    width: 30,
-                    height: 30,
-                    display: 'inline-block',
-                    flexShrink: 0,
-                    backgroundColor: '#00a77f',
-                    WebkitMaskImage: `url(${EditImg.src})`,
-                    maskImage: `url(${EditImg.src})`,
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskRepeat: 'no-repeat',
-                    WebkitMaskPosition: 'center',
-                    maskPosition: 'center',
-                    WebkitMaskSize: 'contain',
-                    maskSize: 'contain',
-                  }}
-                  aria-label="Edit"
-                />
+                <Edit sx={{ color: '#00a77f', fontSize: { xs: 20, sm: 24, md: 28 } }} aria-label="Edit" />
               </Box>
             )}
           </Box>
@@ -973,7 +957,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                 // Responsive grid template: Player | Goals | Assists | Clean Sheets | MOTM Votes | DEF IMP Votes | + Mentality | xp PTS
                 // Mobile: smaller columns, Desktop: comfortable spacing
                 const GRID_COLS = {
-                  xs: 'minmax(120px, 1fr) 55px 60px 90px 80px 85px 85px 60px', // Mobile (8 cols)
+                  xs: '150px repeat(7, 46px)', // Mobile (150px player name + 46px stat cols)
                   sm: 'minmax(160px, 1fr) 65px 70px 110px 95px 105px 105px 70px', // Tablet
                   md: 'minmax(200px, 1fr) 75px 80px 130px 110px 120px 120px 80px' // Desktop
                 };
@@ -1113,7 +1097,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                           fontSize: { xs: 13, sm: 12, md: 15 },
                         }}
                       >
-                        <Box sx={{ minWidth: { xs: 800, sm: 900, md: 1040 } }}>
+                        <Box sx={{ minWidth: { xs: 'max-content', sm: 800, md: 1040 }, width: '100%' }}>
                           {/* Header */}
                           <Box
                             sx={{
@@ -1129,15 +1113,15 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                               display: 'grid',
                               gridTemplateColumns: { xs: GRID_COLS.xs, sm: GRID_COLS.sm, md: GRID_COLS.md },
                               alignItems: 'center',
-                              columnGap: { xs: 2, sm: 2, md: 1.7 },
+                              columnGap: { xs: 1, sm: 2, md: 1.7 },
                             }}
                           >
                             <Box sx={{
                               color: 'white',
                               fontWeight: 500,
                               fontSize: { xs: 14, sm: 14, md: 17 },
-                              pl: { xs: 1.5, sm: 2, md: 3 },
-                              pr: { xs: 1, sm: 1.5, md: 2 },
+                              pl: { xs: 1, sm: 2, md: 3 },
+                              pr: { xs: 0.5, sm: 1.5, md: 2 },
                               textTransform: 'uppercase',
                               position: 'sticky',
                               left: 0,
@@ -1246,10 +1230,13 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                               fontWeight: '500',
                               textAlign: 'center',
                               whiteSpace: 'nowrap',
-                              fontSize: { xs: 14, sm: 12, md: 16 },
+                              fontSize: { xs: 10, sm: 12, md: 16 },
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
                             }}>
-                              <span style={{ fontWeight: '500' }}>xp </span>
-                              <span style={{ fontSize: '1em', fontWeight: '500', letterSpacing: 1 }}>PTS</span>
+                              <span style={{ fontWeight: '500' }}>xp</span>
+                              <span style={{ fontWeight: '600', letterSpacing: 0.5, marginLeft: 1 }}>PTS</span>
                             </Box>
                           </Box>
                           <Box>
@@ -1274,7 +1261,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                                           display: 'grid',
                                           gridTemplateColumns: { xs: GRID_COLS.xs, sm: GRID_COLS.sm, md: GRID_COLS.md },
                                           alignItems: 'center',
-                                          columnGap: { xs: 2, sm: 2, md: 1.7 },
+                                          columnGap: { xs: 1, sm: 2, md: 1.7 },
                                           px: { xs: 1, sm: 1.5, md: 2 },
                                           py: { xs: 0.3, sm: 0.5, md: 0.75 },
                                           background: idx % 2 === 0
@@ -1374,7 +1361,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                                           display: 'grid',
                                           gridTemplateColumns: { xs: GRID_COLS.xs, sm: GRID_COLS.sm, md: GRID_COLS.md },
                                           alignItems: 'center',
-                                          columnGap: { xs: 2, sm: 2, md: 1.7 },
+                                          columnGap: { xs: 1, sm: 2, md: 1.7 },
                                           px: { xs: 1, sm: 1.5, md: 2 },
                                           py: { xs: 0.3, sm: 0.5, md: 0.75 },
                                           background: idx % 2 === 0 ? '#383838' : '#2b2b2b',
