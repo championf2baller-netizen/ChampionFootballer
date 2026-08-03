@@ -1937,19 +1937,20 @@ export default function PlayerStatsPage() {
     }, [trophyCounts]);
 
     // Icon-style item now uses football.png with value centered, label below
-    const StatItem = ({ label, value }: { label: string; value: number }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-            <Box sx={{ width: '100%', borderBottom: '1px solid rgba(255, 255, 255, 0.25)', pb: 0.1, mb: 0.2 }}>
+    const StatItem = ({ label, value }: { label: string; value: string | number }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', minWidth: 0 }}>
+            <Box sx={{ width: '100%', borderBottom: '1px solid rgba(255, 255, 255, 0.25)', pb: 0.2, mb: 0.3 }}>
                 <Typography sx={{
                     color: '#ffffff',
-                    fontSize: { xs: 15, sm: 17, md: 19 },
+                    fontSize: { xs: 10, sm: 11, md: 13, lg: 15 },
                     fontWeight: 600,
-                    px: { xs: 0.5, md: 1 }
+                    whiteSpace: 'nowrap',
+                    pr: { xs: 0.8, sm: 1, md: 1.5 },
                 }}>
-                    {label}
+                    {label.toUpperCase()}
                 </Typography>
             </Box>
-            <Typography sx={{ color: '#00a780', fontSize: { xs: 15, sm: 17, md: 18 }, fontWeight: 700, px: { xs: 0.5, md: 1 } }}>
+            <Typography sx={{ color: '#00a780', fontSize: { xs: 14, sm: 15, md: 17, lg: 18 }, fontWeight: 700, whiteSpace: 'nowrap', pr: { xs: 0.8, sm: 1, md: 1.5 } }}>
                 {value ?? 0}
             </Typography>
         </Box>
@@ -3193,14 +3194,14 @@ export default function PlayerStatsPage() {
 
                         {/* Tabs Navigation */}
                         <Box sx={{
-                            mb: 4,
+                            mb: 3,
                             display: 'flex',
                             flexWrap: 'nowrap',
                             justifyContent: 'space-between',
                             alignItems: 'flex-end',
                             width: '100%',
                             gap: { xs: 0.6, md: 3 },
-                            mt: { xs: 3.5, md: 7.5 },
+                            mt: { xs: 1.5, sm: 2.5, md: 7.5 },
                         }}>
                             {['current', 'career', 'trophies', 'rewards', 'history'].map(tab => (
                                 <Box
@@ -3231,7 +3232,7 @@ export default function PlayerStatsPage() {
                                     <Box sx={{
                                         width: { xs: '58%', md: '70%' },
                                         height: { xs: '3px', md: '6px' },
-                                        bgcolor: activeTab === tab ? '#00a77f' : '#555',
+                                        bgcolor: activeTab === tab ? '#00a780' : '#555',
                                         mt: 1,
                                         mx: 'auto',
                                     }} />
@@ -3240,76 +3241,28 @@ export default function PlayerStatsPage() {
                         </Box>
 
                         {/* Stats Row */}
-                        <Grid container spacing={0} rowSpacing={1.5} sx={{ mb: 3, justifyContent: 'flex-start' }}>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="Apps"
-                                    value={displayedStatsMatches}
-                                />
-                            </Grid>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="Goals"
-                                    value={displayedStatsTotals.goals}
-                                />
-                            </Grid>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="Assists"
-                                    value={displayedStatsTotals.assists}
-                                />
-                            </Grid>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="MOTM Votes"
-                                    value={displayedMotmVotes}
-                                />
-                            </Grid>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="Defensive Imp."
-                                    value={displayedDefensiveImpact}
-                                />
-                            </Grid>
-                            <Grid item xs={4} sm={4} md>
-                                <StatItem
-                                    label="Clean Sheet"
-                                    value={displayedStatsTotals.cleanSheets}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={4} md>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-                                    <Box sx={{ width: '100%', borderBottom: '1px solid rgba(255, 255, 255, 0.25)', pb: 0.1, mb: 0.2 }}>
-                                        <Typography sx={{
-                                            color: '#ffffff',
-                                            fontSize: { xs: 15, sm: 17, md: 19 },
-                                            fontWeight: 600,
-                                            px: { xs: 0.5, md: 1 }
-                                        }}>
-                                            Total xp
-                                        </Typography>
-                                    </Box>
-                                    <Typography sx={{ color: '#00a780', fontSize: { xs: 15, sm: 17, md: 18 }, fontWeight: 700, px: { xs: 0.5, md: 1 } }}>
-                                        {xpLoading ? '...' : `${Math.max(0, displayXp).toLocaleString()} XP`}
-                                    </Typography>
-                                    {/* <Box sx={{ 
-                                    width: '100%',
-                                    height: 8, 
-                                    bgcolor: '#444', 
-                                    borderRadius: 1,
-                                    overflow: 'hidden',
-                                    mt: 0.5
-                                }}>
-                                    <Box sx={{ 
-                                        height: '100%', 
-                                        bgcolor: statsRowXpStatusTier.cardColor, 
-                                        width: statsRowXpProgressToMax > 0 ? `max(${statsRowXpProgressToMax}%, 6px)` : '0%',
-                                        transition: 'width 0.4s ease'
-                                    }} />
-                                </Box> */}
-                                </Box>
-                            </Grid>
-                        </Grid>
+                        <Box
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: {
+                                    xs: 'repeat(3, minmax(0, 1fr))',
+                                    sm: 'repeat(7, minmax(0, 1fr))',
+                                },
+                                columnGap: 0,
+                                rowGap: { xs: 1.2, sm: 2 },
+                                mt: { xs: 1.5, sm: 2, md: 2.5 },
+                                mb: { xs: 2, sm: 3 },
+                                width: '100%',
+                            }}
+                        >
+                            <StatItem label="APPS" value={displayedStatsMatches} />
+                            <StatItem label="GOALS" value={displayedStatsTotals.goals} />
+                            <StatItem label="ASSISTS" value={displayedStatsTotals.assists} />
+                            <StatItem label="MOTM VOTES" value={displayedMotmVotes} />
+                            <StatItem label="DEFENSIVE IMP." value={displayedDefensiveImpact} />
+                            <StatItem label="CLEAN SHEET" value={displayedStatsTotals.cleanSheets} />
+                            <StatItem label="TOTAL XP" value={xpLoading ? '...' : `${Math.max(0, displayXp).toLocaleString()} xp`} />
+                        </Box>
 
                         {/* Three Cards Section */}
                         <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>

@@ -2982,11 +2982,11 @@ export default function AllMatches() {
                                                                 startIcon={<Image src={ADDSTATS} alt="Add Stats" width={isMobile ? 14 : 17} height={isMobile ? 14 : 17} />}
                                                                 sx={{
                                                                     ...resultCardActionButtonSx,
-                                                                    backgroundColor: '#FF007F',
+                                                                    backgroundColor: '#2563EB',
                                                                     color: 'white',
                                                                     border: 'none',
                                                                     '&:hover': {
-                                                                        backgroundColor: '#DB2777',
+                                                                        backgroundColor: '#1D4ED8',
                                                                     },
                                                                 }}
                                                             >
@@ -3019,14 +3019,14 @@ export default function AllMatches() {
                                                             disabled={match.archived}
                                                             sx={{
                                                                 ...resultCardActionButtonSx,
-                                                                backgroundColor: '#2563EB',
+                                                                backgroundColor: '#FF007F',
                                                                 color: 'white',
                                                                 border: 'none',
                                                                 '&:hover': {
-                                                                    backgroundColor: '#1D4ED8',
+                                                                    backgroundColor: '#DB2777',
                                                                 },
                                                                 '&.Mui-disabled': {
-                                                                    backgroundColor: '#2563EB',
+                                                                    backgroundColor: '#FF007F',
                                                                     color: 'white',
                                                                     opacity: 0.5,
                                                                 },
