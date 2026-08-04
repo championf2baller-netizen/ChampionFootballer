@@ -147,7 +147,7 @@ export default function LandingPage() {
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
                         fontWeight: '900 !important',
-                        fontStyle: 'italic !important',
+                        // fontStyle: 'italic !important',
                         fontSize: { xs: '0.85rem', sm: '1.02rem', md: '1.15rem' },
                         lineHeight: 1.2,
                         color: '#FFFFFF',
@@ -195,7 +195,7 @@ export default function LandingPage() {
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
                         fontWeight: '900 !important',
-                        fontStyle: 'italic !important',
+                        // fontStyle: 'italic !important',
                         fontSize: { xs: '0.8rem', sm: '0.92rem', md: '1.05rem' },
                         lineHeight: 1.2,
                         color: '#FFFFFF',
