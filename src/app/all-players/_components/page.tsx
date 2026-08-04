@@ -1664,7 +1664,7 @@ const AllPlayersPage = () => {
                     backgroundColor: '#dddddd',
                     boxShadow: '8px 0 12px -12px rgba(0,0,0,0.6)',
                   }}>
-                  <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
                   </Typography>
                   <Box
@@ -1728,7 +1728,7 @@ const AllPlayersPage = () => {
                   pl: { xs: 1.5, sm: 2.5 },
                   display: 'block',
                 }}>
-                  <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif', textAlign: 'left !important' }}>
+                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif', textAlign: 'left !important' }}>
                     STYLE
                   </Typography>
                 </Box>
@@ -1738,7 +1738,7 @@ const AllPlayersPage = () => {
 
                 {/* View Stats */}
                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, textAlign: 'center' }}>
-                  <Typography sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     {isMobile ? 'STATS' : 'VIEW STATS'}
                   </Typography>
                 </Box>
@@ -1746,7 +1746,7 @@ const AllPlayersPage = () => {
                 {/* XP Points */}
                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
                   <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
-                    CAREER XP
+                    CAREER xp
                   </Typography>
                 </Box>
               </Box>

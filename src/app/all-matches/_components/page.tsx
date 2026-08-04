@@ -2031,7 +2031,7 @@ export default function AllMatches() {
                             mb: { xs: 1.5, md: 2 },
                             bgcolor: '#0E0E0E',
                             px: { xs: 1, sm: 2, md: 3 },
-                            py: { xs: 1.5, md: 2.5 },
+                            py: { xs: 1.5, md: 0 },
                             borderRadius: 0,
                             minHeight: { xs: 'auto', md: 'auto' },
                         }}
@@ -2063,25 +2063,22 @@ export default function AllMatches() {
                                 variant="contained"
                                 onClick={handleCreateMatchClick}
                                 sx={{
-                                    bgcolor: '#0388E3',
-                                    color: 'white',
-                                    fontFamily: 'Arial, Helvetica, sans-serif',
-                                    fontWeight: 'bold',
-                                    fontSize: { xs: '14px', sm: '16px', md: '18px' },
-                                    minHeight: { xs: 44, md: 48 },
-                                    height: { xs: 44, md: 48 },
-                                    '&:hover': { bgcolor: '#0388E3' },
-                                    width: { xs: '100%', sm: '210px' },
-                                    borderRadius: 2,
-                                    py: { xs: 0.75, md: 1 },
-                                    px: { xs: 2.5, md: 3 },
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    textTransform: 'none'
+                                     color: 'white',
+                                                   fontFamily: 'Arial, Helvetica, sans-serif',
+                                                   fontWeight: 'semi-bold',
+                                                   fontSize: { xs: '15px', md: '18px' },
+                                                   bgcolor: '#0388E3',
+                                                   '&:hover': { bgcolor: '#0266b8' },
+                                                   borderRadius: 1,
+                                                   width: { xs: '100%', sm: 'auto' },
+                                                   minHeight: { xs: 42, md: 'auto' },
+                                                   px: 2.5,
+                                                   textTransform: 'none',
+                                                   whiteSpace: 'nowrap'
                                 }}
                             >
-                                <Plus size={22} style={{ marginRight: 6 }} />
-                                 New Match
+                                {/* <Plus size={22} style={{ marginRight: 6 }} /> */}
+                               + New Match
                             </Button>
                         </Box>
 

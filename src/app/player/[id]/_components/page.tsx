@@ -2069,6 +2069,8 @@ export default function PlayerStatsPage() {
                                 position: 'relative',
                                 zIndex: 1200,
                                 isolation: 'isolate',
+                    mt: { xs: -2, md: 0 }
+
                             }}
                         >
                             <TextField

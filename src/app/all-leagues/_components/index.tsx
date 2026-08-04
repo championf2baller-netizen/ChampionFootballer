@@ -5089,11 +5089,11 @@ function AllLeagues() {
               }}
             >
               <Button variant="contained" onClick={() => setIsDialogOpen(true)} sx={{
-                bgcolor: '#0388E3',
                 color: 'white',
                 fontFamily: 'Arial, Helvetica, sans-serif',
                 fontWeight: 'semi-bold',
                 fontSize: { xs: '15px', md: '18px' },
+                bgcolor: '#0388E3',
                 '&:hover': { bgcolor: '#0266b8' },
                 borderRadius: 1,
                 width: { xs: '100%', sm: 'auto' },
@@ -6059,7 +6059,7 @@ function AllLeagues() {
                                   minHeight: 28,
                                   borderRadius: 1,
                                   textTransform: 'none',
-                                  color: isCompleted ? '#111827' : 'blue',
+                                  color: isCompleted ? '#111827' : '#0388E3',
                                   fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
                                   fontWeight: 600,
                                   fontSize: { xs: '10px', sm: '16px' },

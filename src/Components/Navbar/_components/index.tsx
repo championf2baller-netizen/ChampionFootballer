@@ -4443,12 +4443,12 @@ Important Management Controls:          </Typography>
                 case 'Winning Team Bonus': return <CheckCircleOutlineIcon sx={{ color: '#00a896', fontSize: '1.25rem' }} />;
                 case 'Draw': return <HandshakeOutlinedIcon sx={{ color: '#e56a16', fontSize: '1.25rem' }} />;
                 case 'Losing Team Consolation': return <HighlightOffIcon sx={{ color: '#f87171', fontSize: '1.25rem' }} />;
-                case 'Man of the Match (MOTM)': return <Image src={MOTMIcon} alt="MOTM" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Man of the Match (MOTM)': return <Star sx={{ color: '#FFD700', fontSize: '1.4rem' }} />;
                 case 'Clean Sheets':
                 case 'Clean Sheets (Goalkeeper)': return <Image src={CleanSheetIcon} alt="Clean Sheets" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case 'Goal Scored': return <Image src={GoalsIcon} alt="Goal Scored" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case 'Assist': return <Image src={AssistIcon} alt="Assist" width={22} height={22} style={{ objectFit: 'contain' }} />;
-                case 'Man of the Match Votes': return <Image src={MOTMIcon} alt="MOTM Votes" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Man of the Match Votes': return <Star sx={{ color: '#FFD700', fontSize: '1.4rem' }} />;
                 case 'Defensive Impact': return <Image src={ImpactIcon} alt="Defensive Impact" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case '+ Mentality': return <Image src={MentalityIcon} alt="+ Mentality" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 default: return null;
