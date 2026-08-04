@@ -49,7 +49,7 @@ export default function AuthSocialButtons() {
     textDecoration: 'none',
     height: '42px',
     width: '100%',
-    borderRadius: '8px',
+    // borderRadius: '8px',
     whiteSpace: 'nowrap' as const,
   };
 
