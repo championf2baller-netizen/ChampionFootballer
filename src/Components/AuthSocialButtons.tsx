@@ -47,23 +47,15 @@ export default function AuthSocialButtons() {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     textDecoration: 'none',
-    height: '40px',
-    width: '220px',
+    height: '42px',
+    width: '100%',
+    borderRadius: '8px',
     whiteSpace: 'nowrap' as const,
   };
 
-  // const hoverStyle = {
-  //   ':hover': {
-  //     backgroundColor: '#f5f5f5',
-  //     borderColor: '#d0d0d0',
-  //     transform: 'translateY(-1px)',
-  //     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-  //   }
-  // };
-  
   return (
     <>
-    <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', alignItems: 'flex-end', marginTop: '-30px' }}>
+    <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', alignItems: 'stretch', marginTop: '12px' }}>
       <button 
         onClick={() => go('google')} 
         className="auth-social-btn"

@@ -329,38 +329,38 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
   // Shared input styling for white bg + black text + visible placeholder
   const inputSx = {
-    width: { xs: '100%', md: '220px' },
+    width: '100%',
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#fff",
-      color: "#000",
-      borderRadius: '7px',
-      height: '40px',
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderRadius: '8px',
+      height: '44px',
       boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
       overflow: "hidden",
       boxSizing: "border-box",
-      "& fieldset": { borderColor: "#404040", borderWidth: '1px' },
-      "&:hover fieldset": { borderColor: "#404040" },
-      "&.Mui-focused fieldset": { borderColor: "#404040" },
+      "& fieldset": { borderColor: "#cccccc", borderWidth: '1px' },
+      "&:hover fieldset": { borderColor: "#999999" },
+      "&.Mui-focused fieldset": { borderColor: "#000000" },
       "& input": {
-        color: "#000",
+        color: "#000000",
         fontSize: "0.95rem",
         height: "100%",
         boxSizing: "border-box",
         padding: "0 14px",
       },
     },
-    "& input::placeholder": { color: "#757575", opacity: 1 },
+    "& input::placeholder": { color: "#666666", opacity: 1 },
     // disable autofill yellow
     "& input:-webkit-autofill": {
-      WebkitBoxShadow: "0 0 0 1000px #fff inset !important",
-      WebkitTextFillColor: "#000 !important",
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset !important",
+      WebkitTextFillColor: "#000000 !important",
       transition: "background-color 5000s ease-in-out 0s",
-      borderRadius: '7px !important',
+      borderRadius: '8px !important',
     },
     "& input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-      WebkitBoxShadow: "0 0 0 1000px #fff inset !important",
-      WebkitTextFillColor: "#000 !important",
-      borderRadius: '7px !important',
+      WebkitBoxShadow: "0 0 0 1000px #ffffff inset !important",
+      WebkitTextFillColor: "#000000 !important",
+      borderRadius: '8px !important',
     },
   } as const
 
@@ -1176,7 +1176,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
         <Box
           component="form"
           onSubmit={handleLoginSubmit}
-          sx={{ width: { xs: "100%", sm: "60%", md: "70%" }, maxWidth: 420, marginLeft: 'auto' }}
+          sx={{ width: "100%", maxWidth: "100%" }}
         >
           {loginError && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -1184,7 +1184,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
             </Alert>
           )}
 
-          <Stack spacing={1} sx={{ alignItems: 'flex-end' }}>
+          <Stack spacing={1.5} sx={{ alignItems: 'stretch', width: '100%' }}>
             <TextField
               fullWidth
               placeholder="Email address"
@@ -1216,7 +1216,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                     edge="end"
                     size="small"
                     aria-label={showLoginPassword ? "Hide password" : "Show password"}
-                    sx={{ color: "#000" }}
+                    sx={{ color: "#000000" }}
                   >
                     {showLoginPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
@@ -1230,13 +1230,15 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
               disabled={loginLoading || serverStatus === "offline"}
               sx={{
                 background: "#00a77f",
-                color: "white",
-                width: { xs: '100%', md: '220px' },
-                height: { xs: 'auto', md: '40px' },
+                color: "#FFFF",
+                width: '100%',
+                height: '44px',
                 fontSize: "0.95rem",
                 fontWeight: "bold",
+                // fontStyle: "italic",
                 borderRadius: '7px',
                 textTransform: "none",
+                // letterSpacing: "0.02em",
                 "&:hover": {
                   background: "#00cc9c",
                 },
@@ -1246,10 +1248,10 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 },
               }}
             >
-              {loginLoading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
+              {loginLoading ? <CircularProgress size={24} color="inherit" /> : "SIGN IN "}
             </Button>
 
-            <Box sx={{ display: "flex", justifyContent: "center", width: { xs: "100%", md: "220px" } }}>
+            <Box sx={{ display: "flex", justifyContent: "center", width: '100%' }}>
               <Button
                 variant="text"
                 onClick={handleForgotPassword}

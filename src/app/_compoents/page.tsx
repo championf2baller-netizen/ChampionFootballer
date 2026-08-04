@@ -62,34 +62,34 @@ export default function LandingPage() {
       <Box
         sx={{
           width: '100%',
-          backgroundColor: '#101010',
+          backgroundColor: '#0a0a0c',
           overflowX: 'hidden',
-          px: { xs: 2, md: 7 },
-          py: { xs: 4, md: 2 },
+          px: { xs: 2, sm: 3, md: 5 },
+          py: { xs: 3, md: 3 },
         }}
       >
         <Box sx={{ maxWidth: '1280px', mx: 'auto', width: '100%' }}>
-          <Grid container spacing={{ xs: 3, md: 4 }}>
-            {/* Left Side - 8 columns */}
+          <Grid container spacing={{ xs: 2, md: 2 }}>
+            {/* Left Side - 7.5 columns (Hero Image & Collage) */}
             <Grid item xs={12} md={8}>
               <Box
                 sx={{
                   color: 'white',
                   display: 'flex',
                   flexDirection: 'column',
-                  // gap: { xs: 1.5, md: 2 },
-                  mb: { xs: 2, md: 0 },
+                  gap: 2,
                 }}
               >
-                {/* Top Hero Banner */}
+                {/* Top Hero Banner (Taller aspect ratio matching screenshot) */}
                 <Box
                   sx={{
                     position: 'relative',
                     width: '100%',
-                    // borderRadius: '6px',
+                    borderRadius: '12px',
                     overflow: 'hidden',
-                    aspectRatio: { xs: '16/9.5', md: '16/9' },
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                    aspectRatio: { xs: '16/10', md: '1.55/1' },
+                    boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                   }}
                 >
                   <Image
@@ -99,204 +99,206 @@ export default function LandingPage() {
                     priority
                     loading="eager"
                     fetchPriority="high"
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 90vw, 1920px"
+                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 70vw, 1200px"
                     style={{ objectFit: 'cover', objectPosition: 'left center' }}
                     quality={100}
                   />
                 </Box>
 
-                {/* Bottom 2x2 Grid Collage */}
+                {/* Bottom 2 Cards Grid */}
                 <Box
                   sx={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    // gap: { xs: 1.5, md: 2 },
+                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                    gap: { xs: 2, md: 2 },
                     width: '100%',
                   }}
                 >
-                  {/* Top Left Grid Image: Orange Players Celebrating */}
+                  {/* Left Card: Team Squad + Text */}
                   <Box
                     sx={{
-                      position: 'relative',
-                      width: '100%',
-                      aspectRatio: '1.45/1',
-                      overflow: 'hidden',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    <Image
-                      src={heroGridOrange}
-                      alt="Players Celebrating"
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={100}
-                    />
-                  </Box>
-
-                  {/* Top Right Grid Image: Team Squad Posing */}
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      width: '100%',
-                      aspectRatio: '1.45/1',
-                      overflow: 'hidden',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    <Image
-                      src={heroGridTeam1}
-                      alt="Football Team Squad"
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={100}
-                    />
-                  </Box>
-
-                  {/* Bottom Left Grid Container: Black Box with White Text */}
-                  <Box
-                    sx={{
-                      width: '100%',
-                      aspectRatio: '1.45/1',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      p: { xs: 1.5, sm: 2, md: 3 },
-                      textAlign: 'center',
+                      flexDirection: 'column',
+                      width: '100%',
                     }}
                   >
-                    <Typography
+                    <Box
                       sx={{
-                        fontFamily: 'var(--font-geist-anton), Anton, var(--font-woodford-bourne-pro), var(--font-inter), sans-serif !important',
-                        fontWeight: '900 !important',
-                        fontSize: { xs: '0.85rem', sm: '1.15rem', md: '1.45rem' },
-                        lineHeight: { xs: 1.15, md: 1.2 },
-                        color: '#FFFFFF',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.02em',
+                        position: 'relative',
+                        width: '100%',
+                        aspectRatio: '1.5/1',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                       }}
                     >
-                      I GOT 99 PROBLEMS BUT WINNING AIN&apos;T ONE!
+                      <Image
+                        src={heroGridTeam1}
+                        alt="Football Team Squad"
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 600px) 100vw, (max-width: 1200px) 40vw, 600px"
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                        quality={100}
+                      />
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                        fontWeight: '900 !important',
+                        fontStyle: 'italic !important',
+                        fontSize: { xs: '0.85rem', sm: '1.02rem', md: '1.15rem' },
+                        lineHeight: 1.2,
+                        color: '#FFFFFF',
+                        textTransform: 'uppercase',
+                        textAlign: 'center',
+                        mt: 1.5,
+                        px: 1,
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      &quot;I GOT 99 PROBLEMS BUT WINNING AIN&apos;T ONE&quot;
                     </Typography>
                   </Box>
 
-                  {/* Bottom Right Grid Image: Team Victory around Ball */}
+                  {/* Right Card: Orange Players + Text */}
                   <Box
                     sx={{
-                      position: 'relative',
+                      display: 'flex',
+                      flexDirection: 'column',
                       width: '100%',
-                      aspectRatio: '1.45/1',
-                      // borderRadius: '4px',
-                      overflow: 'hidden',
-                      // boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
                     }}
                   >
-                    <Image
-                      src={heroGridTeam2}
-                      alt="Team Celebrating Victory"
-                      fill
-                      loading="lazy"
-                      sizes="(max-width: 600px) 50vw, (max-width: 1200px) 50vw, 800px"
-                      style={{ objectFit: 'cover', objectPosition: 'center' }}
-                      quality={100}
-                    />
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        width: '100%',
+                        aspectRatio: '1.5/1',
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      <Image
+                        src={heroGridOrange}
+                        alt="Champion Footballer Players"
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 600px) 100vw, (max-width: 1200px) 40vw, 600px"
+                        style={{ objectFit: 'cover', objectPosition: 'center' }}
+                        quality={100}
+                      />
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                        fontWeight: '900 !important',
+                        fontStyle: 'italic !important',
+                        fontSize: { xs: '0.8rem', sm: '0.92rem', md: '1.05rem' },
+                        lineHeight: 1.2,
+                        color: '#FFFFFF',
+                        textTransform: 'uppercase',
+                        textAlign: 'center',
+                        mt: 1.5,
+                        px: 1,
+                        letterSpacing: '0.01em',
+                      }}
+                    >
+                      CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!
+                    </Typography>
                   </Box>
                 </Box>
               </Box>
             </Grid>
 
-            {/* Right Side - 4 columns (Auth Form) */}
-            <Grid item xs={12} md={4}>
+            {/* Right Side - 3.8 columns (Auth Sidebar Cards) */}
+            <Grid item xs={12} md={3.8}>
               <Box
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'stretch',
+                  width: '100%',
                   height: '100%',
-                  mt: { xs: 1, md: 0 },
-
                 }}
               >
-                {/* Top Text */}
-                <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-end' }, mb: 1 }}>
-                  <Typography
-                    sx={{
-                      fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                      fontWeight: '600 !important',
-                      fontSize: { xs: '1rem', md: '23px' },
-                      lineHeight: { xs: '1.3', md: '35px' },
-                      letterSpacing: '0% !important',
-                      color: 'white',
-                      textAlign: { xs: 'center', md: 'right' },
-                      maxWidth: { xs: '100%', md: '355px' },
-                      width: '100%',
-                      mt: { xs: 0, md: 1 },
-                      whiteSpace: { xs: 'nowrap', md: 'normal' },
-                    }}
-                  >
-                    The best football app
-                    <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
-                      <br />
-                    </Box>
-                    <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
-                      {' '}
-                    </Box>
-                    on the planet!
-                  </Typography>
-                </Box>
-
-                {/* Join Button */}
-                <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' }, mb: { xs: 1.5, md: 1 } }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      if (showLogin) {
-                        setIsJoinModalOpen(true);
-                      } else {
-                        setShowLogin(true);
-                      }
-                    }}
-                    sx={{
-                      color: 'white',
-                      textTransform: 'none',
-                      fontSize: { xs: '0.95rem', md: '1rem' },
-                      width: { xs: '100%', md: 'auto' },
-                      height: { xs: '40px', md: 'auto' },
-
-                      border: '1px solid #FFFFFF',
-
-                      '&:hover': {
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        border: '1px solid #FFFFFF',
-                      },
-                      borderRadius: '7px',
-                      px: { xs: 3, md: 4 },
-
-                    }}
-                  >
-                    {showLogin ? 'Join' : 'Login'}
-                  </Button>
-                </Box>
-
-                {/* Auth Form */}
+                {/* Main Auth Card Container (Matching Example Screen) */}
                 <Paper
                   elevation={0}
                   sx={{
-                    bgcolor: 'transparent',
-                    boxShadow: 'none',
-                    minHeight: { xs: '330px', md: '350px' },
+                    bgcolor: '#0A0A0C',
+                    p: 0,
                     display: 'flex',
                     flexDirection: 'column',
+                    width: '95%',
+                    ml: 2,
                   }}
                 >
-                  <Box sx={{ width: '100%', overflow: 'visible', mb: 2 }}>
+                  {/* Header Container: Text on Top, Join Button Below It */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', md: 'flex-end' }, width: '100%', mb: 1.5 }}>
+                    <Typography
+                      sx={{
+                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                        fontWeight: '600 !important',
+                        fontSize: { xs: '1rem', md: '23px' },
+                        lineHeight: { xs: '1.3', md: '35px' },
+                        letterSpacing: '0% !important',
+                        color: 'white',
+                        textAlign: { xs: 'center', md: 'right' },
+                        maxWidth: { xs: '100%', md: '355px' },
+                        width: '100%',
+                        mt: 0,
+                        mb: 1,
+                        whiteSpace: { xs: 'nowrap', md: 'normal' },
+                      }}
+                    >
+                      The best football app
+                      <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
+                        <br />
+                      </Box>
+                      <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
+                        {' '}
+                      </Box>
+                      on the planet!
+                    </Typography>
+
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        if (showLogin) {
+                          setIsJoinModalOpen(true);
+                        } else {
+                          setShowLogin(true);
+                        }
+                      }}
+                      sx={{
+                        color: 'white',
+                        textTransform: 'none',
+                        fontSize: { xs: '0.9rem', md: '0.95rem' },
+                        fontWeight: '500',
+                        border: '1px solid #FFFFFF',
+                        backgroundColor: 'transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          border: '1px solid #FFFFFF',
+                        },
+                        borderRadius: '7px',
+                        px: 3,
+                        py: 0.5,
+                        minWidth: '85px',
+                      }}
+                    >
+                      {showLogin ? 'Join' : 'Login'}
+                    </Button>
+                  </Box>
+
+                  {/* Auth Tabs Form */}
+                  <Box sx={{ width: '100%', overflow: 'visible', mb: 1.5 }}>
                     <AuthTabs showLogin={showLogin} onToggleForm={() => setShowLogin(!showLogin)} />
                   </Box>
                   {showLogin ? (
-                    <Box>
+                    <Box sx={{ width: '100%' }}>
                       <AuthSocialButtons />
                     </Box>
                   ) : null}
