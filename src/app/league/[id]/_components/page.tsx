@@ -647,10 +647,14 @@ export default function LeagueDetailPage() {
         return mapValue ?? 0;
     }, [userLeagueXP]);
     const getMemberPositionLabel = useCallback((member: User): string => {
-        const fromPosition = (member.position ?? '').toString().trim();
-        if (fromPosition) return getPositionShortForm(fromPosition);
-        const fromPositionType = String((member as unknown as { positionType?: unknown })?.positionType ?? '').trim();
-        if (fromPositionType) return getPositionShortForm(fromPositionType);
+        if (!member) return '-';
+        const rec = member as unknown as Record<string, unknown>;
+        const fromType = String(rec?.positionType ?? rec?.position_type ?? rec?.role ?? '').trim();
+        if (fromType) return fromType;
+        const fromPosition = String(member.position ?? rec?.position ?? '').trim();
+        if (fromPosition) return fromPosition;
+        const fromStyle = String(rec?.playingStyle ?? rec?.style ?? '').trim();
+        if (fromStyle) return fromStyle;
         return '-';
     }, []);
     const normalizeToWorldRankingPosition = useCallback((positionLabel: string): string => {
@@ -4763,7 +4767,7 @@ export default function LeagueDetailPage() {
 
                                                 {/* XP Points Header */}
                                                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
-                                                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                                                    <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
                                                         CAREER xp
                                                     </Typography>
                                                 </Box>

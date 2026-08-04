@@ -1745,7 +1745,7 @@ const AllPlayersPage = () => {
 
                 {/* XP Points */}
                 <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
-                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                  <Typography className="league-table-heading1" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     CAREER xp
                   </Typography>
                 </Box>
