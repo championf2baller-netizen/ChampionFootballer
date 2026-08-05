@@ -1810,6 +1810,61 @@ const clampLocation = (value: string) => value.slice(0, 120);
       );
     };
 
+    const handleShareMatchPreview = async () => {
+      const home = homeTeamName || 'Home';
+      const away = awayTeamName || 'Away';
+      const dateStr = matchDate ? matchDate.format('DD-MMM-YYYY') : '';
+      const timeStr = startTime ? startTime.format('hh:mm A') : '';
+      const locStr = location || '';
+      const durStr = `${duration || 90} Mins`;
+
+      const homePlayers = homeTeamUsers.map(u => formatGuestAwarePlayerName(u)).filter(Boolean);
+      const awayPlayers = awayTeamUsers.map(u => formatGuestAwarePlayerName(u)).filter(Boolean);
+
+      let text = `⚽ MATCH PREVIEW\n${home} vs ${away}\n`;
+      if (dateStr || timeStr) text += `📅 ${dateStr} ${timeStr}\n`;
+      if (locStr) text += `📍 Location: ${locStr}\n`;
+      if (durStr) text += `⏱️ Duration: ${durStr}\n`;
+
+      if (teamBalance.hasData) {
+        text += `\n⚖️ Team Balance: ${home} (${teamBalance.homePct}%) vs ${away} (${teamBalance.awayPct}%)\n`;
+      }
+
+      if (homePlayers.length > 0) {
+        text += `\n🟢 ${home}: ${homePlayers.join(', ')}`;
+      }
+      if (awayPlayers.length > 0) {
+        text += `\n🟠 ${away}: ${awayPlayers.join(', ')}`;
+      }
+
+      const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+      try {
+        if (typeof navigator !== 'undefined' && navigator.share) {
+          await navigator.share({
+            title: `Match Preview: ${home} vs ${away}`,
+            text: text,
+            url: shareUrl,
+          });
+          return;
+        }
+      } catch (error) {
+        const err = error as { name?: string };
+        if (err?.name === 'AbortError') return;
+      }
+
+      try {
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+          await navigator.clipboard.writeText(`${text}\n\n${shareUrl}`);
+          toast.success('Match preview copied to clipboard!');
+        } else {
+          toast.error('Sharing is not supported on this browser.');
+        }
+      } catch {
+        toast.error('Unable to share match preview.');
+      }
+    };
+
     return (
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Box sx={{ p: isDialog ? 0 : { xs: 1, sm: 2, md: 3 }, minHeight: isDialog ? 'auto' : '100vh', color: '#E5E7EB', bgcolor: '#000', overflowX: 'hidden' }}>
@@ -3094,7 +3149,12 @@ const clampLocation = (value: string) => value.slice(0, 120);
 
                 {/* Share Button */}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                  <IconButton sx={{ bgcolor: '#1a8a6d', color: 'white', '&:hover': { bgcolor: '#157a62' }, width: 40, height: 40, borderRadius: 1 }}>
+                  <IconButton
+                    onClick={handleShareMatchPreview}
+                    aria-label="Share match preview"
+                    title="Share match preview"
+                    sx={{ bgcolor: '#1a8a6d', color: 'white', '&:hover': { bgcolor: '#157a62' }, width: 40, height: 40, borderRadius: 1 }}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                   </IconButton>
                 </Box>
