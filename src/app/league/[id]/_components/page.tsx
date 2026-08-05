@@ -649,12 +649,12 @@ export default function LeagueDetailPage() {
     const getMemberPositionLabel = useCallback((member: User): string => {
         if (!member) return '-';
         const rec = member as unknown as Record<string, unknown>;
-        const fromType = String(rec?.positionType ?? rec?.position_type ?? rec?.role ?? '').trim();
-        if (fromType) return fromType;
         const fromPosition = String(member.position ?? rec?.position ?? '').trim();
-        if (fromPosition) return fromPosition;
+        if (fromPosition && fromPosition !== '-') return getPositionShortForm(fromPosition);
+        const fromType = String(rec?.positionType ?? rec?.position_type ?? rec?.role ?? '').trim();
+        if (fromType && fromType !== '-') return getPositionShortForm(fromType);
         const fromStyle = String(rec?.playingStyle ?? rec?.style ?? '').trim();
-        if (fromStyle) return fromStyle;
+        if (fromStyle && fromStyle !== '-') return getPositionShortForm(fromStyle);
         return '-';
     }, []);
     const normalizeToWorldRankingPosition = useCallback((positionLabel: string): string => {
@@ -6964,19 +6964,23 @@ export default function LeagueDetailPage() {
                                                                                     leaderboardMember?.lastName || player.name.split(' ').slice(1).join(' ')
                                                                                 )}
                                                                             </Typography>
-                                                                            {(player.positionType && player.positionType.toLowerCase() !== 'player' && player.positionType !== '-') && (
-                                                                                <Typography
-                                                                                    sx={{
-                                                                                        color: '#ffff',
-                                                                                        fontSize: '0.65rem',
-                                                                                        fontWeight: 300,
-                                                                                        lineHeight: 1.1,
-                                                                                        mt: 0,
-                                                                                    }}
-                                                                                >
-                                                                                    {player.positionType}
-                                                                                </Typography>
-                                                                            )}
+                                                                            {(() => {
+                                                                                const rawPos = leaderboardMember ? getMemberPositionLabel(leaderboardMember) : getPositionShortForm(player.positionType);
+                                                                                if (!rawPos || rawPos === '-' || rawPos.toLowerCase() === 'player') return null;
+                                                                                return (
+                                                                                    <Typography
+                                                                                        sx={{
+                                                                                            color: 'rgba(255,255,255,0.7)',
+                                                                                            fontSize: '0.65rem',
+                                                                                            fontWeight: 400,
+                                                                                            lineHeight: 1.1,
+                                                                                            mt: 0,
+                                                                                        }}
+                                                                                    >
+                                                                                        {rawPos}
+                                                                                    </Typography>
+                                                                                );
+                                                                            })()}
                                                                         </Box>
 
                                                                         {/* Value */}

@@ -93,6 +93,7 @@ export const getPositionShortForm = (position: unknown): string => {
     'forward': 'FW',
     'striker': 'ST',
     'center forward': 'CF',
+    'central forward': 'CF',
     'right forward': 'RF',
     'left forward': 'LF',
     'right winger': 'RW',

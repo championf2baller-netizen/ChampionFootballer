@@ -6046,7 +6046,7 @@ function AllLeagues() {
                               <Button
                                 size="small"
                                 disabled={isCreatingSeason || isCompleted}
-                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: 'blue' }} /> : undefined}
+                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: '#0388E3' }} /> : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openCreateSeasonConfirm(league);

@@ -79,6 +79,7 @@ import GoalsIcon from '@/Components/images/goal.png';
 import AssistIcon from '@/Components/images/Assist.png';
 import MOTMIcon from '@/Components/images/MOTM.png';
 import ImpactIcon from '@/Components/images/imapct.png';
+import DefImpIcon from '@/Components/images/defimp.png';
 import CleanSheetIcon from '@/Components/images/cleansheet.png';
 import MentalityIcon from '@/Components/images/metality.png';
 import { useAuth } from '@/lib/hooks';
@@ -4448,8 +4449,8 @@ Important Management Controls:          </Typography>
                 case 'Clean Sheets (Goalkeeper)': return <Image src={CleanSheetIcon} alt="Clean Sheets" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case 'Goal Scored': return <Image src={GoalsIcon} alt="Goal Scored" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case 'Assist': return <Image src={AssistIcon} alt="Assist" width={22} height={22} style={{ objectFit: 'contain' }} />;
-                case 'Man of the Match Votes': return <Star sx={{ color: '#FFD700', fontSize: '1.4rem' }} />;
-                case 'Defensive Impact': return <Image src={ImpactIcon} alt="Defensive Impact" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Man of the Match Votes': return <Image src={MOTMIcon} alt="Man of the Match Votes" width={22} height={22} style={{ objectFit: 'contain' }} />;
+                case 'Defensive Impact': return <Image src={DefImpIcon} alt="Defensive Impact" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case '+ Mentality': return <Image src={MentalityIcon} alt="+ Mentality" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 default: return null;
               }

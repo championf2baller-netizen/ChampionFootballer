@@ -133,7 +133,7 @@ export default function PlayerCard({ member }: PlayerCardProps) {
                           {/* <SignalCellularAltIcon sx={{ color: isSelected ? 'white' : '#00C853', fontSize: { xs: 16, sm: 24 } }} /> */}
                         </Box>
                         <Typography variant="h6" component="span" sx={{ fontWeight: 'bold', minWidth: { xs: 36, sm: 60 }, textAlign: 'center', fontSize: { xs: 13, sm: 20 } }}>
-                          {getPositionShortForm(member.position)}
+                          {getPositionShortForm(member.position || (member as any).positionType || (member as any).position_type)}
                         </Typography>
                       </Box>
                     </ListItem>

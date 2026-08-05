@@ -762,7 +762,7 @@ export default function WorldRankingTable() {
                           {p.name}
                         </Link>
                       </TableCell>
-                      <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>{getPositionShortForm(p.position)}</TableCell>
+                      <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>{getPositionShortForm(p.position || p.positionType || '')}</TableCell>
                       <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>{p.country || '-'}</TableCell>
                       <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, textAlign: 'center', minWidth: { xs: 90, sm: 120 }, width: { xs: 90, sm: 120 }, maxWidth: { xs: 90, sm: 120 } }}>{getLevelTitle(p.totalXP ?? 0)}</TableCell>
                       <TableCell sx={{ color: '#fff', fontWeight: 700, fontSize: 14, py: 1.8, textAlign: 'center', minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>

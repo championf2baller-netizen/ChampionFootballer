@@ -36,7 +36,7 @@ import Image from 'next/image';
 import SearchIcon from '@/Components/images/searchicon.png';
 import TableGraphIcon from '@/Components/images/tablegrapicon.png';
 import AllPlayersLoadingSkeleton from '@/Components/loading/AllPlayersLoadingSkeleton';
-import { isGuestPlayerRecord, isRegisteredPlayerRecord } from '@/lib/playerIdentity';
+import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
 
 // Lazy load CloseButton
 const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
@@ -837,10 +837,10 @@ const AllPlayersPage = () => {
   }
 
   function getPositionLabel(player: Player): string {
-    const fromType = (player.positionType || '').toString().trim();
-    if (fromType) return fromType;
     const fromPosition = (player.position || '').toString().trim();
-    if (fromPosition) return fromPosition;
+    if (fromPosition && fromPosition !== '-') return getPositionShortForm(fromPosition);
+    const fromType = (player.positionType || '').toString().trim();
+    if (fromType && fromType !== '-') return getPositionShortForm(fromType);
     return '-';
   }
 
