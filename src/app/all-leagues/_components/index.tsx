@@ -6066,7 +6066,7 @@ function AllLeagues() {
                                   textDecoration: 'underline',
                                   textUnderlineOffset: '3px',
                                   '& .MuiButton-startIcon .MuiSvgIcon-root': {
-                                    color: 'blue',
+                                    color: '#0388E3',
                                   },
                                   // color: isCompleted ? '#ffffff' : '#d1fae5',
                                   // border: isCompleted ? '1px solid #111827' : '1px solid rgba(39,171,131,0.85)',
