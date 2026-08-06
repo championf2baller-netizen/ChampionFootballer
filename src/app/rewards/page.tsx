@@ -307,7 +307,7 @@ const summarizeUserMatchesByLeague = (userId: string, leagues: League[]): Record
         sameComparableId(m.homeMentalityId, userId) || sameComparableId(m.awayMentalityId, userId);
       const motmWinnerId = getTopMotmWinnerId(m.manOfTheMatchVotes);
       const wonMotmAward = sameComparableId(motmWinnerId, userId);
-      const cleanSheetTeam = oppGoals === 0;
+      const cleanSheetTeam = result === 'W' && oppGoals === 0;
 
       arr.push({
         goals: ps.goals || 0,
