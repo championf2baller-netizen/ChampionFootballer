@@ -6062,7 +6062,7 @@ function AllLeagues() {
                                   color: isCompleted ? '#111827' : '#0388E3',
                                   fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
                                   fontWeight: 600,
-                                  fontSize: { xs: '10px', sm: '16px' },
+                                  fontSize: { xs: '12px', sm: '16px' },
                                   textDecoration: 'underline',
                                   textUnderlineOffset: '3px',
                                   '& .MuiButton-startIcon .MuiSvgIcon-root': {

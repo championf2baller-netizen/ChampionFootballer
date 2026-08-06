@@ -442,7 +442,7 @@ const LEADERBOARD_METRIC_CONFIG = [
         label: 'CONTRIBUTION INDEX %',
         icon: Imapct,
         infoSummary: 'Shows overall contribution as a percentage.',
-        infoFormula: "Measures a player's contribution towards winning matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions or the selected league and season.",
+        infoFormula: "Measures a player's contribution towards winning matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions for the selected league and season.",
     },
 ] as const;
 
