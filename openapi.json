@@ -1,0 +1,909 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Champion Footballer API",
+    "version": "1.0.0",
+    "description": "Complete OpenAPI 3.0 specification for Champion Footballer backend API (Node.js/Koa + PostgreSQL + Sequelize ORM). Covers Authentication, User Profiles, League & Season Management, Matchday Operations, Lineup Layouts, Performance Statistics, Leaderboards, World Ranking, Fantasy Dream Team, and Notifications."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://cfbackend.championfootballer.co.uk",
+      "description": "Production Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Provide JWT Bearer Token in Authorization header: Bearer <token>"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "token",
+        "description": "Session token passed in HTTP cookies (token or auth_token)"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "age": { "type": "integer" },
+          "gender": { "type": "string", "enum": ["male", "female"] },
+          "country": { "type": "string", "nullable": true },
+          "state": { "type": "string", "nullable": true },
+          "city": { "type": "string", "nullable": true },
+          "phone": { "type": "string", "nullable": true },
+          "phoneCountryCode": { "type": "string", "nullable": true },
+          "position": { "type": "string", "enum": ["FW", "MF", "DF", "GK"], "nullable": true },
+          "positionType": { "type": "string", "nullable": true },
+          "style": { "type": "string", "nullable": true },
+          "preferredFoot": { "type": "string", "nullable": true },
+          "shirtNumber": { "type": "string", "nullable": true },
+          "profilePicture": { "type": "string", "nullable": true },
+          "skills": {
+            "type": "object",
+            "properties": {
+              "dribbling": { "type": "integer", "default": 50 },
+              "shooting": { "type": "integer", "default": 50 },
+              "passing": { "type": "integer", "default": 50 },
+              "pace": { "type": "integer", "default": 50 },
+              "defending": { "type": "integer", "default": 50 },
+              "physical": { "type": "integer", "default": 50 }
+            }
+          },
+          "xp": { "type": "integer", "default": 0 },
+          "achievements": { "type": "array", "items": { "type": "string" } },
+          "isVerified": { "type": "boolean", "default": false },
+          "provider": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "League": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "inviteCode": { "type": "string" },
+          "maxGames": { "type": "integer", "nullable": true },
+          "active": { "type": "boolean", "default": true },
+          "archived": { "type": "boolean", "default": false },
+          "showPoints": { "type": "boolean", "default": true },
+          "image": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Season": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "leagueId": { "type": "string", "format": "uuid" },
+          "seasonNumber": { "type": "integer" },
+          "name": { "type": "string" },
+          "inviteCode": { "type": "string" },
+          "isActive": { "type": "boolean", "default": true },
+          "archived": { "type": "boolean", "default": false },
+          "deleted": { "type": "boolean", "default": false },
+          "startDate": { "type": "string", "format": "date-time" },
+          "endDate": { "type": "string", "format": "date-time", "nullable": true },
+          "maxGames": { "type": "integer", "nullable": true },
+          "showPoints": { "type": "boolean", "default": true },
+          "trophyAwardSnapshot": { "type": "object" }
+        }
+      },
+      "Match": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "leagueId": { "type": "string", "format": "uuid" },
+          "seasonId": { "type": "string", "format": "uuid", "nullable": true },
+          "date": { "type": "string", "format": "date-time" },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "location": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["SCHEDULED", "IN_PROGRESS", "RESULT_UPLOADED", "REVISION_REQUESTED", "RESULT_PUBLISHED"],
+            "default": "SCHEDULED"
+          },
+          "homeTeamName": { "type": "string" },
+          "awayTeamName": { "type": "string" },
+          "homeTeamGoals": { "type": "integer", "nullable": true },
+          "awayTeamGoals": { "type": "integer", "nullable": true },
+          "homeCaptainId": { "type": "string", "format": "uuid", "nullable": true },
+          "awayCaptainId": { "type": "string", "format": "uuid", "nullable": true },
+          "homeDefensiveImpactId": { "type": "string", "format": "uuid", "nullable": true },
+          "homeMentalityId": { "type": "string", "format": "uuid", "nullable": true },
+          "awayDefensiveImpactId": { "type": "string", "format": "uuid", "nullable": true },
+          "awayMentalityId": { "type": "string", "format": "uuid", "nullable": true },
+          "homeTeamImage": { "type": "string", "nullable": true },
+          "awayTeamImage": { "type": "string", "nullable": true },
+          "homeWinPct": { "type": "integer", "nullable": true },
+          "awayWinPct": { "type": "integer", "nullable": true },
+          "archived": { "type": "boolean", "default": false },
+          "deleted": { "type": "boolean", "default": false }
+        }
+      },
+      "MatchStatistics": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "match_id": { "type": "string", "format": "uuid" },
+          "goals": { "type": "integer", "default": 0 },
+          "assists": { "type": "integer", "default": 0 },
+          "cleanSheets": { "type": "integer", "default": 0 },
+          "penalties": { "type": "integer", "default": 0 },
+          "freeKicks": { "type": "integer", "default": 0 },
+          "yellowCards": { "type": "integer", "default": 0 },
+          "redCards": { "type": "integer", "default": 0 },
+          "defence": { "type": "integer", "default": 0 },
+          "impact": { "type": "integer", "default": 0 },
+          "minutesPlayed": { "type": "integer", "default": 0 },
+          "rating": { "type": "number", "format": "float", "default": 0.0 },
+          "xpAwarded": { "type": "integer", "default": 0 }
+        }
+      },
+      "Vote": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "matchId": { "type": "string", "format": "uuid" },
+          "voterId": { "type": "string", "format": "uuid" },
+          "votedForId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "Notification": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "read": { "type": "boolean", "default": false }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string", "example": "Invalid credentials or missing required fields." }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": true },
+          "message": { "type": "string", "example": "Operation completed successfully." }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Basic Server Health Check",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "example": { "status": "ok", "timestamp": "2026-08-06T11:50:00.000Z", "uptime": 3600 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "summary": "Ping Test",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Pong response",
+            "content": {
+              "application/json": {
+                "example": { "pong": true, "time": 1786103400000 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/detailed": {
+      "get": {
+        "summary": "Detailed Health & Database Check",
+        "tags": ["System"],
+        "responses": {
+          "200": { "description": "Database and memory status healthy" },
+          "503": { "description": "Database connection error" }
+        }
+      }
+    },
+    "/api/contact": {
+      "post": {
+        "summary": "Submit Contact Form",
+        "tags": ["System"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "message"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/schemas/SuccessResponse" },
+          "400": { "$ref": "#/components/schemas/ErrorResponse" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register New Player Account",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["firstName", "lastName", "email", "password", "phoneCountryCode", "phone", "age", "gender", "country", "city"],
+                "properties": {
+                  "firstName": { "type": "string", "maxLength": 20 },
+                  "lastName": { "type": "string", "maxLength": 20 },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 6, "maxLength": 16 },
+                  "phoneCountryCode": { "type": "string", "example": "GB" },
+                  "phone": { "type": "string" },
+                  "age": { "type": "integer", "minimum": 18, "maximum": 65 },
+                  "gender": { "type": "string", "enum": ["male", "female"] },
+                  "country": { "type": "string" },
+                  "city": { "type": "string" },
+                  "position": { "type": "string" },
+                  "shirtNumber": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User created successfully" },
+          "400": { "description": "Validation error or missing fields" },
+          "409": { "description": "Email already exists" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "User Login",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful. Returns JWT token and sets auth cookie." },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Request Password Reset OTP",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Reset OTP code sent via email" }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "summary": "Get Authenticated User Profile",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns full user profile" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "patch": {
+        "summary": "Update Profile Attributes",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": { "type": "string" },
+                  "lastName": { "type": "string" },
+                  "position": { "type": "string" },
+                  "positionType": { "type": "string" },
+                  "shirtNumber": { "type": "string" },
+                  "skills": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated" }
+        }
+      },
+      "delete": {
+        "summary": "Delete Profile Account",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Account deleted" }
+        }
+      }
+    },
+    "/profile/password": {
+      "patch": {
+        "summary": "Change Account Password",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["currentPassword", "newPassword"],
+                "properties": {
+                  "currentPassword": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password updated successfully" },
+          "400": { "description": "Incorrect current password or weak new password" }
+        }
+      }
+    },
+    "/profile/picture": {
+      "post": {
+        "summary": "Upload Profile Avatar",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "profilePicture": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Image uploaded to Cloudinary and profile updated" }
+        }
+      },
+      "delete": {
+        "summary": "Remove Profile Avatar",
+        "tags": ["Profile"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Profile picture reset to default" }
+        }
+      }
+    },
+    "/users/me/global-stats": {
+      "get": {
+        "summary": "Get Aggregated Global Career Stats",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns matches played, goals, assists, clean sheets, defensive impact, MOTM count" }
+        }
+      }
+    },
+    "/users/me/achievements": {
+      "get": {
+        "summary": "Calculate User Achievements & Badges",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Returns array of unlocked and in-progress achievement badges" }
+        }
+      }
+    },
+    "/users/me/achievements/award": {
+      "post": {
+        "summary": "Persist Achievements XP to Profile",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Awards missing XP and updates user profile total XP" }
+        }
+      }
+    },
+    "/leagues": {
+      "get": {
+        "summary": "List User's Active Leagues",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "List of joined and administered leagues" }
+        }
+      },
+      "post": {
+        "summary": "Create New League",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "maxGames": { "type": "integer" },
+                  "image": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "League created with auto-generated 16-char invite code" }
+        }
+      }
+    },
+    "/leagues/join": {
+      "post": {
+        "summary": "Join League via Invite Code",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["inviteCode"],
+                "properties": {
+                  "inviteCode": { "type": "string", "example": "CF16CHARCODE1234" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User associated with league and active season" },
+          "404": { "description": "Invalid invite code" }
+        }
+      }
+    },
+    "/leagues/{id}": {
+      "get": {
+        "summary": "Get League Details by ID",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns league, members, active season, and matches" }
+        }
+      },
+      "patch": {
+        "summary": "Update League Settings",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "League settings updated" }
+        }
+      },
+      "delete": {
+        "summary": "Delete League",
+        "tags": ["Leagues"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "League deleted" }
+        }
+      }
+    },
+    "/leagues/{id}/matches": {
+      "get": {
+        "summary": "List Matches in League",
+        "tags": ["Leagues & Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns matches list for league" }
+        }
+      },
+      "post": {
+        "summary": "Create Match in League",
+        "tags": ["Leagues & Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["date", "start", "end", "location"],
+                "properties": {
+                  "date": { "type": "string", "format": "date-time" },
+                  "start": { "type": "string", "format": "date-time" },
+                  "end": { "type": "string", "format": "date-time" },
+                  "location": { "type": "string" },
+                  "homeTeamName": { "type": "string" },
+                  "awayTeamName": { "type": "string" },
+                  "seasonId": { "type": "string", "format": "uuid" },
+                  "homeTeamImage": { "type": "string", "format": "binary" },
+                  "awayTeamImage": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Match created under league and season" }
+        }
+      }
+    },
+    "/leagues/{id}/matches/{matchId}/team-view": {
+      "get": {
+        "summary": "Get Pitch Formation & Lineup Screen Data",
+        "tags": ["Leagues & Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns Home/Away rosters, captains, layout coordinates, available bench" }
+        }
+      }
+    },
+    "/leagues/{id}/matches/{matchId}/layout": {
+      "patch": {
+        "summary": "Save Pitch Drag-and-Drop Formation Coordinates",
+        "tags": ["Leagues & Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "layout": { "type": "array", "items": { "type": "object" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pitch formation saved" }
+        }
+      }
+    },
+    "/matches/{matchId}/availability": {
+      "get": {
+        "summary": "Get Player Availability RSVPs for Match",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns list of available and unavailable users" }
+        }
+      },
+      "post": {
+        "summary": "Submit Player RSVP (AVAILABLE / UNAVAILABLE)",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["AVAILABLE", "UNAVAILABLE"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "RSVP recorded" }
+        }
+      }
+    },
+    "/matches/{matchId}/stats": {
+      "get": {
+        "summary": "Get Match Performance Statistics",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns player stats for target match" }
+        }
+      },
+      "post": {
+        "summary": "Upload Match Score & Individual Player Stats",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["homeTeamGoals", "awayTeamGoals", "playerStats"],
+                "properties": {
+                  "homeTeamGoals": { "type": "integer" },
+                  "awayTeamGoals": { "type": "integer" },
+                  "playerStats": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["userId"],
+                      "properties": {
+                        "userId": { "type": "string", "format": "uuid" },
+                        "goals": { "type": "integer" },
+                        "assists": { "type": "integer" },
+                        "cleanSheets": { "type": "integer" },
+                        "yellowCards": { "type": "integer" },
+                        "redCards": { "type": "integer" },
+                        "rating": { "type": "number", "format": "float" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Result uploaded; match status transitions to RESULT_UPLOADED" },
+          "403": { "description": "Only match captains or admins can upload results" }
+        }
+      }
+    },
+    "/matches/{matchId}/confirm": {
+      "post": {
+        "summary": "Confirm or Request Revision of Match Result",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "matchId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["confirm"],
+                "properties": {
+                  "confirm": { "type": "boolean" },
+                  "suggestedHomeGoals": { "type": "integer", "nullable": true },
+                  "suggestedAwayGoals": { "type": "integer", "nullable": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Match status updated to RESULT_PUBLISHED (if confirmed) or REVISION_REQUESTED" }
+        }
+      }
+    },
+    "/matches/{id}/votes": {
+      "get": {
+        "summary": "Get Match MOTM Votes Tally",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns vote counts per player" }
+        }
+      },
+      "post": {
+        "summary": "Cast Vote for Man of the Match (MOTM)",
+        "tags": ["Matches"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["votedForId"],
+                "properties": {
+                  "votedForId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Vote recorded" },
+          "400": { "description": "Self-voting or duplicate voting prevented" }
+        }
+      }
+    },
+    "/players/{id}/profile": {
+      "get": {
+        "summary": "Get Complete Player Profile & Match History",
+        "tags": ["Players"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "leagueId", "in": "query", "schema": { "type": "string" } },
+          { "name": "year", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns player info, leagues, match logs, ratings, and statistics" }
+        }
+      }
+    },
+    "/players/{id}/stats": {
+      "get": {
+        "summary": "Get Detailed Player Stats Breakdown",
+        "tags": ["Players"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } },
+          { "name": "leagueId", "in": "query", "schema": { "type": "string" } },
+          { "name": "seasonId", "in": "query", "schema": { "type": "string" } },
+          { "name": "year", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns goals, assists, clean sheets, wins, losses, contribution index, avg XP" }
+        }
+      }
+    },
+    "/leaderboard": {
+      "get": {
+        "summary": "Get Ranked Player Leaderboard",
+        "tags": ["Leaderboard & Rankings"],
+        "parameters": [
+          { "name": "leagueId", "in": "query", "schema": { "type": "string" } },
+          { "name": "seasonId", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["xp", "goals", "assists", "cleanSheets", "motm", "winRate"] } }
+        ],
+        "responses": {
+          "200": { "description": "Array of ranked players sorted by target metric" }
+        }
+      }
+    },
+    "/world-ranking": {
+      "get": {
+        "summary": "Get Global Top Players by XP",
+        "tags": ["Leaderboard & Rankings"],
+        "responses": {
+          "200": { "description": "Returns globally top-ranked players" }
+        }
+      }
+    },
+    "/dream-team": {
+      "get": {
+        "summary": "Generate Fantasy Dream Team XI",
+        "tags": ["Fantasy Dream Team"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "formation", "in": "query", "schema": { "type": "string", "default": "4-3-3" } }
+        ],
+        "responses": {
+          "200": { "description": "Returns optimal starting XI formation populated with top-rated players" }
+        }
+      }
+    },
+    "/notifications": {
+      "get": {
+        "summary": "Get User Notifications",
+        "tags": ["Notifications"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "List of user notifications" }
+        }
+      }
+    },
+    "/notifications/{id}/read": {
+      "patch": {
+        "summary": "Mark Notification as Read",
+        "tags": ["Notifications"],
+        "security": [{ "bearerAuth": [] }, { "cookieAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": { "description": "Notification marked as read" }
+        }
+      }
+    }
+  }
+}

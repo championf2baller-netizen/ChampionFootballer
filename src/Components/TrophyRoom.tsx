@@ -8,7 +8,7 @@ import GoldenBootImg from '@/Components/images/goldenboot.png';
 import KingPlayMakerImg from '@/Components/images/kingplaymaker.png';
 import ShieldImg from '@/Components/images/shield.png';
 import DarkHorseImg from '@/Components/images/darkhourse.png';
-import StarKeeperImg from '@/Components/images/brown.svg';
+import StarKeeperImg from '@/Components/images/startkeeper.png';
 import Image, { StaticImageData } from 'next/image';
 import { useAuth } from '@/lib/hooks';
 import CloseIcon from '@mui/icons-material/Close';
@@ -160,7 +160,7 @@ const TrophyCard = ({ title, description, image, color, winner, onButtonClick }:
             width: '100%',
             objectFit: 'contain',
             objectPosition: 'center center',
-            filter: title === 'Star Keeper' ? BLUE_FILTER : 'none',
+            filter: 'none',
           }}
         />
       </Box>

@@ -43,7 +43,7 @@ import { useAuth } from '@/lib/hooks';
 import { playerAPI } from '@/lib/api';
 import GoatImg from '@/Components/images/goat.png';
 import { BarChart, SpaceDashboard } from '@mui/icons-material';
-import StarKeeperImg from '@/Components/images/brown.svg';
+import StarKeeperImg from '@/Components/images/startkeeper.png';
 import SearchIcon from '@/Components/images/searchicon.png';
 import XPStarMilestoneCard, { XP_TIERS, getXPTier } from '@/Components/XPStarMilestoneCard';
 import PlayerProfileLoadingSkeleton from '@/Components/loading/PlayerProfileLoadingSkeleton';
@@ -209,7 +209,7 @@ const TROPHY_ICON_SIZE_BY_LABEL: Record<string, number> = {
     'King Playmaker': 50,
     'Legendary Shield': 50,
     'The Dark Horse': 50,
-    'Star Keeper': 50,
+    'Star Keeper': 35,
 };
 
 const getTrophyIconSize = (label?: string): number => {
@@ -1640,8 +1640,8 @@ export default function PlayerStatsPage() {
             (val === 'all'
                 ? hasMatches(l)
                 : (l.matches || []).some(m => dayjs(m.date).year().toString() === val) ||
-                  (l.createdAt ? dayjs(l.createdAt).year().toString() === val : false) ||
-                  (l.updatedAt ? dayjs(l.updatedAt).year().toString() === val : false))
+                (l.createdAt ? dayjs(l.createdAt).year().toString() === val : false) ||
+                (l.updatedAt ? dayjs(l.updatedAt).year().toString() === val : false))
         );
 
         // preserve league if possible, else select latest league for that year (or 'all')
@@ -1989,7 +1989,7 @@ export default function PlayerStatsPage() {
             {/* Header Section */}
             <Box sx={{
                 mt: 0,
-                mb: {sm:0,xs:0,md:4},
+                mb: { sm: 0, xs: 0, md: 4 },
                 width: '100vw',
                 position: 'relative',
                 left: '50%',
@@ -2069,7 +2069,7 @@ export default function PlayerStatsPage() {
                                 position: 'relative',
                                 zIndex: 1200,
                                 isolation: 'isolate',
-                    mt: { xs: -2, md: 0 }
+                                mt: { xs: -2, md: 0 }
 
                             }}
                         >
@@ -3345,7 +3345,7 @@ export default function PlayerStatsPage() {
                                                             height={getTrophyIconSize(t.label)}
                                                             style={{
                                                                 objectFit: 'contain',
-                                                                filter: t.label === 'Star Keeper' ? BLUE_FILTER : 'none'
+                                                                filter: 'none'
                                                             }}
                                                         />
                                                     </Box>
