@@ -3333,9 +3333,7 @@ export default function GlobalTrophyRoom() {
               individualRows.push(allIndividual.slice(i, i + 3));
             }
 
-            const hasAnyTrophies = myTrophies.length > 0;
-
-            return hasAnyTrophies ? (
+            return (
               <>
                 {/* Profile Card with Stars */}
                 <Paper sx={{
@@ -3427,13 +3425,9 @@ export default function GlobalTrophyRoom() {
                         bgcolor: '#1a1a1f',
                         p: { xs: 1.25, sm: 2 },
                         pr: { xs: 1.25, sm: 2, md: 2.4 },
-                        minHeight: { xs: 'auto', sm: '230px' },
+                        minHeight: { xs: '120px', sm: '230px' },
                       }}>
-                        {leagueRows.length === 0 ? (
-                          <Typography sx={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', py: 4 }}>
-                            No league awards yet
-                          </Typography>
-                        ) : (
+                        {leagueRows.length === 0 ? null : (
                           leagueRows.map((row, rowIdx) => (
                             <Box key={`league-row-${rowIdx}`}>
                               <Box sx={{
@@ -3459,7 +3453,6 @@ export default function GlobalTrophyRoom() {
                                         transform: 'scale(1.05)',
                                       },
                                     }}
-                                  // onClick={() => openPlayerQuickView(trophy)}
                                   >
                                     <Box sx={{
                                       position: 'relative',
@@ -3525,7 +3518,7 @@ export default function GlobalTrophyRoom() {
                         bgcolor: '#1a1a1f',
                         p: { xs: 1.25, sm: 2 },
                         pl: { xs: 1.25, sm: 2, md: 2.4 },
-                        minHeight: { xs: 'auto', sm: '230px' },
+                        minHeight: { xs: '120px', sm: '230px' },
                         position: 'relative',
                         '&::before': {
                           content: '""',
@@ -3538,11 +3531,7 @@ export default function GlobalTrophyRoom() {
                           backgroundColor: 'rgba(255,255,255,0.9)',
                         },
                       }}>
-                        {individualRows.length === 0 ? (
-                          <Typography sx={{ color: 'rgba(255,255,255,0.5)', textAlign: 'center', py: 4 }}>
-                            No individual awards yet
-                          </Typography>
-                        ) : (
+                        {individualRows.length === 0 ? null : (
                           individualRows.map((row, rowIdx) => (
                             <Box key={`individual-row-${rowIdx}`}>
                               <Box sx={{
@@ -3568,7 +3557,6 @@ export default function GlobalTrophyRoom() {
                                         transform: 'scale(1.05)',
                                       },
                                     }}
-                                  // onClick={() => openPlayerQuickView(trophy)}
                                   >
                                     <Box sx={{
                                       position: 'relative',
@@ -3611,37 +3599,6 @@ export default function GlobalTrophyRoom() {
                   </Box>
                 </Paper>
               </>
-            ) : (
-              <Paper sx={{
-                background: '#1d1d22',
-                borderRadius: { xs: '0 0 26px 26px', sm: '0 0 38px 38px' },
-                p: 0,
-                mb: 3,
-                border: '1.5px solid rgba(255,255,255,0.75)',
-                overflow: 'hidden',
-                maxWidth: 900,
-                mx: 'auto',
-              }}>
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  py: { xs: 6, sm: 8 },
-                  px: { xs: 2, sm: 4 },
-                  gap: 2,
-                }}>
-                  <Trophy size={48} color="rgba(255,255,255,0.25)" />
-                  <Typography sx={{
-                    textAlign: 'center',
-                    color: 'rgba(255,255,255,0.55)',
-                    fontSize: { xs: '1rem', sm: '1.2rem' },
-                    fontWeight: 600,
-                  }}>
-                    No achievements yet. Play more matches to unlock trophies!
-                  </Typography>
-                </Box>
-              </Paper>
             );
           })()}
 

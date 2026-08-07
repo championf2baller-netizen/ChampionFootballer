@@ -427,7 +427,7 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
   leagues.forEach((league) => {
     const completedMatches = sortMatchesChronologically((league.matches ?? []).filter(isResultPublished));
     const totalMatches = completedMatches.length;
-    if (!totalMatches) return;
+    if (totalMatches < 10) return;
     const playedMatches = completedMatches.filter((m) => {
       const { isHome, isAway } = isUserInMatch(user.id, m);
       return isHome || isAway;
@@ -535,7 +535,7 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
       unlocked: ironWillCount > 0,
       progressText: ironWillBestTotal > 0
         ? `Best participation in a league: ${ironWillBestPlayed}/${ironWillBestTotal} (${Math.round(ironWillBestPercent * 100)}%)`
-        : 'No completed league matches yet',
+        : 'No completed league with 10+ matches yet',
     },
     {
       id: 'consecutive_10_victories',
@@ -651,8 +651,8 @@ const mergeBadges = (client: Badge[], server: Badge[] | null | undefined): Badge
 const BadgeCard = ({ id, title, description, image, color, count, unlocked, progressText, xp, onOpen }: Badge & { onOpen?: () => void }) => {
   const totalXPEarned = count * xp;
 
-     
-  
+
+
   return (
     <Paper
       elevation={4}
@@ -669,11 +669,11 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
         flexDirection: 'column',
         justifyContent: 'space-between',
         overflow: 'hidden',
-        px: { xs: 1, sm: 1.5, md: 2},
+        px: { xs: 1, sm: 1.5, md: 2 },
         py: { xs: 1.5, sm: 2, md: 2 },
         position: 'relative',
-        background: unlocked 
-          ? 'linear-gradient(360deg, #00A77F -0.04%, #004131 98.75%)' 
+        background: unlocked
+          ? 'linear-gradient(360deg, #00A77F -0.04%, #004131 98.75%)'
           : '#747474',
         cursor: onOpen ? 'pointer' : 'default',
       }}
@@ -686,11 +686,11 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
         sx={{
           color: unlocked ? '#fff' : '#999',
           fontWeight: 'bold',
-          fontSize: { xs: '0.95rem', sm: '1.05rem' , md : '1.10rem' },
+          fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.10rem' },
           textAlign: 'center',
           fontFamily: 'var(--font-woodford-bourne-pro)',
           fontStyle: 'semibold',
-          fontWidth: 600, 
+          fontWidth: 600,
           // mb: 1,
         }}
       >
@@ -726,7 +726,7 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
               }}
             />
           )}
-          
+
           {/* Main Badge */}
           <Box
             sx={{
@@ -756,7 +756,7 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
             <Box
               sx={{
                 position: 'absolute',
-                bottom: {xs:-3.5, sm:-3.5 , md:8},
+                bottom: { xs: -3.5, sm: -3.5, md: 8 },
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: 'transparent',
@@ -767,14 +767,14 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: {xs:'0.6rem',sm:'0.8rem',md:'0.8rem'},
+                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.8rem' },
                 fontWeight: 700,
               }}
             >
               {xp}
             </Box>
           </Box>
-          
+
           {/* Right Star - Only show when unlocked */}
           {unlocked && (
             <Image
@@ -834,9 +834,9 @@ export default function RewardsPage() {
   const [error, setError] = useState<string | null>(null);
   const { user, token } = useAuth();
   const [serverBadges, setServerBadges] = useState<Badge[] | null>(null);
- const theme = useTheme();
-      const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const loading = leaguesLoading || achievementsLoading;
 
   // Badge detail modal state
@@ -896,7 +896,7 @@ export default function RewardsPage() {
           if (awardRes.ok && awardJson?.success && Number.isFinite(Number(awardJson.totalXP))) {
             setBackendTotalXP(Number(awardJson.totalXP));
           }
-        } catch {}
+        } catch { }
 
         // Fetch achievements
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me/achievements?_=${Date.now()}`, {
@@ -969,7 +969,7 @@ export default function RewardsPage() {
       cancelled = true;
     };
   }, [user?.id, token, myProfileXP]);
-  
+
   // Calculate total XP from all rewards
   const totalRewardsXP = myBadges.reduce((sum, badge) => sum + (badge.count * badge.xp), 0);
 
@@ -1041,107 +1041,107 @@ export default function RewardsPage() {
           Reward points are added to your XP profile and XP status only. They do not count toward league table points.
         </Typography> */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: { xs: 1, sm: 1.5, md: 1.2 }, rowGap: { xs: 2, sm: 3, md: 3 }, justifyContent: 'center', alignItems: 'stretch' }}>
-        {myBadges.length > 0 ? myBadges.map(b => (
-          <Box key={b.id} sx={{ height: '100%', width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 8px)', lg: 'calc(20% - 8px)' } }}>
-            <BadgeCard {...b} onOpen={() => openBadgeDetail(b)} />
-          </Box>
-        )) : (
-          <Typography sx={{ mt: 4, gridColumn: '1 / -1', textAlign: 'center' }}>
-            No badge progress yet.
-          </Typography>
-        )}
-      </Box>
-
-      {/* Badge detail modal */}
-      <Dialog 
-        open={openBadgeDlg} 
-        onClose={closeBadgeDetail} 
-        fullWidth 
-        maxWidth="sm" 
-        PaperProps={{ 
-          sx: { 
-            borderRadius: 2, 
-            background: '#2b2b2b',
-            border: '2px solid #444',
-          } 
-        }}
-      >
-        <DialogTitle sx={{ 
-          fontWeight: 700, 
-          display: 'flex', 
-          alignItems: 'center',
-          color: '#fff',
-          fontFamily: 'var(--font-woodford-bourne-pro)',
-          fontSize: { xs: '1.25rem', sm: '1.5rem' },
-          borderBottom: '1px solid #444',
-          pb: 2,
-        }}>
-          {selectedBadge?.title}
-          <Box sx={{ flexGrow: 1 }} />
-          <IconButton onClick={closeBadgeDetail} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ py: 3 }}>
-          {selectedBadge && (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 3, alignItems: 'center' }}>
-              <Box sx={{ 
-                position: 'relative', 
-                width: 120, 
-                height: 120, 
-                justifySelf: 'center',
-                p: 2,
-                borderRadius: '50%',
-                background: '#1f1f1f',
-                border: '2px solid #555',
-              }}>
-                <Image src={selectedBadge.image} alt={selectedBadge.title} width={96} height={96} style={{ objectFit: 'contain' }} />
-              </Box>
-              <Box>
-                <Typography sx={{ 
-                  fontWeight: 700, 
-                  mb: 1.5, 
-                  color: '#fff',
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                  fontSize: '1.1rem',
-                }}>
-                  How to earn this reward:
-                </Typography>
-                <Typography sx={{ 
-                  mb: 2, 
-                  color: '#bbb', 
-                  fontSize: '0.95rem', 
-                  lineHeight: 1.6,
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                }}>
-                  {selectedBadge.description}
-                </Typography>
-                <Box sx={{ height: '1px', bgcolor: '#444', my: 2 }} />
-                <Typography sx={{ 
-                  color: selectedBadge.unlocked ? '#fbbf24' : '#888', 
-                  mb: 1, 
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                }}>
-                  {selectedBadge.unlocked
-                    ? `Earned x${selectedBadge.count} | Total XP: ${formatNumber(selectedBadge.count * selectedBadge.xp)}`
-                    : `Progress: ${selectedBadge.progressText || 'Progress unavailable'}`}
-                </Typography>
-                <Typography sx={{ 
-                  color: '#888', 
-                  display: 'block', 
-                  mt: 1.5,
-                  fontSize: '0.85rem',
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                }}>
-                  Each reward earns you <span style={{ color: '#fbbf24', fontWeight: 700 }}>{selectedBadge.xp} XP</span> and can be achieved multiple times.
-                </Typography>
-              </Box>
+          {myBadges.length > 0 ? myBadges.map(b => (
+            <Box key={b.id} sx={{ height: '100%', width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 8px)', lg: 'calc(20% - 8px)' } }}>
+              <BadgeCard {...b} onOpen={() => openBadgeDetail(b)} />
             </Box>
+          )) : (
+            <Typography sx={{ mt: 4, gridColumn: '1 / -1', textAlign: 'center' }}>
+              No badge progress yet.
+            </Typography>
           )}
-        </DialogContent>
-      </Dialog>
+        </Box>
+
+        {/* Badge detail modal */}
+        <Dialog
+          open={openBadgeDlg}
+          onClose={closeBadgeDetail}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              background: '#2b2b2b',
+              border: '2px solid #444',
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            color: '#fff',
+            fontFamily: 'var(--font-woodford-bourne-pro)',
+            fontSize: { xs: '1.25rem', sm: '1.5rem' },
+            borderBottom: '1px solid #444',
+            pb: 2,
+          }}>
+            {selectedBadge?.title}
+            <Box sx={{ flexGrow: 1 }} />
+            <IconButton onClick={closeBadgeDetail} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ py: 3 }}>
+            {selectedBadge && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 3, alignItems: 'center' }}>
+                <Box sx={{
+                  position: 'relative',
+                  width: 120,
+                  height: 120,
+                  justifySelf: 'center',
+                  p: 2,
+                  borderRadius: '50%',
+                  background: '#1f1f1f',
+                  border: '2px solid #555',
+                }}>
+                  <Image src={selectedBadge.image} alt={selectedBadge.title} width={96} height={96} style={{ objectFit: 'contain' }} />
+                </Box>
+                <Box>
+                  <Typography sx={{
+                    fontWeight: 700,
+                    mb: 1.5,
+                    color: '#fff',
+                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                    fontSize: '1.1rem',
+                  }}>
+                    How to earn this reward:
+                  </Typography>
+                  <Typography sx={{
+                    mb: 2,
+                    color: '#bbb',
+                    fontSize: '0.95rem',
+                    lineHeight: 1.6,
+                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                  }}>
+                    {selectedBadge.description}
+                  </Typography>
+                  <Box sx={{ height: '1px', bgcolor: '#444', my: 2 }} />
+                  <Typography sx={{
+                    color: selectedBadge.unlocked ? '#fbbf24' : '#888',
+                    mb: 1,
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                  }}>
+                    {selectedBadge.unlocked
+                      ? `Earned x${selectedBadge.count} | Total XP: ${formatNumber(selectedBadge.count * selectedBadge.xp)}`
+                      : `Progress: ${selectedBadge.progressText || 'Progress unavailable'}`}
+                  </Typography>
+                  <Typography sx={{
+                    color: '#888',
+                    display: 'block',
+                    mt: 1.5,
+                    fontSize: '0.85rem',
+                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                  }}>
+                    Each reward earns you <span style={{ color: '#fbbf24', fontWeight: 700 }}>{selectedBadge.xp} XP</span> and can be achieved multiple times.
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+          </DialogContent>
+        </Dialog>
       </Box>
     </Box>
   );

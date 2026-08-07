@@ -77,7 +77,7 @@ export default function LandingPage() {
                   color: 'white',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 2,
+                  gap: 1.2,
                 }}
               >
                 {/* Top Hero Banner (Taller aspect ratio matching screenshot) */}
@@ -109,9 +109,8 @@ export default function LandingPage() {
                 <Box
                   sx={{
                     display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                    gap: { xs: 2, md: 2 },
-                    width: '100%',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                     width: '100%',
                   }}
                 >
                   {/* Left Card: Team Squad + Text */}
@@ -138,7 +137,7 @@ export default function LandingPage() {
                         alt="Football Team Squad"
                         fill
                         loading="lazy"
-                        sizes="(max-width: 600px) 100vw, (max-width: 1200px) 40vw, 600px"
+                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
                         style={{ objectFit: 'cover', objectPosition: 'center' }}
                         quality={100}
                       />
@@ -147,14 +146,13 @@ export default function LandingPage() {
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
                         fontWeight: '900 !important',
-                        // fontStyle: 'italic !important',
-                        fontSize: { xs: '0.85rem', sm: '1.02rem', md: '1.15rem' },
+                        fontSize: { xs: '0.65rem', sm: '0.9rem', md: '1.15rem' },
                         lineHeight: 1.2,
                         color: '#FFFFFF',
                         textTransform: 'uppercase',
                         textAlign: 'center',
-                        mt: 1.5,
-                        px: 1,
+                        mt: { xs: 1, sm: 1.5 },
+                        px: 0.5,
                         letterSpacing: '0.01em',
                       }}
                     >
@@ -186,7 +184,7 @@ export default function LandingPage() {
                         alt="Champion Footballer Players"
                         fill
                         loading="lazy"
-                        sizes="(max-width: 600px) 100vw, (max-width: 1200px) 40vw, 600px"
+                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
                         style={{ objectFit: 'cover', objectPosition: 'center' }}
                         quality={100}
                       />
@@ -195,14 +193,13 @@ export default function LandingPage() {
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
                         fontWeight: '900 !important',
-                        // fontStyle: 'italic !important',
-                        fontSize: { xs: '0.8rem', sm: '0.92rem', md: '1.05rem' },
+                        fontSize: { xs: '0.58rem', sm: '0.82rem', md: '1.05rem' },
                         lineHeight: 1.2,
                         color: '#FFFFFF',
                         textTransform: 'uppercase',
                         textAlign: 'center',
-                        mt: 1.5,
-                        px: 1,
+                        mt: { xs: 1, sm: 1.5 },
+                        px: 0.5,
                         letterSpacing: '0.01em',
                       }}
                     >
@@ -231,12 +228,13 @@ export default function LandingPage() {
                     p: 0,
                     display: 'flex',
                     flexDirection: 'column',
-                    width: '95%',
-                    ml: 2,
+                    width: { xs: '93%', sm: '94%', md: '95%' },
+                    mx: { xs: 'auto', md: 0 },
+                    ml: { xs: 'auto', md: 2 },
                   }}
                 >
                   {/* Header Container: Text on Top, Join Button Below It */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', md: 'flex-end' }, width: '100%', mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', mb: 1.5 }}>
                     <Typography
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
@@ -245,22 +243,15 @@ export default function LandingPage() {
                         lineHeight: { xs: '1.3', md: '35px' },
                         letterSpacing: '0% !important',
                         color: 'white',
-                        textAlign: { xs: 'center', md: 'right' },
-                        maxWidth: { xs: '100%', md: '355px' },
+                        textAlign: 'center',
+                        maxWidth: '100%',
                         width: '100%',
                         mt: 0,
                         mb: 1,
                         whiteSpace: { xs: 'nowrap', md: 'normal' },
                       }}
                     >
-                      The best football app
-                      <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>
-                        <br />
-                      </Box>
-                      <Box component="span" sx={{ display: { xs: 'inline', md: 'none' } }}>
-                        {' '}
-                      </Box>
-                      on the planet!
+                      The best football app on the planet!
                     </Typography>
 
                     <Button
@@ -284,9 +275,9 @@ export default function LandingPage() {
                           border: '1px solid #FFFFFF',
                         },
                         borderRadius: '7px',
-                        px: 3,
+                        width: '100%',
+                        height: '42px',
                         py: 0.5,
-                        minWidth: '85px',
                       }}
                     >
                       {showLogin ? 'Join' : 'Login'}
@@ -385,7 +376,7 @@ export default function LandingPage() {
             mx: 'auto',
             display: 'flex',
             justifyContent: 'center',
-            px: { xs: 2, md: 0 },
+            px: { xs: 0, md: 0 },
             pointerEvents: 'none',
             mt: { xs: 2, sm: 2, md: 10 },
             mb: 4,
@@ -398,7 +389,8 @@ export default function LandingPage() {
               gap: { xs: 2, md: 2 },
               pointerEvents: 'auto',
               alignItems: 'stretch',
-              width: '100%',
+              width: { xs: '93%', sm: '94%', md: '100%' },
+              mx: 'auto',
             }}
           >
             {features.map((f) => (
