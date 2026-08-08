@@ -1,4 +1,4 @@
-/* Fonts are bundled via next/font in layout.tsx */
+/* dddFonts are bundled via next/font in layout.tsx */
 
 @tailwind base;
 @tailwind components;
@@ -13,52 +13,26 @@
   --header-mobile-min-height: 120px;
 }
 
-
-
-
-
-
-
-
-
-/* Sailec font removed - file not present on server */
-
-.font-sailec {
-  font-family: var(--font-woodford-family), Arial, Helvetica, sans-serif;
-}
-
-/* Main title uses bundled Anton for consistent cross-device rendering */
-.main-title {
-  font-family: var(--font-geist-anton), 'Anton', sans-serif;
-  font-weight: bold;
-  font-size: clamp(36px, 4vw, 48px);
-  line-height: 1.2;
-}
-
-/* Section headings use bundled Oswald instead of system-only Franklin variants */
-.section-heading {
-  font-family: var(--font-oswald), "Oswald", sans-serif;
-  font-weight: 600;
-  font-size: clamp(24px, 3vw, 32px);
-  line-height: 1.3;
-}
-
-/* Body Text - Woodford Bourne Pro, Regular, 16-18px */
-.body-text {
-  font-family: var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif;
-  font-weight: 400;
-  font-size: clamp(16px, 1.2vw, 18px);
-  line-height: 1.5;
-}
-
-body {
-  font-family: var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif;
-}
-
+/* Fix MUI dropdown/popover scroll-lock layout shift and white gap on right edge */
 html,
-body {
-  max-width: 100%;
+body,
+body[style] {
+  max-width: 100vw;
   overflow-x: hidden;
+  padding-right: 0px !important;
+  margin-right: 0px !important;
+}
+
+body[style*="overflow: hidden"] {
+  overflow: auto !important;
+  padding-right: 0px !important;
+}
+
+.MuiPopover-root,
+.MuiModal-root,
+.MuiMenu-root,
+.MuiDialog-root {
+  padding-right: 0px !important;
 }
 
 @media (min-width: 768px) {
