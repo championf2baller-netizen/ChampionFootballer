@@ -3857,7 +3857,7 @@ export default function GlobalTrophyRoom() {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '64px 160px 64px', sm: '112px minmax(0, 260px) 112px' },
+                gridTemplateColumns: { xs: '76px 160px 52px', sm: '112px minmax(0, 260px) 112px' },
                 gap: { xs: 0.15, sm: 1 },
                 alignItems: 'start',
                 justifyContent: 'center',
@@ -3914,14 +3914,16 @@ export default function GlobalTrophyRoom() {
                         variant="caption"
                         sx={{
                           color: '#64748b',
-                          fontSize: { xs: '0.43rem', sm: '0.65rem' },
+                          fontSize: { xs: '0.45rem', sm: '0.65rem' },
                           textAlign: 'left',
-                          lineHeight: 1,
-                          whiteSpace: 'nowrap',
+                          lineHeight: 1.05,
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
                           letterSpacing: 0,
+                          width: '100%',
                         }}
                       >
-                        {isMobile ? it.shortLabel : it.label}
+                        {it.label}
                       </Typography>
                     </Box>
                   ))}

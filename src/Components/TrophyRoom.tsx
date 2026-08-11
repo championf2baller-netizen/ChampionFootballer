@@ -523,8 +523,10 @@ export default function TrophyRoom({ leagueId }: { leagueId: string }) {
                           fontSize: { xs: it.label === 'Clean Sheets' ? '0.55rem' : '0.6rem', sm: '0.75rem' },
                           textAlign: 'center',
                           lineHeight: 1.1,
-                          whiteSpace: 'nowrap',
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
                           letterSpacing: 0,
+                          width: '100%',
                         }}
                       >
                         {it.label}
