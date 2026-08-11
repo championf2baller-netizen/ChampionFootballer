@@ -1059,6 +1059,31 @@ export const playerAPI = {
     }
   },
 
+  getCareerDashboard: async (playerId: string, leagueId?: string, year?: string, seasonId?: string): Promise<ApiResponse<any>> => {
+    try {
+      const token = Cookies.get('token') || getAuthToken();
+      const params = new URLSearchParams({
+        leagueId: leagueId || 'all',
+        year: year || 'all',
+        seasonId: seasonId || 'all',
+        _t: String(Date.now())
+      });
+      const response = await optimizedFetch(`/players/${playerId}/career-dashboard?${params.toString()}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return { success: false, message: 'Failed to fetch career dashboard', error: errorData.message || 'Failed to fetch career dashboard' };
+      }
+
+      const data = await response.json();
+      return { success: true, data: data.data, message: data.message };
+    } catch (error) {
+      return { success: false, message: 'An unexpected error occurred', error: error instanceof Error ? error.message : 'An unexpected error occurred' };
+    }
+  },
+
   // Fetch player XP with filters (league/year)
   getPlayerXP: async (playerId: string, leagueId?: string, year?: string): Promise<ApiResponse<{ totalXP: number; avgXP: number; matches: number }>> => {
     try {

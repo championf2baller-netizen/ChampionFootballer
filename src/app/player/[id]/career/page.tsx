@@ -820,6 +820,7 @@ export default function CareerPage() {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [playerName, setPlayerName] = useState<string>('');
   const [playerPosition, setPlayerPosition] = useState<string>('');
+  const [careerDashboardData, setCareerDashboardData] = useState<any>(null);
 
   // Initialize filters from URL params on mount
   useEffect(() => {
@@ -1067,6 +1068,24 @@ export default function CareerPage() {
   // ---------- State for seasons filter ----------
   const [seasonFilter, setSeasonFilter] = useState<string>('all');
   const [availableSeasons, setAvailableSeasons] = useState<SeasonInfo[]>([]);
+
+  // Fetch career dashboard calculation data from backend API
+  useEffect(() => {
+    if (!playerId) return;
+    let cancelled = false;
+    playerAPI
+      .getCareerDashboard(String(playerId), filters.leagueId, filters.year, seasonFilter)
+      .then((res) => {
+        if (cancelled) return;
+        if (res.success && res.data) {
+          setCareerDashboardData(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [playerId, filters.leagueId, filters.year, seasonFilter, refreshNonce]);
   const [seasonsLoading, setSeasonsLoading] = useState(false);
   const yearFilterButtonRef = useRef<HTMLButtonElement | null>(null);
   const leagueFilterButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -1716,194 +1735,30 @@ export default function CareerPage() {
     };
   }, [strengths]);
 
-  // --- Last 10 vs Previous 10 for Impact section (FIXED) ---
+  // --- Last 10 vs Previous 10 for Impact section (From Backend API) ---
   const lastPrev10 = useMemo(() => {
-    const played = filteredMatches
-      .filter(m => !!m.playerStats && !!m.playerStats.id)
-      .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
-    const last10 = played.slice(-10);
-    const prev10 = played.slice(-20, -10);
-
-    const sum = (arr: LeagueMatch[], pick: (ps: PlayerMatchStats) => number) =>
-      arr.reduce((s, m) => s + pick(m.playerStats || {}), 0);
-
-    const count = (arr: LeagueMatch[], pred: (ps: PlayerMatchStats) => boolean) =>
-      arr.reduce((s, m) => s + (pred(m.playerStats || {}) ? 1 : 0), 0);
-
-    const agg = (arr: LeagueMatch[]) => {
-      const n = arr.length || 0;
-
-      let wins = 0;
-      let draws = 0;
-      let losses = 0;
-      arr.forEach((m) => {
-        const result = resolveResultForPlayer(m, String(playerId || ''));
-        if (result === 'W') wins += 1;
-        else if (result === 'D') draws += 1;
-        else if (result === 'L') losses += 1;
-      });
-
-      const winRate = n ? (wins / n) * 100 : 0;
-      const motmVotes = sum(arr, ps => toStatNumber(ps.motmVotes));
-      const ga = sum(arr, ps => toStatNumber(ps.goals) + toStatNumber(ps.assists));
-      const goals = sum(arr, ps => toStatNumber(ps.goals));
-      const assists = sum(arr, ps => toStatNumber(ps.assists));
-      const cleanSheets = sum(arr, ps => toStatNumber(ps.cleanSheets));
-
-      // Match Contribution Index from backend impact (already a 0-100 percentage per match).
-      const impactAvg = n ? Math.max(0, Math.min(100, sum(arr, ps => toStatNumber(ps.impact)) / n)) : 0;
-
-      // For xG/xA/xCS: count matches where player scored/assisted/kept clean sheet (at least once)
-      const matchesWithGoals = count(arr, ps => (ps.goals || 0) > 0);
-      const matchesWithAssists = count(arr, ps => (ps.assists || 0) > 0);
-      const matchesWithCleanSheets = count(arr, ps => (ps.cleanSheets || 0) > 0);
-
-      return { n, wins, draws, losses, winRate, impactAvg, motmVotes, ga, goals, assists, cleanSheets, matchesWithGoals, matchesWithAssists, matchesWithCleanSheets };
-    };
-
-    return { last: agg(last10), prev: agg(prev10) };
-  }, [filteredMatches, playerId]);
-
-  // Aggregated stats for current filters ("Your Stats") - ALL filtered matches
-  const yourStats = useMemo(() => {
-    const arr = filteredMatches.filter(m => !!m.playerStats && !!m.playerStats.id);
-    const sum = (a: LeagueMatch[], pick: (ps: PlayerMatchStats) => number) => a.reduce((s, m) => s + pick(m.playerStats || {}), 0);
-    const count = (a: LeagueMatch[], pred: (ps: PlayerMatchStats) => boolean) => a.reduce((s, m) => s + (pred(m.playerStats || {}) ? 1 : 0), 0);
-
-    const n = arr.length || 0;
-    let wins = 0, draws = 0, losses = 0;
-    arr.forEach((m) => {
-      const result = resolveResultForPlayer(m, String(playerId || ''));
-      if (result === 'W') wins += 1;
-      else if (result === 'D') draws += 1;
-      else if (result === 'L') losses += 1;
-    });
-
-
-    const winRate = n ? (wins / n) * 100 : 0;
-    const motmVotes = sum(arr, ps => toStatNumber(ps.motmVotes));
-    const defence = sum(arr, ps => toStatNumber(ps.defence));
-    // Count defensive impact votes: check homeDefensiveImpactId/awayDefensiveImpactId per match
-    const defensiveImpactVotes = arr.reduce((total, m) => {
-      if (String(m.homeDefensiveImpactId) === String(playerId) || String(m.awayDefensiveImpactId) === String(playerId)) {
-        return total + 1;
-      }
-      return total;
-    }, 0);
-    const ga = sum(arr, ps => toStatNumber(ps.goals) + toStatNumber(ps.assists));
-    const goals = sum(arr, ps => toStatNumber(ps.goals));
-    const assists = sum(arr, ps => toStatNumber(ps.assists));
-    const cleanSheets = sum(arr, ps => toStatNumber(ps.cleanSheets));
-
-    // For xG/xA/xCS: count matches where player scored/assisted/kept clean sheet (at least once)
-    const matchesWithGoals = count(arr, ps => (ps.goals || 0) > 0);
-    const matchesWithAssists = count(arr, ps => (ps.assists || 0) > 0);
-    const matchesWithCleanSheets = count(arr, ps => (ps.cleanSheets || 0) > 0);
-
-
-    // Count how many matches the player was captain of
-    const captainMatchesCount = arr.reduce((total, m) => {
-      if (String(m.homeCaptainId) === String(playerId) || String(m.awayCaptainId) === String(playerId)) {
-        return total + 1;
-      }
-      return total;
-    }, 0);
-
-    const captainWinsCount = arr.reduce((total, m) => {
-      const isHomeCaptain = String(m.homeCaptainId) === String(playerId);
-      const isAwayCaptain = String(m.awayCaptainId) === String(playerId);
-      if (isHomeCaptain || isAwayCaptain) {
-        const result = resolveResultForPlayer(m, String(playerId || ''));
-        if (result === 'W') {
-          return total + 1;
-        }
-      }
-      return total;
-    }, 0);
-
-    const captainWinRate = captainMatchesCount > 0 ? (captainWinsCount / captainMatchesCount) * 100 : 0;
-
-    // Match Contribution Index from backend impact (already a 0-100 percentage per match).
-    const impactAvg = n ? Math.max(0, Math.min(100, sum(arr, ps => toStatNumber(ps.impact)) / n)) : 0;
-
-    return { n, wins, draws, losses, winRate, impactAvg, motmVotes, defence, defensiveImpactVotes, ga, goals, assists, cleanSheets, matchesWithGoals, matchesWithAssists, matchesWithCleanSheets, captainMatchesCount, captainWinRate };
-  }, [filteredMatches, playerId]);
-
-  // One consistent comparison model used by IMPACT + Top Strengths
-  const leagueComparisonRows = useMemo<LeagueComparisonRow[]>(() => {
-    const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
-
-    const rows = [
-      {
-        metric: 'Goals',
-        yourTotal: yourStats.goals,
-        yourDisplay: String(yourStats.goals),
-        leagueAverage: toStatNumber(leagueAverage.goals),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.goals)),
-      },
-      {
-        metric: 'Assists',
-        yourTotal: yourStats.assists,
-        yourDisplay: String(yourStats.assists),
-        leagueAverage: toStatNumber(leagueAverage.assists),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.assists)),
-      },
-      {
-        metric: 'Clean Sheets',
-        yourTotal: yourStats.cleanSheets,
-        yourDisplay: String(yourStats.cleanSheets),
-        leagueAverage: toStatNumber(leagueAverage.cleanSheets),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.cleanSheets)),
-      },
-      {
-        metric: 'MOTM Votes',
-        yourTotal: yourStats.motmVotes,
-        yourDisplay: String(yourStats.motmVotes),
-        leagueAverage: toStatNumber(leagueAverage.motmVotes),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.motmVotes)),
-      },
-      {
-        metric: 'Defensive Impact Votes',
-        yourTotal: yourStats.defensiveImpactVotes,
-        yourDisplay: String(yourStats.defensiveImpactVotes),
-        leagueAverage: toStatNumber(leagueAverage.defensiveImpactVotes),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.defensiveImpactVotes)),
-      },
-      {
-        metric: 'Game Contribution Index',
-        yourTotal: toStatNumber(yourStats.impactAvg),
-        yourDisplay: `${toRoundedInt(yourStats.impactAvg)}%`,
-        leagueAverage: toStatNumber(leagueAverage.impact),
-        leagueDisplay: formatStatDecimal(leagueAverage.impact, '%'),
-      },
-      // {
-      //   metric: 'Total Wins',
-      //   yourTotal: yourStats.wins,
-      //   yourDisplay: String(yourStats.wins),
-      //   leagueAverage: toStatNumber(leagueAverage.wins),
-      //   leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.wins)),
-      // },
-      // {
-      //   metric: '% Win Influence Rate',
-      //   yourTotal: yourStats.winRate,
-      //   yourDisplay: `${toRoundedInt(yourStats.winRate)}%`,
-      //   leagueAverage: toStatNumber(leagueAverage.winRate),
-      //   leagueDisplay: `${toRoundedInt(toStatNumber(leagueAverage.winRate))}%`,
-      // }
-    ];
-
-    if (yourStats.captainMatchesCount > 0) {
-      rows.push({
-        metric: 'Captains Performance',
-        yourTotal: yourStats.captainWinRate,
-        yourDisplay: `${toRoundedInt(yourStats.captainWinRate)}%`,
-        leagueAverage: toStatNumber(leagueAverage.winRate),
-        leagueDisplay: `${toRoundedInt(toStatNumber(leagueAverage.winRate))}%`,
-      });
+    if (careerDashboardData?.lastPrev10) {
+      return careerDashboardData.lastPrev10;
     }
+    const emptyStats = { n: 0, wins: 0, draws: 0, losses: 0, winRate: 0, impactAvg: 0, motmVotes: 0, ga: 0, goals: 0, assists: 0, cleanSheets: 0, matchesWithGoals: 0, matchesWithAssists: 0, matchesWithCleanSheets: 0 };
+    return { last: emptyStats, prev: emptyStats };
+  }, [careerDashboardData]);
 
-    return rows;
-  }, [yourStats, currentImpactLeagueAvg]);
+  // Aggregated stats for current filters ("Your Stats") - From Backend API
+  const yourStats = useMemo(() => {
+    if (careerDashboardData?.yourStats) {
+      return careerDashboardData.yourStats;
+    }
+    return { n: 0, wins: 0, draws: 0, losses: 0, winRate: 0, impactAvg: 0, motmVotes: 0, defence: 0, defensiveImpactVotes: 0, ga: 0, goals: 0, assists: 0, cleanSheets: 0, matchesWithGoals: 0, matchesWithAssists: 0, matchesWithCleanSheets: 0, captainMatchesCount: 0, captainWinsCount: 0, captainWinRate: 0 };
+  }, [careerDashboardData]);
+
+  // One consistent comparison model used by IMPACT + Top Strengths - From Backend API
+  const leagueComparisonRows = useMemo<LeagueComparisonRow[]>(() => {
+    if (careerDashboardData?.leagueComparisonRows) {
+      return careerDashboardData.leagueComparisonRows;
+    }
+    return [];
+  }, [careerDashboardData]);
 
   // Helper to check for attacking positions (strikers & midfielders)
   const isAttackingPlayer = useCallback((position: string): boolean => {
@@ -1917,337 +1772,47 @@ export default function CareerPage() {
     );
   }, []);
 
-  // --- Focus Area suggestion ---
+  // --- Focus Area suggestion - From Backend API ---
   const focusSuggestion = useMemo(() => {
-    if (!filteredMatches.length) {
-      return 'Play a few more games to unlock a personalized focus area.';
+    if (careerDashboardData?.focusSuggestion) {
+      return careerDashboardData.focusSuggestion;
     }
+    return 'Play a few more games to unlock a personalized focus area.';
+  }, [careerDashboardData]);
 
-    const focusMessages: Record<string, string> = {
-      'Goals': "Focus on building your goal-scoring consistency, and you'll continue to rise among the league’s top scorers. Keep pushing yourself, and the goals will follow.",
-      'Assists': "By increasing your assists, you'll elevate your game even further. Keep playing with vision and creativity, and you'll make a greater impact on match results",
-      'Clean Sheets': "Each game provides an opportunity to sharpen your defensive and goalkeeping skills. By focusing on these areas, you can help transform losses into wins.",
-      'MOTM Votes': "To stand out even more, focus on delivering consistent performances in every match – keep it simple, effective, and stay confident in your approach.",
-      'Captains Performance': "To enhance your leadership even further, continue delivering outstanding performances. Leading by example will inspire everyone to perform at their highest level.",
-      'Total Wins': "Keep enhancing your performances, and you'll start turning every opportunity into more victories for both yourself and your team",
-      '% Win Influence Rate': "To make an even greater impact on matches, maintain your focus throughout, keep your game simple, effective, and trust your instincts"
-    };
-
-    const rawData = data as any;
-    const effectivePosition = playerPosition || rawData?.player?.position || rawData?.position || '';
-    const attacking = isAttackingPlayer(effectivePosition);
-
-    const comparableRows = leagueComparisonRows
-      .filter((row) => {
-        // Goals and Assists only applicable to attacking players
-        if (row.metric === 'Goals' || row.metric === 'Assists') {
-          return attacking;
-        }
-        // Check if there is a mapping narrative configured
-        return Boolean(focusMessages[row.metric]);
-      });
-
-    if (!comparableRows.length) {
-      return 'Your available stats are still building; play more matches to unlock a clearer focus area.';
-    }
-
-    const rowsWithGap = comparableRows.map((row) => {
-      const gap = toStatNumber(row.leagueAverage) - toStatNumber(row.yourTotal);
-      const isPct = row.metric.includes('%') || row.metric === 'Captains Performance';
-      const gapRatio = isPct
-        ? gap / 100
-        : gap / Math.max(Math.abs(toStatNumber(row.leagueAverage)), 1);
-      return { row, gap, gapRatio };
-    });
-
-    const target = rowsWithGap
-      .filter((item) => item.gap > 0 && item.row.leagueDisplay !== item.row.yourDisplay)
-      .sort((a, b) => b.gapRatio - a.gapRatio || b.gap - a.gap)[0];
-
-    if (target && focusMessages[target.row.metric]) {
-      return focusMessages[target.row.metric];
-    }
-
-    return "All your metrics are currently above the league average. Keep up the excellent work and continue building your consistency to maintain this edge!";
-  }, [filteredMatches.length, leagueComparisonRows, playerPosition, data, isAttackingPlayer]);
-
-  // Player's maximum statistics in a single match
+  // Player's maximum statistics in a single match - From Backend API
   const playerMaxSingleMatchStats = useMemo(() => {
-    const playerMatches = filteredMatches.filter(m => !!m.playerStats && !!m.playerStats.id);
-    const goals = playerMatches.length > 0 ? Math.max(...playerMatches.map(m => toStatNumber(m.playerStats?.goals))) : 0;
-    const assists = playerMatches.length > 0 ? Math.max(...playerMatches.map(m => toStatNumber(m.playerStats?.assists))) : 0;
-    const motmVotes = playerMatches.length > 0 ? Math.max(...playerMatches.map(m => toStatNumber(m.playerStats?.motmVotes))) : 0;
-    return { goals, assists, motmVotes };
-  }, [filteredMatches]);
-
-  const averageCaptainWins = useMemo(() => {
-    const captainWins: Record<string, number> = {};
-    const allCaptains = new Set<string>();
-
-    filteredMatches.forEach((m) => {
-      if (m.homeCaptainId) allCaptains.add(String(m.homeCaptainId));
-      if (m.awayCaptainId) allCaptains.add(String(m.awayCaptainId));
-
-      let homeWon = false;
-      let awayWon = false;
-
-      if (m.homeTeamGoals != null && m.awayTeamGoals != null) {
-        if (Number(m.homeTeamGoals) > Number(m.awayTeamGoals)) homeWon = true;
-        else if (Number(m.awayTeamGoals) > Number(m.homeTeamGoals)) awayWon = true;
-      } else if (m.team1Score != null && m.team2Score != null) {
-        if (Number(m.team1Score) > Number(m.team2Score)) homeWon = true;
-        else if (Number(m.team2Score) > Number(m.team1Score)) awayWon = true;
-      } else {
-        const playerResult = resolveResultForPlayer(m, String(playerId || ''));
-        if (playerResult === 'W') {
-          const pid = String(playerId || '');
-          const isHomeFromList = (m.homeTeamUsers || []).some(u => String(u.id) === pid);
-          const isAwayFromList = (m.awayTeamUsers || []).some(u => String(u.id) === pid);
-          const isHome = isHomeFromList || (!isAwayFromList && String(m.homeTeamId || '') === pid);
-          if (isHome) homeWon = true;
-          else awayWon = true;
-        } else if (playerResult === 'L') {
-          const pid = String(playerId || '');
-          const isHomeFromList = (m.homeTeamUsers || []).some(u => String(u.id) === pid);
-          const isAwayFromList = (m.awayTeamUsers || []).some(u => String(u.id) === pid);
-          const isHome = isHomeFromList || (!isAwayFromList && String(m.homeTeamId || '') === pid);
-          if (isHome) awayWon = true;
-          else homeWon = true;
-        }
-      }
-
-      let winnerCaptainId: string | null = null;
-      if (homeWon && m.homeCaptainId) {
-        winnerCaptainId = String(m.homeCaptainId);
-      } else if (awayWon && m.awayCaptainId) {
-        winnerCaptainId = String(m.awayCaptainId);
-      }
-
-      if (winnerCaptainId) {
-        captainWins[winnerCaptainId] = (captainWins[winnerCaptainId] || 0) + 1;
-      }
-    });
-
-    let totalWins = 0;
-    allCaptains.forEach((cid) => {
-      totalWins += captainWins[cid] || 0;
-    });
-
-    return allCaptains.size > 0 ? totalWins / allCaptains.size : 0;
-  }, [filteredMatches, playerId]);
-
-  // Calculate actual captain wins count for the current player
-  const playerCaptainWinsCount = useMemo(() => {
-    const arr = filteredMatches.filter(m => !!m.playerStats && !!m.playerStats.id);
-    return arr.reduce((total, m) => {
-      const isHomeCaptain = String(m.homeCaptainId) === String(playerId);
-      const isAwayCaptain = String(m.awayCaptainId) === String(playerId);
-      if (isHomeCaptain || isAwayCaptain) {
-        const result = resolveResultForPlayer(m, String(playerId || ''));
-        if (result === 'W') {
-          return total + 1;
-        }
-      }
-      return total;
-    }, 0);
-  }, [filteredMatches, playerId]);
+    if (careerDashboardData?.playerMaxSingleMatchStats) {
+      return careerDashboardData.playerMaxSingleMatchStats;
+    }
+    return { goals: 0, assists: 0, motmVotes: 0 };
+  }, [careerDashboardData]);
 
   const topStrengthRows = useMemo<LeagueComparisonRow[]>(() => {
-    const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
-
-    // 1. Define all 8 potential strengths with their info
-    const allStrengths = [
-      {
-        metric: '% Impact',
-        rank: 1,
-        yourTotal: toStatNumber(yourStats.impactAvg),
-        yourDisplay: `${toRoundedInt(yourStats.impactAvg)}%`,
-        leagueAverage: toStatNumber(leagueAverage.impact),
-        leagueDisplay: `${formatStatDecimal(leagueAverage.impact)}%`,
-        qualified: yourStats.n > 0 && toStatNumber(leagueAverage.impact) > 0 && yourStats.impactAvg >= 1.25 * toStatNumber(leagueAverage.impact),
-      },
-      {
-        metric: 'Wins',
-        rank: 2,
-        yourTotal: yourStats.wins,
-        yourDisplay: String(yourStats.wins),
-        leagueAverage: toStatNumber(leagueAverage.wins),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.wins)),
-        qualified: toStatNumber(leagueAverage.wins) > 0 && yourStats.wins >= 1.25 * toStatNumber(leagueAverage.wins),
-      },
-      {
-        metric: 'Captains Performance',
-        rank: 3,
-        yourTotal: playerCaptainWinsCount,
-        yourDisplay: String(playerCaptainWinsCount),
-        leagueAverage: averageCaptainWins,
-        leagueDisplay: formatStatDecimal(averageCaptainWins),
-        qualified: yourStats.captainMatchesCount > 0 && playerCaptainWinsCount > averageCaptainWins,
-      },
-      {
-        metric: 'Frequent Top Performer',
-        rank: 4,
-        yourTotal: yourStats.motmVotes,
-        yourDisplay: String(yourStats.motmVotes),
-        leagueAverage: toStatNumber(leagueAverage.motmVotes),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.motmVotes)),
-        qualified: toStatNumber(leagueAverage.motmVotes) > 0 && yourStats.motmVotes >= 1.25 * toStatNumber(leagueAverage.motmVotes),
-      },
-      {
-        metric: 'Individual Brilliances',
-        rank: 5,
-        yourTotal: yourStats.defensiveImpactVotes,
-        yourDisplay: String(yourStats.defensiveImpactVotes),
-        leagueAverage: toStatNumber(leagueAverage.defensiveImpactVotes),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.defensiveImpactVotes)),
-        qualified: yourStats.defensiveImpactVotes > 3,
-      },
-      {
-        metric: 'Clean Sheet',
-        rank: 6,
-        yourTotal: yourStats.cleanSheets,
-        yourDisplay: String(yourStats.cleanSheets),
-        leagueAverage: toStatNumber(leagueAverage.cleanSheets),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.cleanSheets)),
-        qualified: yourStats.cleanSheets > 0,
-      },
-      {
-        metric: 'Goals',
-        rank: 7,
-        yourTotal: yourStats.goals,
-        yourDisplay: String(yourStats.goals),
-        leagueAverage: toStatNumber(leagueAverage.goals),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.goals)),
-        qualified: yourStats.goals > 0,
-      },
-      {
-        metric: 'Assist',
-        rank: 7,
-        yourTotal: yourStats.assists,
-        yourDisplay: String(yourStats.assists),
-        leagueAverage: toStatNumber(leagueAverage.assists),
-        leagueDisplay: formatStatDecimal(toStatNumber(leagueAverage.assists)),
-        qualified: yourStats.assists > 0,
-      },
-    ];
-
-    // Filter to only qualified strengths
-    let qualified = allStrengths.filter(s => s.qualified);
-
-    // If none qualify, use a fallback: show metrics where player's value > 0
-    if (qualified.length === 0) {
-      qualified = allStrengths.filter(s => s.yourTotal > 0);
+    if (careerDashboardData?.topStrengths?.rows) {
+      return careerDashboardData.topStrengths.rows;
     }
-
-    // Sort by rank ascending (1st is best, 7th is worst). Tie-breaker: player's value descending.
-    qualified.sort((a, b) => {
-      if (a.rank !== b.rank) return a.rank - b.rank;
-      return b.yourTotal - a.yourTotal;
-    });
-
-    // Select up to 3 best strengths
-    return qualified.slice(0, 3).map(s => ({
-      metric: s.metric,
-      yourTotal: s.yourTotal,
-      yourDisplay: s.yourDisplay,
-      leagueAverage: s.leagueAverage,
-      leagueDisplay: s.leagueDisplay,
-    }));
-  }, [yourStats, currentImpactLeagueAvg, averageCaptainWins, playerCaptainWinsCount]);
+    return [];
+  }, [careerDashboardData]);
 
   const topStrengthNote = useMemo(() => {
-    if (!topStrengthRows.length) return '';
-    const best = topStrengthRows[0];
-    const desc = strengthDescriptionMap[best.metric];
-    if (desc) return desc;
-    return `${best.metric}: ${best.yourDisplay}; league average ${best.leagueDisplay}.`;
-  }, [topStrengthRows]);
+    if (careerDashboardData?.topStrengths?.note) {
+      return careerDashboardData.topStrengths.note;
+    }
+    return '';
+  }, [careerDashboardData]);
 
   const strongestNarrative = useMemo(() => {
-    const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
-    const allStrengths = [
-      {
-        metric: '% Impact',
-        rank: 1,
-        yourTotal: toStatNumber(yourStats.impactAvg),
-        qualified: yourStats.n > 0 && toStatNumber(leagueAverage.impact) > 0 && yourStats.impactAvg >= 1.25 * toStatNumber(leagueAverage.impact),
-      },
-      {
-        metric: 'Wins',
-        rank: 2,
-        yourTotal: yourStats.wins,
-        qualified: toStatNumber(leagueAverage.wins) > 0 && yourStats.wins >= 1.25 * toStatNumber(leagueAverage.wins),
-      },
-      {
-        metric: 'Captains Performance',
-        rank: 3,
-        yourTotal: playerCaptainWinsCount,
-        qualified: yourStats.captainMatchesCount > 0 && playerCaptainWinsCount > averageCaptainWins,
-      },
-      {
-        metric: 'Frequent Top Performer',
-        rank: 4,
-        yourTotal: yourStats.motmVotes,
-        qualified: toStatNumber(leagueAverage.motmVotes) > 0 && yourStats.motmVotes >= 1.25 * toStatNumber(leagueAverage.motmVotes),
-      },
-      {
-        metric: 'Individual Brilliances',
-        rank: 5,
-        yourTotal: yourStats.defensiveImpactVotes,
-        qualified: yourStats.defensiveImpactVotes > 3,
-      },
-      {
-        metric: 'Clean Sheet',
-        rank: 6,
-        yourTotal: yourStats.cleanSheets,
-        qualified: yourStats.cleanSheets > 0,
-      },
-      {
-        metric: 'Goals',
-        rank: 7,
-        yourTotal: yourStats.goals,
-        qualified: yourStats.goals > 0,
-      },
-      {
-        metric: 'Assist',
-        rank: 7,
-        yourTotal: yourStats.assists,
-        qualified: yourStats.assists > 0,
-      },
-    ];
+    if (careerDashboardData?.topStrengths?.narrative !== undefined) {
+      return careerDashboardData.topStrengths.narrative;
+    }
+    return null;
+  }, [careerDashboardData]);
 
-    const strictlyQualified = allStrengths.filter(s => s.qualified);
-    if (strictlyQualified.length === 0) return null;
-
-    strictlyQualified.sort((a, b) => {
-      if (a.rank !== b.rank) return a.rank - b.rank;
-      return b.yourTotal - a.yourTotal;
-    });
-
-    const bestMetric = strictlyQualified[0].metric;
-    const narrativeMessages: Record<string, string> = {
-      'Goals': "You're among the top goal scorers! Ranked in the top 10% for goals scored in the league",
-      'Assist': "You're one of the top assist providers, ranked in the top 5% for assists in the league!",
-      'Clean Sheet': "You're goal keeping is impressive! Ranked among the top 27% for clean sheets in the league",
-      'Frequent Top Performer': "You’re a consistent standout! Regularly among the top performers in matches",
-      'Captains Performance': "Leading by example! You’ve earned the captain’s pick for outstanding performances multiple times.",
-      'Individual Brilliances': "A match-winning presence! Your individual brilliance is undeniable",
-      'Wins': "Winning mindset! You’re one of the top players with the most wins in the league",
-      '% Impact': "You make a difference every time! Your positive impact on games is among the highest in the league",
-    };
-
-    return {
-      metric: bestMetric,
-      message: narrativeMessages[bestMetric] || ''
-    };
-  }, [yourStats, currentImpactLeagueAvg, averageCaptainWins, playerCaptainWinsCount]);
-
-  // Attempt to extract a name from the stats slice (adjust keys if your slice stores differently)
+  // Attempt to extract a name from the stats slice
   const playerNameFromStats = useMemo(() => {
     return extractPlayerName(data);
   }, [data]);
-
-
 
   // If stats already contain a name, use it
   useEffect(() => {
@@ -2296,104 +1861,25 @@ export default function CareerPage() {
     return () => { aborted = true; };
   }, [playerId, token]);
 
-  // Real Influence data from backend
+  // Real Influence data from backend API
   const influenceRadarData = useMemo(() => {
-    const playerTotals = {
-      Goals: 0,
-      Assists: 0,
-      'Clean Sheets': 0,
-      'Defensive Impact': 0,
-      'MOTM Votes': 0
-    };
-
-    influenceMatches.forEach(match => {
-      const ps = match.playerStats || {};
-      playerTotals.Goals += toStatNumber(ps.goals);
-      playerTotals.Assists += toStatNumber(ps.assists);
-      playerTotals['Clean Sheets'] += toStatNumber(ps.cleanSheets);
-      playerTotals['Defensive Impact'] += toStatNumber(ps.defence);
-      playerTotals['MOTM Votes'] += toStatNumber(ps.motmVotes);
-    });
-
-    // Use real league averages from backend if available
-    const dbAvg = currentInfluenceLeagueAvg;
-    const leagueAvg = dbAvg ? {
-      Goals: dbAvg.goals,
-      Assists: dbAvg.assists,
-      'Clean Sheets': dbAvg.cleanSheets,
-      'Defensive Impact': dbAvg.defence,
-      'MOTM Votes': dbAvg.motmVotes
-    } : {
-      Goals: 0,
-      Assists: 0,
-      'Clean Sheets': 0,
-      'Defensive Impact': 0,
-      'MOTM Votes': 0
-    };
-
-    const displayName = playerName || 'Player';
-    const metrics = Object.keys(playerTotals) as Array<keyof typeof playerTotals>;
-    const n = influenceMatches.length;
-
-    return metrics.map(metric => {
-      const lAvg = toStatNumber(leagueAvg[metric as keyof typeof leagueAvg]);
-      return {
-        metric,
-        [displayName]: toRoundedInt(playerTotals[metric]),
-        'League Avg': Math.round(lAvg * 10) / 10
-      };
-    });
-  }, [influenceMatches, playerName, currentInfluenceLeagueAvg]);
-
-  // Calculate actual win/loss/draw data from backend matches
-  const actualWinLossData = useMemo(() => {
-    let wins = 0;
-    let losses = 0;
-    let draws = 0;
-
-    const arr = winLossMatches;
-    arr.forEach(match => {
-      const result = resolveResultForPlayer(match, String(playerId || ''));
-      if (result === 'W') wins += 1;
-      else if (result === 'D') draws += 1;
-      else if (result === 'L') losses += 1;
-    });
-
-    const total = wins + losses + draws;
-    if (total === 0) {
-      return [
-        { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
-        { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
-        { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
-      ];
+    if (careerDashboardData?.influenceRadar) {
+      return careerDashboardData.influenceRadar;
     }
-    // Largest-remainder method for accurate percentage rounding that sums to exactly 100
-    const rawWin = (wins / total) * 100;
-    const rawLoss = (losses / total) * 100;
-    const rawDraw = (draws / total) * 100;
-    let floorWin = Math.floor(rawWin);
-    let floorLoss = Math.floor(rawLoss);
-    let floorDraw = Math.floor(rawDraw);
-    let remainder = 100 - floorWin - floorLoss - floorDraw;
-    // Distribute remainder to entries with largest fractional parts
-    const fracs = [
-      { key: 'win', frac: rawWin - floorWin },
-      { key: 'loss', frac: rawLoss - floorLoss },
-      { key: 'draw', frac: rawDraw - floorDraw },
-    ].sort((a, b) => b.frac - a.frac);
-    for (const f of fracs) {
-      if (remainder <= 0) break;
-      if (f.key === 'win') floorWin += 1;
-      else if (f.key === 'loss') floorLoss += 1;
-      else floorDraw += 1;
-      remainder -= 1;
+    return [];
+  }, [careerDashboardData]);
+
+  // Calculate actual win/loss/draw data from backend API
+  const actualWinLossData = useMemo(() => {
+    if (careerDashboardData?.winLossBreakdown) {
+      return careerDashboardData.winLossBreakdown;
     }
     return [
-      { name: 'Win', value: floorWin, color: '#15b57a', fill: '#15b57a' },
-      { name: 'Loss', value: floorLoss, color: '#d22f2f', fill: '#d22f2f' },
-      { name: 'Draw', value: floorDraw, color: '#ff4bd2', fill: '#ff4bd2' },
+      { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
+      { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
+      { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
     ];
-  }, [winLossMatches, playerId]);
+  }, [careerDashboardData]);
 
   // Add synergy types (place near other interfaces)
   interface SynergyPairing {
@@ -4160,7 +3646,7 @@ export default function CareerPage() {
                         </Typography>
 
                         <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {actualWinLossData.every(d => d.value === 0) ? (
+                          {actualWinLossData.every((d: any) => d.value === 0) ? (
                             <Typography sx={{ fontSize: 12, color: themeColors.textDim }}>No match data available</Typography>
                           ) : (
                             <ResponsiveContainer width="100%" height="100%">
@@ -4179,7 +3665,7 @@ export default function CareerPage() {
                                   labelLine={false}
                                 />
                                 <Tooltip
-                                  content={({ active, payload }) => {
+                                  content={({ active, payload }: any) => {
                                     if (!active || !payload || !payload.length) return null;
                                     const entry = payload[0];
                                     const item = entry.payload;
@@ -4226,7 +3712,7 @@ export default function CareerPage() {
                         backgroundColor: '#383a3f',
                         borderTop: `1px solid ${themeColors.border}`,
                       }}>
-                        {actualWinLossData.map((entry, index) => (
+                        {actualWinLossData.map((entry: any, index: number) => (
                           <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Box sx={{
                               width: 10, height: 10, borderRadius: '50%',
