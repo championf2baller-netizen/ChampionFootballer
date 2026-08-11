@@ -428,7 +428,7 @@ const LEADERBOARD_METRIC_CONFIG = [
         label: 'DEFENSIVE IMPACT VOTES',
         icon: DefenciveImpact,
         infoSummary: 'Ranks players by defensive Impact Votes selections.',
-        infoFormula: 'Counts captain defensive picks from both teams in RESULT_PUBLISHED matches.',
+        infoFormula: 'Counts the number of votes a player recieved for their Defensive Impact in the selected league and season.',
     },
     {
         key: 'cleanSheet',
