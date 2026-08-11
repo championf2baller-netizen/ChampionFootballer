@@ -77,7 +77,7 @@ const themeColors = {
   green: '#4CAF50',
   red: '#F44336',
   orange: '#FF9800',
-  pink: '#e91e63',
+  pink: '#ff69b4',
   cyan: '#00bcd4'
 };
 // Threshold used for auto switch from weekly to monthly aggregation
@@ -4034,26 +4034,26 @@ export default function CareerPage() {
                                 domain={[0, 'dataMax + 1']}
                               />
 
-                              {/* Player Data - Pink for clear visual distinction */}
+                              {/* Player Data - Green */}
                               <Radar
                                 name={playerName || 'Player'}
                                 dataKey={playerName || 'Player'}
+                                stroke={themeColors.chartBar}
+                                fill={themeColors.chartBar}
+                                fillOpacity={0.2}
+                                strokeWidth={2}
+                                dot={{ r: 2, fill: themeColors.chartBar }}
+                              />
+
+                              {/* League Average - Pink */}
+                              <Radar
+                                name="League Avg"
+                                dataKey="League Avg"
                                 stroke={themeColors.pink}
                                 fill={themeColors.pink}
                                 fillOpacity={0.2}
                                 strokeWidth={2}
                                 dot={{ r: 2, fill: themeColors.pink }}
-                              />
-
-                              {/* League Average - Teal */}
-                              <Radar
-                                name="League Avg"
-                                dataKey="League Avg"
-                                stroke={themeColors.chartBar}
-                                fill={themeColors.chartBar}
-                                fillOpacity={0.1}
-                                strokeWidth={2}
-                                dot={{ r: 2, fill: themeColors.chartBar }}
                               />
 
                               <Tooltip
@@ -4079,13 +4079,13 @@ export default function CareerPage() {
                         borderTop: `1px solid ${themeColors.border}`,
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.pink, borderRadius: 1 }} />
+                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.chartBar, borderRadius: 1 }} />
                           <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
                             {playerName || 'Player'}
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.chartBar, borderRadius: 1 }} />
+                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.pink, borderRadius: 1 }} />
                           <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
                             League Average
                           </Typography>
