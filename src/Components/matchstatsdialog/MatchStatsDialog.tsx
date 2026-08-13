@@ -2058,9 +2058,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
     const playerNameById = useCallback((id?: string | null) => {
         if (!id) return '';
-        const p = captainPickCandidates.find(u => String(u.id) === String(id));
+        const sid = String(id).trim();
+        if (!sid) return '';
+        const p = captainPickCandidates.find(u => String(u.id).trim() === sid || String((u as any).guestId || '').trim() === sid) ||
+                  ((league as any)?.members || (league as any)?.players || []).find((m: any) => String(m.id).trim() === sid);
         return p ? formatGuestAwarePlayerName(p) : '';
-    }, [captainPickCandidates]);
+    }, [captainPickCandidates, league]);
 
     // NEW: Fetch existing stats for current user
     const fetchUserStats = useCallback(async () => {
@@ -2123,8 +2126,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
             console.log('Loading captain picks for match:', resolvedMatchId);
 
-            const teamKey = userPickTeamKey;
-            const storageKey = (teamKey && currentUserId) ? `captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}` : null;
+            const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
+            const primaryStorageKey = (currentUserId && resolvedMatchId) ? `captain_picks_${resolvedMatchId}_${currentUserId}` : null;
+            const teamStorageKey = (currentUserId && resolvedMatchId) ? `captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}` : null;
 
             const normalizeTeamPicks = (raw: unknown): CaptainPicks => {
                 if (!raw || typeof raw !== 'object') return {};
@@ -2136,28 +2140,31 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             };
 
             // 1) Try local storage for CURRENT user first
-            if (storageKey && typeof window !== 'undefined') {
-                const raw = localStorage.getItem(storageKey);
+            let localDefence: string | undefined = undefined;
+            let localInfluence: string | undefined = undefined;
+            if (typeof window !== 'undefined' && currentUserId && resolvedMatchId) {
+                let raw = primaryStorageKey ? localStorage.getItem(primaryStorageKey) : null;
+                if (!raw && teamStorageKey) {
+                    raw = localStorage.getItem(teamStorageKey) ||
+                          localStorage.getItem(`captain_picks_${resolvedMatchId}_home_${currentUserId}`) ||
+                          localStorage.getItem(`captain_picks_${resolvedMatchId}_away_${currentUserId}`);
+                }
                 if (raw) {
                     try {
                         const ls = JSON.parse(raw) as CaptainPicks;
-                        setCaptainPicks({
-                            defence: ls.defence || undefined,
-                            influence: ls.influence || undefined,
-                        });
-                        if (teamKey) {
-                            setMatchCaptainPicks((prev) => ({
-                                ...prev,
-                                [teamKey]: {
-                                    defence: ls.defence || undefined,
-                                    influence: ls.influence || undefined,
-                                }
-                            }));
-                        }
+                        localDefence = ls.defence || undefined;
+                        localInfluence = ls.influence || undefined;
                     } catch (err) {
                         console.error('Failed to parse localStorage picks:', err);
                     }
                 }
+            }
+
+            if (localDefence || localInfluence) {
+                setCaptainPicks({
+                    defence: localDefence,
+                    influence: localInfluence,
+                });
             }
 
             // 2) Fetch from API
@@ -2207,13 +2214,19 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 const awayPicks = normalizeTeamPicks(data?.away);
                 setMatchCaptainPicks({ home: homePicks, away: awayPicks });
 
+                const myTeamPicks = teamKey === 'away' ? awayPicks : homePicks;
+                setCaptainPicks((prev) => ({
+                    defence: localDefence || prev.defence || myTeamPicks.defence || undefined,
+                    influence: localInfluence || prev.influence || myTeamPicks.influence || undefined,
+                }));
+
             } catch (err) {
                 console.error('Failed to load captain picks:', err);
                 setCaptainApiAvailable(false);
             }
         };
         loadPicks();
-    }, [token, resolvedMatchId, userPickTeamKey, currentUserId]);
+    }, [token, resolvedMatchId, userPickTeamKey, currentUserId, playerOnAwayTeamSafe]);
 
     // --- NEW: open pick dialog handler ---
     const openPickDialog = (category: CaptainPickCategory) => {
@@ -2250,12 +2263,19 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
         // Local update + localStorage persist (always immediate)
         const applyLocal = () => {
+            const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
             setCaptainPicks(prev => {
                 const updated = { ...prev, [category]: playerId };
+                if (currentUserId && resolvedMatchId && typeof window !== 'undefined') {
+                    const primaryKey = `captain_picks_${resolvedMatchId}_${currentUserId}`;
+                    localStorage.setItem(primaryKey, JSON.stringify(updated));
+                    if (teamKey) {
+                        localStorage.setItem(`captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}`, JSON.stringify(updated));
+                    }
+                }
                 return updated;
             });
 
-            const teamKey = userPickTeamKey;
             if (teamKey) {
                 setMatchCaptainPicks((prev) => ({
                     ...prev,
@@ -2264,11 +2284,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         [category]: playerId,
                     }
                 }));
-            }
-            if (teamKey && currentUserId && typeof window !== 'undefined') {
-                const key = `captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}`;
-                const next = { ...captainPicks, [category]: playerId };
-                localStorage.setItem(key, JSON.stringify(next));
             }
         };
 
@@ -3165,10 +3180,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     SelectProps={{
                                         displayEmpty: true,
                                         renderValue: (selected) => {
-                                            const selectedPlayer = captainPickCandidates.find(p => p.id === selected);
-                                            return selectedPlayer
-                                                ? formatGuestAwarePlayerName(selectedPlayer)
-                                                : 'Select Defensive Impact Player';
+                                            if (!selected) return 'Select Defensive Impact Player';
+                                            const label = playerNameById(selected as string);
+                                            return label || 'Select Defensive Impact Player';
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
@@ -3217,7 +3231,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }}
                                 >
                                     {captainPickCandidates.map((p) => {
-                                        const selected = captainPicks.defence === p.id;
+                                        const selected = String(captainPicks.defence || '') === String(p.id);
                                         const isSelf = String(p.id) === currentUserId;
                                         return (
                                             <MenuItem
@@ -3284,10 +3298,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     SelectProps={{
                                         displayEmpty: true,
                                         renderValue: (selected) => {
-                                            const selectedPlayer = captainPickCandidates.find(p => p.id === selected);
-                                            return selectedPlayer
-                                                ? formatGuestAwarePlayerName(selectedPlayer)
-                                                : 'Select + Mentality Player';
+                                            if (!selected) return 'Select + Mentality Player';
+                                            const label = playerNameById(selected as string);
+                                            return label || 'Select + Mentality Player';
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
@@ -3336,7 +3349,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }}
                                 >
                                     {captainPickCandidates.map((p) => {
-                                        const selected = captainPicks.influence === p.id;
+                                        const selected = String(captainPicks.influence || '') === String(p.id);
                                         const isSelf = String(p.id) === currentUserId;
                                         return (
                                             <MenuItem
