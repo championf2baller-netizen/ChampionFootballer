@@ -909,39 +909,57 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     // Track balancing run to prevent repeated clicks and show progress
     const [isBalancing, setIsBalancing] = useState(false);
 
+    const normalizeMapPayload = (raw: unknown): Record<string, number> => {
+      const map: Record<string, number> = {};
+      if (!raw) return map;
+      if (Array.isArray(raw)) {
+        raw.forEach((item: any) => {
+          if (!item) return;
+          const id = String(item.userId || item.user_id || item.playerId || item.player_id || item.id || item._id || '');
+          const val = Number(item.avg ?? item.avgXp ?? item.avg_xp ?? item.averageXP ?? item.xp ?? item.totalXP ?? 0);
+          if (id && Number.isFinite(val) && val > 0) map[id] = Math.round(val);
+        });
+      } else if (typeof raw === 'object') {
+        Object.entries(raw as Record<string, any>).forEach(([key, val]) => {
+          const id = String(key);
+          const num = typeof val === 'number' ? val : Number(val?.avg ?? val?.avgXp ?? val?.avg_xp ?? val?.averageXP ?? val?.xp ?? val);
+          if (id && Number.isFinite(num) && num > 0) map[id] = Math.round(num);
+        });
+      }
+      return map;
+    };
+
     const ensureXPMap = useCallback(async () => {
       if (!leagueId || !token) return {} as Record<string, number>;
-      // If we already fetched (success or failure), don't retry
-      if (xpFetchAttempted) return userLeagueXP;
       try {
         setXpLoading(true);
-        setXpFetchAttempted(true);
         const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/${leagueId}/xp`, { headers });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/${leagueId}/xp`, { headers, cache: 'no-store' });
         if (!res.ok) {
-          // Silently handle 404 - endpoint may not exist
           console.warn(`XP endpoint returned ${res.status}, using empty map`);
           return {} as Record<string, number>;
         }
         const json = await res.json();
-        // Support either { xp } or { data: { xp } }
-        const xpMap = (json?.xp || json?.data?.xp || {}) as Record<string, number>;
-        const avgMap = (json?.avg || json?.data?.avg || {}) as Record<string, number>;
+        const rawXp = json?.xp || json?.data?.xp || json;
+        const rawAvg = json?.avg || json?.data?.avg || json;
+        const xpMap = normalizeMapPayload(rawXp);
+        const avgMap = normalizeMapPayload(rawAvg);
         setUserLeagueXP(xpMap);
         setUserLeagueAvgXP(avgMap);
+        setXpFetchAttempted(true);
         return xpMap;
       } catch {
-        // Silent fail - XP is optional
+        setXpFetchAttempted(true);
         return {} as Record<string, number>;
       } finally {
         setXpLoading(false);
       }
-    }, [leagueId, token, xpFetchAttempted, userLeagueXP]);
+    }, [leagueId, token]);
 
     // Ensure XP maps are available for preview UI as soon as league loads
     useEffect(() => {
-      if (leagueId && token && !xpFetchAttempted) { void ensureXPMap(); }
-    }, [leagueId, token, xpFetchAttempted, ensureXPMap]);
+      if (leagueId && token) { void ensureXPMap(); }
+    }, [leagueId, token, ensureXPMap]);
 
     const fetchPrediction = useCallback(async () => {
       if (!matchId || !token) return;
@@ -990,15 +1008,21 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       const sum = nonZeroAvgValues.reduce((a, b) => a + b, 0);
       return Math.round(((sum / nonZeroAvgValues.length) + Number.EPSILON) * 100) / 100;
     }, [nonZeroAvgValues]);
+
     const getAvgRating = (p?: PlayerOption | null): number => {
       if (!p) return 0;
       if (p.isGuest) {
-        // Guests get league average XP; if league has no XP yet, count as 0.
-        return leagueAvgXPValue > 0 ? leagueAvgXPValue : 0;
+        return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
       }
-      const v = userLeagueAvgXP[p.id];
-      // Balance must use the same Avg XP value shown on player cards.
-      return typeof v === 'number' && Number.isFinite(v) ? v : 0;
+      const pId = String(p.id || '');
+      const pMongoId = String((p as any)._id || '');
+      const v = userLeagueAvgXP[pId] ?? (pMongoId ? userLeagueAvgXP[pMongoId] : undefined);
+      if (typeof v === 'number' && Number.isFinite(v) && v > 0) return Math.round(v);
+      const totalXp = userLeagueXP[pId] ?? (pMongoId ? userLeagueXP[pMongoId] : undefined);
+      if (typeof totalXp === 'number' && Number.isFinite(totalXp) && totalXp > 0) return Math.round(totalXp);
+      const skill = calcSkill(p);
+      if (skill > 0) return skill;
+      return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
     };
 
     // XP-based team percentage calculation
@@ -2872,7 +2896,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }}
                             />
                           </Box>
-                          <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: 6, sm: 7, md: 10 } }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: '0.55rem', sm: '0.65rem', md: '0.75rem' }, mt: 0.2 }}>
                             <Typography sx={{ fontSize: 'inherit', color: '#9CA3AF' }}>Position: Defender</Typography>
                             <Typography sx={{ fontSize: 'inherit', color: '#B0BEC5' }}>Avg XP: {getAvgRating(homeCaptain)}</Typography>
                           </Box>
@@ -2953,7 +2977,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 />
                               )}
                             </Typography>
-                            <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: 6, sm: 7, md: 10 } }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: '0.55rem', sm: '0.65rem', md: '0.75rem' }, mt: 0.2 }}>
                               <Typography sx={{ fontSize: 'inherit', color: '#9CA3AF' }}>Position: Defender</Typography>
                               <Typography sx={{ fontSize: 'inherit', color: '#B0BEC5' }}>Avg XP: {getAvgRating(user)}</Typography>
                             </Box>
@@ -3059,7 +3083,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }}
                             />
                           </Box>
-                          <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: 6, sm: 7, md: 10 } }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: '0.55rem', sm: '0.65rem', md: '0.75rem' }, mt: 0.2 }}>
                             <Typography sx={{ fontSize: 'inherit', color: '#9CA3AF' }}>Position: Defender</Typography>
                             <Typography sx={{ fontSize: 'inherit', color: '#B0BEC5' }}>Avg XP: {getAvgRating(awayCaptain)}</Typography>
                           </Box>
@@ -3140,7 +3164,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 />
                               )}
                             </Typography>
-                            <Box sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: 6, sm: 7, md: 10 } }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: { xs: '0.55rem', sm: '0.65rem', md: '0.75rem' }, mt: 0.2 }}>
                               <Typography sx={{ fontSize: 'inherit', color: '#9CA3AF' }}>Position: Defender</Typography>
                               <Typography sx={{ fontSize: 'inherit', color: '#B0BEC5' }}>Avg XP: {getAvgRating(user)}</Typography>
                             </Box>
