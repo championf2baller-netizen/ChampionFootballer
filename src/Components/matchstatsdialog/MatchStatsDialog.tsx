@@ -2008,6 +2008,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     // NEW: captain role flags
     const isHomeCaptain = !!(currentUserId && match && currentUserId === String(match.homeCaptainId || ''));
     const isAwayCaptain = !!(currentUserId && match && currentUserId === String(match.awayCaptainId || ''));
+    const isCaptainUser = isHomeCaptain || isAwayCaptain || isAdmin;
     const userPickTeamKey: 'home' | 'away' | null = playerOnHomeTeamSafe ? 'home' : (playerOnAwayTeamSafe ? 'away' : null);
 
     // Helper to check if user can edit stats for a player
@@ -2213,10 +2214,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 const awayPicks = normalizeTeamPicks(data?.away);
                 setMatchCaptainPicks({ home: homePicks, away: awayPicks });
 
-                const myTeamPicks = teamKey === 'away' ? awayPicks : homePicks;
+                const userPicks = normalizeTeamPicks(data?.userPicks || data?.myPicks);
+                const fallbackPicks = teamKey === 'away' ? awayPicks : homePicks;
+
                 setCaptainPicks((prev) => ({
-                    defence: localDefence || prev.defence || myTeamPicks.defence || undefined,
-                    influence: localInfluence || prev.influence || myTeamPicks.influence || undefined,
+                    defence: localDefence || userPicks.defence || (isCaptainUser ? fallbackPicks.defence : undefined) || prev.defence || undefined,
+                    influence: localInfluence || userPicks.influence || (isCaptainUser ? fallbackPicks.influence : undefined) || prev.influence || undefined,
                 }));
 
             } catch (err) {
@@ -2225,7 +2228,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             }
         };
         loadPicks();
-    }, [token, resolvedMatchId, userPickTeamKey, currentUserId, playerOnAwayTeamSafe]);
+    }, [token, resolvedMatchId, userPickTeamKey, currentUserId, playerOnAwayTeamSafe, isCaptainUser]);
 
     // --- NEW: open pick dialog handler ---
     const openPickDialog = (category: CaptainPickCategory) => {
