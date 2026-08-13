@@ -2113,6 +2113,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
     useEffect(() => {
         const loadPicks = async () => {
+            setCaptainPicks({});
             setMatchCaptainPicks({ home: {}, away: {} });
             setMatchCategoryVoteCounts({ defence: {}, influence: {} });
             if (!token || !resolvedMatchId) {
@@ -2123,7 +2124,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             console.log('Loading captain picks for match:', resolvedMatchId);
 
             const teamKey = userPickTeamKey;
-            const storageKey = teamKey ? `captain_picks_${resolvedMatchId}_${teamKey}` : null;
+            const storageKey = (teamKey && currentUserId) ? `captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}` : null;
 
             const normalizeTeamPicks = (raw: unknown): CaptainPicks => {
                 if (!raw || typeof raw !== 'object') return {};
@@ -2134,7 +2135,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 };
             };
 
-            // 1) Try local storage first so UI shows something even if API is missing
+            // 1) Try local storage for CURRENT user first
             if (storageKey && typeof window !== 'undefined') {
                 const raw = localStorage.getItem(storageKey);
                 if (raw) {
@@ -2159,7 +2160,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 }
             }
 
-            // 2) Fetch from API (overrides localStorage if successful)
+            // 2) Fetch from API
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -2206,37 +2207,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 const awayPicks = normalizeTeamPicks(data?.away);
                 setMatchCaptainPicks({ home: homePicks, away: awayPicks });
 
-                const picks = teamKey ? normalizeTeamPicks(data?.[teamKey]) : normalizeTeamPicks(data?.picks);
-
-                if ((picks.defence || picks.influence)) {
-                    setCaptainPicks({
-                        defence: picks.defence || undefined,
-                        influence: picks.influence || undefined,
-                    });
-                    if (teamKey) {
-                        setMatchCaptainPicks((prev) => ({
-                            ...prev,
-                            [teamKey]: {
-                                defence: picks.defence || undefined,
-                                influence: picks.influence || undefined,
-                            }
-                        }));
-                    }
-
-                    if (storageKey && typeof window !== 'undefined') {
-                        localStorage.setItem(storageKey, JSON.stringify({
-                            defence: picks.defence || undefined,
-                            influence: picks.influence || undefined,
-                        }));
-                    }
-                }
             } catch (err) {
                 console.error('Failed to load captain picks:', err);
                 setCaptainApiAvailable(false);
             }
         };
         loadPicks();
-    }, [token, resolvedMatchId, userPickTeamKey]);
+    }, [token, resolvedMatchId, userPickTeamKey, currentUserId]);
 
     // --- NEW: open pick dialog handler ---
     const openPickDialog = (category: CaptainPickCategory) => {
@@ -2288,8 +2265,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     }
                 }));
             }
-            if (teamKey && typeof window !== 'undefined') {
-                const key = `captain_picks_${resolvedMatchId}_${teamKey}`;
+            if (teamKey && currentUserId && typeof window !== 'undefined') {
+                const key = `captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}`;
                 const next = { ...captainPicks, [category]: playerId };
                 localStorage.setItem(key, JSON.stringify(next));
             }

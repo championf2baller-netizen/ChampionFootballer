@@ -162,8 +162,10 @@ const sameComparableId = (a: unknown, b: unknown): boolean => {
   return left !== '' && right !== '' && left === right;
 };
 
-const isResultPublished = (match: Match): boolean =>
-  String(match.status || '').toUpperCase() === 'RESULT_PUBLISHED';
+const isResultPublished = (match: Match): boolean => {
+  const s = String(match.status || '').toUpperCase();
+  return s === 'RESULT_PUBLISHED' || s === 'RESULT_UPLOADED';
+};
 
 const toTimeMs = (value: unknown): number => {
   if (!value) return NaN;
@@ -184,8 +186,17 @@ const sortMatchesChronologically = (matches: Match[]): Match[] =>
   [...matches].sort((a, b) => getMatchTimeMs(a) - getMatchTimeMs(b));
 
 const isUserInMatch = (userId: string, match: Match): { isHome: boolean; isAway: boolean } => {
-  const isHome = (match.homeTeamUsers ?? []).some((u) => sameComparableId(u.id, userId));
-  const isAway = (match.awayTeamUsers ?? []).some((u) => sameComparableId(u.id, userId));
+  const isHomeUser = (match.homeTeamUsers ?? []).some((u) => sameComparableId(u.id, userId));
+  const isAwayUser = (match.awayTeamUsers ?? []).some((u) => sameComparableId(u.id, userId));
+
+  const isHomePick = sameComparableId(match.homeDefensiveImpactId, userId) || sameComparableId(match.homeMentalityId, userId);
+  const isAwayPick = sameComparableId(match.awayDefensiveImpactId, userId) || sameComparableId(match.awayMentalityId, userId);
+
+  const userStatsEntry = Object.entries(match.playerStats ?? {}).find(([playerId]) => sameComparableId(playerId, userId));
+  const hasStatLine = Boolean(userStatsEntry);
+
+  const isHome = isHomeUser || isHomePick || (hasStatLine && !isAwayUser && !isAwayPick);
+  const isAway = isAwayUser || isAwayPick;
   return { isHome, isAway };
 };
 
