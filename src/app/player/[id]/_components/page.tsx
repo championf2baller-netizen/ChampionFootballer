@@ -50,6 +50,8 @@ import PlayerProfileLoadingSkeleton from '@/Components/loading/PlayerProfileLoad
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { getPositionShortForm } from '@/lib/playerIdentity';
 
+import PlayerOverviewContainer from './PlayerOverviewContainer';
+
 // Lazy load heavy components
 const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
     loading: () => <></>,
@@ -1936,27 +1938,7 @@ export default function PlayerStatsPage() {
             }));
     }, [trophyCounts]);
 
-    // Icon-style item now uses football.png with value centered, label below
-    const StatItem = ({ label, value }: { label: string; value: string | number }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%', minWidth: 0 }}>
-            <Box sx={{ width: '100%', borderBottom: '1px solid rgba(255, 255, 255, 0.25)', pb: 0.2, mb: 0.3 }}>
-                <Typography sx={{
-                    color: '#ffffff',
-                    fontSize: { xs: 10, sm: 11, md: 13, lg: 15 },
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    pr: { xs: 0.8, sm: 1, md: 1.5 },
-                }}>
-                    {label.toUpperCase()}
-                </Typography>
-            </Box>
-            <Typography sx={{ color: '#00a780', fontSize: { xs: 14, sm: 15, md: 17, lg: 18 }, fontWeight: 700, whiteSpace: 'nowrap', pr: { xs: 0.8, sm: 1, md: 1.5 } }}>
-                {value ?? 0}
-            </Typography>
-        </Box>
-    );
-
-    const loading = reduxLoading || !data;
+    const loading = reduxLoading && !data;
 
     return (
         <Box sx={{ minHeight: '100vh', color: '#fff', overflowX: 'hidden' }}>
@@ -2756,1072 +2738,328 @@ export default function PlayerStatsPage() {
                 </Paper>
             </Box>
 
-            <Container maxWidth={false} sx={{ bgcolor: '#383838', py: { xs: 2.2, md: 3 }, px: { xs: 1.3, sm: 2, md: 3.5 }, maxWidth: 1165, mx: 'auto', borderRadius: 2, mb: 5, position: 'relative', zIndex: 1 }}>
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-                        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
-                    </Box>
-                ) : reduxError ? (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8, gap: 2 }}>
-                        <Typography sx={{ color: '#ff6b6b', fontSize: 16, fontWeight: 700 }}>Error Loading Data</Typography>
-                        <Typography sx={{ color: '#fff', fontSize: 14 }}>{reduxError}</Typography>
-                        <Button
-                            variant="contained"
-                            onClick={() => playerId && dispatch(fetchPlayerStats({ playerId, leagueId, year }))}
-                            sx={{ background: TEAL_PRIMARY, '&:hover': { background: '#099968' } }}
-                        >
-                            Retry
-                        </Button>
-                    </Box>
-                ) : (
-                    <>
-                        {/* Header: Player Profile */}
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: { xs: 'stretch', md: 'center' },
-                            justifyContent: 'space-between',
-                            mb: 3,
-                            flexDirection: { xs: 'column', md: 'row' },
-                            gap: { xs: 2.2, md: 2 }
-                        }}>
-                            {/* Left: Avatar + Name + Position */}
-                            <Box sx={{ display: 'flex', alignItems: { xs: 'center', sm: 'flex-start' }, gap: { xs: 1.3, sm: 2 }, width: { xs: '100%', md: 'auto' } }}>
-                                <Avatar
-                                    src={profileAvatarSrc ?? undefined}
-                                    alt={playerName}
-                                    sx={{
-                                        width: { xs: 84, sm: 102, md: 125 },
-                                        height: { xs: 84, sm: 102, md: 125 },
-                                        bgcolor: profileAvatarSrc ? 'transparent' : getAvatarBackgroundColor(playerName),
-                                        color: '#fff',
-                                        fontWeight: 800,
-                                        fontSize: { xs: 30, sm: 34, md: 40 },
-                                        textTransform: 'uppercase',
-                                        // border: '3px solid ' + TEAL_PRIMARY,
-                                    }}
-                                >
-                                    {!profileAvatarSrc && getAvatarInitials({ name: playerName })}
-                                </Avatar>
-                                <Box sx={{ pt: 0, minWidth: 0 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                        <Typography sx={{
-                                            color: '#fff',
-                                            fontSize: { xs: 20, sm: 24, md: 27 },
-                                            fontFamily: 'var(--font-woodford-bourne-pro)',
-                                            fontWeight: 700,
-                                            fontStyle: 'normal',
-                                            lineHeight: '100%',
-                                            letterSpacing: '0%',
-                                            verticalAlign: 'middle',
-                                            textTransform: 'uppercase',
-                                            mt: { xs: 0.2, sm: 1.5, md: 2 },
-                                            wordBreak: 'break-word'
-                                        }}>
-                                            {playerName.toUpperCase()}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'fit-content' }}>
-                                        <Typography sx={{ color: '#fff', fontSize: { xs: 13, sm: 14, md: 16 }, fontWeight: 700, textTransform: 'uppercase' }}>
-                                            {playerPositionType}
-                                        </Typography>
-                                        <Box sx={{ fontSize: isMobile ? 28 : 35 }}>
-                                            <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride={pageXpStatusTier.starColor} />
-                                        </Box>
-                                    </Box>
-                                </Box>
+            <PlayerOverviewContainer
+                loading={loading}
+                reduxError={reduxError}
+                playerId={playerId ? String(playerId) : null}
+                leagueId={leagueId}
+                year={year}
+                onRetry={() => playerId && dispatch(fetchPlayerStats({ playerId: String(playerId), leagueId, year }))}
+                playerName={playerName}
+                playerPositionType={playerPositionType}
+                profileAvatarSrc={profileAvatarSrc}
+                xp={xp}
+                xpLoading={xpLoading}
+                pageXpStatusTier={pageXpStatusTier}
+                pageXpStatusTextColor={pageXpStatusTextColor}
+                pageXpProgressToMax={pageXpProgressToMax}
+                PAGE_XP_MAX_POINTS={PAGE_XP_MAX_POINTS}
+                isMobile={isMobile}
+                onOpenStatsModal={() => setStatsModalOpen(true)}
+                onNavigateCareer={() => playerId && router.push(`/player/${playerId}/career`)}
+                activeTab={activeTab}
+                onTabClick={handleTabClick}
+                displayedStatsMatches={displayedStatsMatches}
+                displayedStatsTotals={displayedStatsTotals}
+                displayedMotmVotes={displayedMotmVotes}
+                displayedDefensiveImpact={displayedDefensiveImpact}
+                displayXp={displayXp}
+                CARD_BG={CARD_BG}
+                TEAL_PRIMARY={TEAL_PRIMARY}
+                trophiesCardRef={trophiesCardRef}
+                trophiesLoading={trophiesLoading}
+                earnedTrophies={earnedTrophies}
+                TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
+                getTrophyIconSize={getTrophyIconSize}
+                rewardsCardRef={rewardsCardRef}
+                badgesLoading={badgesLoading}
+                playerBadges={playerBadges}
+                historyCardRef={historyCardRef}
+                historyRecordsLoading={historyRecordsLoading}
+                historyRecords={historyRecords}
+                historyXpLabel={historyXpLabel}
+            />
+
+            {/* Stats Over Season Modal */}
+            <Dialog
+                open={statsModalOpen}
+                onClose={() => setStatsModalOpen(false)}
+                fullWidth
+                scroll="paper"
+                maxWidth={false}
+                sx={{
+                    '& .MuiDialog-container': {
+                        alignItems: 'center',
+                    },
+                }}
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#e8e4e0',
+                        borderRadius: { xs: '10px', sm: '8px' },
+                        border: '2px solid #3a3a3a',
+                        overflow: 'hidden',
+                        width: { xs: 'calc(100% - 16px)', sm: '100%' },
+                        maxWidth: '1020px',
+                        m: { xs: 1, sm: 2 },
+                        maxHeight: { xs: 'calc(100dvh - 16px)', sm: 'calc(100dvh - 32px)' },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: 'auto',
+                    }
+                }}
+            >
+                {/* Header bar */}
+                <DialogTitle sx={{
+                    bgcolor: '#d9d9d9',
+                    color: '#000',
+                    py: { xs: 1.2, md: 1.45 },
+                    px: { xs: 1.25, md: 2 },
+                    pr: { xs: 5.5, md: 7 },
+                    minHeight: 'auto',
+                    position: 'relative',
+                    borderBottom: '1px solid #bdb8b3',
+                }}>
+                    {isMobile ? (
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.95, minWidth: 0, pr: 4.4 }}>
+                            <Image
+                                src={TrofiiImg}
+                                alt="Trophy"
+                                width={18}
+                                height={18}
+                                style={{ objectFit: 'contain', marginTop: 2, filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)' }}
+                            />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.15, minWidth: 0 }}>
+                                <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.62px', color: '#222', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {currentLeagueName}
+                                </Typography>
+                                <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.58px', color: '#3d3d3d', lineHeight: 1.2 }}>
+                                    {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
+                                </Typography>
+                                <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.55px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {playerName.toUpperCase()}
+                                </Typography>
                             </Box>
+                        </Box>
+                    ) : (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.1, minWidth: 0, pr: 6 }}>
+                            <Image
+                                src={TrofiiImg}
+                                alt="Trophy"
+                                width={28}
+                                height={28}
+                                style={{ objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)' }}
+                            />
+                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 19, textTransform: 'uppercase', letterSpacing: '0.9px', color: '#222', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '34%' }}>
+                                {currentLeagueName}
+                            </Typography>
+                            <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
+                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 17, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#3d3d3d', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                                {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
+                            </Typography>
+                            <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
+                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.85px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '34%' }}>
+                                {playerName.toUpperCase()}
+                            </Typography>
+                        </Box>
+                    )}
+                    <IconButton
+                        onClick={() => setStatsModalOpen(false)}
+                        sx={{ color: '#555', bgcolor: '#e6e6e6', borderRadius: '3px', '&:hover': { color: '#000', bgcolor: '#e6e6e6' }, position: 'absolute', right: { xs: 6, md: 10 }, top: { xs: 6, md: 7 } }}
+                    >
+                        <CloseIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
+                    </IconButton>
+                </DialogTitle>
 
-                            {/* Right: XP + Badges */}
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'stretch', md: 'flex-end' }, gap: 0, width: { xs: '100%', md: 'auto' } }}>
-                                <Box sx={{ width: { xs: '100%', md: 'fit-content' }, maxWidth: '100%' }}>
-                                    {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5, gap: 1 }}>
-                                    <Typography sx={{ color: '#bdbdbd', fontSize: { xs: 11, sm: 12, md: 13 }, fontWeight: 600 }}>
-                                        Total XP (All Leagues)
-                                    </Typography>
-                                    <Typography sx={{ color: '#8fd7c5', fontSize: { xs: 10, sm: 11 }, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.45 }}>
-                                        XP Status
-                                    </Typography>
-                                </Box> */}
-                                    {/* Top row: XP + Status Title */}
-                                    <Box sx={{ display: 'flex', alignItems: 'stretch', gap: { xs: 1, md: 2 }, width: '100%' }}>
-                                        <Paper sx={{
-                                            bgcolor: '#383838',
-                                            color: '#fff',
-                                            px: { xs: 2.2, sm: 3.2, md: 4.3 },
-                                            py: 0.1,
-                                            borderRadius: 0,
-                                            fontWeight: 400,
-                                            fontSize: { xs: 14, sm: 16, md: 18 },
-                                            border: '2px solid #fff',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            minWidth: { xs: 84, sm: 95, md: 100 },
-                                            justifyContent: 'center'
-                                        }}>
-                                            {xpLoading ? '...' : xp.toLocaleString()}
-                                        </Paper>
-                                        <Paper sx={{
-                                            bgcolor: pageXpStatusTier.cardColor,
-                                            color: pageXpStatusTextColor,
-                                            pl: { xs: 1, md: 1.5 },
-                                            pr: { xs: 2, sm: 4, md: 10 },
-                                            py: { xs: 0.6, md: 0.9 },
-                                            borderRadius: 0,
-                                            fontWeight: 700,
-                                            fontSize: { xs: 12, sm: 14, md: 16 },
-                                            minWidth: { xs: 120, sm: 140, md: 170 },
-                                            flex: { xs: 1, md: '0 0 auto' },
-                                            transition: 'all 0.3s ease'
-                                        }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                                                <Typography sx={{ fontSize: { xs: 12, sm: 14, md: 16 }, fontWeight: 700, lineHeight: 1 }}>
-                                                    {pageXpStatusTier.title}
-                                                </Typography>
-                                                {pageXpStatusTier.isGoat && (
-                                                    <Box sx={{ position: 'relative', width: { xs: 18, sm: 20 }, height: { xs: 18, sm: 20 }, flexShrink: 0 }}>
-                                                        <Image src={GoatImg} alt="GOAT tier" fill sizes="20px" style={{ objectFit: 'contain' }} />
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        </Paper>
-                                    </Box>
-                                    {/* Progress bar */}
-                                    <Box sx={{ width: '100%', display: 'flex', height: 6, borderRadius: 0, overflow: 'hidden', mt: 1 }}>
-                                        <Box sx={{
-                                            bgcolor: pageXpStatusTier.cardColor,
-                                            width: `${pageXpProgressToMax}%`,
-                                            height: '100%',
-                                            transition: 'width 0.3s ease'
-                                        }} />
-                                        <Box sx={{ bgcolor: '#555', width: `${100 - pageXpProgressToMax}%`, height: '100%' }} />
-                                    </Box>
-                                    <Typography sx={{ color: '#a8a8a8', fontSize: 11, mt: 0.5, fontWeight: 500 }}>
-                                        {xpLoading
-                                            ? `0 / ${PAGE_XP_MAX_POINTS.toLocaleString()} XP`
-                                            : `${Math.max(0, xp).toLocaleString()} / ${PAGE_XP_MAX_POINTS.toLocaleString()} XP (${pageXpProgressToMax}%)`}
-                                    </Typography>
-                                    {/* {!xpLoading && nextXpStatusTier && (
-                                    <Typography sx={{ 
-                                        color: '#999', 
-                                        fontSize: 11, 
-                                        mt: 0.25,
-                                        fontWeight: 400 
-                                    }}>
-                                        {Math.max(0, nextXpStatusTier.minXP - Math.max(0, xp)).toLocaleString()} XP to {nextXpStatusTier.title}
-                                    </Typography>
-                                )} */}
-                                    {/* {!xpLoading && !nextXpStatusTier && (
-                                    <Typography sx={{ color: '#d6c06a', fontSize: 11, mt: 0.25, fontWeight: 600 }}>
-                                        MAX XP reached ({XP_STATUS_MAX_POINTS.toLocaleString()}+)
-                                    </Typography>
-                                )} */}
-                                    {/* {!xpLoading && xpRemainingToMax > 0 && (
-                                    <Typography sx={{ color: '#8f8f8f', fontSize: 10.5, mt: 0.15, fontWeight: 400 }}>
-                                        {xpRemainingToMax.toLocaleString()} XP remaining to max
-                                    </Typography>
-                                )} */}
-                                </Box>
-                                {/* <Box
-                                sx={{
-                                    mt: 1.8,
-                                    display: 'grid',
-                                    gridTemplateColumns: { xs: '0.9fr 1.1fr', sm: '0.85fr 1.15fr', md: 'repeat(2, minmax(0, 1fr))' },
-                                    gap: { xs: 0.7, md: 0 },
-                                    width: '100%',
-                                    maxWidth: { xs: 520, md: 500 },
-                                    mx: 'auto',
-                                }}
-                            >
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'stretch',
-                                        borderRadius: 1,
-                                        overflow: 'hidden',
-                                        cursor: 'pointer',
-                                        border: '1px solid rgba(255,255,255,0.4)',
-                                        boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
-                                        transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
-                                        '&:hover': {
-                                            transform: 'translateY(-1px)',
-                                            boxShadow: '0 10px 22px rgba(0,0,0,0.45)',
-                                            borderColor: 'rgba(255,255,255,0.65)',
-                                        },
-                                        '&:hover .icon-box': { bgcolor: '#008c6b' },
-                                        '&:hover .text-box': { bgcolor: '#2f2f2f' },
-                                        width: { xs: '100%', md: '78%' },
-                                        minWidth: 0,
-                                        justifyContent: 'center',
-                                        ml: { xs: 0, md: 6 }
-                                    }}
-                                    onClick={() => setStatsModalOpen(true)}
-                                >
-                                    <Box className="icon-box" sx={{ 
-                                        bgcolor: '#00a77f', 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center',
-                                        width: { xs: 38, sm: 40, md: 44 },
-                                        borderRight: '1px solid rgba(255,255,255,0.25)',
-                                        py: { xs: 0.55, md: 0.7 }
-                                    }}>
-                                        <BarChart sx={{ color: '#fff', fontSize: { xs: 20, md: 26 } }} />
-                                    </Box>
-                                    <Box className="text-box" sx={{ 
-                                        bgcolor: '#2b2b2b', 
-                                        display: 'flex', 
-                                        alignItems: 'center',
-                                        justifyContent: { xs: 'center', md: 'flex-start' },
-                                        px: { xs: 0.6, md: 0.9 },
-                                        py: { xs: 0.55, md: 0.7 },
-                                        width: '100%',
-                                    }}>
-                                        <Typography sx={{ 
-                                            color: '#fff', 
-                                            fontWeight: 700, 
-                                            fontSize: { xs: 9, sm: 10, md: 11.5 }, 
-                                            textTransform: 'uppercase',
-                                            letterSpacing: 0.5,
-                                            whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                                            lineHeight: 1.1,
-                                            textAlign: 'center',
-                                        }}>
-                                            Stats Over Season
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'stretch',
-                                        borderRadius: 1,
-                                        overflow: 'hidden',
-                                        cursor: playerId ? 'pointer' : 'not-allowed',
-                                        border: '1px solid rgba(255,255,255,0.4)',
-                                        boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
-                                        opacity: playerId ? 1 : 0.6,
-                                        transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
-                                        '&:hover': {
-                                            transform: playerId ? 'translateY(-1px)' : 'none',
-                                            boxShadow: playerId ? '0 10px 22px rgba(0,0,0,0.45)' : '0 6px 16px rgba(0,0,0,0.35)',
-                                            borderColor: playerId ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.4)',
-                                        },
-                                        '&:hover .perf-icon-box': { bgcolor: '#E16419' },
-                                        '&:hover .perf-text-box': { bgcolor: playerId ? '#2f2f2f' : '#2b2b2b' },
-                                        width: '100%',
-                                        maxWidth: { xs: '100%', md: 238 },
-                                        minWidth: 0,
-                                        justifyContent: 'center',
-                                        justifySelf: { xs: 'stretch', md: 'start' },
-                                    }}
-                                    onClick={() => {
-                                        if (!playerId) return;
-                                        router.push(`/player/${playerId}/career`);
-                                    }}
-                                >
-                                    <Box className="perf-icon-box" sx={{
-                                        bgcolor: '#E16419',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: { xs: 38, sm: 40, md: 44 },
-                                        borderRight: '1px solid rgba(255,255,255,0.25)',
-                                        py: { xs: 0.55, md: 0.7 },
-                                        // ":hover": {bgcolor:'#E16419'}
-                                    }}>
-                                        <SpaceDashboard sx={{ color: '#fff', fontSize: { xs: 24, md: 26 } }} />
-                                    </Box>
-                                    <Box className="perf-text-box" sx={{
-                                        bgcolor: '#2b2b2b',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: { xs: 'center', md: 'flex-start' },
-                                        px: { xs: 0.6, md: 0.9 },
-                                        py: { xs: 0.55, md: 0.7 },
-                                        width: '100%',
-                                    }}>
-                                        <Typography sx={{
-                                            color: '#fff',
-                                            fontWeight: 700,
-                                            fontSize: { xs: 9.5, sm: 10.5, md: 11.5 },
-                                            textTransform: 'uppercase',
-                                            letterSpacing: 0.5,
-                                            whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                                            lineHeight: 1.1,
-                                            textAlign: 'center',
-                                        }}>
-                                            Performance Dashboard
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box> */}
-                                <Box
-                                    sx={{
-                                        mt: 1.8,
-                                        display: 'grid',
-                                        // gridTemplateColumns: { xs: '0.9fr 1.1fr', sm: '0.85fr 1.15fr', md: 'repeat(2, minmax(0, 1fr))' },
-                                        gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr', md: 'repeat(2, minmax(0, 1fr))' },
-                                        width: '100%',
-                                        maxWidth: { xs: 520, md: 500 },
-                                        mx: 'auto',
-                                        gap: { xs: 0.7, md: 1.5 },
-                                    }}
-                                >
-                                    {/* Stats Over Season button */}
+                <DialogContent sx={{
+                    bgcolor: '#f2f2f2',
+                    px: { xs: 1.25, sm: 2.5, md: 5 },
+                    py: { xs: 2, md: 4 },
+                    flex: '0 1 auto',
+                    minHeight: 0,
+                    overflowY: 'auto',
+                    '&::-webkit-scrollbar': {
+                        width: '6px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        bgcolor: '#d5d0cb',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        bgcolor: '#999',
+                        borderRadius: '3px',
+                        '&:hover': {
+                            bgcolor: '#777',
+                        }
+                    }
+                }}>
+                    {leagueId === 'all' ? (
+                        <Box sx={{ textAlign: 'center', py: 6 }}>
+                            <Typography sx={{ color: '#777', fontSize: 14, mb: 1 }}>
+                                Please select a specific league to view season-wise stats.
+                            </Typography>
+                        </Box>
+                    ) : seasonWiseStats.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 6 }}>
+                            <Typography className="empty-state-message" sx={{ color: '#555', fontSize: 16, mb: 1 }}>
+                                No season to compare.
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <>
+                            {/* Tabs */}
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: { xs: 'flex-start', md: 'space-between' },
+                                mb: 1,
+                                pt: { xs: 2.5, md: 6 },
+                                overflowX: 'auto',
+                                gap: { xs: 1.2, md: 0 },
+                                pb: 0.6,
+                                '&::-webkit-scrollbar': { height: 4 },
+                                '&::-webkit-scrollbar-thumb': { background: 'rgba(45,45,45,0.35)', borderRadius: 3 },
+                            }}>
+                                {[
+                                    { key: 'goals', label: 'Goals' },
+                                    { key: 'assists', label: 'Assists' },
+                                    { key: 'motm', label: 'MOTM Votes' },
+                                    { key: 'defensive', label: 'Cln Sht / Def' },
+                                    { key: 'totalXP', label: 'Total XP' }
+                                ].map(tab => (
                                     <Box
+                                        key={tab.key}
+                                        onClick={() => setStatsModalTab(tab.key as any)}
                                         sx={{
+                                            flex: { xs: '0 0 auto', md: 1 },
                                             display: 'flex',
-                                            alignItems: 'stretch',
-                                            borderRadius: 1,
-                                            overflow: 'hidden',
+                                            justifyContent: 'start',
                                             cursor: 'pointer',
-                                            border: '1px solid rgba(255,255,255,0.4)',
-                                            boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
-                                            transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
-                                            '&:hover': {
-                                                transform: 'translateY(-1px)',
-                                                boxShadow: '0 10px 22px rgba(0,0,0,0.45)',
-                                                borderColor: 'rgba(255,255,255,0.65)',
-                                            },
-                                            '&:hover .icon-box': { bgcolor: '#008c6b' },
-                                            '&:hover .text-box': { bgcolor: '#2f2f2f' },
-                                            width: '100%',
-                                            minWidth: 0,
-                                            justifyContent: 'center',
-                                        }}
-                                        onClick={() => setStatsModalOpen(true)}
-                                    >
-                                        <Box className="icon-box" sx={{
-                                            bgcolor: '#00a77f',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: { xs: 38, sm: 40, md: 44 },
-                                            borderRight: '1px solid rgba(255,255,255,0.25)',
-                                            py: { xs: 0.55, md: 0.7 }
-                                        }}>
-                                            <BarChart sx={{ color: '#fff', fontSize: { xs: 20, md: 26 } }} />
-                                        </Box>
-                                        <Box className="text-box" sx={{
-                                            bgcolor: '#2b2b2b',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: { xs: 'center', md: 'flex-start' },
-                                            px: { xs: 0.6, md: 0.9 },
-                                            py: { xs: 0.55, md: 0.7 },
-                                            width: '100%',
-                                        }}>
-                                            <Typography sx={{
-                                                color: '#fff',
-                                                fontWeight: 700,
-                                                fontSize: { xs: 9, sm: 10, md: 11.5 },
-                                                textTransform: 'uppercase',
-                                                letterSpacing: 0.5,
-                                                whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                                                lineHeight: 1.1,
-                                                textAlign: 'center',
-                                            }}>
-                                                Stats Over Season
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-
-                                    {/* Performance Dashboard button */}
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'stretch',
-                                            borderRadius: 1,
-                                            overflow: 'hidden',
-                                            cursor: playerId ? 'pointer' : 'not-allowed',
-                                            border: '1px solid rgba(255,255,255,0.4)',
-                                            boxShadow: '0 6px 16px rgba(0,0,0,0.35)',
-                                            opacity: playerId ? 1 : 0.6,
-                                            transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
-                                            '&:hover': {
-                                                transform: playerId ? 'translateY(-1px)' : 'none',
-                                                boxShadow: playerId ? '0 10px 22px rgba(0,0,0,0.45)' : '0 6px 16px rgba(0,0,0,0.35)',
-                                                borderColor: playerId ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.4)',
-                                            },
-                                            '&:hover .perf-icon-box': { bgcolor: '#b71c1c' },
-                                            '&:hover .perf-text-box': { bgcolor: playerId ? '#2f2f2f' : '#2b2b2b' },
-                                            width: '100%',
-                                            minWidth: 0,
-                                            justifyContent: 'center',
-                                            justifySelf: { xs: 'stretch', md: 'start' },
-                                        }}
-                                        onClick={() => {
-                                            if (!playerId) return;
-                                            router.push(`/player/${playerId}/career`);
+                                            pb: { xs: 1.2, md: 1.8 },
                                         }}
                                     >
-                                        <Box className="perf-icon-box" sx={{
-                                            bgcolor: '#d32f2f',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: { xs: 38, sm: 40, md: 44 },
-                                            borderRight: '1px solid rgba(255,255,255,0.25)',
-                                            py: { xs: 0.55, md: 0.7 },
-                                        }}>
-                                            <SpaceDashboard sx={{ color: '#fff', fontSize: { xs: 24, md: 26 } }} />
-                                        </Box>
-                                        <Box className="perf-text-box" sx={{
-                                            bgcolor: '#2b2b2b',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: { xs: 'center', md: 'flex-start' },
-                                            px: { xs: 0.6, md: 0.9 },
-                                            py: { xs: 0.55, md: 0.7 },
-                                            width: '100%',
-                                        }}>
-                                            <Typography sx={{
-                                                color: '#fff',
-                                                fontWeight: 700,
-                                                fontSize: { xs: 9.5, sm: 10.5, md: 11.5 },
-                                                textTransform: 'uppercase',
-                                                letterSpacing: 0.5,
-                                                whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                                                lineHeight: 1.1,
-                                                textAlign: 'center',
-                                            }}>
-                                                Performance Dashboard
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </Box>
-
-                        {/* Tabs Navigation */}
-                        <Box sx={{
-                            mb: 3,
-                            display: 'flex',
-                            flexWrap: 'nowrap',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-end',
-                            width: '100%',
-                            gap: { xs: 0.6, md: 3 },
-                            mt: { xs: 1.5, sm: 2.5, md: 7.5 },
-                        }}>
-                            {['current', 'career', 'trophies', 'rewards', 'history'].map(tab => (
-                                <Box
-                                    key={tab}
-                                    onClick={() => handleTabClick(tab)}
-                                    sx={{
-                                        flex: 1,
-                                        minWidth: 0,
-                                        textAlign: 'center',
-                                        cursor: 'pointer',
-                                        pb: 1,
-                                    }}
-                                >
-                                    <Typography
-                                        variant="inherit"
-                                        sx={{
-                                            color: '#fff',
-                                            fontWeight: 500,
-                                            fontSize: { xs: '11px !important', sm: '16px !important', md: '26px !important' },
-                                            textTransform: 'capitalize',
-                                            lineHeight: 1.15,
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
-                                        {tab === 'current' ? 'Current' : tab === 'career' ? (isMobile ? 'Career' : 'Career Stats') : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                                    </Typography>
-                                    {/* Underline Box */}
-                                    <Box sx={{
-                                        width: { xs: '58%', md: '70%' },
-                                        height: { xs: '3px', md: '6px' },
-                                        bgcolor: activeTab === tab ? '#00a780' : '#555',
-                                        mt: 1,
-                                        mx: 'auto',
-                                    }} />
-                                </Box>
-                            ))}
-                        </Box>
-
-                        {/* Stats Row */}
-                        <Box
-                            sx={{
-                                display: 'grid',
-                                gridTemplateColumns: {
-                                    xs: 'repeat(3, minmax(0, 1fr))',
-                                    sm: 'repeat(7, minmax(0, 1fr))',
-                                },
-                                columnGap: 0,
-                                rowGap: { xs: 1.2, sm: 2 },
-                                mt: { xs: 1.5, sm: 2, md: 2.5 },
-                                mb: { xs: 2, sm: 3 },
-                                width: '100%',
-                            }}
-                        >
-                            <StatItem label="APPS" value={displayedStatsMatches} />
-                            <StatItem label="GOALS" value={displayedStatsTotals.goals} />
-                            <StatItem label="ASSISTS" value={displayedStatsTotals.assists} />
-                            <StatItem label="MOTM VOTES" value={displayedMotmVotes} />
-                            <StatItem label="DEFENSIVE IMP." value={displayedDefensiveImpact} />
-                            <StatItem label="CLEAN SHEET" value={displayedStatsTotals.cleanSheets} />
-                            <StatItem label="TOTAL XP" value={xpLoading ? '...' : `${Math.max(0, displayXp).toLocaleString()} xp`} />
-                        </Box>
-
-                        {/* Three Cards Section */}
-                        <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
-                            {/* Card 1: Trophies & Awards */}
-                            <Grid
-                                item
-                                xs={12}
-                                md={4}
-                                ref={trophiesCardRef}
-                                sx={{ display: 'flex', scrollMarginTop: { xs: '84px', md: 0 } }}
-                            >
-                                <Paper sx={{
-                                    bgcolor: CARD_BG,
-                                    p: 2.5,
-                                    // borderRadius: 2,
-                                    border: activeTab === 'trophies' ? `3px solid ${TEAL_PRIMARY}` : '1px solid #fff',
-                                    transition: 'border 0.3s ease',
-                                    boxSizing: 'border-box',
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}>
-                                    <Box sx={{ textAlign: 'center', mb: 2 }}>
-                                        <Typography sx={{
-                                            color: '#fff',
-                                            fontSize: 18,
-                                            fontWeight: 600,
-                                            mb: 2,
-                                            textAlign: 'center',
-                                            mt: -1,
-                                            fontFamily: 'var(--font-woodford-bourne-pro)',
-                                        }}>
-                                            Trophies & Awards
-                                        </Typography>
-                                        {/* <Box sx={{ 
-                                        width: 180, 
-                                        height: 3, 
-                                        bgcolor: TEAL_PRIMARY, 
-                                        mx: 'auto' 
-                                    }} /> */}
-                                    </Box>
-                                    {trophiesLoading ? (
-                                        <Box sx={{ textAlign: 'center', py: 3 }}>
-                                            <CircularProgress size={24} sx={{ color: TEAL_PRIMARY }} />
-                                        </Box>
-                                    ) : earnedTrophies.length === 0 ? (
-                                        <Typography sx={{ color: '#999', textAlign: 'center', py: 3, fontSize: 13 }}>
-                                            No trophies yet
-                                        </Typography>
-                                    ) : (
                                         <Box sx={{
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            justifyContent: 'flex-start',
-                                            gap: 2
+                                            borderBottom: statsModalTab === tab.key ? `4px solid #E56B16` : '4px solid #c0bbb5',
+                                            transition: 'all 0.2s ease',
+                                            minWidth: { xs: '120px', md: '150px' },
+                                            textAlign: 'start',
                                         }}>
-                                            {earnedTrophies.map((t) => (
-                                                <Box key={t.key} sx={{
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    gap: 0.5
-                                                }}>
-                                                    <Box
-                                                        sx={{
-                                                            width: TROPHY_ICON_FRAME_SIZE,
-                                                            height: TROPHY_ICON_FRAME_SIZE,
+                                            <Typography sx={{
+                                                color: statsModalTab === tab.key ? '#2d2d2d' : '#888',
+                                                fontWeight: statsModalTab === tab.key ? 800 : 600,
+                                                fontSize: { xs: 14, sm: 17, md: 21 },
+                                                whiteSpace: 'nowrap',
+                                                transition: 'color 0.2s ease'
+                                            }}>
+                                                {tab.label}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                ))}
+                            </Box>
+
+                            {/* Stats Bars - auto-scaled with left border */}
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: { xs: 1.2, md: 2 },
+                                borderLeft: '3px solid #999',
+                                borderBottom: '3px solid #999',
+                                pl: 0,
+                                pb: 2,
+                            }}>
+                                {(() => {
+                                    const getStatValue = (s: typeof seasonWiseStats[0]) => {
+                                        switch (statsModalTab) {
+                                            case 'goals': return s.goals;
+                                            case 'assists': return s.assists;
+                                            case 'motm': return s.motmVotes;
+                                            case 'defensive': return s.defensiveImpact + s.cleanSheets;
+                                            case 'totalXP': return s.totalXP;
+                                            default: return 0;
+                                        }
+                                    };
+                                    const maxValue = Math.max(...seasonWiseStats.map(getStatValue), 1);
+
+                                    return seasonWiseStats.map((season) => {
+                                        const value = getStatValue(season);
+                                        const percentage = (value / maxValue) * 100;
+
+                                        return (
+                                            <Box key={season.seasonId} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.1, md: 3 }, mx: { xs: 1, md: 3 } }}>
+                                                {/* Bar */}
+                                                <Box sx={{ flex: 1 }}>
+                                                    <Box sx={{
+                                                        bgcolor: 'transparent',
+                                                        height: { xs: 34, md: 42 },
+                                                        position: 'relative',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <Box sx={{
+                                                            bgcolor: value > 0 ? '#07BFA5' : 'transparent',
+                                                            height: '100%',
+                                                            width: value > 0 ? `${Math.max(percentage, 10)}%` : '0%',
+                                                            transition: 'width 0.5s ease',
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                        }}
-                                                    >
-                                                        <Image
-                                                            src={t.image}
-                                                            alt={t.label}
-                                                            width={getTrophyIconSize(t.label)}
-                                                            height={getTrophyIconSize(t.label)}
-                                                            style={{
-                                                                objectFit: 'contain',
-                                                                filter: 'none'
-                                                            }}
-                                                        />
-                                                    </Box>
-                                                    <Typography sx={{
-                                                        color: '#fff',
-                                                        fontWeight: 700,
-                                                        fontSize: 16,
-                                                        lineHeight: 1,
-                                                        mb: -0.5,
-                                                        ml: -0.2
-                                                    }}>
-                                                        {t.count}
-                                                    </Typography>
-                                                    <Box sx={{
-                                                        width: 10,
-                                                        height: 1.5,
-                                                        bgcolor: '#fff'
-                                                    }} />
-                                                </Box>
-                                            ))}
-                                        </Box>
-                                    )}
-                                </Paper>
-                            </Grid>
-
-                            {/* Card 2: Rewards XP */}
-                            <Grid
-                                item
-                                xs={12}
-                                md={4}
-                                ref={rewardsCardRef}
-                                sx={{ display: 'flex', scrollMarginTop: { xs: '84px', md: 0 } }}
-                            >
-                                <Paper sx={{
-                                    bgcolor: CARD_BG,
-                                    p: 2.5,
-                                    // borderRadius: 2,
-                                    border: activeTab === 'rewards' ? `3px solid ${TEAL_PRIMARY}` : '1px solid #fff',
-                                    transition: 'border 0.3s ease',
-                                    boxSizing: 'border-box',
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}>
-                                    <Typography sx={{
-                                        color: '#fff',
-                                        fontSize: 18,
-                                        fontWeight: 600,
-                                        mb: 2,
-                                        textAlign: 'center',
-                                        mt: -1,
-                                        fontFamily: 'var(--font-woodford-bourne-pro)',
-                                    }}>
-                                        Rewards XP
-                                    </Typography>
-                                    {badgesLoading ? (
-                                        <Box sx={{ textAlign: 'center', py: 3 }}>
-                                            <CircularProgress size={24} sx={{ color: TEAL_PRIMARY }} />
-                                        </Box>
-                                    ) : playerBadges.length === 0 ? (
-                                        <Typography sx={{ color: '#999', textAlign: 'center', py: 3, fontSize: 13 }}>
-                                            No rewards earned yet
-                                        </Typography>
-                                    ) : (
-                                        <Box sx={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: 1.5,
-                                            maxHeight: 156,
-                                            overflowY: 'auto',
-                                            pr: 1,
-                                            '&::-webkit-scrollbar': {
-                                                width: '6px',
-                                            },
-                                            '&::-webkit-scrollbar-track': {
-                                                background: 'rgba(255,255,255,0.05)',
-                                                borderRadius: '3px',
-                                            },
-                                            '&::-webkit-scrollbar-thumb': {
-                                                background: 'rgba(255,255,255,0.2)',
-                                                borderRadius: '3px',
-                                            },
-                                            '&::-webkit-scrollbar-thumb:hover': {
-                                                background: 'rgba(255,255,255,0.3)',
-                                            }
-                                        }}>
-                                            {playerBadges.map((badge) => (
-                                                <Box key={badge.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <Typography sx={{ color: '#ccc', fontSize: 13 }}>
-                                                        {badge.count}x {badge.title}
-                                                    </Typography>
-                                                    <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                        {(badge.count * badge.xp).toLocaleString()}xp
-                                                    </Typography>
-                                                </Box>
-                                            ))}
-                                        </Box>
-                                    )}
-                                </Paper>
-                            </Grid>
-
-                            {/* Card 3: History & Records */}
-                            <Grid
-                                item
-                                xs={12}
-                                md={4}
-                                ref={historyCardRef}
-                                sx={{ display: 'flex', scrollMarginTop: { xs: '84px', md: 0 } }}
-                            >
-                                <Paper sx={{
-                                    bgcolor: CARD_BG,
-                                    p: 2.5,
-                                    // borderRadius: 2,
-                                    border: activeTab === 'history' ? `3px solid ${TEAL_PRIMARY}` : '1px solid #fff',
-                                    transition: 'border 0.3s ease',
-                                    boxSizing: 'border-box',
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}>
-                                    <Typography sx={{
-                                        color: '#fff',
-                                        fontSize: 18,
-                                        fontWeight: 600,
-                                        mb: 2,
-                                        textAlign: 'center',
-                                        mt: -1,
-                                        fontFamily: 'var(--font-woodford-bourne-pro)',
-                                    }}>
-                                        History & Records
-                                    </Typography>
-                                    {historyRecordsLoading ? (
-                                        <Box sx={{ display: 'flex', flex: 1, minHeight: 156, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1.25 }}>
-                                            <CircularProgress size={26} sx={{ color: TEAL_PRIMARY }} />
-                                            <Typography sx={{ color: '#aaa', fontSize: 13 }}>
-                                                Loading history...
-                                            </Typography>
-                                        </Box>
-                                    ) : (
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, position: 'relative', pl: 2.5 }}>
-                                            {/* Vertical line */}
-                                            <Box sx={{
-                                                position: 'absolute',
-                                                left: 4,
-                                                top: 8,
-                                                bottom: 8,
-                                                width: 2,
-                                                bgcolor: '#00a77f',
-                                                borderRadius: 1,
-                                            }} />
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                                                <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                                                <Typography sx={{ color: '#ccc', fontSize: 13 }}>Longest Win Streak</Typography>
-                                                <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                    {historyRecords.longestWinStreak}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                                                <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                                                <Typography sx={{ color: '#ccc', fontSize: 13 }}>Most Goals Scored In A League</Typography>
-                                                <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                    {historyRecords.mostGoalsInLeague}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                                                <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                                                <Typography sx={{ color: '#ccc', fontSize: 13 }}>Most MOTM Votes Received In A League</Typography>
-                                                <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                    {historyRecords.mostMotmInLeague}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                                                <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                                                <Typography sx={{ color: '#ccc', fontSize: 13 }}>Largest Win Margin</Typography>
-                                                <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                    {historyRecords.longestWinMargin}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-                                                <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                                                <Typography sx={{ color: '#ccc', fontSize: 13 }}>{historyXpLabel}</Typography>
-                                                <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
-                                                    {historyRecords.highestXpInLeague.toLocaleString()}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    )}
-                                </Paper>
-                            </Grid>
-                        </Grid>
-
-                        {/* Stats Over Season Modal */}
-                        <Dialog
-                            open={statsModalOpen}
-                            onClose={() => setStatsModalOpen(false)}
-                            fullWidth
-                            scroll="paper"
-                            maxWidth={false}
-                            sx={{
-                                '& .MuiDialog-container': {
-                                    alignItems: 'center',
-                                },
-                            }}
-                            PaperProps={{
-                                sx: {
-                                    bgcolor: '#e8e4e0',
-                                    borderRadius: { xs: '10px', sm: '8px' },
-                                    border: '2px solid #3a3a3a',
-                                    overflow: 'hidden',
-                                    width: { xs: 'calc(100% - 16px)', sm: '100%' },
-                                    maxWidth: '1020px',
-                                    m: { xs: 1, sm: 2 },
-                                    maxHeight: { xs: 'calc(100dvh - 16px)', sm: 'calc(100dvh - 32px)' },
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    height: 'auto',
-                                }
-                            }}
-                        >
-                            {/* Header bar */}
-                            <DialogTitle sx={{
-                                bgcolor: '#d9d9d9',
-                                color: '#000',
-                                py: { xs: 1.2, md: 1.45 },
-                                px: { xs: 1.25, md: 2 },
-                                pr: { xs: 5.5, md: 7 },
-                                minHeight: 'auto',
-                                position: 'relative',
-                                borderBottom: '1px solid #bdb8b3',
-                            }}>
-                                {isMobile ? (
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.95, minWidth: 0, pr: 4.4 }}>
-                                        <Image
-                                            src={TrofiiImg}
-                                            alt="Trophy"
-                                            width={18}
-                                            height={18}
-                                            style={{ objectFit: 'contain', marginTop: 2, filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)' }}
-                                        />
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.15, minWidth: 0 }}>
-                                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.62px', color: '#222', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {currentLeagueName}
-                                            </Typography>
-                                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.58px', color: '#3d3d3d', lineHeight: 1.2 }}>
-                                                {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
-                                            </Typography>
-                                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.55px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                {playerName.toUpperCase()}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                ) : (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.1, minWidth: 0, pr: 6 }}>
-                                        <Image
-                                            src={TrofiiImg}
-                                            alt="Trophy"
-                                            width={28}
-                                            height={28}
-                                            style={{ objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)' }}
-                                        />
-                                        <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 19, textTransform: 'uppercase', letterSpacing: '0.9px', color: '#222', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '34%' }}>
-                                            {currentLeagueName}
-                                        </Typography>
-                                        <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
-                                        <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 17, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#3d3d3d', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                                            {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
-                                        </Typography>
-                                        <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
-                                        <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.85px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '34%' }}>
-                                            {playerName.toUpperCase()}
-                                        </Typography>
-                                    </Box>
-                                )}
-                                <IconButton
-                                    onClick={() => setStatsModalOpen(false)}
-                                    sx={{ color: '#555', bgcolor: '#e6e6e6', borderRadius: '3px', '&:hover': { color: '#000', bgcolor: '#e6e6e6' }, position: 'absolute', right: { xs: 6, md: 10 }, top: { xs: 6, md: 7 } }}
-                                >
-                                    <CloseIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
-                                </IconButton>
-                            </DialogTitle>
-
-                            <DialogContent sx={{
-                                bgcolor: '#f2f2f2',
-                                px: { xs: 1.25, sm: 2.5, md: 5 },
-                                py: { xs: 2, md: 4 },
-                                flex: '0 1 auto',
-                                minHeight: 0,
-                                overflowY: 'auto',
-                                '&::-webkit-scrollbar': {
-                                    width: '6px',
-                                },
-                                '&::-webkit-scrollbar-track': {
-                                    bgcolor: '#d5d0cb',
-                                },
-                                '&::-webkit-scrollbar-thumb': {
-                                    bgcolor: '#999',
-                                    borderRadius: '3px',
-                                    '&:hover': {
-                                        bgcolor: '#777',
-                                    }
-                                }
-                            }}>
-                                {leagueId === 'all' ? (
-                                    <Box sx={{ textAlign: 'center', py: 6 }}>
-                                        <Typography sx={{ color: '#777', fontSize: 14, mb: 1 }}>
-                                            Please select a specific league to view season-wise stats.
-                                        </Typography>
-                                    </Box>
-                                ) : seasonWiseStats.length === 0 ? (
-                                    <Box sx={{ textAlign: 'center', py: 6 }}>
-                                        <Typography className="empty-state-message" sx={{ color: '#555', fontSize: 16, mb: 1 }}>
-                                            No season to compare.
-                                        </Typography>
-                                    </Box>
-                                ) : (
-                                    <>
-                                        {/* Tabs */}
-                                        <Box sx={{
-                                            display: 'flex',
-                                            justifyContent: { xs: 'flex-start', md: 'space-between' },
-                                            mb: 1,
-                                            pt: { xs: 2.5, md: 6 },
-                                            overflowX: 'auto',
-                                            gap: { xs: 1.2, md: 0 },
-                                            pb: 0.6,
-                                            '&::-webkit-scrollbar': { height: 4 },
-                                            '&::-webkit-scrollbar-thumb': { background: 'rgba(45,45,45,0.35)', borderRadius: 3 },
-                                        }}>
-                                            {[
-                                                { key: 'goals', label: 'Goals' },
-                                                { key: 'assists', label: 'Assists' },
-                                                { key: 'motm', label: 'MOTM Votes' },
-                                                { key: 'defensive', label: 'Cln Sht / Def' },
-                                                { key: 'totalXP', label: 'Total XP' }
-                                            ].map(tab => (
-                                                <Box
-                                                    key={tab.key}
-                                                    onClick={() => setStatsModalTab(tab.key as any)}
-                                                    sx={{
-                                                        flex: { xs: '0 0 auto', md: 1 },
-                                                        display: 'flex',
-                                                        justifyContent: 'start',
-                                                        cursor: 'pointer',
-                                                        pb: { xs: 1.2, md: 1.8 },
-                                                    }}
-                                                >
-                                                    <Box sx={{
-                                                        borderBottom: statsModalTab === tab.key ? `4px solid #E56B16` : '4px solid #c0bbb5',
-                                                        transition: 'all 0.2s ease',
-                                                        minWidth: { xs: '120px', md: '150px' },
-                                                        textAlign: 'start',
-                                                    }}>
-                                                        <Typography sx={{
-                                                            color: statsModalTab === tab.key ? '#2d2d2d' : '#888',
-                                                            fontWeight: statsModalTab === tab.key ? 800 : 600,
-                                                            fontSize: { xs: 14, sm: 17, md: 21 },
-                                                            whiteSpace: 'nowrap',
-                                                            transition: 'color 0.2s ease'
+                                                            justifyContent: 'flex-end',
+                                                            pr: { xs: 1.2, md: 2.5 }
                                                         }}>
-                                                            {tab.label}
-                                                        </Typography>
+                                                            {value > 0 && (
+                                                                <Typography sx={{
+                                                                    color: '#fff',
+                                                                    fontWeight: 700,
+                                                                    fontSize: { xs: 12, md: 16 }
+                                                                }}>
+                                                                    {statsModalTab === 'totalXP' ? value.toLocaleString() : value}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                        {value === 0 && (
+                                                            <Typography sx={{
+                                                                color: '#999',
+                                                                fontWeight: 600,
+                                                                fontSize: { xs: 12, md: 14 },
+                                                                position: 'absolute',
+                                                                left: 14,
+                                                                top: '50%',
+                                                                transform: 'translateY(-50%)'
+                                                            }}>
+                                                                0
+                                                            </Typography>
+                                                        )}
                                                     </Box>
                                                 </Box>
-                                            ))}
-                                        </Box>
 
-                                        {/* Stats Bars - auto-scaled with left border */}
-                                        <Box sx={{
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            gap: { xs: 1.2, md: 2 },
-                                            borderLeft: '3px solid #999',
-                                            borderBottom: '3px solid #999',
-                                            pl: 0,
-                                            pb: 2,
-                                        }}>
-                                            {(() => {
-                                                const getStatValue = (s: typeof seasonWiseStats[0]) => {
-                                                    switch (statsModalTab) {
-                                                        case 'goals': return s.goals;
-                                                        case 'assists': return s.assists;
-                                                        case 'motm': return s.motmVotes;
-                                                        case 'defensive': return s.defensiveImpact + s.cleanSheets;
-                                                        case 'totalXP': return s.totalXP;
-                                                        default: return 0;
-                                                    }
-                                                };
-                                                const maxValue = Math.max(...seasonWiseStats.map(getStatValue), 1);
-
-                                                return seasonWiseStats.map((season) => {
-                                                    const value = getStatValue(season);
-                                                    const percentage = (value / maxValue) * 100;
-
-                                                    return (
-                                                        <Box key={season.seasonId} sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.1, md: 3 }, mx: { xs: 1, md: 3 } }}>
-                                                            {/* Bar */}
-                                                            <Box sx={{ flex: 1 }}>
-                                                                <Box sx={{
-                                                                    bgcolor: 'transparent',
-                                                                    height: { xs: 34, md: 42 },
-                                                                    position: 'relative',
-                                                                    overflow: 'hidden'
-                                                                }}>
-                                                                    <Box sx={{
-                                                                        bgcolor: value > 0 ? '#07BFA5' : 'transparent',
-                                                                        height: '100%',
-                                                                        width: value > 0 ? `${Math.max(percentage, 10)}%` : '0%',
-                                                                        transition: 'width 0.5s ease',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'flex-end',
-                                                                        pr: { xs: 1.2, md: 2.5 }
-                                                                    }}>
-                                                                        {value > 0 && (
-                                                                            <Typography sx={{
-                                                                                color: '#fff',
-                                                                                fontWeight: 700,
-                                                                                fontSize: { xs: 12, md: 16 }
-                                                                            }}>
-                                                                                {statsModalTab === 'totalXP' ? value.toLocaleString() : value}
-                                                                            </Typography>
-                                                                        )}
-                                                                    </Box>
-                                                                    {value === 0 && (
-                                                                        <Typography sx={{
-                                                                            color: '#999',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: 12, md: 14 },
-                                                                            position: 'absolute',
-                                                                            left: 14,
-                                                                            top: '50%',
-                                                                            transform: 'translateY(-50%)'
-                                                                        }}>
-                                                                            0
-                                                                        </Typography>
-                                                                    )}
-                                                                </Box>
-                                                            </Box>
-
-                                                            {/* Season Label */}
-                                                            <Box sx={{ minWidth: { xs: 98, sm: 110, md: 145 }, textAlign: 'right' }}>
-                                                                <Typography sx={{
-                                                                    color: '#2d2d2d',
-                                                                    fontWeight: 700,
-                                                                    fontSize: { xs: 11, md: 14 },
-                                                                    textTransform: 'uppercase',
-                                                                    lineHeight: 1.3,
-                                                                    letterSpacing: '0.5px'
-                                                                }}>
-                                                                    SEASON {season.seasonNumber}
-                                                                </Typography>
-                                                                <Typography sx={{
-                                                                    color: '#666',
-                                                                    fontSize: { xs: 10, md: 12 },
-                                                                    lineHeight: 1.3
-                                                                }}>
-                                                                    {season.isFinished
-                                                                        ? '(Finished)'
-                                                                        : <span style={{ fontSize: 10 }}>(Not Finished)</span>
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    );
-                                                });
-                                            })()}
-                                        </Box>
-                                    </>
-                                )}
-                            </DialogContent>
-                        </Dialog>
-                    </>
-                )}
-            </Container>
+                                                {/* Season Label */}
+                                                <Box sx={{ minWidth: { xs: 98, sm: 110, md: 145 }, textAlign: 'right' }}>
+                                                    <Typography sx={{
+                                                        color: '#2d2d2d',
+                                                        fontWeight: 700,
+                                                        fontSize: { xs: 11, md: 14 },
+                                                        textTransform: 'uppercase',
+                                                        lineHeight: 1.3,
+                                                        letterSpacing: '0.5px'
+                                                    }}>
+                                                        SEASON {season.seasonNumber}
+                                                    </Typography>
+                                                    <Typography sx={{
+                                                        color: '#666',
+                                                        fontSize: { xs: 10, md: 12 },
+                                                        lineHeight: 1.3
+                                                    }}>
+                                                        {season.isFinished
+                                                            ? '(Finished)'
+                                                            : <span style={{ fontSize: 10 }}>(Not Finished)</span>
+                                                        }
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        );
+                                    });
+                                })()}
+                            </Box>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Box>
     );
 }
