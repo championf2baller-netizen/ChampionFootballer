@@ -1680,14 +1680,15 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             toast.error('You must be assigned to a team to vote for Man of the Match.');
             return;
         }
-        if (String(playerId) === String(currentUserId)) {
+        const isNone = !playerId || playerId === 'none' || playerId === 'clear';
+        if (!isNone && String(playerId) === String(currentUserId)) {
             toast.error('You cannot vote for yourself as Man of the Match.');
             return;
         }
         setLoadingVote(true);
         try {
-            // If user already voted for this player, unvote them
-            const voteData = votedForId === playerId ? { votedForId: null } : { votedForId: playerId };
+            // If user selected 'none' or already voted for this player, unvote them
+            const voteData = (isNone || votedForId === playerId) ? { votedForId: null } : { votedForId: playerId };
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/votes`, {
                 method: 'POST',
@@ -1697,9 +1698,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
             const data = await response.json();
             if (data.success) {
-                if (voteData.votedForId !== null) {
-                    toast.success('MOMT player voted');
-                }
+                toast.success(voteData.votedForId !== null ? 'MOTM player voted' : 'MOTM vote cleared');
                 // Update leaderboard cache for MOTM votes
                 if (data.updatedStats) {
                     Object.entries(data.updatedStats).forEach(([metric, value]) => {
@@ -1709,10 +1708,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     });
                 }
 
-                // ًں†• Trigger notification refresh for all players
+                // Trigger notification refresh for all players
                 if (typeof window !== 'undefined') {
                     window.dispatchEvent(new CustomEvent('refresh-notifications'));
-                    console.log('ًں”” Vote successful - notification refresh triggered');
+                    console.log('Vote successful - notification refresh triggered');
                 }
             }
         } catch {
@@ -2247,16 +2246,22 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     };
 
     // --- NEW: save selected player for a category ---
-    const handleSelectPick = async (playerId: string, categoryOverride?: CaptainPickCategory) => {
+    const handleSelectPick = async (rawPlayerId: string, categoryOverride?: CaptainPickCategory) => {
         const category = categoryOverride ?? pickCategory;
         if (!category) return;
-        if (String(playerId) === currentUserId) {
-            toast.error('You cannot select yourself for captain bonus picks.');
-            return;
-        }
-        if (!captainPickCandidates.some(p => String(p.id) === String(playerId))) {
-            toast.error('Please select a valid player from this match.');
-            return;
+
+        const isNone = !rawPlayerId || rawPlayerId === 'none' || rawPlayerId === 'clear';
+        const playerId = isNone ? '' : rawPlayerId;
+
+        if (!isNone) {
+            if (String(playerId) === currentUserId) {
+                toast.error('You cannot select yourself for captain bonus picks.');
+                return;
+            }
+            if (!captainPickCandidates.some(p => String(p.id) === String(playerId))) {
+                toast.error('Please select a valid player from this match.');
+                return;
+            }
         }
 
         console.log('Saving captain pick:', { category, playerId, resolvedMatchId });
@@ -2265,7 +2270,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         const applyLocal = () => {
             const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
             setCaptainPicks(prev => {
-                const updated = { ...prev, [category]: playerId };
+                const updated = { ...prev, [category]: playerId ? playerId : undefined };
                 if (currentUserId && resolvedMatchId && typeof window !== 'undefined') {
                     const primaryKey = `captain_picks_${resolvedMatchId}_${currentUserId}`;
                     localStorage.setItem(primaryKey, JSON.stringify(updated));
@@ -2281,7 +2286,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     ...prev,
                     [teamKey]: {
                         ...(prev[teamKey] || {}),
-                        [category]: playerId,
+                        [category]: playerId ? playerId : undefined,
                     }
                 }));
             }
@@ -2291,9 +2296,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         setIsPickDialogOpen(false);
         setPickCategory(null);
 
-        // Keep API sync as best effort; UI selection should not fail if API fails.
         if (!captainApiAvailable) {
-            toast.success(category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted');
+            toast.success(isNone ? 'Selection cleared' : (category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted'));
             return;
         }
 
@@ -2305,12 +2309,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ category, playerId })
+                body: JSON.stringify({ category, playerId: playerId || null })
             });
 
             if (res.status === 404 || res.status === 405) {
                 setCaptainApiAvailable(false);
-                toast.success(category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted');
+                toast.success(isNone ? 'Selection cleared' : (category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted'));
                 return;
             }
 
@@ -3065,6 +3069,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
+                                            autoFocus: false,
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
@@ -3109,6 +3114,38 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
+                                    <MenuItem
+                                        key="none-motm"
+                                        value="none"
+                                        sx={{
+                                            gridColumn: '1 / -1',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            py: 1,
+                                            px: 2,
+                                            mb: 0.5,
+                                            bgcolor: 'rgba(239, 68, 68, 0.15)',
+                                            border: '1px solid #EF4444',
+                                            borderRadius: 1,
+                                            color: '#F87171',
+                                            fontWeight: 'bold',
+                                            fontSize: '0.85rem',
+                                            transition: 'all 0.2s ease',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(239, 68, 68, 0.3)',
+                                                borderColor: '#EF4444',
+                                            },
+                                            minHeight: 'auto',
+                                        }}
+                                    >
+                                        <Box sx={{ width: 20, height: 20, borderRadius: '50%', border: '1px solid #F87171', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                            ✕
+                                        </Box>
+                                        Clear Selection (None)
+                                    </MenuItem>
                                     {allPlayersForVoting.map((p) => {
                                         const selected = votedForId === p.id;
                                         const isSelf = String(p.id) === currentUserId;
@@ -3186,6 +3223,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
+                                            autoFocus: false,
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
@@ -3230,6 +3268,38 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
+                                    <MenuItem
+                                        key="none-defence"
+                                        value="none"
+                                        sx={{
+                                            gridColumn: '1 / -1',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            py: 1,
+                                            px: 2,
+                                            mb: 0.5,
+                                            bgcolor: 'rgba(239, 68, 68, 0.15)',
+                                            border: '1px solid #EF4444',
+                                            borderRadius: 1,
+                                            color: '#F87171',
+                                            fontWeight: 'bold',
+                                            fontSize: '0.85rem',
+                                            transition: 'all 0.2s ease',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(239, 68, 68, 0.3)',
+                                                borderColor: '#EF4444',
+                                            },
+                                            minHeight: 'auto',
+                                        }}
+                                    >
+                                        <Box sx={{ width: 20, height: 20, borderRadius: '50%', border: '1px solid #F87171', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                            ✕
+                                        </Box>
+                                        Clear Selection (None)
+                                    </MenuItem>
                                     {captainPickCandidates.map((p) => {
                                         const selected = String(captainPicks.defence || '') === String(p.id);
                                         const isSelf = String(p.id) === currentUserId;
@@ -3304,6 +3374,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
+                                            autoFocus: false,
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
@@ -3348,6 +3419,38 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
+                                    <MenuItem
+                                        key="none-influence"
+                                        value="none"
+                                        sx={{
+                                            gridColumn: '1 / -1',
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: 1,
+                                            py: 1,
+                                            px: 2,
+                                            mb: 0.5,
+                                            bgcolor: 'rgba(239, 68, 68, 0.15)',
+                                            border: '1px solid #EF4444',
+                                            borderRadius: 1,
+                                            color: '#F87171',
+                                            fontWeight: 'bold',
+                                            fontSize: '0.85rem',
+                                            transition: 'all 0.2s ease',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(239, 68, 68, 0.3)',
+                                                borderColor: '#EF4444',
+                                            },
+                                            minHeight: 'auto',
+                                        }}
+                                    >
+                                        <Box sx={{ width: 20, height: 20, borderRadius: '50%', border: '1px solid #F87171', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                            ✕
+                                        </Box>
+                                        Clear Selection (None)
+                                    </MenuItem>
                                     {captainPickCandidates.map((p) => {
                                         const selected = String(captainPicks.influence || '') === String(p.id);
                                         const isSelf = String(p.id) === currentUserId;
