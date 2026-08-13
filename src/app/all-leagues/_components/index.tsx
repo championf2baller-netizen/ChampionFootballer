@@ -232,8 +232,9 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
         completedMatches: s.completedMatches,
         isCompleted: s.isCompleted,
         archived: s.archived,
+        deleted: s.deleted || s.isDeleted,
       }))
-    ) as unknown as Season[],
+    ).filter((s: any) => !s.deleted && !s.isDeleted) as unknown as Season[],
     isLocked:
       (typeof isLockedRaw === 'boolean' && isLockedRaw)
       || (typeof lockedRaw === 'boolean' && lockedRaw)
@@ -3416,6 +3417,7 @@ function AllLeagues() {
         if (Boolean((season as Season & { deleted?: boolean }).deleted)) return;
         const statusUnknown = (season as unknown as { status?: unknown }).status;
         const seasonStatus = typeof statusUnknown === 'string' ? statusUnknown.toLowerCase() : '';
+        if (seasonStatus === 'deleted') return;
         if (season.archived === true || seasonStatus === 'archived') {
           items.push({ league, season });
         }
