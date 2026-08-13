@@ -269,24 +269,64 @@ const clampLocation = (value: string) => value.slice(0, 120);
 
   type NotificationAudience = 'match' | 'league';
 
-  export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onClose }: EditMatchPageProps) {
-    // Fallback team image (used in responsive preview)
-    const defaultTeamImage = '/assets/cflogo2.png';
-    const defaultTeamImagee = '/assets/imgicon.png';
+const dropdownScrollMap = new Map<string, number>();
 
-    // Black dropdown container for Autocomplete to remove white bars
-    const BlackPaper = (props: PaperProps) => (
-      <Paper
-        {...props}
-        elevation={0}
-        sx={{
-          bgcolor: '#000',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.12)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
-        }}
-      />
-    );
+const ScrollPreservingListbox = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLElement>>((props, ref) => {
+  const listboxRef = React.useRef<HTMLUListElement | null>(null);
+
+  const handleRef = (node: HTMLUListElement | null) => {
+    listboxRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      (ref as React.MutableRefObject<HTMLUListElement | null>).current = node;
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
+    const id = props.id || 'autocomplete-listbox';
+    dropdownScrollMap.set(id, e.currentTarget.scrollTop);
+    if (props.onScroll) {
+      props.onScroll(e);
+    }
+  };
+
+  React.useLayoutEffect(() => {
+    const id = props.id || 'autocomplete-listbox';
+    const savedScroll = dropdownScrollMap.get(id);
+    if (listboxRef.current && typeof savedScroll === 'number' && savedScroll > 0) {
+      listboxRef.current.scrollTop = savedScroll;
+    }
+  });
+
+  return (
+    <ul
+      {...props}
+      ref={handleRef}
+      onScroll={handleScroll}
+    />
+  );
+});
+ScrollPreservingListbox.displayName = 'ScrollPreservingListbox';
+
+export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onClose }: EditMatchPageProps) {
+  // Fallback team image (used in responsive preview)
+  const defaultTeamImage = '/assets/cflogo2.png';
+  const defaultTeamImagee = '/assets/imgicon.png';
+
+  // Black dropdown container for Autocomplete to remove white bars
+  const BlackPaper = (props: PaperProps) => (
+    <Paper
+      {...props}
+      elevation={0}
+      sx={{
+        bgcolor: '#000',
+        color: '#fff',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+      }}
+    />
+  );
 
     const { token } = useAuth();
     const params = useParams();
@@ -1934,7 +1974,7 @@ const clampLocation = (value: string) => value.slice(0, 120);
                             getOptionDisabled={() => false}
                             isOptionEqualToValue={(o, v) => o.id === v.id}
                             PaperComponent={BlackPaper}
-                            
+                            ListboxComponent={ScrollPreservingListbox}
                             ListboxProps={{
                               sx: {
                                 display: 'grid',
@@ -1954,6 +1994,10 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                   key={key}
                                   component="li"
                                   {...optionProps}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    if (optionProps.onMouseDown) (optionProps.onMouseDown as any)(e);
+                                  }}
                                   sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -1964,26 +2008,37 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                     border: '1px solid',
                                     borderColor: selected ? (isAvailable ? '#43a047' : '#fff') : 'rgba(255,255,255,0.15)',
                                     borderRadius: 1,
-                                    transition: 'background-color .2s ease,border-color .2s ease, transform .08s ease',
+                                    transition: 'background-color .15s ease, border-color .15s ease',
                                     '&:hover': {
-                                      bgcolor: 'rgba(255,255,255,0.06)',
-                                      borderColor: '#fff',
-                                      transform: 'translateY(-1px)'
+                                      bgcolor: 'rgba(255,255,255,0.08)',
+                                      borderColor: '#fff'
                                     }
                                   }}
                                 >
-                                  <Avatar
-                                    src={option.profilePicture || defaultTeamImagee}
-                                    sx={{
-                                      width: 40,
-                                      height: 40,
-                                      mb: 0.5,
-                                      border: '3px solid',
-                                      borderColor: isAvailable ? '#43a047' : '#fff',
-                                      bgcolor: '#000',
-                                      '& .MuiAvatar-img': { backgroundColor: '#000', objectFit: 'cover' }
-                                    }}
-                                  />
+                                  <Box
+                                     sx={{
+                                       width: 40,
+                                       height: 40,
+                                       mb: 0.5,
+                                       borderRadius: '50%',
+                                       overflow: 'hidden',
+                                       border: '3px solid',
+                                       borderColor: isAvailable ? '#43a047' : '#fff',
+                                       bgcolor: '#000',
+                                       flexShrink: 0,
+                                       display: 'flex',
+                                       alignItems: 'center',
+                                       justifyContent: 'center'
+                                     }}
+                                   >
+                                     <img
+                                       src={option.profilePicture || defaultTeamImagee}
+                                       alt=""
+                                       loading="eager"
+                                       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                       onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
+                                     />
+                                   </Box>
                                   <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
                                     {option.firstName}
                                   </Typography>
@@ -2019,7 +2074,6 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                 delete (safeTagProps as { onDelete?: unknown }).onDelete;
                                 const isAvailable = availabilityMap[opt.id] === 'available';
                                 const availabilityOrder = availableOrderMap[opt.id];
-                                // const number = opt.shirtNumber || (opt.isGuest ? 'G' : '—');
                                 return (
                                   <Box
                                     key={tagKey ?? opt.id}
@@ -2057,18 +2111,6 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                         ({availabilityOrder})
                                       </Typography>
                                     )}
-                                    {/* Shirt number instead of availability text */}
-                                    {/* <Box sx={{
-                                      mt: 0.2,
-                                      px: 0.4,
-                                      py: 0.15,
-                                      borderRadius: 1,
-                                      fontSize: '0.55rem',
-                                      fontWeight: 800,
-                                      color: isAvailable ? '#43a047' : '#fff'
-                                    }}>
-                                      {number}
-                                    </Box> */}
                                   </Box>
                                 );
                               })
@@ -2114,7 +2156,7 @@ const clampLocation = (value: string) => value.slice(0, 120);
                             getOptionDisabled={() => false}
                             isOptionEqualToValue={(o, v) => o.id === v.id}
                             PaperComponent={BlackPaper}
-                            
+                            ListboxComponent={ScrollPreservingListbox}
                             ListboxProps={{
                               sx: {
                                 display: 'grid',
@@ -2134,6 +2176,10 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                   key={key}
                                   component="li"
                                   {...optionProps}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    if (optionProps.onMouseDown) (optionProps.onMouseDown as any)(e);
+                                  }}
                                   sx={{
                                     display: 'flex',
                                     flexDirection: 'column',
@@ -2144,11 +2190,10 @@ const clampLocation = (value: string) => value.slice(0, 120);
                                     border: '1px solid',
                                     borderColor: selected ? (isAvailable ? '#43a047' : '#fff') : 'rgba(255,255,255,0.15)',
                                     borderRadius: 1,
-                                    transition: 'background-color .2s ease,border-color .2s ease, transform .08s ease',
+                                    transition: 'background-color .15s ease, border-color .15s ease',
                                     '&:hover': {
-                                      bgcolor: 'rgba(255,255,255,0.06)',
-                                      borderColor: '#fff',
-                                      transform: 'translateY(-1px)'
+                                      bgcolor: 'rgba(255,255,255,0.08)',
+                                      borderColor: '#fff'
                                     }
                                   }}
                                 >
