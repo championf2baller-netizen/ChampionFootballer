@@ -7496,15 +7496,17 @@ export default function LeagueDetailPage() {
                     sx: {
                         borderRadius: { xs: 1.5, sm: 2 },
                         overflow: 'visible',
-                        width: { xs: 'calc(100vw - 20px)', sm: 'min(540px, calc(100vw - 56px))' },
-                        maxWidth: { xs: 'calc(100vw - 20px)', sm: '540px' },
-                        m: { xs: 0.5, sm: 2 },
+                        width: { xs: 'min(335px, calc(100vw - 12px))', sm: 'min(490px, calc(100vw - 40px))' },
+                        maxWidth: { xs: '335px', sm: '490px' },
+                        m: { xs: 'auto', sm: 2 },
                     }
                 }}
             >
-                <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1, sm: 2 }, px: { xs: 2, sm: 3 }, bgcolor: '#000', position: 'relative' }}>
-                    <Image src={cflogo} alt="CF Logo" width={isMobile ? 160 : 320} height={isMobile ? 160 : 320} />
-                    <IconButton onClick={() => setOpenQuickView(false)} sx={{ color: '#fff', position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)' }}>
+                <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1, sm: 1.5 }, px: { xs: 1.5, sm: 3 }, bgcolor: '#000', position: 'relative' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+                        <Image src={cflogo} alt="CF Logo" width={isMobile ? 200 : 300} height={isMobile ? 200 : 300} style={{ objectFit: 'contain', maxWidth: '85%' }} />
+                    </Box>
+                    <IconButton onClick={() => setOpenQuickView(false)} sx={{ color: '#fff', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
@@ -7513,7 +7515,7 @@ export default function LeagueDetailPage() {
                 <DialogContent
                     sx={{
                         py: { xs: 0.65, sm: 2.5 },
-                        px: { xs: 0.6, sm: 1.5 },
+                        px: { xs: 0.3, sm: 1.5 },
                         pb: { xs: 2.8, sm: 5 },
                         position: 'relative',
                         overflowX: 'visible',
@@ -7534,21 +7536,20 @@ export default function LeagueDetailPage() {
                         <Box
                             sx={{
                                 display: 'grid',
-                                gridTemplateColumns: { xs: '76px 160px 52px', sm: '112px minmax(0, 260px) 112px' },
-                                gap: { xs: 0.15, sm: 1 },
+                                gridTemplateColumns: { xs: '64px 160px 64px', sm: '100px 260px 100px' },
+                                gap: { xs: 0.2, sm: 1 },
                                 alignItems: 'start',
                                 justifyContent: 'center',
                                 minHeight: { xs: '308px', sm: '438px' },
-
-
                             }}
                         >
                             {/* Left: Stats Icons */}
                             <Paper elevation={0} sx={{
-                                p: { xs: 0.3, sm: 1 },
+                                p: { xs: 0.2, sm: 0.6 },
                                 border: '1px solid rgba(15, 23, 42, 0.2)',
                                 backgroundColor: '#fff',
                                 minWidth: 0,
+                                width: '100%',
                                 minHeight: { xs: '188px', sm: '280px' },
                                 height: { xs: '188px', sm: 'auto' },
                                 borderRadius: 2,
@@ -7557,7 +7558,7 @@ export default function LeagueDetailPage() {
                                 order: { xs: 1, sm: 1 },
                                 mt: { xs: 3.4, sm: 6 }
                             }}>
-                                <Typography sx={{ fontWeight: 800, fontSize: { xs: '0.5rem', sm: '0.8rem', md: '0.79rem' }, letterSpacing: 0, mb: 0.15, lineHeight: 1.05 }}>Current Stats</Typography>
+                                <Typography sx={{ fontWeight: 800, fontSize: { xs: '0.48rem', sm: '0.75rem' }, letterSpacing: 0, mb: 0.15, lineHeight: 1.05, textAlign: 'center' }}>Current Stats</Typography>
                                 <Box
                                     sx={{
                                         display: 'flex',
@@ -7569,9 +7570,9 @@ export default function LeagueDetailPage() {
                                         { img: Goals, label: 'Goals', shortLabel: 'Goals', value: quickView.stats?.goals ?? 0 },
                                         { img: Assist, label: 'Assists', shortLabel: 'Assist', value: quickView.stats?.assists ?? 0 },
                                         { img: Cleansheet, label: 'Clean Sheets', shortLabel: 'Clean', value: quickView.cleanSheets ?? 0 },
-                                        { img: Momt, label: 'MOTM', shortLabel: 'MOTM', value: quickView.motmCount ?? 0 },
-                                        { img: DefensiveImpact, label: 'Defensive Impact', shortLabel: 'Def', value: quickView.defensiveImpact ?? 0 },
-                                        { img: Mentality, label: 'Mentality', shortLabel: 'Mental', value: quickView.mentality ?? 0 },
+                                        { img: Momt, label: 'MOTM Votes', shortLabel: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                                        { img: DefensiveImpact, label: 'Def Impact', shortLabel: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
+                                        { img: Mentality, label: 'Mental Impact', shortLabel: 'Mental Impact', value: quickView.mentality ?? 0 },
                                     ].map((it, i) => (
                                         <Box
                                             key={i}
@@ -7584,8 +7585,8 @@ export default function LeagueDetailPage() {
                                             }}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
-                                                <Image src={it.img} alt={it.label} width={isMobile ? 10 : 19} height={isMobile ? 10 : 20} style={{ objectFit: 'contain' }} />
-                                                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: { xs: '0.58rem', sm: '0.9rem' }, lineHeight: 1 }}>
+                                                <Image src={it.img} alt={it.label} width={isMobile ? 10 : 18} height={isMobile ? 10 : 18} style={{ objectFit: 'contain' }} />
+                                                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: { xs: '0.58rem', sm: '0.85rem' }, lineHeight: 1 }}>
                                                     {it.value}
                                                 </Typography>
                                             </Box>
@@ -7593,7 +7594,7 @@ export default function LeagueDetailPage() {
                                                 variant="caption"
                                                 sx={{
                                                     color: '#64748b',
-                                                    fontSize: { xs: '0.45rem', sm: '0.65rem' },
+                                                    fontSize: { xs: '0.42rem', sm: '0.6rem' },
                                                     textAlign: 'left',
                                                     lineHeight: 1.05,
                                                     whiteSpace: 'normal',
@@ -7620,14 +7621,16 @@ export default function LeagueDetailPage() {
                                     sx={{
 
                                         color: '#1976d2',
-                                        fontSize: { xs: '0.48rem', sm: '0.75rem' },
+                                        fontSize: { xs: '0.45rem', sm: '0.7rem' },
                                         fontWeight: 600,
                                         textTransform: 'none',
                                         textDecoration: 'underline',
                                         textUnderlineOffset: '3px',
                                         WebkitTapHighlightColor: 'transparent',
-                                        padding: { xs: '1px 2px', sm: '4px 8px' },
+                                        padding: { xs: '1px 2px', sm: '2px 4px' },
                                         minWidth: 'auto',
+                                        width: '100%',
+                                        textAlign: 'center',
                                         '&:hover': {
                                             backgroundColor: 'transparent',
                                         },
@@ -7719,12 +7722,13 @@ export default function LeagueDetailPage() {
 
                             {/* Right: Last 10 Matches */}
                             <Paper elevation={0} sx={{
-                                p: { xs: 0.3, sm: 0.75 },
+                                p: { xs: 0.2, sm: 0.6 },
                                 border: '1px solid rgba(15, 23, 42, 0.2)',
                                 backgroundColor: '#fff',
                                 borderRadius: 2,
                                 overflowY: 'hidden',
                                 minWidth: 0,
+                                width: '100%',
                                 position: 'relative',
                                 zIndex: 4,
                                 order: { xs: 3, sm: 3 },
@@ -7732,8 +7736,8 @@ export default function LeagueDetailPage() {
                                 minHeight: { xs: 188, sm: 290 },
                                 height: { xs: 188, sm: 'auto' },
                             }}>
-                                <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: { xs: '0.5rem', sm: '0.7rem' }, letterSpacing: 0, lineHeight: 1.05 }}>Last 10 games</Typography>
-                                <Stack direction="column" spacing={0.2}>
+                                <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: { xs: '0.48rem', sm: '0.75rem' }, letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>Last 10 games</Typography>
+                                <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: { xs: 0.2, sm: 0.4 } }}>
                                     {(quickView.lastFive ?? []).slice(0, 10).map((m, idx) => (
                                         <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                             <Box
