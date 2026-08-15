@@ -56,6 +56,7 @@ import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoad
 import MatchResultLoadingSkeleton from '@/Components/loading/MatchResultLoadingSkeleton';
 import PlayerCardLoadingSkeleton from '@/Components/loading/PlayerCardLoadingSkeleton';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import PLAYERIMAGE from '@/Components/images/players.png'
 import HomeTeamImage from '@/Components/images/hometeamshirt.png'
 import AwayTeamImage from '@/Components/images/awayteamshirt.png'
@@ -4671,13 +4672,13 @@ export default function LeagueDetailPage() {
                                                     aria-haspopup="menu"
                                                     aria-expanded={memberPositionMenuOpen ? 'true' : undefined}
                                                     sx={{
-                                                        width: { xs: 196, sm: 280, md: 320 },
-                                                        minWidth: { xs: 196, sm: 280, md: 320 },
+                                                        width: { xs: 170, sm: 230, md: 260 },
+                                                        minWidth: { xs: 170, sm: 230, md: 260 },
                                                         flexShrink: 0,
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                         pl: { xs: 2, sm: 3 },
-                                                        pr: { xs: 1.2, sm: 2 },
+                                                        pr: { xs: 1, sm: 1.5 },
                                                         cursor: 'pointer',
                                                         userSelect: 'none',
                                                         position: 'sticky',
@@ -4686,7 +4687,7 @@ export default function LeagueDetailPage() {
                                                         backgroundColor: '#dddddd',
                                                         borderTopLeftRadius: '8px',
                                                     }}>
-                                                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
                                                         {selectedMemberPosition === 'all' ? 'ALL POSITIONS' : selectedMemberPosition.toUpperCase()}
                                                     </Typography>
                                                     <Box
@@ -4741,35 +4742,64 @@ export default function LeagueDetailPage() {
                                                     ))}
                                                 </Menu>
 
-                                                {/* Playing Style Header */}
-                                                <Box sx={{
-                                                    width: { xs: 108, sm: 150, md: 180 },
-                                                    minWidth: { xs: 108, sm: 150, md: 180 },
-                                                    flexShrink: 0,
-                                                    // pr: { xs: 0.5, sm: 2 , md: 7 },
-                                                    pl: { xs: 1.5, sm: 2.5, md: 4 },
-                                                    display: 'block',
-                                                }}>
-                                                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'left !important' }}>
-                                                        STYLE
-                                                    </Typography>
-                                                </Box>
+                                                {/* Flexible Spacer pushing the 4 columns to the right side */}
+                                                <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                                                {/* Spacer */}
-                                                <Box sx={{ flex: 1 }} />
+                                                {/* Right columns container with clean gap between headings */}
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                                                    {/* Playing Style Header */}
+                                                    <Box sx={{
+                                                        width: { xs: 100, sm: 130, md: 150 },
+                                                        minWidth: { xs: 100, sm: 130, md: 150 },
+                                                        flexShrink: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                            STYLE
+                                                        </Typography>
+                                                    </Box>
 
-                                                {/* View Stats Header */}
-                                                <Box sx={{ minWidth: { xs: 90, sm: 120 }, textAlign: 'center' }}>
-                                                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
-                                                        {isMobile ? 'STATS' : 'VIEW STATS'}
-                                                    </Typography>
-                                                </Box>
+                                                    {/* XP Status Header */}
+                                                    <Box sx={{
+                                                        width: { xs: 90, sm: 120, md: 135 },
+                                                        minWidth: { xs: 90, sm: 120, md: 135 },
+                                                        flexShrink: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                            XP STATUS
+                                                        </Typography>
+                                                    </Box>
 
-                                                {/* XP Points Header */}
-                                                <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
-                                                    <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
-                                                        CAREER xp
-                                                    </Typography>
+                                                    {/* View Stats Header */}
+                                                    <Box sx={{
+                                                        width: { xs: 75, sm: 100, md: 115 },
+                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                        flexShrink: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}>
+                                                        <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                                                            {isMobile ? 'STATS' : 'VIEW STATS'}
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {/* XP Points Header */}
+                                                    <Box sx={{
+                                                        width: { xs: 75, sm: 100, md: 115 },
+                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                        flexShrink: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}>
+                                                        <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
+                                                            CAREER xp
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
                                             </Box>
 
@@ -4781,8 +4811,7 @@ export default function LeagueDetailPage() {
                                                 msOverflowStyle: 'none',
                                                 borderBottomLeftRadius: '8px',
                                                 borderBottomRightRadius: '8px',
-                                                pl: 2,
-                                                pr: 2
+                                                px: 0,
                                             }}>
                                                 <List sx={{ p: 0 }}>
                                                     {filteredMembersForTable.map((member, idx) => {
@@ -4792,6 +4821,7 @@ export default function LeagueDetailPage() {
                                                         const rowBgColor = idx % 2 === 0 ? '#383838' : '#2b2b2b';
                                                         const rowBgColorHover = idx % 2 === 0 ? '#464646' : '#3a3a3a';
                                                         const isLast = idx === filteredMembersForTable.length - 1;
+                                                        const xpStatusTitle = getXPTier(member.xp ?? 0).title;
 
                                                         return (
                                                             <ListItem
@@ -4812,18 +4842,17 @@ export default function LeagueDetailPage() {
                                                                     borderBottomLeftRadius: isLast ? '8px' : 0,
                                                                     borderBottomRightRadius: isLast ? '8px' : 0,
                                                                     minHeight: { xs: '58px', sm: '72px' },
-                                                                    // p: 2
                                                                 }}
                                                             >
                                                                 {/* Avatar + Name column */}
                                                                 <Box sx={{
-                                                                    width: { xs: 196, sm: 280, md: 320 },
-                                                                    minWidth: { xs: 196, sm: 280, md: 320 },
+                                                                    width: { xs: 170, sm: 230, md: 260 },
+                                                                    minWidth: { xs: 170, sm: 230, md: 260 },
                                                                     flexShrink: 0,
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     pl: { xs: 2, sm: 3 },
-                                                                    pr: { xs: 1.2, sm: 2 },
+                                                                    pr: { xs: 1, sm: 1.5 },
                                                                     position: 'sticky',
                                                                     left: 0,
                                                                     zIndex: 2,
@@ -4882,35 +4911,64 @@ export default function LeagueDetailPage() {
                                                                     </Box>
                                                                 </Box>
 
-                                                                {/* Playing Style column */}
-                                                                <Box sx={{
-                                                                    width: { xs: 108, sm: 150, md: 180 },
-                                                                    minWidth: { xs: 108, sm: 150, md: 180 },
-                                                                    flexShrink: 0,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'flex-start',
-                                                                    pr: { xs: 0.5, sm: 2 },
-                                                                    pl: { xs: 1.5, sm: 2.5 },
-                                                                }}>
-                                                                    <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 18 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
-                                                                        {member.style}
-                                                                    </Typography>
-                                                                </Box>
+                                                                {/* Flexible Spacer pushing the 4 columns to the right side */}
+                                                                <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                                                                {/* Spacer */}
-                                                                <Box sx={{ flex: 1 }} />
+                                                                {/* Right columns container with matching clean gap */}
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                                                                    {/* Playing Style column */}
+                                                                    <Box sx={{
+                                                                        width: { xs: 100, sm: 130, md: 150 },
+                                                                        minWidth: { xs: 100, sm: 130, md: 150 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'flex-start',
+                                                                    }}>
+                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                                                            {member.style}
+                                                                        </Typography>
+                                                                    </Box>
 
-                                                                {/* View Stats column */}
-                                                                <Box sx={{ minWidth: { xs: 90, sm: 120 }, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                                    <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
-                                                                </Box>
+                                                                    {/* XP Status column */}
+                                                                    <Box sx={{
+                                                                        width: { xs: 90, sm: 120, md: 135 },
+                                                                        minWidth: { xs: 90, sm: 120, md: 135 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'flex-start',
+                                                                    }}>
+                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                                                            {xpStatusTitle}
+                                                                        </Typography>
+                                                                    </Box>
 
-                                                                {/* XP Points column */}
-                                                                <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 5.5 }, textAlign: 'center' }}>
-                                                                    <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
-                                                                        {(member.xp ?? 0).toLocaleString()}
-                                                                    </Typography>
+                                                                    {/* View Stats column */}
+                                                                    <Box sx={{
+                                                                        width: { xs: 75, sm: 100, md: 115 },
+                                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        justifyContent: 'center',
+                                                                        alignItems: 'center',
+                                                                    }}>
+                                                                        <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
+                                                                    </Box>
+
+                                                                    {/* XP Points column */}
+                                                                    <Box sx={{
+                                                                        width: { xs: 75, sm: 100, md: 115 },
+                                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        justifyContent: 'center',
+                                                                        alignItems: 'center',
+                                                                    }}>
+                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
+                                                                            {(member.xp ?? 0).toLocaleString()}
+                                                                        </Typography>
+                                                                    </Box>
                                                                 </Box>
                                                             </ListItem>
                                                         );
