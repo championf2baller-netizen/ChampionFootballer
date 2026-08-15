@@ -1664,7 +1664,7 @@ const AllPlayersPage = () => {
                     backgroundColor: '#dddddd',
                     boxShadow: '8px 0 12px -12px rgba(0,0,0,0.6)',
                   }}>
-                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
                   </Typography>
                   <Box
@@ -1728,7 +1728,7 @@ const AllPlayersPage = () => {
                   pl: { xs: 1.5, sm: 2.5 },
                   display: 'block',
                 }}>
-                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif', textAlign: 'left !important' }}>
+                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     STYLE
                   </Typography>
                 </Box>
@@ -1744,7 +1744,7 @@ const AllPlayersPage = () => {
                 </Box>
 
                 {/* XP Points */}
-                <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 7.5 }, textAlign: 'center' }}>
+                <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 5.5 }, textAlign: 'center' }}>
                   <Typography className="league-table-heading1" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
                     CAREER xp
                   </Typography>
@@ -1781,7 +1781,7 @@ const AllPlayersPage = () => {
                   '&::-webkit-scrollbar': { display: 'none' },
                   scrollbarWidth: 'none',
                   msOverflowStyle: 'none',
-                  px: { xs: 0, sm: 1.5 },
+                  px: 0,
                   pb: { xs: 0, sm: 1.5 },
                   pt: 0.5,
 
