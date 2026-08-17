@@ -12,6 +12,7 @@ import ShieldImg from '@/Components/images/shield.png';
 import DarkHorseImg from '@/Components/images/darkhourse.png';
 import Image, { StaticImageData } from 'next/image';
 import { useAuth } from '@/lib/hooks';
+import { useRouter } from 'next/navigation';
 import { Trophy, ChevronDown } from 'lucide-react';
 import HatTrickBadge from '@/Components/images/brown.svg'
 import AssistMaestroBadge from '@/Components/images/brown.svg'
@@ -1709,6 +1710,8 @@ export default function GlobalTrophyRoom() {
 
     return false;
   }, [completedStatusTokens]);
+
+  const router = useRouter();
 
   // Quick-view modal state
   const [openQuickView, setOpenQuickView] = useState(false);
@@ -3869,12 +3872,13 @@ export default function GlobalTrophyRoom() {
               {/* Left: Stats Icons */}
               <Paper elevation={0} sx={{
                 p: { xs: 0.2, sm: 0.6 },
+                pb: { xs: 0.4, sm: 0.6 },
                 border: '1px solid rgba(15, 23, 42, 0.2)',
                 backgroundColor: '#fff',
                 minWidth: 0,
                 width: '100%',
-                minHeight: { xs: '188px', sm: '280px' },
-                height: { xs: '188px', sm: 'auto' },
+                minHeight: { xs: 0, sm: '280px' },
+                height: 'auto',
                 borderRadius: 2,
                 position: 'relative',
                 zIndex: 4,
@@ -3903,7 +3907,7 @@ export default function GlobalTrophyRoom() {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
-                        gap: 0.01,
+                        gap: 0.5,
                         p: { xs: 0.02, sm: 0.3 },
                       }}
                     >
@@ -3935,6 +3939,12 @@ export default function GlobalTrophyRoom() {
                   variant="text"
                   disableRipple
                   disableFocusRipple
+                  onClick={() => {
+                    const playerId = quickView.player?.id;
+                    if (!playerId) return;
+                    setOpenQuickView(false);
+                    router.push(`/player/${playerId}`);
+                  }}
                   sx={{
                     color: '#1976d2',
                     fontSize: { xs: '0.45rem', sm: '0.7rem' },
@@ -4039,6 +4049,7 @@ export default function GlobalTrophyRoom() {
               {/* Right: Last 10 Matches */}
               <Paper elevation={0} sx={{
                 p: { xs: 0.2, sm: 0.6 },
+                pb: { xs: 0.4, sm: 0.6 },
                 border: '1px solid rgba(15, 23, 42, 0.2)',
                 backgroundColor: '#fff',
                 borderRadius: 2,
@@ -4049,8 +4060,8 @@ export default function GlobalTrophyRoom() {
                 zIndex: 4,
                 order: { xs: 3, sm: 3 },
                 mt: { xs: 3.4, sm: 6 },
-                minHeight: { xs: 188, sm: 275 },
-                height: { xs: 188, sm: 'auto' },
+                minHeight: { xs: 0, sm: 290 },
+                height: 'auto',
               }}>
                 <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: { xs: '0.48rem', sm: '0.75rem' }, letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>Last 10 games</Typography>
                 <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: { xs: 0.2, sm: 0.4 } }}>

@@ -7546,12 +7546,13 @@ export default function LeagueDetailPage() {
                             {/* Left: Stats Icons */}
                             <Paper elevation={0} sx={{
                                 p: { xs: 0.2, sm: 0.6 },
+                                pb: { xs: 0.4, sm: 0.6 },
                                 border: '1px solid rgba(15, 23, 42, 0.2)',
                                 backgroundColor: '#fff',
                                 minWidth: 0,
                                 width: '100%',
-                                minHeight: { xs: '188px', sm: '280px' },
-                                height: { xs: '188px', sm: 'auto' },
+                                minHeight: { xs: 0, sm: '280px' },
+                                height: 'auto',
                                 borderRadius: 2,
                                 position: 'relative',
                                 zIndex: 4,
@@ -7723,6 +7724,7 @@ export default function LeagueDetailPage() {
                             {/* Right: Last 10 Matches */}
                             <Paper elevation={0} sx={{
                                 p: { xs: 0.2, sm: 0.6 },
+                                pb: { xs: 0.4, sm: 0.6 },
                                 border: '1px solid rgba(15, 23, 42, 0.2)',
                                 backgroundColor: '#fff',
                                 borderRadius: 2,
@@ -7733,8 +7735,8 @@ export default function LeagueDetailPage() {
                                 zIndex: 4,
                                 order: { xs: 3, sm: 3 },
                                 mt: { xs: 3.4, sm: 6 },
-                                minHeight: { xs: 188, sm: 290 },
-                                height: { xs: 188, sm: 'auto' },
+                                minHeight: { xs: 0, sm: 290 },
+                                height: 'auto',
                             }}>
                                 <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: { xs: '0.48rem', sm: '0.75rem' }, letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>Last 10 games</Typography>
                                 <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: { xs: 0.2, sm: 0.4 } }}>
