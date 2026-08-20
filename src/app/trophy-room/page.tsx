@@ -2377,7 +2377,7 @@ export default function GlobalTrophyRoom() {
       // Fetch quick-view, full player profile, and league stats in parallel
       const [quickViewRes, playerRes, statsRes] = await Promise.all([
         fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/leagues/${encodeURIComponent(String(trophy.leagueId))}/player/${encodeURIComponent(String(trophy.winnerId))}/quick-view?refresh=1&_t=${Date.now()}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/leagues/${encodeURIComponent(String(trophy.leagueId))}/player/${encodeURIComponent(String(trophy.winnerId))}/quick-view?seasonId=${encodeURIComponent(String(trophy.seasonId || selectedSeasonId || 'all'))}&refresh=1&_t=${Date.now()}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
         fetch(
@@ -2385,7 +2385,7 @@ export default function GlobalTrophyRoom() {
           { headers: { Authorization: `Bearer ${token}` } }
         ),
         fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/players/${encodeURIComponent(String(trophy.winnerId))}/stats?leagueId=${encodeURIComponent(String(trophy.leagueId))}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/players/${encodeURIComponent(String(trophy.winnerId))}/stats?leagueId=${encodeURIComponent(String(trophy.leagueId))}&seasonId=${encodeURIComponent(String(trophy.seasonId || selectedSeasonId || 'all'))}`,
           { headers: { Authorization: `Bearer ${token}` } }
         ),
       ]);
@@ -2442,10 +2442,10 @@ export default function GlobalTrophyRoom() {
         : undefined;
 
       const lastFive: UserMatchSummary[] = Array.isArray(data.lastFive) ? data.lastFive : [];
-      const cleanSheets: number = Number(data.cleanSheets ?? 0);
-      const motmCount: number = Number(data.motmCount ?? 0);
-      const defensiveImpact: number = Number(data.defensiveImpact ?? 0);
-      const mentality: number = Number(data.mentality ?? 0);
+      const cleanSheets: number = Number(matchStats?.cleanSheets ?? data.cleanSheets ?? 0);
+      const motmCount: number = Number(matchStats?.motmVotes ?? data.motmCount ?? 0);
+      const defensiveImpact: number = Number(matchStats?.defensiveImpact ?? data.defensiveImpact ?? 0);
+      const mentality: number = Number(matchStats?.mentality ?? data.mentality ?? 0);
 
       // NEW: prefer backend XP fields
       const pickNumber = (...vals: Array<number | string | null | undefined>): number => {
