@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Anton, Inter, Geist, Geist_Mono, Bebas_Neue, Oswald, League_Spartan } from "next/font/google";
 import localFont from 'next/font/local';
 import "./globals.css";
 import "./bones/registry";
@@ -20,58 +19,6 @@ const woodfordBournePro = localFont({
   preload: true,
 });
 
-const bebasNeue = Bebas_Neue({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-bebas-neue',
-  display: 'swap',
-  preload: false,
-});
-
-const anton = Anton({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-geist-anton',
-  display: 'swap',
-});
-
-const oswald = Oswald({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  variable: '--font-oswald',
-  display: 'swap',
-  preload: false,
-});
-
-const leagueSpartan = League_Spartan({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-  variable: '--font-league-spartan',
-  display: 'swap',
-  preload: false,
-});
-
-const inter = Inter({
-  weight: ['400', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const geistSans = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-  display: 'swap',
-  preload: false,
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-geist-mono",
-  display: 'swap',
-  preload: false,
-});
-
 export const metadata: Metadata = {
   title: "Champion Footballer",
   description: "Your ultimate football management platform",
@@ -89,6 +36,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;600;700&family=League+Spartan:wght@400;700&family=Oswald:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
         <link rel="preload" href="/assets/images/hero_top_bg.webp" as="image" type="image/webp" fetchPriority="high" />
         <link rel="preload" href="/assets/images/logonavbar.webp" as="image" type="image/webp" fetchPriority="high" />
         {apiHostname && (
@@ -97,9 +50,20 @@ export default function RootLayout({
             <link rel="preconnect" href={apiUrl} crossOrigin="use-credentials" />
           </>
         )}
+        <style>{`
+          :root {
+            --font-league-spartan: 'League Spartan', sans-serif;
+            --font-bebas-neue: 'Bebas Neue', sans-serif;
+            --font-geist-anton: 'Anton', sans-serif;
+            --font-oswald: 'Oswald', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --font-geist-sans: 'Inter', sans-serif;
+            --font-geist-mono: monospace;
+          }
+        `}</style>
       </head>
       <body
-        className={`${woodfordBournePro.variable} ${geistSans.variable} ${geistMono.variable} ${anton.variable} ${inter.variable} ${bebasNeue.variable} ${oswald.variable} ${leagueSpartan.variable} antialiased`}
+        className={`${woodfordBournePro.variable} antialiased`}
         style={{ fontFamily: "var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif" }}
       >
         <Providers>

@@ -1,14 +1,31 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
+
+interface CMSItem {
+  title?: string;
+  content?: string;
+}
 
 export default function AboutCF() {
+  const [cmsItem, setCmsItem] = useState<CMSItem | null>(null);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/about_cf?_=${Date.now()}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.success && res?.data) {
+          setCmsItem(res.data);
+        }
+      })
+      .catch((err) => console.error('[AboutCF] CMS fetch error:', err));
+  }, []);
+
+  const title = cmsItem?.title || "About CF";
+  const contentText = cmsItem?.content;
+
   return (
-    <main
-      className="min-h-screen p-6"
-    // style={{
-    //   background:
-    //     "linear-gradient(177deg, rgba(229,106,22,0.08) 0%, rgba(207,35,38,0.08) 100%)",
-    // }}
-    >
+    <main className="min-h-screen p-6">
       <div
         className="max-w-3xl mx-auto rounded-2xl border border-white/10 shadow-xl overflow-hidden"
         style={{ background: "#2b2b2b" }}
@@ -18,43 +35,34 @@ export default function AboutCF() {
             className="text-[32px] sm:text-[42px] md:text-[55px] font-bold text-white text-center uppercase tracking-normal"
             style={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif' }}
           >
-            About CF
+            {title}
           </h1>
         </header>
 
-        <div className="p-6 sm:p-8 flex flex-col gap-4 text-white/90 leading-relaxed">
-          <p>
-            {`Champion Footballer is where football becomes more than just a kickabout with friends it becomes your journey to greatness!`}
-          </p>
-          <p>
-            {` Whether you're playing 5 or 7-a-side under the lights, dominating the local cage, or enjoying a weekend match at the park, CF turns every game into a competitive and unforgettable experience.`}
-          </p>
-          <p>
-            {`Create your player card, organise matches with ease, choose teams from a live player availability list, and track every goal, win, result, and rivalry as you build your football legacy. Keep the competition alive with real stats, rankings, league tables, and match history where every performance counts and every goal matters.`}
-          </p>
-          <p>
-            {`Fight for the top spot, dominate your league, and prove who truly deserves Player of the Match. After every game, vote for standout players, earn virtual awards, and climb your way to football bragging rights.`}
-          </p>
-          <p>
-            {`CF combines the energy of football, competition, and social gaming into one experience built for true football fans. Connect with players, create unforgettable matches, and bring the beautiful game to life every time you step onto the pitch.`}
-          </p>
-          {/* <p>
-            {`          CF can help you have fun playing the world's most loved sport, providing you with a unique experience that
-            connects football fans all around the world. It's a fun way to bring social media experience and playing
-            football together!`}
-          </p> */}
-          <p className="font-bold text-white">{`Play hard! Compete harder!`}</p>
-          <p className="font-bold text-white -mt-6">{`Become Champion Footballer!`}</p>
-          {/* <p>
-            {` CF is for everyone at all playing levels, who would like to relish the chance to become their local champion!`} {" "}
-            <Link
-              href="/"
-              className="font-bold text-[#E56A16] hover:text-[#CF2326] underline-offset-4 hover:underline"
-            >
-              Sign-up
-            </Link>{" "}
-            {` now to join an existing league or create a new league/group and invite your friends to play.`}
-          </p> */}
+        <div className="p-6 sm:p-8 flex flex-col gap-4 text-white/90 leading-relaxed whitespace-pre-line">
+          {contentText ? (
+            <p>{contentText}</p>
+          ) : (
+            <>
+              <p>
+                {`Champion Footballer is where football becomes more than just a kickabout with friends it becomes your journey to greatness!`}
+              </p>
+              <p>
+                {` Whether you're playing 5 or 7-a-side under the lights, dominating the local cage, or enjoying a weekend match at the park, CF turns every game into a competitive and unforgettable experience.`}
+              </p>
+              <p>
+                {`Create your player card, organise matches with ease, choose teams from a live player availability list, and track every goal, win, result, and rivalry as you build your football legacy. Keep the competition alive with real stats, rankings, league tables, and match history where every performance counts and every goal matters.`}
+              </p>
+              <p>
+                {`Fight for the top spot, dominate your league, and prove who truly deserves Player of the Match. After every game, vote for standout players, earn virtual awards, and climb your way to football bragging rights.`}
+              </p>
+              <p>
+                {`CF combines the energy of football, competition, and social gaming into one experience built for true football fans. Connect with players, create unforgettable matches, and bring the beautiful game to life every time you step onto the pitch.`}
+              </p>
+              <p className="font-bold text-white">{`Play hard! Compete harder!`}</p>
+              <p className="font-bold text-white -mt-6">{`Become Champion Footballer!`}</p>
+            </>
+          )}
         </div>
 
         <footer className="px-6 sm:px-8 pb-8 pt-4 border-t border-white/10 bg-[#2b2b2b]">

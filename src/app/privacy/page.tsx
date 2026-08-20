@@ -12,9 +12,24 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+interface CMSItem {
+  title?: string;
+  content?: string;
+}
+
 function PrivacyPolicies() {
+    const [cmsItem, setCmsItem] = useState<CMSItem | null>(null);
+
     useEffect(() => {
         window.scrollTo({ top: 0 });
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/privacy_policy?_=${Date.now()}`)
+            .then((r) => r.json())
+            .then((res) => {
+                if (res?.success && res?.data) {
+                    setCmsItem(res.data);
+                }
+            })
+            .catch((err) => console.error('[Privacy] CMS fetch error:', err));
     }, []);
 
     const [expanded, setExpanded] = useState<string | false>(false);
@@ -266,6 +281,22 @@ function PrivacyPolicies() {
         });
     };
 
+    const pageTitle = cmsItem?.title || "Privacy Policy";
+    const pageContent = cmsItem?.content;
+
+    // Helper: Parse CMS text into individual accordion sections by section numbers (e.g., "1. Title\nBody...")
+    const cmsSections = React.useMemo(() => {
+        if (!pageContent) return null;
+        const blocks = pageContent.split(/(?=\b\d+\.\s+)/g).map(s => s.trim()).filter(Boolean);
+        if (blocks.length < 2) return null;
+        return blocks.map((block) => {
+            const lines = block.split('\n');
+            const title = lines[0].trim();
+            const body = lines.slice(1).join('\n').trim();
+            return { title, body: body || title };
+        });
+    }, [pageContent]);
+
     return (
         <Box sx={{ p: 3, minHeight: '100vh' }}>
             <Typography
@@ -281,51 +312,95 @@ function PrivacyPolicies() {
                     color: 'white'
                 }}
             >
-                Privacy Policy
+                {pageTitle}
             </Typography>
             <Typography variant="h6" sx={{ mb: 4, color: 'white', textAlign: 'center' }}>
                 Last updated August 22, 2022
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 1200, mx: 'auto' }}>
-                {sections.map((section, index) => (
-                    <Accordion
-                        key={index}
-                        expanded={expanded === `panel${index}`}
-                        onChange={handleChange(`panel${index}`)}
-                        sx={{
-                            mb: 2,
-                            '&:before': { display: 'none' },
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                            borderRadius: 0,
-                            overflow: 'hidden',
-                            '&.Mui-expanded': {
-                                margin: '16px 0',
-                            },
-                        }}
-                    >
-                        <AccordionSummary
-                            expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                {cmsSections ? (
+                    cmsSections.map((sec, index) => (
+                        <Accordion
+                            key={`cms_${index}`}
+                            expanded={expanded === `cms_panel_${index}`}
+                            onChange={handleChange(`cms_panel_${index}`)}
                             sx={{
-                                background: '#2b2b2b',
-                                color: 'white',
+                                mb: 2,
+                                '&:before': { display: 'none' },
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                 borderRadius: 0,
-                                '&:hover': {
-                                    opacity: 0.95,
-                                },
+                                overflow: 'hidden',
                                 '&.Mui-expanded': {
-                                    borderRadius: 0,
+                                    margin: '16px 0',
                                 },
                             }}
                         >
-                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                {section.title}
-                            </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails sx={{ bgcolor: 'white', p: 3 }}>
-                            {renderContent(section.content)}
-                        </AccordionDetails>
-                    </Accordion>
-                ))}
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                sx={{
+                                    background: '#2b2b2b',
+                                    color: 'white',
+                                    borderRadius: 0,
+                                    '&:hover': {
+                                        opacity: 0.95,
+                                    },
+                                    '&.Mui-expanded': {
+                                        borderRadius: 0,
+                                    },
+                                }}
+                            >
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {sec.title}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ bgcolor: 'white', p: 3 }}>
+                                <Typography variant="body1" sx={{ color: '#222', lineHeight: 1.7, fontSize: '0.98rem', whiteSpace: 'pre-line' }}>
+                                    {sec.body}
+                                </Typography>
+                            </AccordionDetails>
+                        </Accordion>
+                    ))
+                ) : (
+                    sections.map((section, index) => (
+                        <Accordion
+                            key={index}
+                            expanded={expanded === `panel${index}`}
+                            onChange={handleChange(`panel${index}`)}
+                            sx={{
+                                mb: 2,
+                                '&:before': { display: 'none' },
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                borderRadius: 0,
+                                overflow: 'hidden',
+                                '&.Mui-expanded': {
+                                    margin: '16px 0',
+                                },
+                            }}
+                        >
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon sx={{ color: 'white' }} />}
+                                sx={{
+                                    background: '#2b2b2b',
+                                    color: 'white',
+                                    borderRadius: 0,
+                                    '&:hover': {
+                                        opacity: 0.95,
+                                    },
+                                    '&.Mui-expanded': {
+                                        borderRadius: 0,
+                                    },
+                                }}
+                            >
+                                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                    {section.title}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ bgcolor: 'white', p: 3 }}>
+                                {renderContent(section.content)}
+                            </AccordionDetails>
+                        </Accordion>
+                    ))
+                )}
             </Box>
         </Box>
     );

@@ -2036,6 +2036,20 @@ export default function PlayerDashboard() {
   const [statsLoading, setStatsLoading] = useState(false);
   const userDisplayName = getHomeUserDisplayName(user);
 
+  // Dynamic Home CMS Static Content
+  const [homeCmsContent, setHomeCmsContent] = useState<Record<string, { title?: string; content?: string; metadata?: any }>>({});
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content?_=${Date.now()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.success && data?.contentMap) {
+          setHomeCmsContent(data.contentMap);
+        }
+      })
+      .catch((err) => console.error('[Home] CMS fetch error', err));
+  }, []);
+
   const [, setWindowWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 1024);
 
   useEffect(() => {
@@ -2378,6 +2392,7 @@ export default function PlayerDashboard() {
           zIndex: 1,
         }}
       >
+
         {/* User Live Stats Section */}
         <Box sx={{
           display: 'flex',
@@ -2404,7 +2419,7 @@ export default function PlayerDashboard() {
             textTransform: 'uppercase',
             mb: { xs: 0.5, md: 0.3 },
           }}>
-            your LIVE stats
+            {homeCmsContent.home_live_stats_heading?.content || 'your LIVE stats'}
           </Box>
 
           <Box sx={{
@@ -2558,7 +2573,7 @@ export default function PlayerDashboard() {
                   fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.2rem' },
                   color: 'black',
                   fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                }}>Welcome,</Typography>
+                }}>{homeCmsContent.home_welcome_text?.content || 'Welcome,'}</Typography>
                 <Typography sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.2rem' }, fontWeight: 550, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
                   {userDisplayName}
                 </Typography>
@@ -2575,7 +2590,7 @@ export default function PlayerDashboard() {
                   fontWeight: 400,
                   whiteSpace: { xs: 'normal', md: 'nowrap' },
                 }}>
-                  Your Current League In Which You Stand
+                  {homeCmsContent.home_league_subtitle?.content || 'Your Current League In Which You Stand'}
                 </Typography>
 
                 {/* League Selection Component */}

@@ -15,8 +15,14 @@ interface ContactForm {
   message: string
 }
 
+interface CMSItem {
+  title?: string
+  content?: string
+}
+
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [cmsItem, setCmsItem] = useState<CMSItem | null>(null)
 
   const {
     control,
@@ -34,7 +40,18 @@ export default function ContactForm() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/contact_details?_=${Date.now()}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res?.success && res?.data) {
+          setCmsItem(res.data)
+        }
+      })
+      .catch((err) => console.error('[Contact] CMS fetch error:', err))
   }, [])
+
+  const pageTitle = cmsItem?.title || "Contact Us"
+  const pageSubtitle = cmsItem?.content || "Have a question or feedback? Fill out the form below and we'll get back to you!"
 
   const submitContactForm = async (value: ContactForm) => {
     setIsSubmitting(true)
@@ -95,14 +112,14 @@ export default function ContactForm() {
             textShadow: '0 2px 4px rgba(0,0,0,0.3)'
           }}
         >
-          Contact Us
+          {pageTitle}
         </Typography>
         <Typography
           variant="subtitle1"
           align="center"
-          sx={{ mb: 3, color: 'rgba(255,255,255,0.72)' }}
+          sx={{ mb: 3, color: 'rgba(255,255,255,0.72)', whitespace: 'pre-line' }}
         >
-          {`Have a question or feedback? Fill out the form below and we'll get back to you!`}
+          {pageSubtitle}
         </Typography>
         <Box component="form" onSubmit={handleSubmit(submitContactForm)} noValidate>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

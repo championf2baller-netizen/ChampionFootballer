@@ -1046,8 +1046,47 @@ export default function NavigationBar() {
   const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
   const openProfileMenu = Boolean(profileMenuAnchor);
   const [howToPlayOpen, setHowToPlayOpen] = useState(false);
+  const [howToPlayCmsData, setHowToPlayCmsData] = useState<any>(null);
+
+  useEffect(() => {
+    if (howToPlayOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/how_to_play?_=${Date.now()}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res?.success && res?.data) {
+            setHowToPlayCmsData(res.data);
+          }
+        })
+        .catch(err => console.error('[Navbar] How to Play CMS fetch error:', err));
+    }
+  }, [howToPlayOpen]);
   const [gameRulesOpen, setGameRulesOpen] = useState(false);
+  const [gameRulesCmsData, setGameRulesCmsData] = useState<any>(null);
+
+  useEffect(() => {
+    if (gameRulesOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/game_rules?_=${Date.now()}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res?.success && res?.data) setGameRulesCmsData(res.data);
+        })
+        .catch(err => console.error('[Navbar] Game Rules CMS fetch error:', err));
+    }
+  }, [gameRulesOpen]);
+
   const [xpStatusOpen, setXpStatusOpen] = useState(false);
+  const [xpStatusCmsData, setXpStatusCmsData] = useState<any>(null);
+
+  useEffect(() => {
+    if (xpStatusOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content/xp_status?_=${Date.now()}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res?.success && res?.data) setXpStatusCmsData(res.data);
+        })
+        .catch(err => console.error('[Navbar] XP Status CMS fetch error:', err));
+    }
+  }, [xpStatusOpen]);
   const pathname = usePathname();
 
   // 🔥 NOTIFICATION STATES
@@ -4188,7 +4227,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
       </Drawer>
 
       {/* YOUR EXISTING DIALOGS - keeping them as they were */}
-      <Dialog open={howToPlayOpen} onClose={() => setHowToPlayOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={howToPlayOpen} onClose={() => setHowToPlayOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle sx={{
           // background: '#2b2b2b',
           // color: 'white',
@@ -4233,7 +4272,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             Set up your player profile with your player card and profile picture to start tracking your football journey
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={playercardupdate.src} alt='Player Card Example' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step1 || playercardupdate.src} alt='Player Card Example' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
 
           <Typography variant="h6" sx={{
@@ -4254,17 +4293,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             Join an existing league using an <b>invite code</b> or create your own league and invite friends to compete throughout the league
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={leagueimg.src} alt='League Example' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step2 || leagueimg.src} alt='League Example' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
-          {/* <Typography variant="body1" sx={{ mb: 2 }}>
-            Each league can have seasons. Use the season selector to view the right season data (fixtures, results, table, leaderboard, players, and dream team).
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            The creator is initially the <b>league admin</b>. Admin can update league settings, manage season flow, and keep match data accurate.
-          </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={leaguesetting.src} alt='League Settings' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
-          </Box> */}
 
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
@@ -4276,11 +4306,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           <Typography variant="body1" sx={{ mb: 2 }}>
            League Admins can schedule match fixtures by selecting the date, time, venue and match format. All players will be notified
           </Typography>
-          {/* <Typography variant="body1" sx={{ mb: 2 }}>
-            In <b>Fixtures</b>, players mark availability. In <b>Match Results</b>, users can view teams, result details, and posted outcomes.
-          </Typography> */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={matchdetails.src} alt='League Progress' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step3 || matchdetails.src} alt='League Progress' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
 
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
@@ -4293,11 +4320,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           <Typography variant="body1" sx={{ mb: 2 }}>
           Lock in your spot by marking yourself Available. Players are ranked by response time, so the earlier you confirm, the higher you'll appear during team selection
           </Typography>
-          {/* <Typography variant="body1" sx={{ mb: 2 }}>
-            Typical admin flow: <b>Fixtures</b> {`>`} <b>New Match</b> {`>`} set details {`>`} completed match {`>`} add stats and scores in <b>Match Results</b>.
-          </Typography> */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={availability.src} alt='Match Management' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step4 || availability.src} alt='Match Management' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
 
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
@@ -4310,11 +4334,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           <Typography variant="body1" sx={{ mb: 2 }}>
             Once enough players have confirmed their availability, teams are generated. Teams can be automatically balanced by the app, randomly generated, or selected manually by the League Admin. Balanced teams create fair, competitive matches every time
           </Typography>
-          {/* <Typography variant="body1" sx={{ mb: 2 }}>
-            You can open any player from league tables or leaderboards to view profile, performance history, and detailed season or career metrics.
-          </Typography> */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={teamsection.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step5 || teamsection.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
 
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
@@ -4327,11 +4348,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           <Typography variant="body1" sx={{ mb: 2 }}>
           Take to the pitch, enjoy the game and compete with your teammates. Every match contributes to your season statistics and league standings
           </Typography>
-          {/* <Typography variant="body1" sx={{ mb: 2 }}>
-            Common awards include <b>League Champion</b>, <b>Runner-Up</b>, <b>Golden Boot</b>, <b>King Playmaker</b>, <b>Ballon d&apos;Or</b>, and role-based honors.
-          </Typography> */}
            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={playmatch.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step6 || playmatch.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
 
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
@@ -4345,7 +4363,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             After the match, the League Admin submits the final score to update the league table
           </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={submitresult.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step7 || submitresult.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
@@ -4358,7 +4376,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
            Add your goals, assists, clean sheets and match stats after every game. League Admins can edit player statistics to keep records accurate
           </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={individualstats.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step8 || individualstats.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
@@ -4371,7 +4389,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             View your stats, performance trends, achievements and career history as you progress through the league
           </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={trackperformance.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step9 || trackperformance.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
           <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
@@ -4384,7 +4402,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 Compete for individual awards and seasonal honours. Every achievement is stored in your Trophy Room
           </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <Image src={trophyroomandrewards.src} alt='Player Stats' width={550} height={180} style={{ borderRadius: 8, objectFit: 'contain', maxWidth: '100%' }} />
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step10 || trophyroomandrewards.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
           </Box>
             <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
          Build Your Legacy!
@@ -4491,18 +4509,28 @@ Important Management Controls:          </Typography>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {[
-                      { action: 'Winning Team Bonus', desc: 'Winning a match', winning: '30 xp', losing: '', isLosingEmpty: true, points: '3 Points' },
-                      { action: 'Draw', desc: 'Drawing a match', winning: '15 xp', losing: '15 xp', isMerged: true, points: '1 Point' },
-                      { action: 'Losing Team Consolation', desc: 'Losing a match', winning: '', isWinningEmpty: true, losing: '10 xp', points: '0 Points' },
-                      { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '10 xp', losing: '5 xp', points: '0 Points' },
-                      { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '5 xp', losing: '5 xp', isMerged: true, points: '0 Points' },
-                      { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '3 xp', losing: '2 xp', points: '0 Points' },
-                      { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '1 xp', points: '0 Points' },
-                      { action: 'Man of the Match Votes', desc: 'Player receiving individual count of votes per match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
-                      { action: 'Defensive Impact', desc: 'Decisive defensive or goalkeeping performance in the match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
-                      { action: '+ Mentality', desc: 'Recognise positive mentality and sportsmanship in the match.', winning: '2 xp', losing: '2 xp', points: '0 Points' }
-                    ].map((row, idx) => {
+                    {(() => {
+                      let rows = [
+                        { action: 'Winning Team Bonus', desc: 'Winning a match', winning: '30 xp', losing: '', isLosingEmpty: true, points: '3 Points' },
+                        { action: 'Draw', desc: 'Drawing a match', winning: '15 xp', losing: '15 xp', isMerged: true, points: '1 Point' },
+                        { action: 'Losing Team Consolation', desc: 'Losing a match', winning: '', isWinningEmpty: true, losing: '10 xp', points: '0 Points' },
+                        { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '10 xp', losing: '5 xp', points: '0 Points' },
+                        { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '5 xp', losing: '5 xp', isMerged: true, points: '0 Points' },
+                        { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '3 xp', losing: '2 xp', points: '0 Points' },
+                        { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '1 xp', points: '0 Points' },
+                        { action: 'Man of the Match Votes', desc: 'Player receiving individual count of votes per match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
+                        { action: 'Defensive Impact', desc: 'Decisive defensive or goalkeeping performance in the match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
+                        { action: '+ Mentality', desc: 'Recognise positive mentality and sportsmanship in the match.', winning: '2 xp', losing: '2 xp', points: '0 Points' }
+                      ];
+                      if (gameRulesCmsData?.content) {
+                        try {
+                          const parsed = typeof gameRulesCmsData.content === 'string' ? JSON.parse(gameRulesCmsData.content) : gameRulesCmsData.content;
+                          if (Array.isArray(parsed) && parsed.length > 0) rows = parsed;
+                        } catch (e) {
+                          console.warn('Game rules CMS parse failed, using fallback:', e);
+                        }
+                      }
+                      return rows.map((row: any, idx: number) => {
                       const rowBg = idx % 2 === 0 ? '#242424' : '#1e1e1e';
                       return (
                         <TableRow key={idx} sx={{ bgcolor: rowBg, '&:hover': { bgcolor: '#2c2c2c' }, transition: 'background-color 0.15s' }}>
@@ -4569,7 +4597,8 @@ Important Management Controls:          </Typography>
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    });
+                  })()}
 
                     {/* Streak Bonuses Header Row */}
                     <TableRow sx={{ bgcolor: '#2b2b2b !important' }}>
@@ -4693,53 +4722,64 @@ Important Management Controls:          </Typography>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {[
-                  { level: 1, title: 'Rookie', range: '0 - 500', desc: 'Building your way to football dominance, all the way to Champion Footballer', color: '#B0B0B0', label: 'Cool Gray' },
-                  { level: 2, title: 'Rising Star', range: '500 - 2,500', desc: 'Rising in prominence with every performance', color: '#4AA3FF', label: 'Sky Blue' },
-                  { level: 3, title: 'Baller', range: '2,500 - 5,000', desc: "A force on the field that can't be ignored", color: '#00a896', label: 'Green' },
-                  { level: 4, title: 'Pro', range: '5,000 - 15,000', desc: 'High mastery and control over the matches, consistently excelling and asserting dominance in your position', color: '#9B59B6', label: 'Purple' },
-                  { level: 5, title: 'Elite', range: '15,000 - 25,000', desc: 'Regarded as an elite player by peers, known for unwavering talent and a relentless winning mentality', color: '#3448FF', label: 'Royal Blue' },
-                  { level: 6, title: 'Champion Footballer', range: '25,000 - 50,000', desc: 'Attaining coveted status as a benchmark of excellence. A true icon of the game, respected by peers and feared by opponents', color: '#E74C3C', label: 'Crimson' },
-                  { level: 7, title: 'GOAT', range: '50,000+', desc: 'An undisputed footballer, forever cemented in the history books as the greatest of all time', color: '#F1C40F', label: 'Gold' },
-                ].map((row) => (
-                  <TableRow key={row.level} sx={{ '&:hover': { bgcolor: '#252525' } }}>
-                    <TableCell
-                      sx={{
-                        color: 'white',
-                        borderBottom: '1px solid #333',
-                        fontWeight: 700,
-                      }}
-                    >
-                      {row.level}
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        color: 'white',
-                        borderBottom: '1px solid #333',
-                        fontWeight: 600,
-                        position: 'sticky',
-                        left: 0,
-                        zIndex: 2,
-                        bgcolor: '#1a1a1a',
-                        boxShadow: '8px 0 12px -12px rgba(0,0,0,0.62)',
-                        '.MuiTableRow-root:hover &': {
-                          bgcolor: '#252525',
-                          boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
-                        },
-                      }}
-                    >
-                      {row.title}
-                    </TableCell>
-                    <TableCell sx={{ color: 'white', borderBottom: '1px solid #333' }}>{row.range}</TableCell>
-                    <TableCell sx={{ color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #333', fontSize: '0.9rem' }}>{row.desc}</TableCell>
-                    <TableCell sx={{ borderBottom: '1px solid #333' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: row.color, border: '1px solid rgba(255,255,255,0.2)' }} />
-                        <Typography sx={{ color: 'white', fontSize: '0.85rem' }}>{row.label}</Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {(() => {
+                  let milestones = [
+                    { level: 1, title: 'Rookie', range: '0 - 500', desc: 'Building your way to football dominance, all the way to Champion Footballer', color: '#B0B0B0', label: 'Cool Gray' },
+                    { level: 2, title: 'Rising Star', range: '500 - 2,500', desc: 'Rising in prominence with every performance', color: '#4AA3FF', label: 'Sky Blue' },
+                    { level: 3, title: 'Baller', range: '2,500 - 5,000', desc: "A force on the field that can't be ignored", color: '#00a896', label: 'Green' },
+                    { level: 4, title: 'Pro', range: '5,000 - 15,000', desc: 'High mastery and control over the matches, consistently excelling and asserting dominance in your position', color: '#9B59B6', label: 'Purple' },
+                    { level: 5, title: 'Elite', range: '15,000 - 25,000', desc: 'Regarded as an elite player by peers, known for unwavering talent and a relentless winning mentality', color: '#3448FF', label: 'Royal Blue' },
+                    { level: 6, title: 'Champion Footballer', range: '25,000 - 50,000', desc: 'Attaining coveted status as a benchmark of excellence. A true icon of the game, respected by peers and feared by opponents', color: '#E74C3C', label: 'Crimson' },
+                    { level: 7, title: 'GOAT', range: '50,000+', desc: 'An undisputed footballer, forever cemented in the history books as the greatest of all time', color: '#F1C40F', label: 'Gold' },
+                  ];
+                  if (xpStatusCmsData?.content) {
+                    try {
+                      const parsed = typeof xpStatusCmsData.content === 'string' ? JSON.parse(xpStatusCmsData.content) : xpStatusCmsData.content;
+                      if (Array.isArray(parsed) && parsed.length > 0) milestones = parsed;
+                    } catch (e) {
+                      console.warn('XP Status CMS parse failed, using fallback:', e);
+                    }
+                  }
+                  return milestones.map((row: any) => (
+                    <TableRow key={row.level} sx={{ '&:hover': { bgcolor: '#252525' } }}>
+                      <TableCell
+                        sx={{
+                          color: 'white',
+                          borderBottom: '1px solid #333',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {row.level}
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          color: 'white',
+                          borderBottom: '1px solid #333',
+                          fontWeight: 600,
+                          position: 'sticky',
+                          left: 0,
+                          zIndex: 2,
+                          bgcolor: '#1a1a1a',
+                          boxShadow: '8px 0 12px -12px rgba(0,0,0,0.62)',
+                          '.MuiTableRow-root:hover &': {
+                            bgcolor: '#252525',
+                            boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
+                          },
+                        }}
+                      >
+                        {row.title}
+                      </TableCell>
+                      <TableCell sx={{ color: 'white', borderBottom: '1px solid #333' }}>{row.range}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #333', fontSize: '0.9rem' }}>{row.desc}</TableCell>
+                      <TableCell sx={{ borderBottom: '1px solid #333' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: row.color, border: '1px solid rgba(255,255,255,0.2)' }} />
+                          <Typography sx={{ color: 'white', fontSize: '0.85rem' }}>{row.label}</Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ));
+                })()}
               </TableBody>
             </Table>
           </TableContainer>

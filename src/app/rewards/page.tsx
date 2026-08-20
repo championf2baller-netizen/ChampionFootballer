@@ -847,6 +847,7 @@ export default function RewardsPage() {
   const [serverBadges, setServerBadges] = useState<Badge[] | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [cmsStaticContent, setCmsStaticContent] = useState<Record<string, { title: string; content: string }>>({});
 
   const loading = leaguesLoading || achievementsLoading;
 
@@ -855,6 +856,18 @@ export default function RewardsPage() {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const openBadgeDetail = (b: Badge) => { setSelectedBadge(b); setOpenBadgeDlg(true); };
   const closeBadgeDetail = () => { setOpenBadgeDlg(false); setSelectedBadge(null); };
+
+  // Fetch dynamic CMS static content for reward badge titles and descriptions
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/static-content?_=${Date.now()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.success && data?.contentMap) {
+          setCmsStaticContent(data.contentMap);
+        }
+      })
+      .catch((err) => console.error('[Rewards] CMS fetch error', err));
+  }, []);
 
   // Fetch leagues data
   useEffect(() => {
@@ -929,9 +942,22 @@ export default function RewardsPage() {
     })();
   }, [token]);
 
-  // Compute badges
+  // Compute badges & apply dynamic CMS content overrides
   const clientBadges: Badge[] = user ? computeBadges(user, leagues, backendTotalXP) : [];
-  const myBadges: Badge[] = user ? mergeBadges(clientBadges, serverBadges) : [];
+  const rawBadges: Badge[] = user ? mergeBadges(clientBadges, serverBadges) : [];
+  const myBadges: Badge[] = useMemo(() => {
+    return rawBadges.map((badge) => {
+      const cmsItem = cmsStaticContent[badge.id] || cmsStaticContent[`reward_${badge.id}`];
+      if (cmsItem) {
+        return {
+          ...badge,
+          title: cmsItem.title || badge.title,
+          description: cmsItem.content || badge.description,
+        };
+      }
+      return badge;
+    });
+  }, [rawBadges, cmsStaticContent]);
   const myProfileXP = useMemo(() => {
     const risingXP = myBadges.find((b) => b.id === 'rising_xp')?.xp;
     const resolved =
