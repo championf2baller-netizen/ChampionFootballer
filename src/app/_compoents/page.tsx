@@ -85,11 +85,11 @@ export default function LandingPage() {
                   sx={{
                     position: 'relative',
                     width: '100%',
-                    borderRadius: '12px',
+                    // borderRadius: '12px',
                     overflow: 'hidden',
                     aspectRatio: { xs: '16/10', md: '1.55/1' },
-                    boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    // boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+                    // border: '1px solid rgba(255, 255, 255, 0.08)',
                   }}
                 >
                   <Image
@@ -110,7 +110,9 @@ export default function LandingPage() {
                   sx={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(2, 1fr)',
-                     width: '100%',
+                    width: '100%',
+                    gap: 1.2
+
                   }}
                 >
                   {/* Left Card: Team Squad + Text */}
@@ -126,10 +128,10 @@ export default function LandingPage() {
                         position: 'relative',
                         width: '100%',
                         aspectRatio: '1.5/1',
-                        borderRadius: '12px',
+                        // borderRadius: '12px',
                         overflow: 'hidden',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        // border: '1px solid rgba(255, 255, 255, 0.1)',
+                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                       }}
                     >
                       <Image
@@ -173,10 +175,10 @@ export default function LandingPage() {
                         position: 'relative',
                         width: '100%',
                         aspectRatio: '1.5/1',
-                        borderRadius: '12px',
+                        // borderRadius: '12px',
                         overflow: 'hidden',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        // border: '1px solid rgba(255, 255, 255, 0.1)',
+                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                       }}
                     >
                       <Image
