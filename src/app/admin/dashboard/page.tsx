@@ -42,7 +42,6 @@ const PAGE_TABS = [
   { id: 'rewards', label: 'Rewards & Badges Page', icon: <EmojiEventsIcon />, description: 'Manage all 9 reward rules, XP multipliers, and badge descriptions' },
   { id: 'home', label: 'Home Page & Banners', icon: <HomeIcon />, description: 'Manage welcome texts, subtitles, and home highlights' },
   { id: 'rules', label: 'App Info & Static Pages', icon: <GavelIcon />, description: 'Manage About CF, How to Play, Contact Us, Terms & Conditions, and Privacy Policy' },
-  { id: 'faq', label: 'FAQs Page', icon: <HelpOutlineIcon />, description: 'Manage Frequently Asked Questions and Help answers' },
   { id: 'all', label: 'All Pages (Full Overview)', icon: <AppsIcon />, description: 'View all static content items across the entire platform' },
 ];
 
@@ -73,7 +72,7 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/static-content`, {
+      const res = await fetch(`${API_BASE}/api/admin/static-content?_=${Date.now()}`, {
         headers: getHeaders()
       });
 
@@ -215,12 +214,11 @@ export default function AdminDashboardPage() {
 
   // Filter items by selected Page Tab
   const filteredItems = items.filter(item => {
-    if (item.key === 'announcement_banner' || item.key === 'app_rules') return false;
+    if (item.key === 'announcement_banner' || item.key === 'app_rules' || item.key === 'faq' || item.category === 'faq') return false;
     if (activeTab === 'all') return true;
     if (activeTab === 'rewards') return item.category === 'rewards';
     if (activeTab === 'home') return item.category === 'home';
     if (activeTab === 'rules') return item.category === 'general' || item.category === 'contact' || item.category === 'legal';
-    if (activeTab === 'faq') return item.category === 'faq';
     return item.category === activeTab;
   });
 
@@ -313,11 +311,11 @@ export default function AdminDashboardPage() {
                     <span>{tab.label}</span>
                     <Chip
                       label={items.filter(i => {
+                        if (i.key === 'faq' || i.category === 'faq') return false;
                         if (tab.id === 'all') return true;
                         if (tab.id === 'rewards') return i.category === 'rewards';
                         if (tab.id === 'home') return i.category === 'home';
                         if (tab.id === 'rules') return i.category === 'general' || i.category === 'contact' || i.category === 'legal';
-                        if (tab.id === 'faq') return i.category === 'faq';
                         return i.category === tab.id;
                       }).length}
                       size="small"
