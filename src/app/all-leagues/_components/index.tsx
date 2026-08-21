@@ -393,7 +393,17 @@ function LeagueMembersDialog({
 
   const isAdmin = league.adminId === currentUserId || (league.administrators || []).some((a) => a.id === currentUserId)
   const memberCount = (league.members && Array.isArray(league.members)) ? league.members.filter((m: any) => !(m.isGuest || (m.email && String(m.email).toLowerCase().includes('guest')) || m.provider === 'guest' || (m.lastName && String(m.lastName).toLowerCase().includes('guest')))).length : (typeof league.memberCount === 'number' ? league.memberCount : 0)
-  const matchCount = league.matches?.length || 0
+  const matchCount = typeof (league as any).totalMatchCount === 'number'
+    ? (league as any).totalMatchCount
+    : (typeof ((league as any).computedStatus as any)?.totalMatchCount === 'number'
+      ? ((league as any).computedStatus as any).totalMatchCount
+      : (league.matches ? league.matches.filter((m: any) => {
+          const isDeleted = Boolean(m.deleted || m.isDeleted);
+          const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase());
+          if (!isDeleted) return true;
+          if (isDeleted && isResult) return true;
+          return false;
+        }).length : 0));
   const leagueAdmin = (league.members || []).find((m) => m.id === league.adminId)
     || (league.administrators || []).find((a) => a.id === league.adminId)
     || (league.administrators || [])[0]
@@ -6019,13 +6029,18 @@ function AllLeagues() {
                               }}>
                                 Total Matches: {(() => {
                                   const l = league as any;
-                                  // totalMatchCount = all matches (fixtures + completed) from server SQL COUNT
-                                  return l.totalMatchCount
-                                    ?? l.computedStatus?.totalMatchCount
-                                    ?? l.computedStatus?.matchesPlayed
-                                    ?? l.computedStatus?.gamesPlayed
-                                    ?? league.matches?.length
-                                    ?? 0;
+                                  if (typeof l.totalMatchCount === 'number') return l.totalMatchCount;
+                                  if (typeof l.computedStatus?.totalMatchCount === 'number') return l.computedStatus.totalMatchCount;
+                                  if (Array.isArray(league.matches)) {
+                                    return league.matches.filter((m: any) => {
+                                      const isDeleted = Boolean(m.deleted || m.isDeleted);
+                                      const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase());
+                                      if (!isDeleted) return true;
+                                      if (isDeleted && isResult) return true;
+                                      return false;
+                                    }).length;
+                                  }
+                                  return l.computedStatus?.matchesPlayed ?? l.computedStatus?.gamesPlayed ?? 0;
                                 })()}
                               </Typography>
                             </Box>
