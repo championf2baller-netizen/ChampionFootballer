@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Box, Container, Typography, IconButton, Stack, Divider, Button } from '@mui/material';
 import { useAuth } from '@/lib/hooks';
 import { logout } from '@/lib/features/authSlice';
@@ -102,6 +102,10 @@ const WhatsAppIcon = ({ size = 18 }: { size?: number }) => (
 
 export default function Footer() {
   const router = useRouter();
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   const { isAuthenticated, dispatch } = useAuth();
   const [socialLinks, setSocialLinks] = React.useState<Record<string, string>>({
     x: 'https://x.com/ChampionF2tball',
