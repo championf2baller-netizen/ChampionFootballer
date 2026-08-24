@@ -35,13 +35,24 @@ interface StaticContentItem {
   updatedAt?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://cfbackend.championfootballer.co.uk';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
+
+const API_BASE = getApiBaseUrl();
 
 // App Pages Categories
 const PAGE_TABS = [
+  { id: 'landing', label: 'Main Landing Page (First Page)', icon: <AppsIcon />, description: 'Manage main landing page hero banners, cards, images, and headlines' },
+  { id: 'footer', label: 'Footer & Social Media Links', icon: <AppsIcon />, description: 'Manage footer social media icons, URLs, and platform links' },
   { id: 'rewards', label: 'Rewards & Badges Page', icon: <EmojiEventsIcon />, description: 'Manage all 9 reward rules, XP multipliers, and badge descriptions' },
-  { id: 'home', label: 'Home Page & Banners', icon: <HomeIcon />, description: 'Manage welcome texts, subtitles, and home highlights' },
-  { id: 'rules', label: 'App Info & Static Pages', icon: <GavelIcon />, description: 'Manage About CF, How to Play, Contact Us, Terms & Conditions, and Privacy Policy' },
+  { id: 'home', label: 'Home Page & Banners (Post-Login)', icon: <HomeIcon />, description: 'Manage welcome texts, subtitles, and home highlights' },
+  { id: 'leagues', label: 'All Leagues & Details', icon: <AppsIcon />, description: 'Manage All Leagues and League Details info banners' },
+  { id: 'matches', label: 'All Matches Page', icon: <AppsIcon />, description: 'Manage All Matches info banner' },
+  { id: 'players', label: 'All Players Page', icon: <AppsIcon />, description: 'Manage All Players main heading, search input, filters, and info banner' },
+  { id: 'player_stats', label: 'Player Stats Page', icon: <AppsIcon />, description: 'Manage Player Stats page (/player/[id]) main heading, search input, filters, and clear button' },
+  { id: 'career', label: 'Player Career Page', icon: <AppsIcon />, description: 'Manage Player Career History page (/player/[id]/career) heading, search input, filters, and clear button' },
+  { id: 'trophy', label: 'Trophy Room Page', icon: <EmojiEventsIcon />, description: 'Manage Trophy Room page (/trophy-room) main heading, filters, tabs, section titles, and info banner' },
+  { id: 'profile', label: 'Profile Page', icon: <AppsIcon />, description: 'Manage My Profile info banner' },
+  { id: 'rules', label: 'App Info & Legal Pages', icon: <GavelIcon />, description: 'Manage About CF, How to Play, Contact Us, Terms & Conditions, and Privacy Policy' },
   { id: 'all', label: 'All Pages (Full Overview)', icon: <AppsIcon />, description: 'View all static content items across the entire platform' },
 ];
 
@@ -61,7 +72,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   const getHeaders = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
     return {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -77,7 +88,8 @@ export default function AdminDashboardPage() {
       });
 
       if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem('token');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
         router.push('/admin/login');
         return;
       }
@@ -96,7 +108,7 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
     if (!token) {
       router.push('/admin/login');
       return;
@@ -328,34 +340,15 @@ export default function AdminDashboardPage() {
           </Tabs>
         </Paper>
 
-        {/* Selected Page Banner & Action Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {currentTabInfo?.icon}
-              {currentTabInfo?.label}
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#94a3b8', mt: 0.5 }}>
-              {currentTabInfo?.description}
-            </Typography>
-          </Box>
-
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={openNewDialog}
-            sx={{
-              bgcolor: '#00ff88',
-              color: '#0a0e17',
-              fontWeight: 800,
-              px: 3,
-              py: 1.2,
-              borderRadius: 2,
-              '&:hover': { bgcolor: '#00cc6c' }
-            }}
-          >
-            Add Content to {currentTabInfo?.label.split(' ')[0]} Page
-          </Button>
+        {/* Selected Page Banner */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {currentTabInfo?.icon}
+            {currentTabInfo?.label}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#94a3b8', mt: 0.5 }}>
+            {currentTabInfo?.description}
+          </Typography>
         </Box>
 
         {error && (
@@ -373,9 +366,6 @@ export default function AdminDashboardPage() {
             <Typography variant="h6" sx={{ color: '#94a3b8' }}>
               No static content items found for {currentTabInfo?.label}.
             </Typography>
-            <Button variant="contained" onClick={openNewDialog} sx={{ mt: 2, bgcolor: '#00ff88', color: '#0a0e17', fontWeight: 800 }}>
-              Create First Content Entry
-            </Button>
           </Paper>
         ) : (
           <Grid container spacing={3}>
@@ -412,23 +402,6 @@ export default function AdminDashboardPage() {
                           API Key: {item.key}
                         </Typography>
                       </Box>
-
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={item.isActive}
-                            onChange={() => handleToggleActive(item)}
-                            disabled={savingKey === item.key}
-                            size="small"
-                            sx={{
-                              '& .MuiSwitch-switchBase.Mui-checked': { color: '#00ff88' },
-                              '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { backgroundColor: '#00ff88' }
-                            }}
-                          />
-                        }
-                        label={<Typography variant="caption" sx={{ color: item.isActive ? '#00ff88' : '#64748b', fontWeight: 700 }}>{item.isActive ? 'Active' : 'Disabled'}</Typography>}
-                        sx={{ mr: -1 }}
-                      />
                     </Box>
 
                     {item.metadata?.xp && (
@@ -468,21 +441,15 @@ export default function AdminDashboardPage() {
                     </Typography>
 
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton
+                      <Button
                         size="small"
+                        variant="contained"
+                        startIcon={<EditIcon fontSize="small" />}
                         onClick={() => openEditDialog(item)}
-                        sx={{ color: '#60a5fa', bgcolor: 'rgba(96,165,250,0.1)', '&:hover': { bgcolor: 'rgba(96,165,250,0.2)' } }}
+                        sx={{ bgcolor: '#00ff88', color: '#0a0e17', fontWeight: 800, '&:hover': { bgcolor: '#00cc6c' } }}
                       >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteItem(item.key)}
-                        sx={{ color: '#ef4444', bgcolor: 'rgba(239,68,68,0.1)', '&:hover': { bgcolor: 'rgba(239,68,68,0.2)' } }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                        Edit Content
+                      </Button>
                     </Box>
                   </Box>
                 </Card>
@@ -548,132 +515,543 @@ export default function AdminDashboardPage() {
               InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
             />
 
-            <TextField
-              label="Text Content (Markdown / Plain Text)"
-              fullWidth
-              multiline
-              rows={6}
-              value={editItem?.content || ''}
-              onChange={(e) => setEditItem(prev => prev ? { ...prev, content: e.target.value } : null)}
-              InputLabelProps={{ style: { color: '#94a3b8' } }}
-              InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
-            />
+            {(() => {
+              const isImageItem = Boolean(
+                editItem?.key === 'how_to_play' ||
+                editItem?.key === 'page_profile_images' ||
+                editItem?.key?.includes('image') ||
+                editItem?.key?.includes('icon') ||
+                editItem?.key?.includes('avatar') ||
+                editItem?.key?.includes('banner')
+              );
 
-            {editItem?.key === 'how_to_play' && (
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 2, border: '1px solid rgba(0,255,136,0.3)' }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 1, fontSize: '1.1rem' }}>
-                  📸 How to Play Step Images (Upload or Set Image URL for Each Step)
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2 }}>
-                  You can upload a custom image or paste an image URL for any of the 10 steps. These images will display under each step in the website modal.
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                  {[
-                    { key: 'step1', title: 'Step 1: Complete Your Player Card' },
-                    { key: 'step2', title: 'Step 2: Join or Create a League' },
-                    { key: 'step3', title: 'Step 3: Create a New Match' },
-                    { key: 'step4', title: 'Step 4: Confirm Your Availability' },
-                    { key: 'step5', title: 'Step 5: Team Selection' },
-                    { key: 'step6', title: 'Step 6: Play the Match' },
-                    { key: 'step7', title: 'Step 7: Submit the Match Result' },
-                    { key: 'step8', title: 'Step 8: Add Your Individual Stats' },
-                    { key: 'step9', title: 'Step 9: Track Your Performance' },
-                    { key: 'step10', title: 'Step 10: Trophy Room and Awards' }
-                  ].map((step) => {
-                    const currentImg = editItem.metadata?.stepImages?.[step.key] || '';
-                    return (
-                      <Box key={step.key} sx={{ p: 2, bgcolor: 'rgba(30,41,59,0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#fff', mb: 1 }}>
-                          {step.title}
-                        </Typography>
-                        {currentImg && (
-                          <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <img
-                              src={currentImg}
-                              alt={step.title}
-                              style={{ width: 140, height: 75, objectFit: 'contain', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', backgroundColor: '#0a0e17' }}
-                            />
-                            <Typography variant="caption" sx={{ color: '#00ff88', wordBreak: 'break-all' }}>
-                              Custom Image Active
-                            </Typography>
-                          </Box>
-                        )}
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                          <Button
-                            variant="contained"
-                            component="label"
-                            size="small"
-                            sx={{ bgcolor: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid #00ff88', '&:hover': { bgcolor: 'rgba(0,255,136,0.3)' } }}
-                          >
-                            Upload Image File
-                            <input
-                              type="file"
-                              accept="image/*"
-                              hidden
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                try {
-                                  setSavingKey(`upload_${step.key}`);
-                                  const formData = new FormData();
-                                  formData.append('image', file);
-                                  const token = localStorage.getItem('token');
-                                  const res = await fetch(`${API_BASE}/api/admin/static-content/upload-image`, {
-                                    method: 'POST',
-                                    headers: { 'Authorization': `Bearer ${token}` },
-                                    body: formData
-                                  });
-                                  const data = await res.json();
-                                  if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
-                                  setEditItem(prev => {
+              return (
+                <>
+                  {!isImageItem && (
+                    <TextField
+                      label="Text Content (Markdown / Plain Text)"
+                      fullWidth
+                      multiline
+                      rows={6}
+                      value={editItem?.content || ''}
+                      onChange={(e) => setEditItem(prev => prev ? { ...prev, content: e.target.value } : null)}
+                      InputLabelProps={{ style: { color: '#94a3b8' } }}
+                      InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
+                    />
+                  )}
+
+                  {editItem?.key === 'how_to_play' && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 2, border: '1px solid rgba(0,255,136,0.3)' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 1, fontSize: '1.1rem' }}>
+                        📸 How to Play Step Images (Upload or Set Image URL for Each Step)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2 }}>
+                        You can upload a custom image or paste an image URL for any of the 10 steps. These images will display under each step in the website modal.
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        {[
+                          { key: 'step1', title: 'Step 1: Complete Your Player Card' },
+                          { key: 'step2', title: 'Step 2: Join or Create a League' },
+                          { key: 'step3', title: 'Step 3: Create a New Match' },
+                          { key: 'step4', title: 'Step 4: Confirm Your Availability' },
+                          { key: 'step5', title: 'Step 5: Team Selection' },
+                          { key: 'step6', title: 'Step 6: Play the Match' },
+                          { key: 'step7', title: 'Step 7: Submit the Match Result' },
+                          { key: 'step8', title: 'Step 8: Add Your Individual Stats' },
+                          { key: 'step9', title: 'Step 9: Track Your Performance' },
+                          { key: 'step10', title: 'Step 10: Trophy Room and Awards' }
+                        ].map((step) => {
+                          const currentImg = editItem.metadata?.stepImages?.[step.key] || '';
+                          return (
+                            <Box key={step.key} sx={{ p: 2, bgcolor: 'rgba(30,41,59,0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#fff', mb: 1 }}>
+                                {step.title}
+                              </Typography>
+                              {currentImg && (
+                                <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                  <img
+                                    src={currentImg}
+                                    alt={step.title}
+                                    style={{ width: 140, height: 75, objectFit: 'contain', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', backgroundColor: '#0a0e17' }}
+                                  />
+                                  <Typography variant="caption" sx={{ color: '#00ff88', wordBreak: 'break-all' }}>
+                                    Custom Image Active
+                                  </Typography>
+                                </Box>
+                              )}
+                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Button
+                                  variant="contained"
+                                  component="label"
+                                  size="small"
+                                  sx={{ bgcolor: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid #00ff88', '&:hover': { bgcolor: 'rgba(0,255,136,0.3)' } }}
+                                >
+                                  Upload Image File
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      try {
+                                        setSavingKey(`upload_${step.key}`);
+                                        const formData = new FormData();
+                                        formData.append('image', file);
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch(`${API_BASE}/api/admin/static-content/upload-image`, {
+                                          method: 'POST',
+                                          headers: { 'Authorization': `Bearer ${token}` },
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
+                                        setEditItem(prev => {
+                                          if (!prev) return null;
+                                          const meta = prev.metadata || {};
+                                          const stepImgs = meta.stepImages || {};
+                                          return {
+                                            ...prev,
+                                            metadata: {
+                                              ...meta,
+                                              stepImages: { ...stepImgs, [step.key]: data.imageUrl }
+                                            }
+                                          };
+                                        });
+                                        setSnackbar(`${step.title} image uploaded successfully!`);
+                                      } catch (err: any) {
+                                        setError(err.message || 'Image upload failed');
+                                      } finally {
+                                        setSavingKey(null);
+                                      }
+                                    }}
+                                  />
+                                </Button>
+                                <TextField
+                                  size="small"
+                                  placeholder="Or paste image URL (e.g. https://...)"
+                                  value={currentImg}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setEditItem(prev => {
+                                      if (!prev) return null;
+                                      const meta = prev.metadata || {};
+                                      const stepImgs = meta.stepImages || {};
+                                      return {
+                                        ...prev,
+                                        metadata: {
+                                          ...meta,
+                                          stepImages: { ...stepImgs, [step.key]: val }
+                                        }
+                                      };
+                                    });
+                                  }}
+                                  sx={{ flex: 1, minWidth: 200, '& input': { color: '#fff', fontSize: '0.85rem' } }}
+                                />
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {editItem?.key === 'page_landing_images' && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 2, border: '1px solid rgba(0,255,136,0.3)' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 1, fontSize: '1.1rem' }}>
+                        📸 Main Landing Page All Banners & Images (Upload or Set Image URL)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2 }}>
+                        Upload custom image files or paste image URLs for all 7 main landing page hero banners, squad grid cards, and feature card images.
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        {[
+                          { key: 'hero_top_bg', title: '1. Main Hero Top Banner Image' },
+                          { key: 'hero_grid_team1', title: '2. Team Squad Grid Card 1 Image' },
+                          { key: 'hero_grid_orange', title: '3. Orange Players Grid Card 2 Image' },
+                          { key: 'feature1_img', title: '4. Feature Card 1 Image (Create Player Card)' },
+                          { key: 'feature2_img', title: '5. Feature Card 2 Image (Leagues & Matches)' },
+                          { key: 'feature3_img', title: '6. Feature Card 3 Image (Track Performance)' },
+                          { key: 'feature4_img', title: '7. Feature Card 4 Image (Trophies & Rewards)' },
+                        ].map((item) => {
+                          const currentImg = editItem.metadata?.stepImages?.[item.key] || '';
+                          return (
+                            <Box key={item.key} sx={{ p: 2, bgcolor: 'rgba(30,41,59,0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#fff', mb: 1 }}>
+                                {item.title}
+                              </Typography>
+                              {currentImg && (
+                                <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                  <img
+                                    src={currentImg}
+                                    alt={item.title}
+                                    style={{ width: 140, height: 75, objectFit: 'contain', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', backgroundColor: '#0a0e17' }}
+                                  />
+                                  <Typography variant="caption" sx={{ color: '#00ff88', wordBreak: 'break-all' }}>
+                                    Custom Image Active
+                                  </Typography>
+                                </Box>
+                              )}
+                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Button
+                                  variant="contained"
+                                  component="label"
+                                  size="small"
+                                  sx={{ bgcolor: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid #00ff88', '&:hover': { bgcolor: 'rgba(0,255,136,0.3)' } }}
+                                >
+                                  Upload Image File
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      try {
+                                        setSavingKey(`upload_${item.key}`);
+                                        const formData = new FormData();
+                                        formData.append('image', file);
+                                        const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+                                        const res = await fetch(`${API_BASE}/api/admin/static-content/upload-image`, {
+                                          method: 'POST',
+                                          headers: { 'Authorization': `Bearer ${token}` },
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (data.success && data.imageUrl) {
+                                          const imgUrl = data.imageUrl;
+                                          setEditItem((prev) => {
+                                            if (!prev) return null;
+                                            const meta = prev.metadata || {};
+                                            const stepImgs = meta.stepImages || {};
+                                            return {
+                                              ...prev,
+                                              metadata: {
+                                                ...meta,
+                                                stepImages: { ...stepImgs, [item.key]: imgUrl }
+                                              }
+                                            };
+                                          });
+                                          setSnackbar(`Uploaded image for ${item.title}`);
+                                        } else {
+                                          setError(data.message || 'Image upload failed');
+                                        }
+                                      } catch (err: any) {
+                                        setError(err.message || 'Image upload failed');
+                                      } finally {
+                                        setSavingKey(null);
+                                      }
+                                    }}
+                                  />
+                                </Button>
+                                <TextField
+                                  size="small"
+                                  placeholder="Or paste image URL (e.g. https://...)"
+                                  value={currentImg}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setEditItem((prev) => {
+                                      if (!prev) return null;
+                                      const meta = prev.metadata || {};
+                                      const stepImgs = meta.stepImages || {};
+                                      return {
+                                        ...prev,
+                                        metadata: {
+                                          ...meta,
+                                          stepImages: { ...stepImgs, [item.key]: val }
+                                        }
+                                      };
+                                    });
+                                  }}
+                                  sx={{ flex: 1, minWidth: 200, '& input': { color: '#fff', fontSize: '0.85rem' } }}
+                                />
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {editItem?.key === 'social_media_links' && (
+                    <Box sx={{ mt: 2, p: 2.5, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 3, border: '1px solid rgba(0,255,136,0.3)' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 0.5, fontSize: '1.1rem' }}>
+                        🌐 Social Media Profile Links & Footer Icons
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mb: 3 }}>
+                        Add or edit profile links for social media icons. If a link is entered, its icon will automatically appear in the footer. Empty links stay hidden.
+                      </Typography>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, gap: 2.5 }}>
+                        {[
+                          { key: 'facebook', title: 'Facebook URL', placeholder: 'https://facebook.com/yourpage' },
+                          { key: 'x', title: 'Twitter URL', placeholder: 'https://x.com/yourpage' },
+                          { key: 'instagram', title: 'Instagram URL', placeholder: 'https://instagram.com/yourpage' },
+                          { key: 'linkedin', title: 'LinkedIn URL', placeholder: 'https://linkedin.com/yourpage' },
+                          { key: 'youtube', title: 'YouTube URL', placeholder: 'https://youtube.com/yourpage' },
+                          { key: 'tiktok', title: 'TikTok URL', placeholder: 'https://tiktok.com/yourpage' },
+                          { key: 'pinterest', title: 'Pinterest URL', placeholder: 'https://pinterest.com/yourpage' },
+                          { key: 'whatsapp', title: 'WhatsApp URL', placeholder: 'https://whatsapp.com/yourpage' },
+                          { key: 'telegram', title: 'Telegram URL', placeholder: 'https://telegram.com/yourpage' },
+                          { key: 'reddit', title: 'Reddit URL', placeholder: 'https://reddit.com/yourpage' },
+                          { key: 'threads', title: 'Threads URL', placeholder: 'https://threads.com/yourpage' },
+                          { key: 'snapchat', title: 'Snapchat URL', placeholder: 'https://snapchat.com/yourpage' },
+                          { key: 'twitch', title: 'Twitch URL', placeholder: 'https://twitch.com/yourpage' },
+                          { key: 'discord', title: 'Discord URL', placeholder: 'https://discord.com/yourpage' },
+                        ].map((platform) => {
+                          const currentLink = editItem.metadata?.socialLinks?.[platform.key] || '';
+                          return (
+                            <Box key={platform.key}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#ffffff', mb: 0.8, fontSize: '0.9rem' }}>
+                                {platform.title}
+                              </Typography>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                placeholder={platform.placeholder}
+                                value={currentLink}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setEditItem((prev) => {
                                     if (!prev) return null;
                                     const meta = prev.metadata || {};
-                                    const stepImgs = meta.stepImages || {};
+                                    const links = meta.socialLinks || {};
                                     return {
                                       ...prev,
                                       metadata: {
                                         ...meta,
-                                        stepImages: { ...stepImgs, [step.key]: data.imageUrl }
+                                        socialLinks: { ...links, [platform.key]: val }
                                       }
                                     };
                                   });
-                                  setSnackbar(`${step.title} image uploaded successfully!`);
-                                } catch (err: any) {
-                                  setError(err.message || 'Image upload failed');
-                                } finally {
-                                  setSavingKey(null);
-                                }
-                              }}
-                            />
-                          </Button>
-                          <TextField
-                            size="small"
-                            placeholder="Or paste image URL (e.g. https://...)"
-                            value={currentImg}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setEditItem(prev => {
-                                if (!prev) return null;
-                                const meta = prev.metadata || {};
-                                const stepImgs = meta.stepImages || {};
-                                return {
-                                  ...prev,
-                                  metadata: {
-                                    ...meta,
-                                    stepImages: { ...stepImgs, [step.key]: val }
-                                  }
-                                };
-                              });
-                            }}
-                            sx={{ flex: 1, minWidth: 200, '& input': { color: '#fff', fontSize: '0.85rem' } }}
-                          />
-                        </Box>
+                                }}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    backgroundColor: 'rgba(30,41,59,0.7)',
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' },
+                                    '&:hover fieldset': { borderColor: '#00ff88' },
+                                    '&.Mui-focused fieldset': { borderColor: '#00ff88' },
+                                    '& input': { color: '#ffffff', fontSize: '0.88rem', py: 1 }
+                                  },
+                                  '& input::placeholder': { color: '#64748b', opacity: 1 }
+                                }}
+                              />
+                            </Box>
+                          );
+                        })}
                       </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
-            )}
+                    </Box>
+                  )}
+
+                  {editItem?.key === 'page_profile_images' && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 2, border: '1px solid rgba(0,255,136,0.3)' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 1, fontSize: '1.1rem' }}>
+                        📸 Profile Page Skill Icons (Upload or Set Image URL)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2 }}>
+                        Upload custom image files or paste image URLs for the 6 Profile Page skill icons (Dribbling, Shooting, Passing, Pace, Defending, Physical).
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                        {[
+                          { key: 'dribbling', title: '1. Dribbling Skill Icon' },
+                          { key: 'shooting', title: '2. Shooting Skill Icon' },
+                          { key: 'passing', title: '3. Passing Skill Icon' },
+                          { key: 'pace', title: '4. Pace Skill Icon' },
+                          { key: 'defending', title: '5. Defending Skill Icon' },
+                          { key: 'physical', title: '6. Physical Skill Icon' },
+                        ].map((item) => {
+                          const currentImg = editItem.metadata?.stepImages?.[item.key] || '';
+                          return (
+                            <Box key={item.key} sx={{ p: 2, bgcolor: 'rgba(30,41,59,0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#fff', mb: 1 }}>
+                                {item.title}
+                              </Typography>
+                              {currentImg && (
+                                <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+                                  <img
+                                    src={currentImg}
+                                    alt={item.title}
+                                    style={{ width: 140, height: 75, objectFit: 'contain', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', backgroundColor: '#0a0e17' }}
+                                  />
+                                  <Typography variant="caption" sx={{ color: '#00ff88', wordBreak: 'break-all' }}>
+                                    Custom Image Active
+                                  </Typography>
+                                </Box>
+                              )}
+                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                                <Button
+                                  variant="contained"
+                                  component="label"
+                                  size="small"
+                                  sx={{ bgcolor: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid #00ff88', '&:hover': { bgcolor: 'rgba(0,255,136,0.3)' } }}
+                                >
+                                  Upload Image File
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    hidden
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (!file) return;
+                                      try {
+                                        setSavingKey(`upload_${item.key}`);
+                                        const formData = new FormData();
+                                        formData.append('image', file);
+                                        const token = localStorage.getItem('token');
+                                        const res = await fetch(`${API_BASE}/api/admin/static-content/upload-image`, {
+                                          method: 'POST',
+                                          headers: { 'Authorization': `Bearer ${token}` },
+                                          body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
+                                        setEditItem(prev => {
+                                          if (!prev) return null;
+                                          const meta = prev.metadata || {};
+                                          const stepImgs = meta.stepImages || {};
+                                          return {
+                                            ...prev,
+                                            metadata: {
+                                              ...meta,
+                                              stepImages: { ...stepImgs, [item.key]: data.imageUrl }
+                                            }
+                                          };
+                                        });
+                                        setSnackbar(`${item.title} uploaded successfully!`);
+                                      } catch (err: any) {
+                                        setError(err.message || 'Image upload failed');
+                                      } finally {
+                                        setSavingKey(null);
+                                      }
+                                    }}
+                                  />
+                                </Button>
+                                <TextField
+                                  size="small"
+                                  placeholder="Or paste image URL (e.g. https://...)"
+                                  value={currentImg}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setEditItem(prev => {
+                                      if (!prev) return null;
+                                      const meta = prev.metadata || {};
+                                      const stepImgs = meta.stepImages || {};
+                                      return {
+                                        ...prev,
+                                        metadata: {
+                                          ...meta,
+                                          stepImages: { ...stepImgs, [item.key]: val }
+                                        }
+                                      };
+                                    });
+                                  }}
+                                  sx={{ flex: 1, minWidth: 200, '& input': { color: '#fff', fontSize: '0.85rem' } }}
+                                />
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {isImageItem && editItem?.key !== 'how_to_play' && editItem?.key !== 'page_profile_images' && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(15,23,42,0.8)', borderRadius: 2, border: '1px solid rgba(0,255,136,0.3)' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800, color: '#00ff88', mb: 1, fontSize: '1.05rem' }}>
+                        📸 {editItem?.title} (Image File / URL)
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#94a3b8', mb: 2, fontSize: '0.85rem' }}>
+                        Upload a custom image file or paste an image URL for {editItem?.title}.
+                      </Typography>
+
+                      {(editItem?.metadata?.imageUrl || (editItem?.content && (editItem.content.startsWith('http') || editItem.content.startsWith('data:image')))) && (
+                        <Box sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <img
+                            src={editItem.metadata?.imageUrl || editItem.content}
+                            alt={editItem?.title || 'Preview'}
+                            style={{ width: 140, height: 75, objectFit: 'contain', borderRadius: 6, border: '1px solid rgba(0,255,136,0.3)', backgroundColor: '#0a0e17' }}
+                          />
+                          <Typography variant="caption" sx={{ color: '#00ff88', fontWeight: 700 }}>
+                            Custom Image Active
+                          </Typography>
+                        </Box>
+                      )}
+
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <Button
+                          variant="contained"
+                          component="label"
+                          size="small"
+                          sx={{ bgcolor: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid #00ff88', '&:hover': { bgcolor: 'rgba(0,255,136,0.3)' } }}
+                        >
+                          Upload Image File
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                setSavingKey(`upload_${editItem?.key}`);
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const token = localStorage.getItem('token');
+                                const res = await fetch(`${API_BASE}/api/admin/static-content/upload-image`, {
+                                  method: 'POST',
+                                  headers: { 'Authorization': `Bearer ${token}` },
+                                  body: formData
+                                });
+                                const data = await res.json();
+                                if (!res.ok || !data.success) throw new Error(data.message || 'Upload failed');
+                                setEditItem(prev => {
+                                  if (!prev) return null;
+                                  const meta = prev.metadata || {};
+                                  return {
+                                    ...prev,
+                                    content: data.imageUrl,
+                                    metadata: {
+                                      ...meta,
+                                      imageUrl: data.imageUrl
+                                    }
+                                  };
+                                });
+                                setSnackbar(`Image uploaded successfully!`);
+                              } catch (err: any) {
+                                setError(err.message || 'Image upload failed');
+                              } finally {
+                                setSavingKey(null);
+                              }
+                            }}
+                          />
+                        </Button>
+                        <TextField
+                          size="small"
+                          placeholder="Or paste image URL (e.g. https://...)"
+                          value={editItem?.metadata?.imageUrl || (editItem?.content?.startsWith('http') || editItem?.content?.startsWith('data:image') ? editItem.content : '')}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditItem(prev => {
+                              if (!prev) return null;
+                              const meta = prev.metadata || {};
+                              return {
+                                ...prev,
+                                content: val || prev.content,
+                                metadata: {
+                                  ...meta,
+                                  imageUrl: val
+                                }
+                              };
+                            });
+                          }}
+                          sx={{ flex: 1, minWidth: 200, '& input': { color: '#fff', fontSize: '0.85rem' } }}
+                        />
+                      </Box>
+                    </Box>
+                  )}
+                </>
+              );
+            })()}
 
             <FormControlLabel
               control={

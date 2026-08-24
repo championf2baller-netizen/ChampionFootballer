@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import PageHeader from '@/Components/PageHeader';
 import dynamic from 'next/dynamic';
 import {
@@ -159,6 +160,27 @@ const AllPlayersPage = () => {
   const yearFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const seasonFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store' }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success && d?.contentMap) {
+          const map: Record<string, string> = {};
+          Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+            if (v?.content) map[k] = v.content;
+          });
+          setCmsMap(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
   const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
   const completedStatusTokens = React.useMemo(
     () => new Set([
@@ -1041,7 +1063,7 @@ const AllPlayersPage = () => {
       }}>
         {/* Full-width Header Section */}
         <PageHeader
-          title="Players"
+          title={getCms('page_all_players_heading', 'ALL PLAYERS')}
           fullBleed={false}
           sx={{ mb: { xs: 1.2, md: 4 } }}
           dividerSx={{
@@ -1068,7 +1090,7 @@ const AllPlayersPage = () => {
             {/* Search Input */}
             <TextField
               variant="outlined"
-              placeholder="Search player name and hit enter..."
+              placeholder={getCms('page_all_players_search_placeholder', 'Search player name and hit enter...')}
               value={searchQuery}
               onChange={(e) => {
                 const nextQuery = e.target.value;
@@ -1160,7 +1182,7 @@ const AllPlayersPage = () => {
                       fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                     }}
                   >
-                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_players_year_placeholder', 'All Years')}</option>
                     {yearOptions.map(year => (
                       <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{year}</option>
                     ))}
@@ -1190,7 +1212,7 @@ const AllPlayersPage = () => {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {selectedYear && selectedYear !== 'all' ? selectedYear : 'All Years'}
+                      {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_players_year_placeholder', 'All Years')}
                     </button>
                     <Menu
                       anchorEl={yearFilterButtonRef.current}
@@ -1230,7 +1252,7 @@ const AllPlayersPage = () => {
                             '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                           }}
                         >
-                          {value === 'all' ? 'All Years' : value}
+                          {value === 'all' ? getCms('page_all_players_year_placeholder', 'All Years') : value}
                         </MenuItem>
                       ))}
                     </Menu>
@@ -1453,7 +1475,7 @@ const AllPlayersPage = () => {
                       fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                     }}
                   >
-                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Seasons</option>
+                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_players_season_placeholder', 'All Seasons')}</option>
                     {seasons.map((season) => (
                       <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                         {season.name}
@@ -1492,8 +1514,8 @@ const AllPlayersPage = () => {
                       }}
                     >
                       {selectedSeason === 'all'
-                        ? 'All Seasons'
-                        : (seasons.find((season) => season.id === selectedSeason)?.name || 'All Seasons')}
+                        ? getCms('page_all_players_season_placeholder', 'All Seasons')
+                        : (seasons.find((season) => season.id === selectedSeason)?.name || getCms('page_all_players_season_placeholder', 'All Seasons'))}
                     </button>
                     <Menu
                       anchorEl={seasonFilterButtonRef.current}
@@ -1531,7 +1553,7 @@ const AllPlayersPage = () => {
                           '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                         }}
                       >
-                        All Seasons
+                        {getCms('page_all_players_season_placeholder', 'All Seasons')}
                       </MenuItem>
                       {seasons.map((season) => (
                         <MenuItem
@@ -1592,7 +1614,7 @@ const AllPlayersPage = () => {
                   }
                 }}
               >
-                Clear
+                {getCms('page_all_players_clear_btn', 'Clear')}
               </Button>
             </Box>
           </Box>

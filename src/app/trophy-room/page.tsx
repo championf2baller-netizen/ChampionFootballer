@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import { Box, Typography, Paper, Button, Chip, CircularProgress, Alert, MenuItem, Menu, Avatar, Tooltip, useTheme, useMediaQuery, TextField } from '@mui/material';
 import TrophyImg from '@/Components/images/awardtrophy.png';
 import RunnerUpImg from '@/Components/images/runnerup.png';
@@ -1598,6 +1599,34 @@ export default function GlobalTrophyRoom() {
   const [backendTotalXP, setBackendTotalXP] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [trophyLoading, setTrophyLoading] = useState(false); // separate loading for trophy re-fetches (season/league change)
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store'
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {};
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) map[it.key] = it.content;
+            });
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) map[k] = v.content;
+            });
+          }
+          setCmsMap(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
+  const cmsTrophyBanner = cmsMap['trophy_room_info'] || '';
   const [apiLastUpdatedAt, setApiLastUpdatedAt] = useState<string | null>(null);
   const [relativeNowMs, setRelativeNowMs] = useState<number>(() => Date.now());
   const [error, setError] = useState<string | null>(null);
@@ -2070,8 +2099,6 @@ export default function GlobalTrophyRoom() {
     return leagueSeasons.find(s => s.isActive) || leagueSeasons[0] || null;
   }, [selectedSeasonId, leagueSeasons]);
 
-  // Track whether seasons have been checked for the current league
-  // This lets fetchWinners proceed without a season when the league genuinely has none
   const [seasonsChecked, setSeasonsChecked] = useState(false);
 
   // Fetch trophy winners with league and season filters
@@ -2598,7 +2625,7 @@ export default function GlobalTrophyRoom() {
           >
             {filter === 'my' && user
               ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-              : 'TROPHY ROOM'}
+              : getCms('page_trophy_room_heading', 'TROPHY ROOM')}
           </Typography>
 
           {/* Orange divider */}
@@ -2630,7 +2657,7 @@ export default function GlobalTrophyRoom() {
               <Box sx={{ width: { xs: '100%', md: 'auto' }, textAlign: { xs: 'center', md: 'left' } }}>
                 <Box sx={{ display: { xs: 'flex', sm: 'none' }, alignItems: 'baseline', justifyContent: 'center', gap: 0.6, whiteSpace: 'nowrap' }}>
                   <Typography sx={{ fontSize: '0.92rem', fontWeight: 600, color: 'white' }}>
-                    Standings:
+                    {getCms('page_trophy_room_standings_label', 'Standings:')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.92rem', fontWeight: 300, color: 'white' }}>
                     {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
@@ -2639,7 +2666,7 @@ export default function GlobalTrophyRoom() {
                     |
                   </Typography>
                   <Typography sx={{ fontSize: '0.92rem', fontWeight: 300, color: 'white' }}>
-                    Last Updated:
+                    {getCms('page_trophy_room_last_updated_label', 'Last Updated:')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.75rem', fontWeight: 400, color: 'white' }}>
                     {lastUpdatedLabel}
@@ -2649,7 +2676,7 @@ export default function GlobalTrophyRoom() {
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', gap: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                     <Typography sx={{ fontSize: '1.1rem', fontWeight: 600, color: 'white' }}>
-                      Standings:
+                      {getCms('page_trophy_room_standings_label', 'Standings:')}
                     </Typography>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>
                       {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
@@ -2657,7 +2684,7 @@ export default function GlobalTrophyRoom() {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>
-                      Last Updated:
+                      {getCms('page_trophy_room_last_updated_label', 'Last Updated:')}
                     </Typography>
                     <Typography sx={{ fontSize: '0.75rem', fontWeight: 400, color: 'white' }}>
                       {lastUpdatedLabel}
@@ -2710,7 +2737,7 @@ export default function GlobalTrophyRoom() {
                         fontWeight: 400,
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_trophy_room_year_placeholder', 'All Years')}</option>
                       {yearOptions.map((year) => (
                         <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                           {year}
@@ -2742,7 +2769,7 @@ export default function GlobalTrophyRoom() {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {selectedYear && selectedYear !== 'all' ? selectedYear : 'All Years'}
+                        {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_trophy_room_year_placeholder', 'All Years')}
                       </button>
                       <Menu
                         anchorEl={yearFilterButtonRef.current}
@@ -2782,7 +2809,7 @@ export default function GlobalTrophyRoom() {
                               '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                             }}
                           >
-                            {value === 'all' ? 'All Years' : value}
+                            {value === 'all' ? getCms('page_trophy_room_year_placeholder', 'All Years') : value}
                           </MenuItem>
                         ))}
                       </Menu>
@@ -2826,8 +2853,8 @@ export default function GlobalTrophyRoom() {
                   >
                     <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
                       {selectedLeagueSelectValue
-                        ? (filteredLeagues.find((l) => String(l.id) === String(selectedLeagueSelectValue))?.name || 'Select League')
-                        : 'Select League'}
+                        ? (filteredLeagues.find((l) => String(l.id) === String(selectedLeagueSelectValue))?.name || getCms('page_trophy_room_league_placeholder', 'Select League'))
+                        : getCms('page_trophy_room_league_placeholder', 'Select League')}
                     </Box>
                     {/* <ChevronDown size={isDesktop ? 16 : 12} style={{ flexShrink: 0, color: '#9CA3AF' }} /> */}
                   </button>
@@ -2987,7 +3014,7 @@ export default function GlobalTrophyRoom() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Seasons</option>
+                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_trophy_room_season_placeholder', 'All Seasons')}</option>
                       {availableSeasons.map((season) => (
                         <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                           {season.name}
@@ -3026,8 +3053,8 @@ export default function GlobalTrophyRoom() {
                         }}
                       >
                         {selectedSeasonSelectValue === 'all'
-                          ? 'All Seasons'
-                          : (availableSeasons.find((s) => String(s.id) === String(selectedSeasonSelectValue))?.name || 'All Seasons')}
+                          ? getCms('page_trophy_room_season_placeholder', 'All Seasons')
+                          : (availableSeasons.find((s) => String(s.id) === String(selectedSeasonSelectValue))?.name || getCms('page_trophy_room_season_placeholder', 'All Seasons'))}
                       </button>
                       <Menu
                         anchorEl={seasonFilterButtonRef.current}
@@ -3065,7 +3092,7 @@ export default function GlobalTrophyRoom() {
                             '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                           }}
                         >
-                          All Seasons
+                          {getCms('page_trophy_room_season_placeholder', 'All Seasons')}
                         </MenuItem>
                         {availableSeasons.map((season) => (
                           <MenuItem
@@ -3120,7 +3147,7 @@ export default function GlobalTrophyRoom() {
                     },
                   }}
                 >
-                  Clear
+                  {getCms('page_trophy_room_clear_btn', 'Clear')}
                 </Button>
               </Box>
             </Box>
@@ -3172,7 +3199,7 @@ export default function GlobalTrophyRoom() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  LEAGUE AWARDS
+                  {getCms('page_trophy_room_tab_league', 'LEAGUE AWARDS')}
                 </Button>
                 <Button
                   onClick={() => setFilter('my')}
@@ -3192,7 +3219,7 @@ export default function GlobalTrophyRoom() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Achievements
+                  {getCms('page_trophy_room_tab_achievements', 'Achievements')}
                 </Button>
               </Box>
             </Box>
@@ -3419,7 +3446,7 @@ export default function GlobalTrophyRoom() {
                           letterSpacing: 0.6,
                           textTransform: 'uppercase',
                         }}>
-                          LEAGUE AWARDS
+                          {getCms('page_trophy_room_league_awards_title', 'LEAGUE AWARDS')}
                         </Typography>
                       </Box>
 
@@ -3512,7 +3539,7 @@ export default function GlobalTrophyRoom() {
                           letterSpacing: 0.6,
                           textTransform: 'uppercase',
                         }}>
-                          INDIVIDUAL AWARDS
+                          {getCms('page_trophy_room_individual_awards_title', 'INDIVIDUAL AWARDS')}
                         </Typography>
                       </Box>
 

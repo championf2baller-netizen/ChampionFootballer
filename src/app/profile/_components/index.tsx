@@ -1,4 +1,5 @@
 "use client"
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl'
 import { useAuth } from "@/lib/hooks"
 import type React from "react"
 import { useState, useEffect, useRef, useMemo } from "react"
@@ -278,6 +279,51 @@ const PlayerProfileCard = () => {
   const dispatch = useDispatch()
   const { user, token, isAuthenticated, loading: authLoading } = useAuth()
   const [step, setStep] = useState(1)
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store'
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {}
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) map[it.key] = it.content
+              if (it?.metadata?.stepImages) {
+                Object.entries(it.metadata.stepImages).forEach(([sk, sv]: [string, any]) => {
+                  if (sv) {
+                    map[`${it.key}_${sk}`] = sv
+                    map[`page_profile_img_${sk}`] = sv
+                    map[`page_profile_skill_${sk}_image`] = sv
+                  }
+                })
+              }
+            })
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) map[k] = v.content
+              if (v?.metadata?.stepImages) {
+                Object.entries(v.metadata.stepImages).forEach(([sk, sv]: [string, any]) => {
+                  if (sv) {
+                    map[`${k}_${sk}`] = sv
+                    map[`page_profile_img_${sk}`] = sv
+                    map[`page_profile_skill_${sk}_image`] = sv
+                  }
+                })
+              }
+            })
+          }
+          setCmsMap(map)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const getCms = (key: string, fallback: string) => cmsMap[key] || fallback
   const [dribbling, setDribbling] = useState(user?.skills?.dribbling)
   const [shooting, setShooting] = useState(user?.skills?.shooting)
   const [passing, setPassing] = useState(user?.skills?.passing)
@@ -397,7 +443,11 @@ const PlayerProfileCard = () => {
   const streamRef = useRef<MediaStream | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const router = useRouter()
-  const steps = ["Profile Overview", "Skills & Attributes", "Brief Details"]
+  const steps = [
+    getCms('page_profile_step1_title', 'PROFILE OVERVIEW'),
+    getCms('page_profile_step2_title', 'SKILLS & ATTRIBUTES'),
+    getCms('page_profile_step3_title', 'BRIEF DETAILS')
+  ]
   const activeWizardStep = step === 1 ? 0 : step === 3 ? 1 : 2
   const userDisplayName = buildPlayerDisplayName(user?.firstName, user?.lastName)
   const avatarInitials = getAvatarInitials({ name: userDisplayName, firstName, lastName })
@@ -808,7 +858,7 @@ const PlayerProfileCard = () => {
       setIsUpdating(true)
       const formData = new FormData()
       formData.append('profilePicture', file)
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile/picture`, {
+      const res = await fetch(`${getApiBaseUrl()}/profile/picture`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -1046,13 +1096,13 @@ const PlayerProfileCard = () => {
                   }}>
                     {userDisplayName}
                   </Typography>
-                  <Typography sx={{ fontSize: 13, color: themeColors.textDim, mt: .5 }}>Age: <b style={{ color: themeColors.text }}>{user?.age || "-"}</b></Typography>
+                  <Typography sx={{ fontSize: 13, color: themeColors.textDim, mt: .5 }}>{getCms('page_profile_label_age', 'Age:')} <b style={{ color: themeColors.text }}>{user?.age || "-"}</b></Typography>
                   <Typography sx={{ fontSize: 13, color: themeColors.textDim, display: 'flex', gap: .5, wordBreak: 'break-word', flexWrap: 'wrap' }}>
-                    Email: <span style={{ color: themeColors.text }}>{user?.email || "email@example.com"}</span>
+                    {getCms('page_profile_label_email', 'Email:')} <span style={{ color: themeColors.text }}>{user?.email || "email@example.com"}</span>
                   </Typography>
                   {/* Shirt number hidden per request */}
-                  <Typography sx={{ fontSize: 13, color: themeColors.textDim }}>Foot: <b style={{ color: themeColors.text }}>{user?.preferredFoot || "-"}</b></Typography>
-                  {user?.phone && <Typography sx={{ fontSize: 13, color: themeColors.textDim }}>Phone: <b style={{ color: themeColors.text }}>{user.phone}</b></Typography>}
+                  <Typography sx={{ fontSize: 13, color: themeColors.textDim }}>{getCms('page_profile_label_foot', 'Foot:')} <b style={{ color: themeColors.text }}>{user?.preferredFoot || "-"}</b></Typography>
+                  {user?.phone && <Typography sx={{ fontSize: 13, color: themeColors.textDim }}>{getCms('page_profile_label_phone', 'Phone:')} <b style={{ color: themeColors.text }}>{user.phone}</b></Typography>}
                   <Chip
                     label={positionType || "Position"}
                     size="small"
@@ -1084,7 +1134,7 @@ const PlayerProfileCard = () => {
                     gap: .6,
                     color: themeColors.text
                   }}>
-                    Skills Overview
+                    {getCms('page_profile_skills_title', 'Skills Overview')}
                   </Typography>
                   <Stack spacing={1.1}>
                     {[
@@ -1134,7 +1184,7 @@ const PlayerProfileCard = () => {
                     '&:hover': { opacity: .9 }
                   }}
                 >
-                  Home
+                  {getCms('page_profile_btn_home', 'Home')}
                 </Button>
                 <Button
                   variant="contained"
@@ -1151,7 +1201,7 @@ const PlayerProfileCard = () => {
                     '&:hover': { opacity: .9 }
                   }}
                 >
-                  Edit Profile
+                  {getCms('page_profile_btn_edit', 'Edit Profile')}
                 </Button>
               </Box>
             </StyledPaper>
@@ -1203,7 +1253,7 @@ const PlayerProfileCard = () => {
                 fontSize: { xs: '1.2rem', sm: '1.75rem' },
                 textShadow: '0 2px 8px rgba(0,0,0,0.6)'
               }}>
-                <AccountCircle sx={{ mr: 1, verticalAlign: 'middle', color: themeColors.primary, fontSize: 36, position: 'relative', top: -6 }} /> BRIEF DETAILS
+                <AccountCircle sx={{ mr: 1, verticalAlign: 'middle', color: themeColors.primary, fontSize: 36, position: 'relative', top: -6 }} /> {getCms('page_profile_brief_title', 'BRIEF DETAILS')}
               </Typography>
 
               <Box sx={{
@@ -1256,19 +1306,19 @@ const PlayerProfileCard = () => {
                 <Box sx={{ flex: 1, pr: 0.5 }}>
                   <Grid container spacing={0.5}>
                     <Grid item xs={6} sm={6}>
-                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>First Name</Typography>
+                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_firstname', 'First Name')}</Typography>
                       <StyledTextField size="small" value={firstName} onChange={e => setFirstName((e.target.value || "").slice(0, 20))} fullWidth placeholder="First Name" inputProps={{ maxLength: 20 }} sx={{ mb: 1 }} />
                     </Grid>
                     <Grid item xs={6} sm={6}>
-                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Last Name</Typography>
+                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_lastname', 'Last Name')}</Typography>
                       <StyledTextField size="small" value={lastName} onChange={e => setLastName((e.target.value || "").slice(0, 20))} fullWidth placeholder="Last Name" inputProps={{ maxLength: 20 }} sx={{ mb: 1 }} />
                     </Grid>
                     <Grid item xs={6} sm={6}>
-                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Email</Typography>
+                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_email_input', 'Email')}</Typography>
                       <StyledTextField size="small" type="email" value={email} onChange={e => setEmail((e.target.value || "").slice(0, 40))} fullWidth placeholder="123@gmail.com" inputProps={{ maxLength: 40 }} sx={{ mb: 1 }} />
                     </Grid>
                     <Grid item xs={6} sm={6}>
-                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Change Password</Typography>
+                      <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_password', 'Change Password')}</Typography>
                       <StyledTextField
                         size="small"
                         type={showPassword ? "text" : "password"}
@@ -1296,7 +1346,7 @@ const PlayerProfileCard = () => {
                       <Grid item xs={12}>
                         <Grid container spacing={1}>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Country/Region</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_country', 'Country/Region')}</Typography>
                             <StyledTextField
                               size="small"
                               value={selectedProfileCountryCode}
@@ -1328,7 +1378,7 @@ const PlayerProfileCard = () => {
                             </StyledTextField>
                           </Grid>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>City/State</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_city', 'City/State')}</Typography>
                             <StyledTextField
                               size="small"
                               value={city || stateProvince}
@@ -1354,7 +1404,7 @@ const PlayerProfileCard = () => {
                             </StyledTextField>
                           </Grid>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Phone Number</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_phone_input', 'Phone Number')}</Typography>
                             <StyledTextField
                               size="small"
                               type="tel"
@@ -1461,11 +1511,11 @@ const PlayerProfileCard = () => {
                             />
                           </Grid>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Age</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_age_input', 'Age')}</Typography>
                             <StyledTextField size="small" type="number" value={age} onChange={e => setAge(e.target.value)} fullWidth placeholder="00" sx={{ mb: 1 }} />
                           </Grid>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Gender</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_gender', 'Gender')}</Typography>
                             <Card
                               sx={{
                                 p: 0.5,
@@ -1511,7 +1561,7 @@ const PlayerProfileCard = () => {
                             </Card>
                           </Grid>
                           <Grid item xs={6} sm={6}>
-                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Preferred Foot</Typography>
+                            <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_foot_input', 'Preferred Foot')}</Typography>
                             <Card
                               sx={{
                                 p: 0.5,
@@ -1565,7 +1615,7 @@ const PlayerProfileCard = () => {
 
               <Grid container spacing={3} justifyContent="space-between" sx={{ px: { xs: 1.25, sm: 3, md: 6 } }}>
                 <Grid item xs={12}>
-                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text, ml: 0, maxWidth: 900, mx: 'auto' }}>Position Type</Typography>
+                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text, ml: 0, maxWidth: 900, mx: 'auto' }}>{getCms('page_profile_label_position_type', 'Position Type')}</Typography>
                   <Card sx={{
                     p: 2.2,
                     background: "#171717",
@@ -1612,7 +1662,7 @@ const PlayerProfileCard = () => {
                 </Grid>
 
                 <Grid item xs={12} sm={5}>
-                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Specific Position</Typography>
+                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_specific_position', 'Specific Position')}</Typography>
                   <Card sx={{
                     p: 2,
                     pl: { xs: 1.5, sm: 4 },
@@ -1644,7 +1694,7 @@ const PlayerProfileCard = () => {
                 </Grid>
 
                 <Grid item xs={12} sm={5}>
-                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>Playing Style</Typography>
+                  <Typography sx={{ mb: 0.8, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_playing_style', 'Playing Style')}</Typography>
                   <Card sx={{
                     p: 2,
                     pl: { xs: 1.5, sm: 4 },
@@ -1684,7 +1734,7 @@ const PlayerProfileCard = () => {
                     '&:hover': { opacity: .9 }
                   }}
                 >
-                  {isUpdating ? "Updating..." : "Update Profile"}
+                  {isUpdating ? getCms('page_profile_btn_updating', 'Updating...') : getCms('page_profile_btn_update', 'Update Profile')}
                 </Button>
 
                 {/* Bottom Row: Previous & Delete Account (Smaller Width) */}
@@ -1712,7 +1762,7 @@ const PlayerProfileCard = () => {
                       '&:hover': { background: themeColors.primarySoft, borderColor: themeColors.primaryAlt }
                     }}
                   >
-                    Previous
+                    {getCms('page_profile_btn_previous', 'Previous')}
                   </Button>
 
                   <Button
@@ -1729,7 +1779,7 @@ const PlayerProfileCard = () => {
                       fontWeight: 600,
                     }}
                   >
-                    Delete Account
+                    {getCms('page_profile_btn_delete', 'Delete Account')}
                   </Button>
                 </Stack>
               </Box>
@@ -1815,12 +1865,12 @@ const PlayerProfileCard = () => {
   // ---------- STEP 3 ----------
   if (step === 3) {
     const skills = [
-      { name: "Dribbling", value: dribbling, setter: setDribbling, icon: Dribbling },
-      { name: "Shooting", value: shooting, setter: setShooting, icon: Shooting },
-      { name: "Passing", value: passing, setter: setPassing, icon: Passing },
-      { name: "Pace", value: pace, setter: setPace, icon: Pace },
-      { name: "Defending", value: defending, setter: setDefending, icon: Defending },
-      { name: "Physical", value: physical, setter: setPhysical, icon: Physical }
+      { name: getCms('page_profile_skill_dribbling', 'Dribbling'), value: dribbling, setter: setDribbling, icon: getCms('page_profile_img_dribbling', '') || Dribbling },
+      { name: getCms('page_profile_skill_shooting', 'Shooting'), value: shooting, setter: setShooting, icon: getCms('page_profile_img_shooting', '') || Shooting },
+      { name: getCms('page_profile_skill_passing', 'Passing'), value: passing, setter: setPassing, icon: getCms('page_profile_img_passing', '') || Passing },
+      { name: getCms('page_profile_skill_pace', 'Pace'), value: pace, setter: setPace, icon: getCms('page_profile_img_pace', '') || Pace },
+      { name: getCms('page_profile_skill_defending', 'Defending'), value: defending, setter: setDefending, icon: getCms('page_profile_img_defending', '') || Defending },
+      { name: getCms('page_profile_skill_physical', 'Physical'), value: physical, setter: setPhysical, icon: getCms('page_profile_img_physical', '') || Physical }
     ]
 
     return (
@@ -1863,7 +1913,7 @@ const PlayerProfileCard = () => {
                 fontSize: { xs: '1.2rem', sm: '1.75rem' },
                 textShadow: '0 2px 8px rgba(0,0,0,0.6)'
               }}>
-                SKILLS & ATTRIBUTES
+                {getCms('page_profile_skills_step_title', 'SKILLS & ATTRIBUTES')}
               </Typography>
 
               <Grid container spacing={{ xs: 1.5, sm: 3 }} sx={{ mt: 1, px: { xs: 1, sm: 3, md: 6 } }}>
@@ -1984,7 +2034,7 @@ const PlayerProfileCard = () => {
                     '&:hover': { background: themeColors.primarySoft, borderColor: themeColors.primaryAlt }
                   }}
                 >
-                  Previous
+                  {getCms('page_profile_btn_previous', 'Previous')}
                 </Button>
                 <Button
                   variant="contained"
@@ -2000,7 +2050,7 @@ const PlayerProfileCard = () => {
                     '&:hover': { opacity: .9 }
                   }}
                 >
-                  Next
+                  {getCms('page_profile_btn_next', 'Next')}
                 </Button>
               </Stack>
             </StyledPaper>

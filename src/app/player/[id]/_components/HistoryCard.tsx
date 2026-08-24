@@ -19,6 +19,7 @@ export interface HistoryCardProps {
     historyXpLabel: string;
     CARD_BG: string;
     TEAL_PRIMARY: string;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const HistoryCard: React.FC<HistoryCardProps> = ({
@@ -29,6 +30,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
     historyXpLabel,
     CARD_BG,
     TEAL_PRIMARY,
+    getCms,
 }) => {
     return (
         <Grid
@@ -58,7 +60,7 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
                     mt: -1,
                     fontFamily: 'var(--font-woodford-bourne-pro)',
                 }}>
-                    History & Records
+                    {getCms ? getCms('page_player_stats_history_title', 'History & Records') : 'History & Records'}
                 </Typography>
                 {historyRecordsLoading ? (
                     <Box sx={{ display: 'flex', flex: 1, minHeight: 156, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1.25 }}>
@@ -81,35 +83,35 @@ export const HistoryCard: React.FC<HistoryCardProps> = ({
                         }} />
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>Longest Win Streak</Typography>
+                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{getCms ? getCms('page_player_stats_history_win_streak', 'Longest Win Streak') : 'Longest Win Streak'}</Typography>
                             <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
                                 {historyRecords.longestWinStreak}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>Most Goals Scored In A League</Typography>
+                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{getCms ? getCms('page_player_stats_history_most_goals', 'Most Goals Scored In A League') : 'Most Goals Scored In A League'}</Typography>
                             <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
                                 {historyRecords.mostGoalsInLeague}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>Most MOTM Votes Received In A League</Typography>
+                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{getCms ? getCms('page_player_stats_history_most_motm', 'Most MOTM Votes Received In A League') : 'Most MOTM Votes Received In A League'}</Typography>
                             <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
                                 {historyRecords.mostMotmInLeague}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>Largest Win Margin</Typography>
+                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{getCms ? getCms('page_player_stats_history_win_margin', 'Largest Win Margin') : 'Largest Win Margin'}</Typography>
                             <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
                                 {historyRecords.longestWinMargin}
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: -19, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, borderRadius: '50%', bgcolor: '#00a77f' }} />
-                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{historyXpLabel}</Typography>
+                            <Typography sx={{ color: '#ccc', fontSize: 13 }}>{getCms ? getCms('page_player_stats_history_highest_xp', historyXpLabel) : historyXpLabel}</Typography>
                             <Typography sx={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>
                                 {historyRecords.highestXpInLeague.toLocaleString()}
                             </Typography>

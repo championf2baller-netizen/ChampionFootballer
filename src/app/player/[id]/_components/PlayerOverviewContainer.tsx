@@ -62,6 +62,7 @@ export interface PlayerOverviewContainerProps {
     historyRecordsLoading: boolean;
     historyRecords: HistoryRecordsData;
     historyXpLabel: string;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = ({
@@ -102,6 +103,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
     historyRecordsLoading,
     historyRecords,
     historyXpLabel,
+    getCms,
 }) => {
     return (
         <Container maxWidth={false} sx={{ bgcolor: '#383838', py: { xs: 2.2, md: 3 }, px: { xs: 1.3, sm: 2, md: 3.5 }, maxWidth: 1165, mx: 'auto', borderRadius: 2, mb: 5, position: 'relative', zIndex: 1 }}>
@@ -145,6 +147,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
                         activeTab={activeTab}
                         onTabClick={onTabClick}
                         isMobile={isMobile}
+                        getCms={getCms}
                     />
 
                     {/* Stats Row */}
@@ -155,6 +158,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
                         displayedDefensiveImpact={displayedDefensiveImpact}
                         xpLoading={xpLoading}
                         displayXp={displayXp}
+                        getCms={getCms}
                     />
 
                     {/* Three Cards Section */}
@@ -174,6 +178,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
                         historyRecordsLoading={historyRecordsLoading}
                         historyRecords={historyRecords}
                         historyXpLabel={historyXpLabel}
+                        getCms={getCms}
                     />
                 </>
             )}

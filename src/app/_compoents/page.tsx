@@ -19,7 +19,8 @@ import image12 from '@/Components/images/4thpicc.png';
 import LogoNavbar from './logonavbar';
 
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 
 // Lazy load heavy components with exact reserved height fallback to prevent CLS (Cumulative Layout Shift)
 const AuthTabs = dynamic(() => import('@/Components/authtabs/authtabs'), {
@@ -45,13 +46,60 @@ const AuthSocialButtons = dynamic(() => import('@/Components/AuthSocialButtons')
 export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(true);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store'
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {};
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) map[it.key] = it.content;
+              if (it?.metadata?.stepImages) {
+                Object.entries(it.metadata.stepImages).forEach(([sk, sv]: [string, any]) => {
+                  if (sv) {
+                    map[`${it.key}_${sk}`] = sv;
+                    map[sk] = sv;
+                  }
+                });
+              }
+            });
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) map[k] = v.content;
+              if (v?.metadata?.stepImages) {
+                Object.entries(v.metadata.stepImages).forEach(([sk, sv]: [string, any]) => {
+                  if (sv) {
+                    map[`${k}_${sk}`] = sv;
+                    map[sk] = sv;
+                  }
+                });
+              }
+            });
+          }
+          setCmsMap(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
+
+  const activeHeroTopBg = cmsMap['page_landing_images_hero_top_bg'] || cmsMap['hero_top_bg'] || heroTopBg;
+  const activeHeroGridTeam1 = cmsMap['page_landing_images_hero_grid_team1'] || cmsMap['hero_grid_team1'] || heroGridTeam1;
+  const activeHeroGridOrange = cmsMap['page_landing_images_hero_grid_orange'] || cmsMap['hero_grid_orange'] || heroGridOrange;
 
   // Feature cards (id, title, image)
   const features = [
-    { id: '1', title: 'CREATE YOUR PLAYER CARD', img: image9 },
-    { id: '2', title: 'CREATE LEAGUES & MATCHES', img: image10 },
-    { id: '3', title: 'TRACK YOUR PERFORMANCE', img: image11 },
-    { id: '4', title: 'WIN TROPHIES & REWARDS', img: image12 },
+    { id: '1', title: getCms('page_main_feature1_title', 'CREATE YOUR PLAYER CARD'), img: cmsMap['page_landing_images_feature1_img'] || cmsMap['feature1_img'] || image9 },
+    { id: '2', title: getCms('page_main_feature2_title', 'CREATE LEAGUES & MATCHES'), img: cmsMap['page_landing_images_feature2_img'] || cmsMap['feature2_img'] || image10 },
+    { id: '3', title: getCms('page_main_feature3_title', 'TRACK YOUR PERFORMANCE'), img: cmsMap['page_landing_images_feature3_img'] || cmsMap['feature3_img'] || image11 },
+    { id: '4', title: getCms('page_main_feature4_title', 'WIN TROPHIES & REWARDS'), img: cmsMap['page_landing_images_feature4_img'] || cmsMap['feature4_img'] || image12 },
   ];
 
   return (
@@ -93,7 +141,7 @@ export default function LandingPage() {
                   }}
                 >
                   <Image
-                    src={heroTopBg}
+                    src={activeHeroTopBg}
                     alt="Create your matches, track your stats, and rise through the rankings"
                     fill
                     priority
@@ -135,7 +183,7 @@ export default function LandingPage() {
                       }}
                     >
                       <Image
-                        src={heroGridTeam1}
+                        src={activeHeroGridTeam1}
                         alt="Football Team Squad"
                         fill
                         loading="lazy"
@@ -158,7 +206,7 @@ export default function LandingPage() {
                         letterSpacing: '0.01em',
                       }}
                     >
-                      &quot;I GOT 99 PROBLEMS BUT WINNING AIN&apos;T ONE&quot;
+                      {getCms('page_main_card1_text', '"I GOT 99 PROBLEMS BUT WINNING AIN\'T ONE"')}
                     </Typography>
                   </Box>
 
@@ -182,7 +230,7 @@ export default function LandingPage() {
                       }}
                     >
                       <Image
-                        src={heroGridOrange}
+                        src={activeHeroGridOrange}
                         alt="Champion Footballer Players"
                         fill
                         loading="lazy"
@@ -205,7 +253,7 @@ export default function LandingPage() {
                         letterSpacing: '0.01em',
                       }}
                     >
-                      CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!
+                      {getCms('page_main_card2_text', 'CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!')}
                     </Typography>
                   </Box>
                 </Box>

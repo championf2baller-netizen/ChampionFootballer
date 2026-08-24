@@ -7,14 +7,23 @@ export interface PlayerTabsNavProps {
     activeTab: string;
     onTabClick: (tab: string) => void;
     isMobile: boolean;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const PlayerTabsNav: React.FC<PlayerTabsNavProps> = ({
     activeTab,
     onTabClick,
     isMobile,
+    getCms,
 }) => {
     const tabs = ['current', 'career', 'trophies', 'rewards', 'history'];
+
+    const getTabLabel = (tab: string) => {
+        const fallback = tab === 'current' ? 'Current' : tab === 'career' ? (isMobile ? 'Career' : 'Career Stats') : tab === 'trophies' ? 'Trophies' : tab === 'rewards' ? 'Rewards' : tab === 'history' ? 'History' : tab.charAt(0).toUpperCase() + tab.slice(1);
+        if (!getCms) return fallback;
+        const key = `page_player_stats_tab_${tab}`;
+        return getCms(key, fallback);
+    };
 
     return (
         <Box sx={{
@@ -50,7 +59,7 @@ export const PlayerTabsNav: React.FC<PlayerTabsNavProps> = ({
                             whiteSpace: 'nowrap',
                         }}
                     >
-                        {tab === 'current' ? 'Current' : tab === 'career' ? (isMobile ? 'Career' : 'Career Stats') : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        {getTabLabel(tab)}
                     </Typography>
                     {/* Underline Box */}
                     <Box sx={{

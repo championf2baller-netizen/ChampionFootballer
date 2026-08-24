@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import {
     Container,
     Typography,
@@ -319,6 +320,33 @@ export default function PlayerStatsPage() {
 
     const [search, setSearch] = useState('');
     const [leagues, setLeagues] = useState<League[]>([]);
+    const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+            cache: 'no-store'
+        })
+            .then(r => r.json())
+            .then(d => {
+                if (d?.success) {
+                    const map: Record<string, string> = {};
+                    if (Array.isArray(d?.data)) {
+                        d.data.forEach((it: any) => {
+                            if (it?.key && it?.content !== undefined) map[it.key] = it.content;
+                        });
+                    }
+                    if (d?.contentMap) {
+                        Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+                            if (v && v.content !== undefined) map[k] = v.content;
+                        });
+                    }
+                    setCmsMap(map);
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
     type PlayerSeasonOption = {
         id: string;
         name: string;
@@ -2010,7 +2038,7 @@ export default function PlayerStatsPage() {
                                 lineHeight: '100%',
                             }}
                         >
-                            PLAYER STATS
+                            {getCms('page_player_stats_heading', 'PLAYER STATS')}
                         </Typography>
                     </Box>
 
@@ -2057,7 +2085,7 @@ export default function PlayerStatsPage() {
                         >
                             <TextField
                                 variant="outlined"
-                                placeholder="Search player name and hit enter..."
+                                placeholder={getCms('page_player_stats_search_placeholder', 'Search player name and hit enter...')}
                                 value={search}
                                 onFocus={() => {
                                     setShowTeammatePanel(true);
@@ -2293,7 +2321,7 @@ export default function PlayerStatsPage() {
                                             // whiteSpace: 'nowrap',
                                         }}
                                     >
-                                        <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                                        <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_stats_year_placeholder', 'All Years')}</option>
                                         {yearsOptions.filter(y => y !== 'all').map(y => (
                                             <option key={y} value={y} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{y}</option>
                                         ))}
@@ -2323,7 +2351,7 @@ export default function PlayerStatsPage() {
                                                 whiteSpace: 'nowrap',
                                             }}
                                         >
-                                            {year && year !== 'all' ? year : 'All Years'}
+                                            {year && year !== 'all' ? year : getCms('page_player_stats_year_placeholder', 'All Years')}
                                         </button>
                                         <Menu
                                             anchorEl={yearFilterButtonRef.current}
@@ -2360,7 +2388,7 @@ export default function PlayerStatsPage() {
                                                         '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                                                     }}
                                                 >
-                                                    {value === 'all' ? 'All Years' : value}
+                                                     {value === 'all' ? getCms('page_player_stats_year_placeholder', 'All Years') : value}
                                                 </MenuItem>
                                             ))}
                                         </Menu>
@@ -2398,8 +2426,8 @@ export default function PlayerStatsPage() {
                                 >
                                     <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
                                         {leagueId && leagueId !== 'all'
-                                            ? (leagues.find((l) => sameId(l.id, leagueId))?.name || 'Select League')
-                                            : 'All Leagues'}
+                                            ? (leagues.find((l) => sameId(l.id, leagueId))?.name || getCms('page_player_stats_league_placeholder', 'Select League'))
+                                            : getCms('page_all_leagues_select_placeholder', 'All Leagues')}
                                     </Box>
                                     {/* <ChevronDown size={isDesktop ? 16 : 12} style={{ flexShrink: 0, color: '#9CA3AF' }} /> */}
                                 </button>
@@ -2592,7 +2620,7 @@ export default function PlayerStatsPage() {
                                             whiteSpace: 'nowrap',
                                         }}
                                     >
-                                        <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Seasons</option>
+                                        <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_stats_season_placeholder', 'All Seasons')}</option>
                                         {seasons.map((season) => (
                                             <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                                                 {season.name}
@@ -2631,8 +2659,8 @@ export default function PlayerStatsPage() {
                                             }}
                                         >
                                             {selectedSeason === 'all'
-                                                ? 'All Seasons'
-                                                : (seasons.find((season) => sameId(season.id, selectedSeason))?.name || 'All Seasons')}
+                                                ? getCms('page_player_stats_season_placeholder', 'All Seasons')
+                                                : (seasons.find((season) => sameId(season.id, selectedSeason))?.name || getCms('page_player_stats_season_placeholder', 'All Seasons'))}
                                         </button>
                                         <Menu
                                             anchorEl={seasonFilterButtonRef.current}
@@ -2670,7 +2698,7 @@ export default function PlayerStatsPage() {
                                                     '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                                                 }}
                                             >
-                                                All Seasons
+                                                 {getCms('page_player_stats_season_placeholder', 'All Seasons')}
                                             </MenuItem>
                                             {seasons.map((season) => (
                                                 <MenuItem
@@ -2731,7 +2759,7 @@ export default function PlayerStatsPage() {
                                     }
                                 }}
                             >
-                                Clear
+                                {getCms('page_player_stats_clear_btn', 'Clear')}
                             </Button>
                         </Box>
                     </Box>
@@ -2778,6 +2806,7 @@ export default function PlayerStatsPage() {
                 historyRecordsLoading={historyRecordsLoading}
                 historyRecords={historyRecords}
                 historyXpLabel={historyXpLabel}
+                getCms={getCms}
             />
 
             {/* Stats Over Season Modal */}

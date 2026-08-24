@@ -1,17 +1,32 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, TextField, Button, Alert, CircularProgress, Container } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import cflogo from '@/Components/images/champion football logo 3 (1).png';
 import ShieldIcon from '@mui/icons-material/Security';
 
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
+
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem('adminToken');
+    const adminUserStr = localStorage.getItem('adminUser');
+    if (adminToken && adminUserStr) {
+      try {
+        const u = JSON.parse(adminUserStr);
+        if (u.isAdmin === true || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') {
+          router.replace('/admin/dashboard');
+        }
+      } catch { }
+    }
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +39,7 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'https://cfbackend.championfootballer.co.uk';
+      const apiBase = getApiBaseUrl();
       const res = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,6 +62,11 @@ export default function AdminLoginPage() {
 
       // Store auth tokens
       if (data.token) {
+        document.cookie = `adminToken=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+        localStorage.setItem('adminToken', data.token);
+        localStorage.setItem('adminUser', JSON.stringify(user));
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(user));
       }

@@ -25,6 +25,7 @@ export interface PlayerCardsSectionProps {
     historyRecordsLoading: boolean;
     historyRecords: HistoryRecordsData;
     historyXpLabel: string;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
@@ -43,6 +44,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
     historyRecordsLoading,
     historyRecords,
     historyXpLabel,
+    getCms,
 }) => {
     return (
         <Grid container spacing={3} sx={{ alignItems: 'stretch' }}>
@@ -55,6 +57,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
                 TEAL_PRIMARY={TEAL_PRIMARY}
                 TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
                 getTrophyIconSize={getTrophyIconSize}
+                getCms={getCms}
             />
             <RewardsCard
                 activeTab={activeTab}
@@ -63,6 +66,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
                 playerBadges={playerBadges}
                 CARD_BG={CARD_BG}
                 TEAL_PRIMARY={TEAL_PRIMARY}
+                getCms={getCms}
             />
             <HistoryCard
                 activeTab={activeTab}
@@ -72,6 +76,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
                 historyXpLabel={historyXpLabel}
                 CARD_BG={CARD_BG}
                 TEAL_PRIMARY={TEAL_PRIMARY}
+                getCms={getCms}
             />
         </Grid>
     );

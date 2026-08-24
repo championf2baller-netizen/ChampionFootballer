@@ -1,4 +1,5 @@
 'use client';
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import { Box, Button, Container, Typography, Paper, MenuItem, Divider, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CircularProgress, Menu, ListItemIcon, ListItemText, Chip, Alert, useTheme, useMediaQuery, TextField } from '@mui/material';
 import { Calendar, ChevronDown, Crown, Edit, Plus, Trash2, Trophy, Undo2 } from 'lucide-react';
 import { useAuth } from '@/lib/hooks';
@@ -392,6 +393,33 @@ export default function AllMatches() {
     const seasonFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
     const [availabilityLoading, setAvailabilityLoading] = useState<{ [key: string]: boolean }>({});
     const router = useRouter();
+    const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+            cache: 'no-store'
+        })
+            .then(r => r.json())
+            .then(d => {
+                if (d?.success) {
+                    const map: Record<string, string> = {};
+                    if (Array.isArray(d?.data)) {
+                        d.data.forEach((it: any) => {
+                            if (it?.key && it?.content !== undefined) map[it.key] = it.content;
+                        });
+                    }
+                    if (d?.contentMap) {
+                        Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+                            if (v && v.content !== undefined) map[k] = v.content;
+                        });
+                    }
+                    setCmsMap(map);
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
 
     // Extract years dynamically from existing leagues only
     const yearOptions = React.useMemo(() => {
@@ -2022,7 +2050,7 @@ export default function AllMatches() {
                 }
             `}</style>
             <PageHeader
-                title="Matches"
+                title={getCms('page_all_matches_heading', 'Matches')}
                 fullBleed={false}
                 sx={{ mb: 4 }}
             >
@@ -2078,7 +2106,7 @@ export default function AllMatches() {
                                 }}
                             >
                                 {/* <Plus size={22} style={{ marginRight: 6 }} /> */}
-                               + New Match
+                               {getCms('page_all_matches_new_btn', '+ New Match')}
                             </Button>
                         </Box>
 
@@ -2126,7 +2154,7 @@ export default function AllMatches() {
                                         fontWeight: 400,
                                     }}
                                 >
-                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_matches_year_placeholder', 'All Years')}</option>
                                     {yearOptions.filter(y => y !== 'all').map(y => (
                                         <option key={y} value={y} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{y}</option>
                                     ))}
@@ -2156,7 +2184,7 @@ export default function AllMatches() {
                                             whiteSpace: 'nowrap',
                                         }}
                                     >
-                                        {selectedYear && selectedYear !== 'all' ? selectedYear : 'All Years'}
+                                        {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_matches_year_placeholder', 'All Years')}
                                     </button>
                                     <Menu
                                         anchorEl={yearFilterButtonRef.current}
@@ -2240,8 +2268,8 @@ export default function AllMatches() {
                                 >
                                     <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
                                         {selectedLeague && selectedLeague !== 'all'
-                                            ? (formatLeagueName(sortedLeagues.find((l) => l.id === selectedLeague)?.name || '') || 'Select League')
-                                            : 'Select League'}
+                                            ? (formatLeagueName(sortedLeagues.find((l) => l.id === selectedLeague)?.name || '') || getCms('page_all_matches_league_placeholder', 'Select League'))
+                                            : getCms('page_all_matches_league_placeholder', 'Select League')}
                                     </Box>
                                     {/* <ChevronDown size={isDesktop ? 16 : 12} style={{ flexShrink: 0, color: '#9CA3AF' }} /> */}
                                 </button>
@@ -2301,7 +2329,7 @@ export default function AllMatches() {
                                                 opacity: 0.7
                                             }}
                                         >
-                                            Select League
+                                            {getCms('page_all_matches_league_placeholder', 'Select League')}
                                         </MenuItem>
                                     )}
                                     {[...sortedLeagues].sort((a, b) => {
@@ -2418,7 +2446,7 @@ export default function AllMatches() {
                                         whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Seasons</option>
+                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_matches_season_placeholder', 'All Seasons')}</option>
                                     {sortedSeasons.map((season) => (
                                         <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                                             {season.name}
@@ -2457,8 +2485,8 @@ export default function AllMatches() {
                                         }}
                                     >
                                         {selectedSeason === 'all'
-                                            ? 'All Seasons'
-                                            : (sortedSeasons.find((season) => season.id === selectedSeason)?.name || 'All Seasons')}
+                                            ? getCms('page_all_matches_season_placeholder', 'All Seasons')
+                                            : (sortedSeasons.find((season) => season.id === selectedSeason)?.name || getCms('page_all_matches_season_placeholder', 'All Seasons'))}
                                     </button>
                                     <Menu
                                         anchorEl={seasonFilterButtonRef.current}
@@ -2496,7 +2524,7 @@ export default function AllMatches() {
                                                 '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                                             }}
                                         >
-                                            All Seasons
+                                            {getCms('page_all_matches_season_placeholder', 'All Seasons')}
                                         </MenuItem>
                                         {sortedSeasons.map((season) => (
                                             <MenuItem
@@ -2552,7 +2580,7 @@ export default function AllMatches() {
                   }
                 }}
                             >
-                                Clear
+                                {getCms('page_all_matches_clear_btn', 'Clear')}
                             </Button>
                         </Box>
                     </Box>
@@ -2590,7 +2618,7 @@ export default function AllMatches() {
                                     transition: 'all 0.3s ease',
                                 }}
                             >
-                                Match Results
+                                {getCms('page_all_matches_results_tab', 'Match Results')}
                             </Button>
                             <Button
                                 onClick={() => setMatchFilter('fixtures')}
@@ -2610,7 +2638,7 @@ export default function AllMatches() {
                                     transition: 'all 0.3s ease',
                                 }}
                             >
-                                Fixtures
+                                {getCms('page_all_matches_fixtures_tab', 'Fixtures')}
                             </Button>
                             {(archivedMatchesCount > 0 || matchFilter === 'archived') && (
                                 <Button
@@ -2631,7 +2659,7 @@ export default function AllMatches() {
                                         transition: 'all 0.3s ease',
                                     }}
                                 >
-                                    Archived
+                                    {getCms('page_all_matches_archived_tab', 'Archived')}
                                 </Button>
                             )}
                         </Box>

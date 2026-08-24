@@ -18,6 +18,7 @@ export interface RewardsCardProps {
     playerBadges: PlayerBadgeItem[];
     CARD_BG: string;
     TEAL_PRIMARY: string;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const RewardsCard: React.FC<RewardsCardProps> = ({
@@ -27,6 +28,7 @@ export const RewardsCard: React.FC<RewardsCardProps> = ({
     playerBadges,
     CARD_BG,
     TEAL_PRIMARY,
+    getCms,
 }) => {
     return (
         <Grid
@@ -56,7 +58,7 @@ export const RewardsCard: React.FC<RewardsCardProps> = ({
                     mt: -1,
                     fontFamily: 'var(--font-woodford-bourne-pro)',
                 }}>
-                    Rewards XP
+                    {getCms ? getCms('page_player_stats_rewards_title', 'Rewards XP') : 'Rewards XP'}
                 </Typography>
                 {badgesLoading ? (
                     <Box sx={{ textAlign: 'center', py: 3 }}>
@@ -64,7 +66,7 @@ export const RewardsCard: React.FC<RewardsCardProps> = ({
                     </Box>
                 ) : playerBadges.length === 0 ? (
                     <Typography sx={{ color: '#999', textAlign: 'center', py: 3, fontSize: 13 }}>
-                        No rewards earned yet
+                        {getCms ? getCms('page_player_stats_rewards_empty', 'No rewards earned yet') : 'No rewards earned yet'}
                     </Typography>
                 ) : (
                     <Box sx={{

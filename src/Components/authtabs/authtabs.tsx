@@ -224,6 +224,33 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
   const [tabValue, setTabValue] = useState(showLogin ? 0 : 1)
   const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking")
   const { isAuthenticated } = useSelector((state: RootState) => state.auth) as { isAuthenticated: boolean }
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    fetch(`${getClientApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store'
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {}
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) map[it.key] = it.content
+            })
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) map[k] = v.content
+            })
+          }
+          setCmsMap(map)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const getCms = (key: string, fallback: string) => cmsMap[key] || fallback
 
   const isDesktop = useMediaQuery("(min-width:900px)")
 
@@ -1248,7 +1275,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 },
               }}
             >
-              {loginLoading ? <CircularProgress size={24} color="inherit" /> : "SIGN IN "}
+              {loginLoading ? <CircularProgress size={24} color="inherit" /> : getCms('page_auth_login_btn', 'SIGN IN')}
             </Button>
 
             <Box sx={{ display: "flex", justifyContent: "center", width: '100%' }}>
@@ -1269,7 +1296,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   padding: 0,
                 }}
               >
-                Forgot your password?
+                {getCms('page_auth_forgot_pw_link', 'Forgot your password?')}
               </Button>
             </Box>
           </Stack>
@@ -1723,10 +1750,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 }
                 label={
                   <span className="text-black" style={{ color: 'black' }}>
-                    I accept the{' '}
-                    <Link href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'black', textDecoration: 'underline' }}>
-                      terms and conditions
-                    </Link>
+                    {getCms('page_auth_terms_label', 'I accept the terms and conditions')}
                   </span>
                 }
                 sx={{ color: '#fff' }}
@@ -1756,7 +1780,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 },
               }}
             >
-              {registerLoading ? <CircularProgress size={24} color="inherit" /> : 'Register'}
+              {registerLoading ? <CircularProgress size={24} color="inherit" /> : getCms('page_auth_register_btn', 'Register')}
             </Button>
 
             {/* Social auth buttons (desktop: to the right of Register; next row: FB/Apple) */}

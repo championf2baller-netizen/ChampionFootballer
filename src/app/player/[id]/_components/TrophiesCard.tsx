@@ -20,6 +20,7 @@ export interface TrophiesCardProps {
     TEAL_PRIMARY: string;
     TROPHY_ICON_FRAME_SIZE: number;
     getTrophyIconSize: (label: string) => number;
+    getCms?: (key: string, fallback: string) => string;
 }
 
 export const TrophiesCard: React.FC<TrophiesCardProps> = ({
@@ -31,6 +32,7 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
     TEAL_PRIMARY,
     TROPHY_ICON_FRAME_SIZE,
     getTrophyIconSize,
+    getCms,
 }) => {
     return (
         <Grid
@@ -61,7 +63,7 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
                         mt: -1,
                         fontFamily: 'var(--font-woodford-bourne-pro)',
                     }}>
-                        Trophies & Awards
+                        {getCms ? getCms('page_player_stats_trophies_title', 'Trophies & Awards') : 'Trophies & Awards'}
                     </Typography>
                 </Box>
                 {trophiesLoading ? (
@@ -70,7 +72,7 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
                     </Box>
                 ) : earnedTrophies.length === 0 ? (
                     <Typography sx={{ color: '#999', textAlign: 'center', py: 3, fontSize: 13 }}>
-                        No trophies yet
+                        {getCms ? getCms('page_player_stats_trophies_empty', 'No trophies yet') : 'No trophies yet'}
                     </Typography>
                 ) : (
                     <Box sx={{

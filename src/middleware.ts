@@ -3,24 +3,23 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  
-  // COMPLETE AUTH BYPASS - Let all auth routes pass through
-  if (pathname.startsWith('/auth/')) {
-    console.log(`[MIDDLEWARE] Bypassing auth route: ${pathname}`);
+
+  // COMPLETE AUTH BYPASS - Let all admin & auth routes pass through
+  if (pathname.startsWith('/admin') || pathname.startsWith('/auth/')) {
     return NextResponse.next();
   }
-  
+
   // Add this condition to your middleware
   if (request.nextUrl.pathname.startsWith('/auth/callback')) {
     return NextResponse.next();
   }
-  
+
   const rawToken = request.cookies.get('token')?.value || request.cookies.get('auth_token')?.value;
   const token =
     typeof rawToken === 'string' &&
-    rawToken !== 'undefined' &&
-    rawToken !== 'null' &&
-    rawToken.split('.').length === 3
+      rawToken !== 'undefined' &&
+      rawToken !== 'null' &&
+      rawToken.split('.').length === 3
       ? rawToken
       : undefined;
 
@@ -38,7 +37,7 @@ export function middleware(request: NextRequest) {
   if (!publicPaths.includes(pathname) && !token) {
     return NextResponse.redirect(new URL('/', request.url));
   }
-  
+
   return NextResponse.next();
 }
 

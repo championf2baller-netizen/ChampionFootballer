@@ -11,6 +11,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const resolvedPathname = pathname ?? '';
   const isMainPage = resolvedPathname === '/';
+  const isAdminPage = resolvedPathname.startsWith('/admin');
 
   return (
     <>
@@ -18,7 +19,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         id="main-content"
         role="main"
         style={{
-          backgroundImage: isMainPage ? 'none' : `url(${Mainbg.src})`,
+          backgroundImage: (isMainPage || isAdminPage) ? 'none' : `url(${Mainbg.src})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
@@ -30,7 +31,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           backgroundColor: 'black',
         }}
       >
-        {!isMainPage && <Navbar />}
+        {!isMainPage && !isAdminPage && <Navbar />}
         {children}
         {/* {!isMainPage && <Footer />} */}
       </main>

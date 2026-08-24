@@ -2,7 +2,7 @@
 import { useAuth } from '@/lib/hooks';
 import dynamic from 'next/dynamic';
 import { AdminPanelSettings, Close, Delete, ExitToApp, People, CloudUpload, CheckCircle, Search, ExpandMore, Add as AddIcon, PowerSettingsNew } from '@mui/icons-material'
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography, Container, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, useTheme, useMediaQuery, Fade, Chip, CircularProgress, MenuItem, InputAdornment, FormControl, Select, RadioGroup, Radio, Switch, FormControlLabel, Grid, Menu, ListItemIcon } from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography, Container, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, useTheme, useMediaQuery, Fade, Chip, CircularProgress, MenuItem, InputAdornment, FormControl, Select, RadioGroup, Radio, Switch, FormControlLabel, Grid, Menu, ListItemIcon, Alert } from '@mui/material'
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -328,6 +328,39 @@ function LeagueMembersDialog({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const [openSettings, setOpenSettings] = useState(false)
   const [selectedLeaveSeasonId, setSelectedLeaveSeasonId] = useState<string>('')
+  const [cmsLeagueDetailsBanner, setCmsLeagueDetailsBanner] = useState<string>('')
+
+  useEffect(() => {
+    if (!open) return;
+    const getApiBaseUrl = () => {
+      if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        return 'http://localhost:5000';
+      }
+      return 'https://cfbackend.championfootballer.co.uk';
+    };
+
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store' }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {};
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => { if (it?.key && it?.content !== undefined) map[it.key] = it.content; });
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => { if (v && v.content !== undefined) map[k] = v.content; });
+          }
+          const banner = map['page_league_details_info'] || map['league_details_info'] || '';
+          setCmsLeagueDetailsBanner(banner);
+        }
+      })
+      .catch(() => {});
+  }, [open]);
+
   useEffect(() => {
     if (open && openSettingsOnOpen && league && league.adminId === currentUserId) {
       setOpenSettings(true)
@@ -532,6 +565,13 @@ function LeagueMembersDialog({
           "&::-webkit-scrollbar-thumb": { background: "rgba(255,255,255,0.2)", borderRadius: "3px" },
         }}
       >
+        {cmsLeagueDetailsBanner && (
+          <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2, pb: 0 }}>
+            <Alert severity="info" sx={{ bgcolor: 'rgba(229,106,22,0.12)', color: '#f97316', border: '1px solid rgba(229,106,22,0.3)', fontSize: '0.85rem' }}>
+              {cmsLeagueDetailsBanner}
+            </Alert>
+          </Box>
+        )}
         {!isAdmin && (
           <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
             <Box
@@ -2873,6 +2913,43 @@ function AllLeagues() {
   const [isCreating, setIsCreating] = useState(false);
   const [leagues, setLeagues] = useState<LeagueWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cmsAllLeaguesBanner, setCmsAllLeaguesBanner] = useState<string>('');
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const getApiBaseUrl = () => {
+      if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
+      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        return 'http://localhost:5000';
+      }
+      return 'https://cfbackend.championfootballer.co.uk';
+    };
+
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store' }
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {};
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) map[it.key] = it.content;
+            });
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) map[k] = v.content;
+            });
+          }
+          setCmsMap(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
   const router = useRouter();
   const [leagueName, setLeagueName] = useState('');
   const [leagueNameError, setLeagueNameError] = useState<string>('');
@@ -5062,7 +5139,7 @@ function AllLeagues() {
           }}
             className='all-leagues-heading'
           >
-            LEAGUES
+            {getCms('page_all_leagues_heading', 'LEAGUES')}
           </Typography>
 
           {/* Divider line below heading */}
@@ -5113,7 +5190,7 @@ function AllLeagues() {
                 px: 2.5,
                 textTransform: 'none',
                 whiteSpace: 'nowrap'
-              }}>+ Create New League</Button>
+              }}> {getCms('page_all_leagues_create_btn', '+ Create New League')}</Button>
 
               {/* Grouped Invite Code + Join Button */}
               <Box
@@ -5125,7 +5202,7 @@ function AllLeagues() {
                 }}
               >
                 <TextField
-                  placeholder="Enter invite code"
+                  placeholder={getCms('page_all_leagues_join_placeholder', 'Enter invite code')}
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   size="small"
@@ -5177,7 +5254,7 @@ function AllLeagues() {
                     whiteSpace: 'nowrap'
                   }}
                 >
-                  {isJoining ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Join League'}
+                  {isJoining ? <CircularProgress size={20} sx={{ color: 'white' }} /> : getCms('page_all_leagues_join_btn', 'Join League')}
                 </Button>
               </Box>
             </Box>
@@ -5225,7 +5302,7 @@ function AllLeagues() {
                       fontWeight: 400,
                     }}
                   >
-                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_leagues_year_placeholder', 'All Years')}</option>
                     {yearOptions.map((year) => (
                       <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                         {year}
@@ -5257,7 +5334,7 @@ function AllLeagues() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {selectedYear && selectedYear !== 'all' ? selectedYear : 'All Years'}
+                      {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_leagues_year_placeholder', 'All Years')}
                     </button>
                     <Menu
                       anchorEl={yearFilterButtonRef.current}
@@ -5297,7 +5374,7 @@ function AllLeagues() {
                             '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                           }}
                         >
-                          {value === 'all' ? 'All Years' : value}
+                          {value === 'all' ? getCms('page_all_leagues_year_placeholder', 'All Years') : value}
                         </MenuItem>
                       ))}
                     </Menu>
@@ -5341,8 +5418,8 @@ function AllLeagues() {
                 >
                   <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
                     {selectedLeagueId && selectedLeagueId !== 'all'
-                      ? (filteredLeagues.find((l) => String(l.id) === String(selectedLeagueId))?.name || 'All Leagues')
-                      : 'All Leagues'}
+                      ? (filteredLeagues.find((l) => String(l.id) === String(selectedLeagueId))?.name || getCms('page_all_leagues_select_placeholder', 'All Leagues'))
+                      : getCms('page_all_leagues_select_placeholder', 'All Leagues')}
                   </Box>
                 </button>
                 <Menu
@@ -5387,7 +5464,7 @@ function AllLeagues() {
                     }
                   }}
                 >
-                  {[{ id: 'all', name: 'All Leagues' }, ...filteredLeagues].map((leagueItem) => {
+                  {[{ id: 'all', name: getCms('page_all_leagues_select_placeholder', 'All Leagues') }, ...filteredLeagues].map((leagueItem) => {
                     const isActive = String(selectedLeagueId) === String(leagueItem.id);
                     return (
                       <MenuItem
@@ -5458,7 +5535,7 @@ function AllLeagues() {
                   }
                 }}
               >
-                Clear
+                {getCms('page_all_leagues_clear_btn', 'Clear')}
               </Button>
             </Box>
           </Box>
@@ -5497,7 +5574,7 @@ function AllLeagues() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Completed Leagues
+                {getCms('page_all_leagues_completed_tab', 'Completed Leagues')}
               </Button>
               <Button
                 onClick={() => setCompletionTab('live')}
@@ -5517,7 +5594,7 @@ function AllLeagues() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                Live Leagues
+                {getCms('page_all_leagues_live_tab', 'Current / Live Leagues')}
               </Button>
             </Box>
           </Box>
@@ -5962,7 +6039,7 @@ function AllLeagues() {
                                   fontWeight: 300,
                                   fontSize: { xs: '10px', sm: '16px' }
                                 }}>
-                                  Invite Code: {inviteContextLabel}: {inviteCodeDisplay}
+                                  {getCms('page_all_leagues_card_invite_label', 'Invite Code:')} {inviteContextLabel}: {inviteCodeDisplay}
                                 </Typography>
                                 <IconButton
                                   size="small"
@@ -6027,7 +6104,7 @@ function AllLeagues() {
                                 fontWeight: 300,
                                 fontSize: { xs: '10px', sm: '16px' }
                               }}>
-                                Total Matches: {(() => {
+                                {getCms('page_all_leagues_card_matches_label', 'Total Matches:')} {(() => {
                                   const l = league as any;
                                   if (typeof l.totalMatchCount === 'number') return l.totalMatchCount;
                                   if (typeof l.computedStatus?.totalMatchCount === 'number') return l.computedStatus.totalMatchCount;
@@ -6055,7 +6132,7 @@ function AllLeagues() {
                                 fontWeight: 300,
                                 fontSize: { xs: '10px', sm: '16px' }
                               }}>
-                                League Admin: {leagueAdminName}
+                                {getCms('page_all_leagues_card_admin_label', 'League Admin:')} {leagueAdminName}
                               </Typography>
                             </Box>
 
@@ -6181,7 +6258,7 @@ function AllLeagues() {
                                     fontWeight: 'semi-bold',
                                     fontSize: { xs: '22px', md: '22px' }
                                   }}>
-                                    View
+                                    {getCms('page_all_leagues_card_view_btn', 'View')}
                                   </Typography>
                                   <Image className="view-play-icon" src={play} alt="Play" width={15} height={15} style={{ flexShrink: 0 }} />
                                 </Box>

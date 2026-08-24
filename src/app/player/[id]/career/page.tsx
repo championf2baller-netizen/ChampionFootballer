@@ -45,9 +45,9 @@ import { getAuthToken } from '@/lib/tokenManager';
 import { playerAPI } from '@/lib/api';
 import CloseButton from '@/Components/CloseButton';
 import PlayerCareerLoadingSkeleton from '@/Components/loading/PlayerCareerLoadingSkeleton';
-// import api from '@/lib/api'; // Adjust the import based on your project structure
+import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = getApiBaseUrl();
 
 // ---------- THEME (Brand) ----------
 const themeColors = {
@@ -821,6 +821,90 @@ export default function CareerPage() {
   const [playerName, setPlayerName] = useState<string>('');
   const [playerPosition, setPlayerPosition] = useState<string>('');
   const [careerDashboardData, setCareerDashboardData] = useState<any>(null);
+  const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
+      cache: 'no-store'
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success) {
+          const map: Record<string, string> = {};
+          if (Array.isArray(d?.data)) {
+            d.data.forEach((it: any) => {
+              if (it?.key && it?.content !== undefined) {
+                map[it.key] = it.content;
+              }
+            });
+          }
+          if (d?.contentMap) {
+            Object.entries(d.contentMap).forEach(([k, v]: [string, any]) => {
+              if (v && v.content !== undefined) {
+                map[k] = v.content;
+              }
+            });
+          }
+          setCmsMap(map);
+        }
+      })
+      .catch((err) => {
+        console.warn('Static content fetch failed:', err);
+      });
+  }, []);
+
+  const cmsCareerBanner = cmsMap['player_career_info'] || '';
+  const getCms = useCallback((key: string, fallback: string) => {
+    if (cmsMap[key]) return cmsMap[key];
+    if (key.startsWith('page_player_career_')) {
+      const altKey = key.replace('page_player_career_', 'player_career_');
+      if (cmsMap[altKey]) return cmsMap[altKey];
+    }
+    if (key.startsWith('player_career_')) {
+      const altKey = key.replace('player_career_', 'page_player_career_');
+      if (cmsMap[altKey]) return cmsMap[altKey];
+    }
+    return fallback;
+  }, [cmsMap]);
+  const getMetricCmsLabel = useCallback((metricName: string) => {
+    const primaryKeyMap: Record<string, string> = {
+      'Goals': 'page_player_career_metric_goals',
+      'Assists': 'page_player_career_metric_assists',
+      'Clean Sheets': 'page_player_career_metric_clean_sheets',
+      'Clean Sheet': 'page_player_career_metric_clean_sheets',
+      'MOTM Votes': 'page_player_career_metric_motm_votes',
+      'Frequent Top Performer': 'page_player_career_metric_motm_votes',
+      'Defensive Impact Votes': 'page_player_career_metric_defensive_impact_votes',
+      'Individual Brilliances': 'page_player_career_metric_defensive_impact_votes',
+      'Game Contribution Index': 'page_player_career_metric_game_contribution_index',
+      'Captains Performance': 'page_player_career_metric_captains_performance',
+      'Wins': 'page_player_career_metric_wins',
+      '% Impact': 'page_player_career_metric_pct_impact',
+    };
+
+    const primaryKey = primaryKeyMap[metricName];
+    if (primaryKey && cmsMap[primaryKey]) {
+      return cmsMap[primaryKey];
+    }
+
+    const fallbackKeys: Record<string, string[]> = {
+      'Goals': ['page_player_stats_label_goals', 'page_player_career_goals', 'player_career_metric_goals', 'goals'],
+      'Assists': ['page_player_stats_label_assists', 'page_player_career_assists', 'player_career_metric_assists', 'assists'],
+      'Clean Sheets': ['page_player_stats_label_cleansheet', 'page_player_career_clean_sheets', 'player_career_metric_clean_sheets', 'clean_sheets'],
+      'Clean Sheet': ['page_player_stats_label_cleansheet', 'page_player_career_clean_sheets', 'player_career_metric_clean_sheets', 'clean_sheets'],
+      'MOTM Votes': ['page_player_stats_label_motm', 'page_player_career_motm_votes', 'player_career_metric_motm_votes', 'motm_votes'],
+      'Frequent Top Performer': ['page_player_stats_label_motm', 'page_player_career_motm_votes', 'player_career_metric_motm_votes', 'motm_votes'],
+      'Defensive Impact Votes': ['page_player_stats_label_defensive', 'page_player_career_defensive_impact_votes', 'player_career_metric_defensive_impact_votes', 'defensive_impact_votes'],
+      'Individual Brilliances': ['page_player_stats_label_defensive', 'page_player_career_defensive_impact_votes', 'player_career_metric_defensive_impact_votes', 'defensive_impact_votes'],
+    };
+
+    const fallbacks = fallbackKeys[metricName] || [];
+    for (const fk of fallbacks) {
+      if (cmsMap[fk]) return cmsMap[fk];
+    }
+
+    return getCms(`page_player_career_metric_${metricName.toLowerCase().replace(/[^a-z0-9]/g, '_')}`, metricName);
+  }, [cmsMap, getCms]);
 
   // Initialize filters from URL params on mount
   useEffect(() => {
@@ -1504,10 +1588,10 @@ export default function CareerPage() {
     return base.filter(m => !!m.playerStats);
   }, [allLeagueMatches, filteredMatches, winLossLeague]);
 
-  // ------------- NEW STATE (grouping + range) -------------
   const [groupMode, setGroupMode] = useState<'weekly' | 'monthly'>('weekly');
   const [range, setRange] = useState<number[] | null>(null); // [startIdx, endIdx]
   const [activeYear, setActiveYear] = useState<string | null>(null);
+
 
   const chartScrollRef = useRef<HTMLDivElement | null>(null);
   // const [chartScrollPercent, setChartScrollPercent] = useState(0);
@@ -2198,7 +2282,8 @@ export default function CareerPage() {
     setLeagueMenuOpen(false);
     setSeasonMenuOpen(false);
   };
-  const dashboardTitle = playerName ? `${playerName} PERFORMANCE DASHBOARD` : 'PERFORMANCE DASHBOARD';
+  const defaultCareerHeading = getCms('player_career_heading', 'PERFORMANCE DASHBOARD');
+  const dashboardTitle = playerName ? `${playerName} ${defaultCareerHeading}` : defaultCareerHeading;
   const isLongDashboardTitle = dashboardTitle.length > 30;
   const desktopFilterWidth = '150px';
 
@@ -2240,6 +2325,18 @@ export default function CareerPage() {
               minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
               overflow: 'visible',
             }}>
+              {/* Orange divider under header */}
+              <Box sx={{
+                display: { xs: 'none', md: 'block' },
+                width: '100%',
+                position: 'relative',
+                left: 0,
+                transform: 'none',
+                height: 'var(--header-divider-height)',
+                background: 'var(--header-divider-color)',
+                mb: { xs: 2, md: 2 },
+              }} />
+
               {/* Centered Title */}
               <Box sx={{
                 display: { xs: 'none', md: 'flex' },
@@ -2313,7 +2410,7 @@ export default function CareerPage() {
                 >
                   <TextField
                     variant="outlined"
-                    placeholder="Search player name and hit enter..."
+                    placeholder={getCms('page_player_career_search_placeholder', 'Search player name and hit enter...')}
                     value={search}
                     onFocus={() => {
                       setShowTeammatePanel(true);
@@ -2566,7 +2663,7 @@ export default function CareerPage() {
                           backgroundPosition: 'right 12px center',
                         }}
                       >
-                        {filters.year && filters.year !== 'all' ? filters.year : 'All Years'}
+                        {filters.year && filters.year !== 'all' ? filters.year : getCms('page_player_career_year_placeholder', 'All Years')}
                       </button>
                       <Menu
                         anchorEl={yearFilterButtonRef.current}
@@ -2601,7 +2698,7 @@ export default function CareerPage() {
                             '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                           }}
                         >
-                          All Years
+                          {getCms('page_player_career_year_placeholder', 'All Years')}
                         </MenuItem>
                         {availableYears.map((year) => (
                           <MenuItem
@@ -2649,7 +2746,7 @@ export default function CareerPage() {
                         backgroundPosition: 'right 12px center',
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Years</option>
+                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_career_year_placeholder', 'All Years')}</option>
                       {availableYears.map(year => (
                         <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{year}</option>
                       ))}
@@ -2689,7 +2786,7 @@ export default function CareerPage() {
                           backgroundPosition: 'right 12px center',
                         }}
                       >
-                        {selectedLeagueName || 'All Leagues'}
+                        {selectedLeagueName || getCms('page_all_leagues_select_placeholder', 'All Leagues')}
                       </button>
                       <Menu
                         anchorEl={leagueFilterButtonRef.current}
@@ -2849,7 +2946,7 @@ export default function CareerPage() {
                             '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
                           }}
                         >
-                          All Seasons
+                          {getCms('page_player_career_season_placeholder', 'All Seasons')}
                         </MenuItem>
                         {availableSeasons.map((season) => (
                           <MenuItem
@@ -2897,7 +2994,7 @@ export default function CareerPage() {
                         backgroundPosition: 'right 12px center',
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Seasons</option>
+                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_career_season_placeholder', 'All Seasons')}</option>
                       {availableSeasons.map(season => (
                         <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
                           {formatSeasonDisplayLabel(season)}
@@ -2924,7 +3021,7 @@ export default function CareerPage() {
                       width: isMobile ? '100%' : 'auto',
                     }}
                   >
-                    Clear
+                    {getCms('page_player_career_clear_btn', 'Clear')}
                   </button>
                 </Box>
               </Box>
@@ -3414,13 +3511,13 @@ export default function CareerPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Box sx={{ width: 14, height: 10, borderRadius: 1, background: themeColors.chartBar }} />
                         <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                          Total XP Points
+                          {getCms('page_player_career_total_xp_legend', 'Total XP Points')}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Box sx={{ width: 14, height: 3, borderRadius: 1, background: themeColors.chartLine }} />
                         <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                          Cumulative XP Points
+                          {getCms('page_player_career_cumulative_xp_legend', 'Cumulative XP Points')}
                         </Typography>
                       </Box>
                     </Box>
@@ -3458,7 +3555,7 @@ export default function CareerPage() {
                           }}
                           onClick={() => setInfluenceLeague('all')}
                         >
-                          All Leagues
+                          {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
                         </Button>
                         <Button
                           size="small"
@@ -3476,7 +3573,7 @@ export default function CareerPage() {
                           }}
                           onClick={() => setInfluenceLeague('current')}
                         >
-                          Current
+                          {getCms('page_player_career_influence_current_btn', 'Current')}
                         </Button>
                       </Box>
 
@@ -3490,7 +3587,7 @@ export default function CareerPage() {
                           textTransform: 'uppercase',
                           mb: 1
                         }}>
-                          Influence
+                          {getCms('page_player_career_influence_title', 'INFLUENCE')}
                         </Typography>
 
                         <Box sx={{ height: 160 }}>
@@ -3573,7 +3670,7 @@ export default function CareerPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.pink, borderRadius: 1 }} />
                           <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
-                            League Average
+                            {getCms('page_player_career_table_header_league_avg', 'League Average')}
                           </Typography>
                         </Box>
                       </Box>
@@ -3610,7 +3707,7 @@ export default function CareerPage() {
                           }}
                           onClick={() => setWinLossLeague('all')}
                         >
-                          All Leagues
+                          {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
                         </Button>
                         <Button
                           size="small"
@@ -3628,7 +3725,7 @@ export default function CareerPage() {
                           }}
                           onClick={() => setWinLossLeague('current')}
                         >
-                          Current
+                          {getCms('page_player_career_influence_current_btn', 'Current')}
                         </Button>
                       </Box>
 
@@ -3642,7 +3739,7 @@ export default function CareerPage() {
                           textTransform: 'uppercase',
                           mb: 1
                         }}>
-                          Win/Loss/Draw
+                          {getCms('page_player_career_winloss_title', 'WIN/LOSS/DRAW')}
                         </Typography>
 
                         <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3746,7 +3843,7 @@ export default function CareerPage() {
                       pt: 1,
                       textTransform: 'uppercase'
                     }}>
-                      IMPACT
+                      {getCms('page_player_career_impact_title', 'IMPACT')}
                     </Typography>
                   </Box>
 
@@ -3766,9 +3863,9 @@ export default function CareerPage() {
                         >
                           <TableHead>
                             <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>Metric</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'Your Stats' : 'Your Stats'}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'League Average' : 'League Average'}</TableCell>
+                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -3788,22 +3885,22 @@ export default function CareerPage() {
                               return (
                                 <>
                                   <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>Expected to score a goal (xG)</TableCell>
+                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xg_label', 'Expected to score a goal (xG)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedGoalsPerMatch)}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedGoalsMatches)}</TableCell>
                                   </TableRow>
                                   <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>Expected to assist a goal (xA)</TableCell>
+                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xa_label', 'Expected to assist a goal (xA)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedAssistsPerMatch)}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedAssistsMatches)}</TableCell>
                                   </TableRow>
                                   <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>Expected to keep Clean Sheet (xCS)</TableCell>
+                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xcs_label', 'Expected to keep Clean Sheet (xCS)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedCleanSheetsPerMatch)}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedCleanSheetsMatches)}</TableCell>
                                   </TableRow>
                                   <TableRow sx={{ bgcolor: '#383a3e' }}>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>Win rate</TableCell>
+                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{getCms('page_player_career_winrate_label', 'Win rate')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{winRate.toFixed(0)}%</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>
                                       {leagueAverage.winRate !== undefined ? `${leagueAverage.winRate.toFixed(0)}%` : '-'}
@@ -3826,9 +3923,9 @@ export default function CareerPage() {
                         >
                           <TableHead>
                             <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>Metric</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'Your Stats' : 'Your Stats'}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'League Average' : 'League Average'}</TableCell>
+                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
@@ -3846,7 +3943,7 @@ export default function CareerPage() {
                                         ...(isContribution ? { bgcolor: '#383a3e' } : {})
                                       }}
                                     >
-                                      {row.metric}
+                                      {getMetricCmsLabel(row.metric)}
                                     </TableCell>
                                     <TableCell
                                       align="center"
@@ -3900,7 +3997,7 @@ export default function CareerPage() {
                       pt: 1,
                       textTransform: 'uppercase'
                     }}>
-                      Your Top Strengths
+                      {getCms('page_player_career_strengths_title', 'YOUR TOP STRENGTHS')}
                     </Typography>
                   </Box>
 
@@ -3917,23 +4014,23 @@ export default function CareerPage() {
                         >
                           <TableHead>
                             <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>Metric</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'Your Stats' : 'Your Stats'}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{isMobile ? 'League Average' : 'League Average'}</TableCell>
+                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
                             {topStrengthRows.length === 0 ? (
                               <TableRow>
                                 <TableCell colSpan={3} align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 2, color: themeColors.textDim, borderBottom: `1px solid ${themeColors.border}` }}>
-                                  No strengths identified yet. Play more matches to unlock your strengths.
+                                  {getCms('page_player_career_strengths_empty', 'No strengths identified yet. Play more matches to unlock your strengths.')}
                                 </TableCell>
                               </TableRow>
                             ) : (
                               topStrengthRows.map((row) => {
                                 return (
                                   <TableRow key={row.metric}>
-                                    <TableCell sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{row.metric}</TableCell>
+                                    <TableCell sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getMetricCmsLabel(row.metric)}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{row.yourDisplay}</TableCell>
                                     <TableCell align="center" sx={{ py: 0.8, borderBottom: `1px solid ${themeColors.border}` }}>
                                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
@@ -3975,7 +4072,7 @@ export default function CareerPage() {
                                 mb: 0.5,
                               }}
                             >
-                              Key Insight / Top Strength
+                              {getCms('page_player_career_key_insight_title', 'Key Insight / Top Strength')}
                             </Typography>
                             <Typography
                               sx={{
@@ -4018,7 +4115,7 @@ export default function CareerPage() {
                         mb: 0.5,
                       }}
                     >
-                      Focus Area
+                      {getCms('page_player_career_focus_title', 'FOCUS AREA')}
                     </Typography>
                     <Typography
                       sx={{
