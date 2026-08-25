@@ -140,6 +140,11 @@ type LeagueWithComputed = BasicLeague & {
   userRole?: 'ADMIN' | 'MEMBER';
   seasonNumber?: number;
   seasons?: HomeSeason[];
+  administrators?: unknown[];
+  members?: unknown[];
+  users?: unknown[];
+  adminId?: string | number;
+  creatorId?: string | number;
 };
 
 type ApiLeague = {
@@ -460,7 +465,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     if (l.active === false) return true;
     if (l.isCompleted === true || l.isComplete === true || l.isLocked === true) return true;
 
-    // 2) Explicit completion status strings
+    // 2) Explicit completion status strings for the league
     const sRaw = (l?.status ?? '').toString();
     const s = sRaw.trim().toUpperCase();
     const completionStatuses = new Set([
@@ -470,12 +475,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
       'ENDED',
       'CLOSED',
       'INACTIVE',
-      'RESULT_PUBLISHED',
-      'RESULT_UPLOADED',
-      'RESULT_COMPLETE',
-      'RESULT_FINISHED',
-      'RESULT_ENDED',
-      'RESULT_DONE',
+      'ARCHIVED'
     ]);
     if (completionStatuses.has(s)) return true;
 
@@ -488,30 +488,30 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
       return true;
     }
 
-    // 4) Check matches threshold if maxGames is present
-    const toNum = (v: unknown): number | undefined => {
-      const n = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v) : NaN);
-      return Number.isFinite(n) ? n : undefined;
-    };
-    const maxG = toNum(l?.computedStatus?.maxGames) ?? toNum(l?.maxGames);
-    if (Array.isArray(l.matches) && typeof maxG === 'number' && maxG > 0) {
-      const matches = l.matches;
-      const completedCount = matches.reduce((acc, m) => {
-        const status = typeof m.status === 'string' ? m.status.toLowerCase() : '';
-        const endedByStatus = status === 'completed' || status === 'finished' || status === 'ended' || status === 'result_published';
-        const endedByFlag = m.active === false;
-        const endedByEnd = Boolean(m.end);
-        return acc + (endedByStatus || endedByFlag || endedByEnd ? 1 : 0);
-      }, 0);
-      if (completedCount >= maxG) return true;
+    return false;
+  };
+
+  const isUserMemberOrAdmin = (l: LeagueWithComputed, uid?: string | number): boolean => {
+    if (!l) return false;
+    if (l.userRole === 'ADMIN' || l.userRole === 'MEMBER') return true;
+    if (uid == null) return false;
+
+    const currentId = String(uid);
+    const withAdmin = l as League & { adminId?: string | number; creatorId?: string | number };
+    if (String(withAdmin.adminId || '') === currentId || String(withAdmin.creatorId || '') === currentId) {
+      return true;
     }
 
-    // 5) Season-level completion fallback: if seasons exist, and NONE are active while at least one is completed
-    const seasons = Array.isArray(l.seasons) ? l.seasons : [];
-    if (seasons.length > 0) {
-      const hasActiveSeason = seasons.some(isHomeActiveSeason);
-      const hasCompletedSeason = seasons.some(isHomeCompletedSeason);
-      if (!hasActiveSeason && hasCompletedSeason) return true;
+    type UserWithId = { id?: string | number };
+    if (Array.isArray(l.administrators)) {
+      if ((l.administrators as UserWithId[]).some((u: UserWithId) => Boolean(u && String(u.id) === currentId))) return true;
+    }
+    if (Array.isArray(l.members)) {
+      if ((l.members as UserWithId[]).some((u: UserWithId) => Boolean(u && String(u.id) === currentId))) return true;
+    }
+    if (Array.isArray((l as unknown as { users?: UserWithId[] }).users)) {
+      const usersArr = (l as unknown as { users: UserWithId[] }).users;
+      if (usersArr.some((u: UserWithId) => Boolean(u && String(u.id) === currentId))) return true;
     }
 
     return false;
@@ -522,6 +522,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     if (l.archived === true) return false;
     if (l.active === false) return false;
     if (leagueIsCompleted(l)) return false;
+    if (currentUserId != null && !isUserMemberOrAdmin(l, currentUserId)) return false;
     return true;
   };
 
@@ -878,15 +879,18 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
 
           setSelectedLeague((prev) => {
             if (prev) {
-              const existing = visibleList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
-              if (existing && shouldShowLeagueInDropdown(existing)) return existing;
+              const existing = combinedList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
+              if (existing) return existing;
+              return prev;
             }
 
             const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            const preferred = storedId ? visibleList.find(l => String(l.id) === String(storedId)) || null : null;
+            const preferred = storedId ? combinedList.find(l => String(l.id) === String(storedId)) || null : null;
             if (preferred) return preferred;
 
-            const latest = [...visibleList].sort((a, b) => timeOf(b) - timeOf(a))[0];
+            const visibleList = combinedList.filter(shouldShowLeagueInDropdown);
+            const selectionList = visibleList.length > 0 ? visibleList : combinedList;
+            const latest = [...selectionList].sort((a, b) => timeOf(b) - timeOf(a))[0];
             return latest || null;
           });
         }
@@ -1186,10 +1190,14 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
           : undefined,
       }));
 
-      if (minimal.length) {
-        setUserLeagues((prev) => prev.length ? prev : minimal);
-        const visible = minimal.filter(shouldShowLeagueInDropdown);
-        const selectionList = visible.length > 0 ? visible : minimal;
+      const userJoinedMinimal = currentUserId != null
+        ? minimal.filter((l) => isUserMemberOrAdmin(l, currentUserId))
+        : minimal;
+
+      if (userJoinedMinimal.length) {
+        setUserLeagues((prev) => prev.length ? prev : userJoinedMinimal);
+        const visible = userJoinedMinimal.filter(shouldShowLeagueInDropdown);
+        const selectionList = visible.length > 0 ? visible : userJoinedMinimal;
         const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
         const preferred = storedId ? selectionList.find(l => String(l.id) === String(storedId)) || null : null;
         if (preferred) {
