@@ -860,28 +860,34 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
           : null;
 
         // Keep a freshly created league visible even if backend list is momentarily stale.
-        setUserLeagues(() => {
-          const map = new Map<string, LeagueWithComputed>(
-            minimalList.map((leagueItem) => [String(leagueItem.id), leagueItem])
-          );
-          if (optimisticCreatedLeague && !map.has(String(optimisticCreatedLeague.id))) {
-            map.set(String(optimisticCreatedLeague.id), optimisticCreatedLeague);
+        const map = new Map<string, LeagueWithComputed>(
+          minimalList.map((leagueItem) => [String(leagueItem.id), leagueItem])
+        );
+        if (optimisticCreatedLeague && !map.has(String(optimisticCreatedLeague.id))) {
+          map.set(String(optimisticCreatedLeague.id), optimisticCreatedLeague);
+        }
+        const newList = Array.from(map.values());
+
+        // Sync with local cache so deleted leagues are removed from localStorage
+        try {
+          if (typeof window !== 'undefined') {
+            leagueAPI.setAllInstant(newList as unknown as League[]);
           }
-          return Array.from(map.values());
-        });
+        } catch { }
+
+        setUserLeagues(newList);
 
         // Choose a sensible default quickly (based purely on recency for instant UX).
-        if (minimalList.length > 0 || optimisticCreatedLeague) {
-          const combinedList = optimisticCreatedLeague
-            ? [...minimalList, optimisticCreatedLeague]
-            : minimalList;
-          const visibleList = combinedList.filter(shouldShowLeagueInDropdown);
+        const combinedList = optimisticCreatedLeague
+          ? [...minimalList, optimisticCreatedLeague]
+          : minimalList;
 
+        if (combinedList.length > 0) {
           setSelectedLeague((prev) => {
             if (prev) {
               const existing = combinedList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
               if (existing) return existing;
-              return prev;
+              // If prev is no longer in combinedList (because it was deleted in DB), fall through to pick a valid remaining league!
             }
 
             const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
@@ -893,6 +899,9 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
             const latest = [...selectionList].sort((a, b) => timeOf(b) - timeOf(a))[0];
             return latest || null;
           });
+        } else {
+          // If combinedList is empty (all leagues deleted from DB), reset selectedLeague to null
+          setSelectedLeague(null);
         }
 
         // 2) Enrich in the background per-league and update state incrementally

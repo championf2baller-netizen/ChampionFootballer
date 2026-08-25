@@ -26,6 +26,7 @@ import { User, League, Match } from '@/types/user';
 import { useDispatch } from 'react-redux';
 import { joinLeague } from '@/lib/features/leagueSlice';
 import { AppDispatch } from '@/lib/store';
+import { leagueAPI } from '@/lib/api-ultra-fast';
 import Tooltip from '@mui/material/Tooltip';
 import Slide, { SlideProps } from '@mui/material/Slide';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
@@ -404,6 +405,11 @@ function LeagueMembersDialog({
     [availableSeasonsForCurrentUser, selectedLeaveSeasonId]
   )
 
+  const availableSeasonsKey = useMemo(
+    () => availableSeasonsForCurrentUser.map((s) => String(s.id)).join(','),
+    [availableSeasonsForCurrentUser]
+  );
+
   useEffect(() => {
     if (!open || !league) return;
     if (availableSeasonsForCurrentUser.length === 0) {
@@ -422,7 +428,7 @@ function LeagueMembersDialog({
         || availableSeasonsForCurrentUser[0];
       return String(preferredSeason?.id || '');
     });
-  }, [availableSeasonsForCurrentUser, league?.id, open]);
+  }, [availableSeasonsKey, league?.id, open]);
 
   if (!league) return null
 
@@ -3642,15 +3648,21 @@ function AllLeagues() {
       if (leaguesData) {
         const normalizedLeagues: League[] = leaguesData
           .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
-          .filter((league): league is League => Boolean(league && league.id));
+          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
 
         const sortedLeagues = sortLeaguesByRecency(normalizedLeagues as LeagueWithStatus[]);
-        if (locallyDeletedLeagueIds.length > 0) {
-          const deletedIds = new Set(locallyDeletedLeagueIds.map((id) => String(id)));
-          setLeagues(sortedLeagues.filter((leagueItem) => !deletedIds.has(String(leagueItem.id))));
-        } else {
-          setLeagues(sortedLeagues);
-        }
+        const finalLeagues = locallyDeletedLeagueIds.length > 0
+          ? sortedLeagues.filter((leagueItem) => !locallyDeletedLeagueIds.map(String).includes(String(leagueItem.id)))
+          : sortedLeagues;
+
+        setLeagues(finalLeagues);
+
+        // Sync with local cache so deleted leagues are removed from localStorage
+        try {
+          if (typeof window !== 'undefined') {
+            leagueAPI.setAllInstant(finalLeagues as unknown as League[]);
+          }
+        } catch { }
       } else {
         console.error('Failed to fetch leagues');
         toast.error('Failed to fetch leagues');

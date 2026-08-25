@@ -469,6 +469,15 @@ export const leagueAPI = {
   },
 
   /**
+   * Set all leagues in instant cache directly
+   */
+  setAllInstant: (leagues: League[]) => {
+    setCacheInstant('leagues_all', { success: true, leagues });
+    setCacheChunked('leagues_chunked', leagues);
+    dispatchCacheEvent('leagues_all', { success: true, leagues });
+  },
+
+  /**
    * Get leagues in chunks progressively (for smooth UI rendering)
    * Returns a generator that yields chunks of leagues
    */

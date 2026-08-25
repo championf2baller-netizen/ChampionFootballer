@@ -2810,8 +2810,10 @@ export default function AllMatches() {
                                             <Box sx={{ pl: 1, pr: 1, py: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #fff', mt: -3.5, gap: 0 }}>
                                                 {/* Home Team */}
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                    <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || 'Home'} width={65} height={65} style={{ objectFit: 'contain' }} />
-                                                    <Typography sx={{ color: 'white', fontWeight: 600, fontSize: '1.1rem', textAlign: 'center' }}>Home</Typography>
+                                                    <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={65} height={65} style={{ objectFit: 'contain' }} />
+                                                    <Typography sx={{ color: 'white', fontWeight: 600, fontSize: '1.1rem', textAlign: 'center' }}>
+                                                        {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                    </Typography>
                                                 </Box>
 
                                                 {/* Score Center */}
@@ -2832,8 +2834,10 @@ export default function AllMatches() {
 
                                                 {/* Away Team */}
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                    <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || 'Away'} width={65} height={65} style={{ objectFit: 'contain' }} />
-                                                    <Typography sx={{ color: 'white', fontWeight: 600, fontSize: '1.1rem', textAlign: 'center' }}>Away</Typography>
+                                                    <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={65} height={65} style={{ objectFit: 'contain' }} />
+                                                    <Typography sx={{ color: 'white', fontWeight: 600, fontSize: '1.1rem', textAlign: 'center' }}>
+                                                        {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                    </Typography>
                                                 </Box>
                                             </Box>
 
@@ -3226,8 +3230,10 @@ export default function AllMatches() {
                                         <Box sx={{ pl: 1, pr: 1, py: { xs: 0.75, sm: 0 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #fff', gap: { xs: 1, sm: 0 } }}>
                                             {/* Home Team */}
                                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || 'Home'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
-                                                <Typography sx={{ color: 'white', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.1rem' }, textAlign: 'center' }}>Home</Typography>
+                                                <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
+                                                <Typography sx={{ color: 'white', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.1rem' }, textAlign: 'center' }}>
+                                                    {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                </Typography>
                                             </Box>
 
                                             {/* VS Center */}
@@ -3238,8 +3244,10 @@ export default function AllMatches() {
 
                                             {/* Away Team */}
                                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || 'Away'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
-                                                <Typography sx={{ color: 'white', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.1rem' }, textAlign: 'center' }}>Away</Typography>
+                                                <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
+                                                <Typography sx={{ color: 'white', fontWeight: 600, fontSize: { xs: '1rem', sm: '1.1rem' }, textAlign: 'center' }}>
+                                                    {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                </Typography>
                                             </Box>
                                         </Box>
 

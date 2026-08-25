@@ -82,6 +82,8 @@ export interface Match {
   status: string;
   homeTeamName: string;
   awayTeamName: string;
+  homeTeam?: string;
+  awayTeam?: string;
   homeTeamGoals?: number;
   awayTeamGoals?: number;
   availableUsers: User[];

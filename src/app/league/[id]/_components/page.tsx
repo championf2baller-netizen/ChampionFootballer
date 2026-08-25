@@ -242,6 +242,8 @@ interface Match {
     status: string;
     homeTeamName: string;
     awayTeamName: string;
+    homeTeam?: string;
+    awayTeam?: string;
     homeTeamGoals?: number;
     awayTeamGoals?: number;
     availableUsers: User[];
@@ -5186,10 +5188,9 @@ export default function LeagueDetailPage() {
                                                                             color: 'white',
                                                                             fontWeight: 600,
                                                                             fontSize: '1.1rem',
-                                                                            // mt: 1,
                                                                             textAlign: 'center'
                                                                         }}>
-                                                                            Home
+                                                                            {match.homeTeamName || match.homeTeam || 'Home Team'}
                                                                         </Typography>
                                                                     </Box>
 
@@ -5241,10 +5242,9 @@ export default function LeagueDetailPage() {
                                                                             color: 'white',
                                                                             fontWeight: 600,
                                                                             fontSize: '1.1rem',
-                                                                            // mt: 1,
                                                                             textAlign: 'center'
                                                                         }}>
-                                                                            Away
+                                                                            {match.awayTeamName || match.awayTeam || 'Away Team'}
                                                                         </Typography>
                                                                     </Box>
                                                                 </Box>
@@ -5685,7 +5685,7 @@ export default function LeagueDetailPage() {
                                                                             fontSize: '1.1rem',
                                                                             textAlign: 'center'
                                                                         }}>
-                                                                            Home
+                                                                            {match.homeTeamName || match.homeTeam || 'Home Team'}
                                                                         </Typography>
                                                                     </Box>
 
@@ -5780,7 +5780,7 @@ export default function LeagueDetailPage() {
                                                                             fontSize: '1.1rem',
                                                                             textAlign: 'center'
                                                                         }}>
-                                                                            Away
+                                                                            {match.awayTeamName || match.awayTeam || 'Away Team'}
                                                                         </Typography>
                                                                     </Box>
                                                                 </Box>
