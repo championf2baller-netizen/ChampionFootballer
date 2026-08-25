@@ -2318,24 +2318,13 @@ export default function CareerPage() {
           }}>
             <Paper sx={{
               px: 0,
-              py: { xs: 2, md: 1.1 },
+              py: { xs: 1, md: 0.5 },
               background: '#0e0e0e',
               color: 'white',
               boxShadow: 'none',
               minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
               overflow: 'visible',
             }}>
-              {/* Orange divider under header */}
-              <Box sx={{
-                display: { xs: 'none', md: 'block' },
-                width: '100%',
-                position: 'relative',
-                left: 0,
-                transform: 'none',
-                height: 'var(--header-divider-height)',
-                background: 'var(--header-divider-color)',
-                mb: { xs: 2, md: 2 },
-              }} />
 
               {/* Centered Title */}
               <Box sx={{
@@ -2370,7 +2359,7 @@ export default function CareerPage() {
                   display: { xs: 'none', md: 'block' },
                   height: 'var(--header-divider-height)',
                   bgcolor: 'var(--header-divider-color)',
-                  mt: { xs: 2, md: 4.5 },
+                  mt: { xs: 1.5, md: 2 },
                   width: '100vw',
                   position: 'relative',
                   left: '50%',

@@ -405,22 +405,24 @@ function LeagueMembersDialog({
   )
 
   useEffect(() => {
-    if (!open || !league) return
+    if (!open || !league) return;
     if (availableSeasonsForCurrentUser.length === 0) {
-      if (selectedLeaveSeasonId) setSelectedLeaveSeasonId('')
-      return
+      setSelectedLeaveSeasonId((prev) => (prev !== '' ? '' : prev));
+      return;
     }
-    if (selectedLeaveSeasonId && availableSeasonsForCurrentUser.some((season) => String(season.id) === String(selectedLeaveSeasonId))) {
-      return
-    }
-    const leagueWithSeasons = league as League & { currentSeason?: Season | null }
-    const currentSeasonId = String(leagueWithSeasons.currentSeason?.id || '').trim()
-    const preferredSeason =
-      availableSeasonsForCurrentUser.find((season) => season.isActive)
-      || availableSeasonsForCurrentUser.find((season) => String(season.id) === currentSeasonId)
-      || availableSeasonsForCurrentUser[0]
-    setSelectedLeaveSeasonId(String(preferredSeason?.id || ''))
-  }, [availableSeasonsForCurrentUser, league, open, selectedLeaveSeasonId])
+    setSelectedLeaveSeasonId((prev) => {
+      if (prev && availableSeasonsForCurrentUser.some((season) => String(season.id) === String(prev))) {
+        return prev;
+      }
+      const leagueWithSeasons = league as League & { currentSeason?: Season | null };
+      const currentSeasonId = String(leagueWithSeasons.currentSeason?.id || '').trim();
+      const preferredSeason =
+        availableSeasonsForCurrentUser.find((season) => season.isActive)
+        || availableSeasonsForCurrentUser.find((season) => String(season.id) === currentSeasonId)
+        || availableSeasonsForCurrentUser[0];
+      return String(preferredSeason?.id || '');
+    });
+  }, [availableSeasonsForCurrentUser, league?.id, open]);
 
   if (!league) return null
 
