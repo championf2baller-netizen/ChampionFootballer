@@ -492,34 +492,42 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
     })();
   }, [token, matchId, match]);
 
+  const [matchCategoryVoteCounts, setMatchCategoryVoteCounts] = useState<{ defence: Record<string, number>; influence: Record<string, number> }>({ defence: {}, influence: {} });
+
   // Prefer canonical captain picks endpoint so guest picks are returned as guest-<id> display IDs.
-  useEffect(() => {
+  const fetchCaptainPicks = useCallback(async () => {
     if (!token || !match?.id) return;
-    let active = true;
-    (async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match.id}/captain-picks?_t=${Date.now()}`, {
-          headers: { Authorization: `Bearer ${token}` }
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${match.id}/captain-picks?_t=${Date.now()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json().catch(() => null);
+      if (!data?.success) return;
+      setMatch(prev => {
+        if (!prev || prev.id !== match.id) return prev;
+        return {
+          ...prev,
+          homeDefensiveImpactId: data?.home?.defence ?? null,
+          awayDefensiveImpactId: data?.away?.defence ?? null,
+          homeMentalityId: data?.home?.influence ?? null,
+          awayMentalityId: data?.away?.influence ?? null,
+        };
+      });
+      if (data?.defenceVotes || data?.influenceVotes) {
+        setMatchCategoryVoteCounts({
+          defence: data.defenceVotes || {},
+          influence: data.influenceVotes || {}
         });
-        if (!res.ok) return;
-        const data = await res.json().catch(() => null);
-        if (!active || !data?.success) return;
-        setMatch(prev => {
-          if (!prev || prev.id !== match.id) return prev;
-          return {
-            ...prev,
-            homeDefensiveImpactId: data?.home?.defence ?? null,
-            awayDefensiveImpactId: data?.away?.defence ?? null,
-            homeMentalityId: data?.home?.influence ?? null,
-            awayMentalityId: data?.away?.influence ?? null,
-          };
-        });
-      } catch {
-        // ignore
       }
-    })();
-    return () => { active = false; };
+    } catch {
+      // ignore
+    }
   }, [token, match?.id]);
+
+  useEffect(() => {
+    fetchCaptainPicks();
+  }, [fetchCaptainPicks]);
 
   // Automatically select home team on load if match is loaded
   useEffect(() => {
@@ -552,21 +560,28 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
       // If event carries a matchId, ensure it matches; otherwise, refresh anyway
       if (!customEvent.detail?.matchId || customEvent.detail.matchId === matchId) {
         fetchVotes();
+        fetchCaptainPicks();
       }
     };
 
     // These events can be dispatched by dialogs/forms after a vote change
     window.addEventListener('votes-updated', handleVotesEvent);
     window.addEventListener('vote-submitted', handleVotesEvent);
-    // Also react to general match updates to keep votes in sync
     window.addEventListener('match-updated', handleVotesEvent);
+    window.addEventListener('captain-picks-updated', handleVotesEvent);
+    window.addEventListener('match-stats-updated', handleVotesEvent);
+    window.addEventListener('refresh-notifications', handleVotesEvent);
 
     return () => {
       window.removeEventListener('votes-updated', handleVotesEvent);
       window.removeEventListener('vote-submitted', handleVotesEvent);
       window.removeEventListener('match-updated', handleVotesEvent);
+      window.removeEventListener('captain-picks-updated', handleVotesEvent);
+      window.removeEventListener('match-stats-updated', handleVotesEvent);
+      window.removeEventListener('refresh-notifications', handleVotesEvent);
     };
-  }, [matchId, fetchVotes]);
+  }, [matchId, fetchVotes, fetchCaptainPicks]);
+
 
   const currentMatchSeasonActive = React.useMemo(() => {
     const matchSeasonId = normalizeEntityId(match?.seasonId);
@@ -998,18 +1013,23 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                   return typeof s.xpAwarded === 'number' ? s.xpAwarded : 0;
                 };
 
-                // Calculate DEF IMP and MENTALITY vote counts per player
-                const defImpactVotes: Record<string, number> = {};
-                const mentalityVotes: Record<string, number> = {};
+                // Calculate DEF IMP and MENTALITY vote counts per player from live votes endpoint + match picks fallback
+                const defImpactVotes: Record<string, number> = { ...(matchCategoryVoteCounts.defence || {}) };
+                const mentalityVotes: Record<string, number> = { ...(matchCategoryVoteCounts.influence || {}) };
                 if (match) {
-                  // Collect captain pick IDs for defensive impact and mentality
                   const defPickIds = [match.homeDefensiveImpactId, match.awayDefensiveImpactId].filter(Boolean);
                   const menPickIds = [match.homeMentalityId, match.awayMentalityId].filter(Boolean);
                   allPlayers.forEach(p => {
-                    defImpactVotes[p.id] = defPickIds.filter(id => String(id) === String(p.id)).length;
-                    mentalityVotes[p.id] = menPickIds.filter(id => String(id) === String(p.id)).length;
+                    const pid = String(p.id);
+                    if (!defImpactVotes[pid]) {
+                      defImpactVotes[pid] = defPickIds.filter(id => String(id) === pid).length;
+                    }
+                    if (!mentalityVotes[pid]) {
+                      mentalityVotes[pid] = menPickIds.filter(id => String(id) === pid).length;
+                    }
                   });
                 }
+
 
                 const sortedPlayers = [...allPlayers].sort((a, b) => {
                   const pb = getPoints(b);

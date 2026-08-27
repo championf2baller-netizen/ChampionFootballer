@@ -1698,6 +1698,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
             const data = await response.json();
             if (data.success) {
+                setVotedForId(voteData.votedForId);
                 toast.success(voteData.votedForId !== null ? 'MOTM player voted' : 'MOTM vote cleared');
                 // Update leaderboard cache for MOTM votes
                 if (data.updatedStats) {
@@ -1714,6 +1715,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     console.log('Vote successful - notification refresh triggered');
                 }
             }
+
         } catch {
             setError('An error occurred while voting.');
         } finally {
@@ -2139,35 +2141,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 };
             };
 
-            // 1) Try local storage for CURRENT user first
-            let localDefence: string | undefined = undefined;
-            let localInfluence: string | undefined = undefined;
-            if (typeof window !== 'undefined' && currentUserId && resolvedMatchId) {
-                let raw = primaryStorageKey ? localStorage.getItem(primaryStorageKey) : null;
-                if (!raw && teamStorageKey) {
-                    raw = localStorage.getItem(teamStorageKey) ||
-                          localStorage.getItem(`captain_picks_${resolvedMatchId}_home_${currentUserId}`) ||
-                          localStorage.getItem(`captain_picks_${resolvedMatchId}_away_${currentUserId}`);
-                }
-                if (raw) {
-                    try {
-                        const ls = JSON.parse(raw) as CaptainPicks;
-                        localDefence = ls.defence || undefined;
-                        localInfluence = ls.influence || undefined;
-                    } catch (err) {
-                        console.error('Failed to parse localStorage picks:', err);
-                    }
-                }
-            }
-
-            if (localDefence || localInfluence) {
-                setCaptainPicks({
-                    defence: localDefence,
-                    influence: localInfluence,
-                });
-            }
-
-            // 2) Fetch from API
+            // Fetch picks directly from DB API
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -2215,12 +2189,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 setMatchCaptainPicks({ home: homePicks, away: awayPicks });
 
                 const userPicks = normalizeTeamPicks(data?.userPicks || data?.myPicks);
-                const fallbackPicks = teamKey === 'away' ? awayPicks : homePicks;
+                setCaptainPicks({
+                    defence: userPicks.defence || undefined,
+                    influence: userPicks.influence || undefined,
+                });
 
-                setCaptainPicks((prev) => ({
-                    defence: localDefence || userPicks.defence || (isCaptainUser ? fallbackPicks.defence : undefined) || prev.defence || undefined,
-                    influence: localInfluence || userPicks.influence || (isCaptainUser ? fallbackPicks.influence : undefined) || prev.influence || undefined,
-                }));
+
 
             } catch (err) {
                 console.error('Failed to load captain picks:', err);
@@ -2269,18 +2243,11 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
         console.log('Saving captain pick:', { category, playerId, resolvedMatchId });
 
-        // Local update + localStorage persist (always immediate)
+        // Local state update (synced with DB)
         const applyLocal = () => {
             const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
             setCaptainPicks(prev => {
-                const updated = { ...prev, [category]: playerId ? playerId : undefined };
-                if (currentUserId && resolvedMatchId && typeof window !== 'undefined') {
-                    const primaryKey = `captain_picks_${resolvedMatchId}_${currentUserId}`;
-                    localStorage.setItem(primaryKey, JSON.stringify(updated));
-                    if (teamKey) {
-                        localStorage.setItem(`captain_picks_${resolvedMatchId}_${teamKey}_${currentUserId}`, JSON.stringify(updated));
-                    }
-                }
+                const updated = { ...prev, [category]: (playerId && playerId !== 'none') ? playerId : undefined };
                 return updated;
             });
 
@@ -2289,11 +2256,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     ...prev,
                     [teamKey]: {
                         ...(prev[teamKey] || {}),
-                        [category]: playerId ? playerId : undefined,
+                        [category]: (playerId && playerId !== 'none') ? playerId : undefined,
                     }
                 }));
             }
         };
+
 
         applyLocal();
         setIsPickDialogOpen(false);
