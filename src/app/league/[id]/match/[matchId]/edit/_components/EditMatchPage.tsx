@@ -988,6 +988,28 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       } catch { }
     }, [matchId, token, homeTeamUsers, awayTeamUsers]);
 
+    // Backend XP Breakdown API Integration
+    const [matchXPBreakdown, setMatchXPBreakdown] = useState<any[]>([]);
+
+    const fetchMatchXPBreakdown = useCallback(async () => {
+      if (!matchId || !token) return;
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/matches/${matchId}/xp-breakdown`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.success && Array.isArray(data.players || data.playerXPBreakdown)) {
+          setMatchXPBreakdown(data.players || data.playerXPBreakdown);
+        }
+      } catch { }
+    }, [matchId, token]);
+
+    useEffect(() => {
+      if (matchId && token) { void fetchMatchXPBreakdown(); }
+    }, [matchId, token, fetchMatchXPBreakdown]);
+
     // Minimal skill display helper for UI only
     const calcSkill = (p?: PlayerOption | null) => {
       if (!p) return 0;
