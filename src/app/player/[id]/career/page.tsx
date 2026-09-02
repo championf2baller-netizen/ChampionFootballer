@@ -654,6 +654,26 @@ const resolveLeagueAverageFromPayload = (payload: unknown): LeagueMetricValues =
   const totals = record.leagueTotals;
   const avg = record.leagueAvg || {};
 
+  if (avg && typeof avg === 'object' && avg.expectedGoals !== undefined) {
+    return {
+      goals: toStatNumber(avg.goals),
+      assists: toStatNumber(avg.assists),
+      cleanSheets: toStatNumber(avg.cleanSheets),
+      defence: toStatNumber(avg.defence),
+      motmVotes: toStatNumber(avg.motmVotes),
+      defensiveImpactVotes: toStatNumber(avg.defensiveImpactVotes),
+      impact: toStatNumber(avg.impact),
+      expectedGoals: toStatNumber(avg.expectedGoals),
+      expectedAssists: toStatNumber(avg.expectedAssists),
+      expectedCleanSheets: toStatNumber(avg.expectedCleanSheets),
+      winRate: toStatNumber(avg.winRate),
+      wins: toStatNumber(avg.wins),
+      maxSingleGoals: toStatNumber(avg.maxSingleGoals),
+      maxSingleAssists: toStatNumber(avg.maxSingleAssists),
+      maxSingleMotmVotes: toStatNumber(avg.maxSingleMotmVotes),
+    };
+  }
+
   if (totals && typeof totals === 'object') {
     const totalMatches = Math.max(toStatNumber(totals.matches), 1);
     return {
@@ -3865,34 +3885,42 @@ export default function CareerPage() {
                               const expectedAssistsPerMatch = totalMatches > 0 ? current.assists / totalMatches : 0;
                               const expectedCleanSheetsPerMatch = totalMatches > 0 ? current.cleanSheets / totalMatches : 0;
                               const winRate = current.winRate;
+
+                              const impactRowsFromApi = careerDashboardData?.impactRows as Array<any> | undefined;
+                              const xgApi = impactRowsFromApi?.find((r) => r.metric?.includes('xG') || r.metric?.includes('goal'));
+                              const xaApi = impactRowsFromApi?.find((r) => r.metric?.includes('xA') || r.metric?.includes('assist'));
+                              const xcsApi = impactRowsFromApi?.find((r) => r.metric?.includes('xCS') || r.metric?.includes('Clean Sheet'));
+                              const wrApi = impactRowsFromApi?.find((r) => r.metric?.includes('Win rate') || r.metric?.includes('win'));
+
                               const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
 
-                              const leagueExpectedGoalsMatches = leagueAverage.expectedGoals !== undefined ? leagueAverage.expectedGoals : leagueAverage.goals;
-                              const leagueExpectedAssistsMatches = leagueAverage.expectedAssists !== undefined ? leagueAverage.expectedAssists : leagueAverage.assists;
-                              const leagueExpectedCleanSheetsMatches = leagueAverage.expectedCleanSheets !== undefined ? leagueAverage.expectedCleanSheets : leagueAverage.cleanSheets;
+                              const displayXg = xgApi?.leagueAverage !== undefined ? xgApi.leagueAverage : formatStatDecimal(leagueAverage.expectedGoals !== undefined ? leagueAverage.expectedGoals : leagueAverage.goals);
+                              const displayXa = xaApi?.leagueAverage !== undefined ? xaApi.leagueAverage : formatStatDecimal(leagueAverage.expectedAssists !== undefined ? leagueAverage.expectedAssists : leagueAverage.assists);
+                              const displayXcs = xcsApi?.leagueAverage !== undefined ? xcsApi.leagueAverage : formatStatDecimal(leagueAverage.expectedCleanSheets !== undefined ? leagueAverage.expectedCleanSheets : leagueAverage.cleanSheets);
+                              const displayWinRate = wrApi?.leagueAverage !== undefined ? wrApi.leagueAverage : (leagueAverage.winRate !== undefined ? `${leagueAverage.winRate.toFixed(0)}%` : '-');
 
                               return (
                                 <>
                                   <TableRow>
                                     <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xg_label', 'Expected to score a goal (xG)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedGoalsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedGoalsMatches)}</TableCell>
+                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXg}</TableCell>
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xa_label', 'Expected to assist a goal (xA)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedAssistsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedAssistsMatches)}</TableCell>
+                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXa}</TableCell>
                                   </TableRow>
                                   <TableRow>
                                     <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xcs_label', 'Expected to keep Clean Sheet (xCS)')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedCleanSheetsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(leagueExpectedCleanSheetsMatches)}</TableCell>
+                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXcs}</TableCell>
                                   </TableRow>
                                   <TableRow sx={{ bgcolor: '#383a3e' }}>
                                     <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{getCms('page_player_career_winrate_label', 'Win rate')}</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{winRate.toFixed(0)}%</TableCell>
                                     <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>
-                                      {leagueAverage.winRate !== undefined ? `${leagueAverage.winRate.toFixed(0)}%` : '-'}
+                                      {displayWinRate}
                                     </TableCell>
                                   </TableRow>
                                 </>
