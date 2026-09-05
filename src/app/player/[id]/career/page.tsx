@@ -841,6 +841,7 @@ export default function CareerPage() {
   const [playerName, setPlayerName] = useState<string>('');
   const [playerPosition, setPlayerPosition] = useState<string>('');
   const [careerDashboardData, setCareerDashboardData] = useState<any>(null);
+  const [allCareerDashboardData, setAllCareerDashboardData] = useState<any>(null);
   const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -1186,6 +1187,21 @@ export default function CareerPage() {
         }
       })
       .catch(() => {});
+
+    if (filters.leagueId && filters.leagueId !== 'all') {
+      playerAPI
+        .getCareerDashboard(String(playerId), 'all', filters.year, 'all')
+        .then((res) => {
+          if (cancelled) return;
+          if (res.success && res.data) {
+            setAllCareerDashboardData(res.data);
+          }
+        })
+        .catch(() => {});
+    } else {
+      setAllCareerDashboardData(null);
+    }
+
     return () => {
       cancelled = true;
     };
@@ -1967,23 +1983,29 @@ export default function CareerPage() {
 
   // Real Influence data from backend API
   const influenceRadarData = useMemo(() => {
-    if (careerDashboardData?.influenceRadar) {
-      return careerDashboardData.influenceRadar;
+    const activeDashboard = influenceLeague === 'all'
+      ? (filters.leagueId === 'all' ? careerDashboardData : (allCareerDashboardData || careerDashboardData))
+      : careerDashboardData;
+    if (activeDashboard?.influenceRadar) {
+      return activeDashboard.influenceRadar;
     }
     return [];
-  }, [careerDashboardData]);
+  }, [influenceLeague, careerDashboardData, allCareerDashboardData, filters.leagueId]);
 
   // Calculate actual win/loss/draw data from backend API
   const actualWinLossData = useMemo(() => {
-    if (careerDashboardData?.winLossBreakdown) {
-      return careerDashboardData.winLossBreakdown;
+    const activeDashboard = winLossLeague === 'all'
+      ? (filters.leagueId === 'all' ? careerDashboardData : (allCareerDashboardData || careerDashboardData))
+      : careerDashboardData;
+    if (activeDashboard?.winLossBreakdown) {
+      return activeDashboard.winLossBreakdown;
     }
     return [
       { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
       { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
       { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
     ];
-  }, [careerDashboardData]);
+  }, [winLossLeague, careerDashboardData, allCareerDashboardData, filters.leagueId]);
 
   // Add synergy types (place near other interfaces)
   interface SynergyPairing {
