@@ -469,14 +469,73 @@ const PlayerProfileCard = () => {
   const specificPositionRowHeight = 42
   const specificPositionRowsTarget = 6
 
+  const findPositionTypeForPosition = (pos: string): "Goalkeeper" | "Defender" | "Midfielder" | "Forward" | "" => {
+    if (!pos) return ""
+    if (positionOptionsMap.Goalkeeper.includes(pos)) return "Goalkeeper"
+    if (positionOptionsMap.Defender.includes(pos)) return "Defender"
+    if (positionOptionsMap.Midfielder.includes(pos)) return "Midfielder"
+    if (positionOptionsMap.Forward.includes(pos)) return "Forward"
+    return ""
+  }
+
   const resolvedPositionType: "Goalkeeper" | "Defender" | "Midfielder" | "Forward" | "" =
     (positionType === "Goalkeeper" || positionType === "Defender" || positionType === "Midfielder" || positionType === "Forward")
       ? positionType
       : ""
 
-  const currentStyleOptions = resolvedPositionType ? playingStylesMap[resolvedPositionType] : []
-  const currentPositionOptions = resolvedPositionType ? positionOptionsMap[resolvedPositionType] : []
+  const allPositionOptions = useMemo(() => [
+    ...positionOptionsMap.Goalkeeper,
+    ...positionOptionsMap.Defender,
+    ...positionOptionsMap.Midfielder,
+    ...positionOptionsMap.Forward,
+  ], [])
+
+  const allStyleOptions = useMemo(() => [
+    ...playingStylesMap.Goalkeeper,
+    ...playingStylesMap.Defender,
+    ...playingStylesMap.Midfielder,
+    ...playingStylesMap.Forward,
+  ], [])
+
+  const currentStyleOptions = resolvedPositionType ? playingStylesMap[resolvedPositionType] : playingStylesMap.Goalkeeper
+  const currentPositionOptions = resolvedPositionType ? positionOptionsMap[resolvedPositionType] : positionOptionsMap.Goalkeeper
   const useExpandedPositionSpacing = currentPositionOptions.length === 5
+
+  const handlePositionTypeChange = (newType: string) => {
+    setPositionType(newType)
+    if (newType && position) {
+      const pType = findPositionTypeForPosition(position)
+      if (pType !== newType) {
+        setPosition("")
+      }
+    }
+    if (newType && style) {
+      const validStyles = playingStylesMap[newType as keyof typeof playingStylesMap] || []
+      if (!validStyles.includes(style)) {
+        setStyle("")
+      }
+    }
+  }
+
+  const handlePositionChange = (newPos: string) => {
+    setPosition(newPos)
+    const inferredType = findPositionTypeForPosition(newPos)
+    if (inferredType && positionType !== inferredType) {
+      setPositionType(inferredType)
+    }
+  }
+
+  const handleStyleChange = (newStyle: string) => {
+    setStyle(newStyle)
+    if (!positionType) {
+      for (const [type, styles] of Object.entries(playingStylesMap)) {
+        if (styles.includes(newStyle)) {
+          setPositionType(type)
+          break
+        }
+      }
+    }
+  }
 
   const selectedPhoneRule = useMemo(
     () => getPhoneDigitRuleByIsoCode(phoneCountryCode),
@@ -514,16 +573,20 @@ const PlayerProfileCard = () => {
   useEffect(() => {
     if (user?.position) {
       const p = user.position
-      if (p.includes("Goalkeeper")) { setPositionType("Goalkeeper"); setPosition(p) }
-      else if (p.includes("Back") || p.includes("Wing-back")) { setPositionType("Defender"); setPosition(p) }
-      else if (p.includes("Midfielder")) { setPositionType("Midfielder"); setPosition(p) }
-      else if (p.includes("Forward") || p.includes("Striker") || p.includes("Winger")) { setPositionType("Forward"); setPosition(p) }
-      else { setPositionType(""); setPosition("") }
-    } else {
-      setPositionType("")
-      setPosition("")
+      setPosition(p)
+      const inferredType = findPositionTypeForPosition(p)
+      if (inferredType) {
+        setPositionType(inferredType)
+      } else if (user?.positionType) {
+        setPositionType(user.positionType)
+      }
+    } else if (user?.positionType) {
+      setPositionType(user.positionType)
     }
-  }, [user?.position])
+    if (user?.style) {
+      setStyle(user.style)
+    }
+  }, [user?.position, user?.positionType, user?.style])
 
   useEffect(() => {
     const digits = sanitizePhoneDigits(phone)
@@ -1627,7 +1690,7 @@ const PlayerProfileCard = () => {
                     <FormControl component="fieldset" sx={{ width: '100%' }}>
                       <RadioGroup
                         value={positionType}
-                        onChange={e => setPositionType(e.target.value)}
+                        onChange={e => handlePositionTypeChange(e.target.value)}
                         sx={{
                           px: { xs: 0.5, sm: 2 },
                           display: 'grid',
@@ -1670,14 +1733,20 @@ const PlayerProfileCard = () => {
                     border: `1px solid rgba(255,255,255,0.5)`,
                     borderRadius: 2,
                     maxWidth: { xs: '100%', sm: 400 },
-                    width: '100%'
+                    width: '100%',
+                    maxHeight: 280,
+                    overflowY: 'auto',
+                    '&::-webkit-scrollbar': { width: 6 },
+                    '&::-webkit-scrollbar-track': { background: '#121212' },
+                    '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.2)', borderRadius: 3 },
+                    '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.4)' },
                   }}>
-                    <FormControl component="fieldset">
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
                       <RadioGroup
                         value={position}
-                        onChange={e => setPosition(e.target.value)}
+                        onChange={e => handlePositionChange(e.target.value)}
                         sx={{
-                          minHeight: specificPositionRowHeight * specificPositionRowsTarget,
+                          minHeight: specificPositionRowHeight * (currentPositionOptions.length || specificPositionRowsTarget),
                           justifyContent: useExpandedPositionSpacing ? 'space-between' : 'flex-start',
                           '& .MuiFormControlLabel-root': {
                             m: 0,
@@ -1686,7 +1755,15 @@ const PlayerProfileCard = () => {
                         }}
                       >
                         {currentPositionOptions.map(p => (
-                          <FormControlLabel key={p} value={p} control={<StyledRadio />} label={<span style={{ color: themeColors.textDim }}>{p}</span>} />
+                          <FormControlLabel
+                            key={p}
+                            value={p}
+                            control={<StyledRadio />}
+                            label={<span style={{
+                              color: position === p ? themeColors.text : themeColors.textDim,
+                              fontWeight: position === p ? 700 : 400
+                            }}>{p}</span>}
+                          />
                         ))}
                       </RadioGroup>
                     </FormControl>
@@ -1702,12 +1779,26 @@ const PlayerProfileCard = () => {
                     border: `1px solid rgba(255,255,255,0.5)`,
                     borderRadius: 2,
                     maxWidth: { xs: '100%', sm: 400 },
-                    width: '100%'
+                    width: '100%',
+                    maxHeight: 280,
+                    overflowY: 'auto',
+                    '&::-webkit-scrollbar': { width: 6 },
+                    '&::-webkit-scrollbar-track': { background: '#121212' },
+                    '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.2)', borderRadius: 3 },
+                    '&::-webkit-scrollbar-thumb:hover': { background: 'rgba(255,255,255,0.4)' },
                   }}>
-                    <FormControl component="fieldset">
-                      <RadioGroup value={style} onChange={e => setStyle(e.target.value)}>
+                    <FormControl component="fieldset" sx={{ width: '100%' }}>
+                      <RadioGroup value={style} onChange={e => handleStyleChange(e.target.value)}>
                         {currentStyleOptions.map(s => (
-                          <FormControlLabel key={s} value={s} control={<StyledRadio />} label={<span style={{ color: themeColors.textDim }}>{s}</span>} />
+                          <FormControlLabel
+                            key={s}
+                            value={s}
+                            control={<StyledRadio />}
+                            label={<span style={{
+                              color: style === s ? themeColors.text : themeColors.textDim,
+                              fontWeight: style === s ? 700 : 400
+                            }}>{s}</span>}
+                          />
                         ))}
                       </RadioGroup>
                     </FormControl>
