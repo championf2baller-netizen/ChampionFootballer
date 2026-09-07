@@ -895,7 +895,7 @@ export default function PlayerStatsPage() {
                         });
 
                     const visibleLeagues = unique.filter(
-                        (l) => l.archived !== true && !leagueIsCompleted(l)
+                        (l) => l.archived !== true
                     );
 
                     visibleLeagues.sort((a, b) => {

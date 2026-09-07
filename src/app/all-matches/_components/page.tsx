@@ -641,10 +641,9 @@ export default function AllMatches() {
                     } as League;
                 });
 
-                // Keep leagues visible for switching, including inactive ones.
-                // Only hide archived/completed leagues.
+                // Keep leagues visible for switching, including completed ones.
                 const visibleLeagues = simpleLeagues.filter(
-                    (l) => l.archived !== true && !leagueIsCompleted(l)
+                    (l) => l.archived !== true
                 );
 
                 // Sort alphabetically by name

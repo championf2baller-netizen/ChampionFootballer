@@ -1689,12 +1689,10 @@ export default function GlobalTrophyRoom() {
       isComplete?: boolean;
       isCompleted?: boolean;
       archived?: boolean;
-      seasons?: Array<{
-        isActive?: boolean;
-        archived?: boolean;
-        status?: unknown;
-      }>;
+      active?: boolean;
     };
+
+    if (withFlags?.active === false || withFlags?.archived === true) return true;
 
     const status = String(l?.status || '').toLowerCase().trim();
     if (completedStatusTokens.has(status)) return true;
@@ -1708,33 +1706,6 @@ export default function GlobalTrophyRoom() {
       l?.isLocked === true
     ) {
       return true;
-    }
-
-    // Season-level fallback kept in sync with All Leagues.
-    const seasons = Array.isArray(withFlags.seasons) ? withFlags.seasons : [];
-    if (seasons.length > 0) {
-      const seasonDoneTokens = new Set([
-        'completed',
-        'complete',
-        'finished',
-        'ended',
-        'locked',
-        'archived',
-        'result_published',
-        'result_uploaded',
-        'result_complete',
-        'result_finished',
-        'result_ended',
-        'result_done',
-      ]);
-      const hasActiveSeason = seasons.some((s: any) => s?.isActive === true && s?.archived !== true);
-      const hasArchivedOrCompletedSeason = seasons.some((s: any) => {
-        if (!s) return false;
-        if (s.archived === true) return true;
-        const st = typeof s.status === 'string' ? s.status.toLowerCase().trim() : '';
-        return seasonDoneTokens.has(st);
-      });
-      if (!hasActiveSeason && hasArchivedOrCompletedSeason) return true;
     }
 
     return false;
@@ -1904,9 +1875,9 @@ export default function GlobalTrophyRoom() {
             } as League;
           });
 
-          // Show only visible leagues (non-archived + not completed, same as league detail page)
+          // Show all non-archived leagues (including completed leagues)
           const activeLeagues = enrichedLeagues.filter(
-            (l) => l.archived !== true && !leagueIsCompleted(l)
+            (l) => l.archived !== true
           );
 
           // Sort alphabetically
@@ -2101,6 +2072,43 @@ export default function GlobalTrophyRoom() {
     // Fallback: active season or first
     return leagueSeasons.find(s => s.isActive) || leagueSeasons[0] || null;
   }, [selectedSeasonId, leagueSeasons]);
+
+  const isSelectedLeagueCompleted = useMemo(() => {
+    return selectedLeague ? leagueIsCompleted(selectedLeague) : false;
+  }, [selectedLeague, leagueIsCompleted]);
+
+  const isSelectedSeasonCompleted = useMemo(() => {
+    if (isSelectedLeagueCompleted || (selectedLeague && (selectedLeague as any).active === false)) {
+      return true;
+    }
+    if (!displaySeason) return false;
+    const seasonDoneTokens = new Set([
+      'completed',
+      'complete',
+      'finished',
+      'ended',
+      'locked',
+      'archived',
+      'result_published',
+      'result_uploaded',
+      'result_complete',
+      'result_finished',
+      'result_ended',
+      'result_done',
+      'inactive',
+    ]);
+    if (displaySeason.isActive === false || (displaySeason as any).active === false || (displaySeason as any).archived === true) {
+      return true;
+    }
+    const statusText = typeof (displaySeason as any).status === 'string' ? (displaySeason as any).status.toLowerCase().trim() : '';
+    return seasonDoneTokens.has(statusText);
+  }, [displaySeason, isSelectedLeagueCompleted, selectedLeague]);
+
+  const standingsStatusLabel = useMemo(() => {
+    if (isSelectedLeagueCompleted) return 'FINAL';
+    if (isSelectedSeasonCompleted) return 'COMPLETED';
+    return 'LIVE';
+  }, [isSelectedLeagueCompleted, isSelectedSeasonCompleted]);
 
   const [seasonsChecked, setSeasonsChecked] = useState(false);
 
@@ -2663,7 +2671,7 @@ export default function GlobalTrophyRoom() {
                     {getCms('page_trophy_room_standings_label', 'Standings:')}
                   </Typography>
                   <Typography sx={{ fontSize: '0.92rem', fontWeight: 300, color: 'white' }}>
-                    {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
+                    {standingsStatusLabel}
                   </Typography>
                   <Typography sx={{ fontSize: '0.85rem', fontWeight: 300, color: 'rgba(255,255,255,0.7)' }}>
                     |
@@ -2682,7 +2690,7 @@ export default function GlobalTrophyRoom() {
                       {getCms('page_trophy_room_standings_label', 'Standings:')}
                     </Typography>
                     <Typography sx={{ fontSize: '1rem', fontWeight: 300, color: 'white' }}>
-                      {selectedLeagueFlags?.final ? 'FINAL' : 'LIVE'}
+                      {standingsStatusLabel}
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>

@@ -148,9 +148,9 @@ export default function LeaderBoardPage() {
             } as League;
           });
 
-          // Show only visible leagues (active + non-archived + not completed)
+          // Show all non-archived leagues (including completed leagues)
           const activeLeagues = simpleLeagues.filter(
-            (l) => l.active !== false && l.archived !== true && !leagueIsCompleted(l)
+            (l) => l.archived !== true
           );
 
           // Sort alphabetically
