@@ -88,6 +88,9 @@ const playerStatsSlice = createSlice({
   reducers: {
     setLeagueFilter: (state, action: PayloadAction<string>) => {
       state.filters.leagueId = action.payload;
+      if (typeof window !== 'undefined' && action.payload) {
+        try { localStorage.setItem('preferredLeagueId', action.payload); } catch {}
+      }
     },
     setYearFilter: (state, action: PayloadAction<string>) => {
       state.filters.year = action.payload;

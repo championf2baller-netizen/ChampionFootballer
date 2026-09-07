@@ -782,10 +782,27 @@ export default function LeagueDetailPage() {
     const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(() => {
         if (initialSeasonIdFromQuery) return initialSeasonIdFromQuery;
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('preferredSeasonId_' + leagueId) || null;
+            return localStorage.getItem('preferredSeasonId_' + leagueId) || localStorage.getItem('preferredSeasonId') || null;
         }
         return null;
     });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && leagueId) {
+            try { localStorage.setItem('preferredLeagueId', String(leagueId)); } catch {}
+        }
+    }, [leagueId]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && selectedSeasonId) {
+            try {
+                localStorage.setItem('preferredSeasonId', String(selectedSeasonId));
+                if (leagueId) {
+                    localStorage.setItem('preferredSeasonId_' + leagueId, String(selectedSeasonId));
+                }
+            } catch {}
+        }
+    }, [selectedSeasonId, leagueId]);
     const [seasonOptions, setSeasonOptions] = useState<Array<{
         id: string;
         seasonNumber: number;

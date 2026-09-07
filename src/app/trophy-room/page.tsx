@@ -2063,8 +2063,8 @@ export default function GlobalTrophyRoom() {
           // Store seasons in dedicated state (NOT in leagues array)
           setLeagueSeasons(data.seasons);
           // Directly select the preferred season if set in localStorage, else active season
-          const storedSeasonId = typeof window !== 'undefined' ? localStorage.getItem('preferredSeasonId_' + selectedLeagueId) : null;
-          const active = (storedSeasonId && data.seasons.find((s: Season) => String(s.id) === storedSeasonId)) || data.seasons.find((s: Season) => s.isActive) || data.seasons[0];
+          const storedSeasonId = typeof window !== 'undefined' ? (localStorage.getItem('preferredSeasonId_' + selectedLeagueId) || localStorage.getItem('preferredSeasonId')) : null;
+          const active = (storedSeasonId && data.seasons.find((s: Season) => String(s.id) === String(storedSeasonId))) || data.seasons.find((s: Season) => s.isActive) || data.seasons[0];
           if (active) {
             console.log('[Trophy Room] ✅ Directly selecting season:', active.id, active.name);
             setSelectedSeasonId(active.id);

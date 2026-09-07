@@ -1440,6 +1440,9 @@ export default function CareerPage() {
         if (cancelled) return;
         setAvailableSeasons(finalSeasons);
         setSeasonFilter((prev) => {
+          const storedSeasonId = typeof window !== 'undefined' ? (localStorage.getItem('preferredSeasonId_' + filters.leagueId) || localStorage.getItem('preferredSeasonId')) : null;
+          const preferredSeasonObj = storedSeasonId ? finalSeasons.find((s) => sameId(s.id, storedSeasonId)) : null;
+          if (preferredSeasonObj) return preferredSeasonObj.id;
           if (prev !== 'all' && finalSeasons.some((s) => sameId(s.id, prev))) return prev;
           return resolvedDefaultSeasonId;
         });
@@ -2269,6 +2272,17 @@ export default function CareerPage() {
     }
     preferredAppliedRef.current = true;
   }, [urlLeagueId, preferredLeagueId, filters.leagueId, availableLeagues, dispatch]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && seasonFilter && seasonFilter !== 'all') {
+      try {
+        localStorage.setItem('preferredSeasonId', seasonFilter);
+        if (filters.leagueId && filters.leagueId !== 'all') {
+          localStorage.setItem('preferredSeasonId_' + filters.leagueId, seasonFilter);
+        }
+      } catch {}
+    }
+  }, [seasonFilter, filters.leagueId]);
 
   const selectedSeasonLabel = useMemo(() => {
     if (!seasonFilter || seasonFilter === 'all') return 'All Seasons';

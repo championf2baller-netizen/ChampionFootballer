@@ -373,9 +373,36 @@ const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): strin
 export default function AllMatches() {
     const [matches, setMatches] = useState<Match[]>([]);
     const [leagues, setLeagues] = useState<League[]>([]);
-    const [selectedLeague, setSelectedLeague] = useState<string>('all');
+    const [selectedLeague, setSelectedLeague] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('preferredLeagueId') || 'all';
+        }
+        return 'all';
+    });
     const [seasons, setSeasons] = useState<SeasonOption[]>([]);
-    const [selectedSeason, setSelectedSeason] = useState<string>('all');
+    const [selectedSeason, setSelectedSeason] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('preferredSeasonId') || 'all';
+        }
+        return 'all';
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && selectedLeague) {
+            try { localStorage.setItem('preferredLeagueId', selectedLeague); } catch {}
+        }
+    }, [selectedLeague]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && selectedSeason) {
+            try {
+                localStorage.setItem('preferredSeasonId', selectedSeason);
+                if (selectedLeague && selectedLeague !== 'all') {
+                    localStorage.setItem('preferredSeasonId_' + selectedLeague, selectedSeason);
+                }
+            } catch {}
+        }
+    }, [selectedSeason, selectedLeague]);
     const [seasonsLoading, setSeasonsLoading] = useState(false);
     const [matchFilter, setMatchFilter] = useState<'all' | 'results' | 'fixtures' | 'archived'>('results');
     const [loading, setLoading] = useState(true);

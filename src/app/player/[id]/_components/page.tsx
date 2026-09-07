@@ -558,7 +558,9 @@ export default function PlayerStatsPage() {
                         const sortedSeasons = sortSeasonsLatestFirst(formattedSeasons);
                         const visibleSeasons = sortedSeasons.filter((season) => !isSeasonExplicitlyDeclined(season));
                         const activeVisibleSeason = visibleSeasons.find((season) => isSeasonActiveLike(season));
-                        const defaultSeason = activeVisibleSeason || visibleSeasons[0] || sortedSeasons[0];
+                        const storedSeasonId = typeof window !== 'undefined' ? (localStorage.getItem('preferredSeasonId_' + leagueId) || localStorage.getItem('preferredSeasonId')) : null;
+                        const preferredSeasonObj = storedSeasonId ? visibleSeasons.find((s: any) => String(s.id) === String(storedSeasonId)) : null;
+                        const defaultSeason = preferredSeasonObj || activeVisibleSeason || visibleSeasons[0] || sortedSeasons[0];
 
                         setSeasons(sortedSeasons);
                         console.log('📋 Fetched seasons from /leagues/:id/seasons API:', sortedSeasons);
@@ -1701,6 +1703,9 @@ export default function PlayerStatsPage() {
     const applyLeagueSelection = (value: string) => {
         setLeagueDropdownOpen(false);
         dispatch(setLeagueFilter(value));
+        if (typeof window !== 'undefined' && value) {
+            try { localStorage.setItem('preferredLeagueId', value); } catch {}
+        }
     };
 
     const handleLeagueChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
