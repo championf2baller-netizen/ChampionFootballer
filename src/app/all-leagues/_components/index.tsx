@@ -1051,7 +1051,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
   const [isActive, setIsActive] = useState(true)
   const [showPoints, setShowPoints] = useState(true)
   const [selectedSeasonId, setSelectedSeasonId] = useState<string>('')
-  const [seasonMaxGames, setSeasonMaxGames] = useState(20)
+  const [seasonMaxGames, setSeasonMaxGames] = useState<number | string>(20)
   const [seasonShowPoints, setSeasonShowPoints] = useState(true)
   const [seasonIsActive, setSeasonIsActive] = useState(true)
   const [settingsImageFile, setSettingsImageFile] = useState<File | null>(null)
@@ -1179,7 +1179,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       // Include season settings so they're updated atomically with league
       ...(selectedSeasonId ? {
         seasonId: selectedSeasonId,
-        seasonMaxGames: seasonMaxGames,
+        seasonMaxGames: Number(seasonMaxGames) || 0,
         seasonShowPoints: seasonShowPoints,
         seasonIsActive: seasonIsActive,
       } : {}),
@@ -2172,8 +2172,27 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 <TextField
                   fullWidth
                   type="number"
-                  value={seasonMaxGames}
-                  onChange={(e) => setSeasonMaxGames(Number(e.target.value))}
+                  value={seasonMaxGames === 0 || seasonMaxGames === '0' ? '' : seasonMaxGames}
+                  onFocus={(e) => {
+                    e.target.select();
+                    if (seasonMaxGames === 0 || seasonMaxGames === '0') {
+                      setSeasonMaxGames('');
+                    }
+                  }}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setSeasonMaxGames('');
+                    } else {
+                      const num = Number(val);
+                      setSeasonMaxGames(isNaN(num) ? '' : num);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (seasonMaxGames === '' || seasonMaxGames === null || seasonMaxGames === undefined) {
+                      setSeasonMaxGames(0);
+                    }
+                  }}
                   disabled={!selectedSeasonId || !canManageLeagueSettings}
                   sx={{
                     '& .MuiOutlinedInput-root': {
