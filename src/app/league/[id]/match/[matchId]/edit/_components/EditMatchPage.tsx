@@ -27,7 +27,7 @@ import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLo
   interface League { id: string; name: string; members: User[]; active: boolean; }
   interface Guest { id: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; }
   interface StagedGuest { tempId: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; existingId?: string; }
-  interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; }
+  interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; notes?: string; notificationMessage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; }
   type PlayerOption = User & { isGuest?: boolean; guestTempId?: string; team?: 'home' | 'away'; existingGuestId?: string };
   interface AvailabilityRecord { userId: string; status: 'available' | 'unavailable' | 'pending'; }
   type AvailabilityStatus = AvailabilityRecord['status'];
@@ -882,6 +882,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         }
         if (m.homeTeamImage) setHomeTeamImagePreview(m.homeTeamImage.startsWith('http') ? m.homeTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.homeTeamImage}`);
         if (m.awayTeamImage) setAwayTeamImagePreview(m.awayTeamImage.startsWith('http') ? m.awayTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.awayTeamImage}`);
+
+        // Auto-populate last saved notification message / notes
+        const savedMessage = String(m.notes || m.notificationMessage || '').trim();
+        if (savedMessage) {
+          setNotificationMessage(savedMessage);
+          setShowNotificationBox(true);
+        }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Load failed';
         setError(msg);
@@ -1865,9 +1872,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
             console.warn('League-wide notification could not be sent via fallback endpoints.');
           }
         }
-        setNotificationMessage('');
+        if (!notificationToSend) {
+          setNotificationMessage('');
+          setShowNotificationBox(false);
+        }
         setNotificationAudience('match');
-        setShowNotificationBox(false);
         if (isDialog && onClose) {
           onClose();
         } else {
