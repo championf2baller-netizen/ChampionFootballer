@@ -836,6 +836,7 @@ export default function LeagueDetailPage() {
     const [selectedMetric, setSelectedMetric] = useState<LeaderboardMetricKey>('goals');
     const [leaderboardPlayers, setLeaderboardPlayers] = useState<Array<{ id: string; name: string; positionType: string; value: number }>>([]);
     const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+    const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
     const [allLeaderboardData, setAllLeaderboardData] = useState<Record<string, Array<{ id: string; name: string; positionType: string; value: number }>>>({});
     const [leaderboardInfoMetric, setLeaderboardInfoMetric] = useState<LeaderboardMetricKey | null>(null);
     const selectedLeaderboardInfo = useMemo(
@@ -2858,7 +2859,33 @@ export default function LeagueDetailPage() {
         };
     }, [league?.id, token, selectedSeasonId]);
 
-    // Fetch leaderboard for ALL metrics when league or season changes
+    // Listen for live match, stats, and league updates to trigger real-time refetch
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleLiveUpdate = (evt: Event) => {
+            const detail = (evt as CustomEvent<{ leagueId?: string | number }>).detail;
+            const eventLeagueId = String(detail?.leagueId || '').trim();
+            if (eventLeagueId && leagueId && eventLeagueId !== String(leagueId)) return;
+
+            setLeaderboardRefreshKey(prev => prev + 1);
+            if (typeof fetchLeagueDetails === 'function') {
+                fetchLeagueDetails();
+            }
+        };
+
+        window.addEventListener('match-stats-updated', handleLiveUpdate);
+        window.addEventListener('match-updated', handleLiveUpdate);
+        window.addEventListener('league-updated', handleLiveUpdate);
+
+        return () => {
+            window.removeEventListener('match-stats-updated', handleLiveUpdate);
+            window.removeEventListener('match-updated', handleLiveUpdate);
+            window.removeEventListener('league-updated', handleLiveUpdate);
+        };
+    }, [leagueId, fetchLeagueDetails]);
+
+    // Fetch leaderboard for ALL metrics when league, season, or refreshKey changes
     useEffect(() => {
         if (!leagueId || !token) return;
         setLeaderboardLoading(true);
@@ -2903,7 +2930,7 @@ export default function LeagueDetailPage() {
 
         Promise.all(
             metrics.map(async (metric) => {
-                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=5`;
+                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=5&refresh=1&_t=${Date.now()}`;
                 const urlSeason = selectedSeasonId ? `${urlAll}&seasonId=${selectedSeasonId}` : urlAll;
                 const requestInit: RequestInit = {
                     credentials: 'include',
@@ -2935,7 +2962,7 @@ export default function LeagueDetailPage() {
                 console.error('Error fetching leaderboard:', error);
                 setLeaderboardLoading(false);
             });
-    }, [leagueId, token, selectedSeasonId]);
+    }, [leagueId, token, selectedSeasonId, leaderboardRefreshKey]);
 
     const getAvailabilityCounts = (match: Match) => {
         // Find the league for this match

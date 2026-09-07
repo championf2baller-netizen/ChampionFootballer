@@ -906,11 +906,13 @@ export default function AllMatches() {
         };
         window.addEventListener('match-created', handleRefresh);
         window.addEventListener('match-updated', handleRefresh);
+        window.addEventListener('match-stats-updated', handleRefresh);
         window.addEventListener('league-updated', handleRefresh);
         window.addEventListener('cache-cleared', handleRefresh);
         return () => {
             window.removeEventListener('match-created', handleRefresh);
             window.removeEventListener('match-updated', handleRefresh);
+            window.removeEventListener('match-stats-updated', handleRefresh);
             window.removeEventListener('league-updated', handleRefresh);
             window.removeEventListener('cache-cleared', handleRefresh);
         };

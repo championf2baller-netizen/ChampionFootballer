@@ -1855,6 +1855,9 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         toast.success(serverMsg);
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new Event('refresh-notifications'));
+          window.dispatchEvent(new CustomEvent('match-updated', { detail: { matchId, leagueId } }));
+          window.dispatchEvent(new CustomEvent('match-stats-updated', { detail: { matchId, leagueId } }));
+          window.dispatchEvent(new CustomEvent('league-updated', { detail: { leagueId } }));
         }
         if (notificationToSend && notificationAudience === 'league') {
           const sent = await sendLeagueWideNotification(notificationToSend);
