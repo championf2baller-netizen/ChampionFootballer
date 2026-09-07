@@ -2014,6 +2014,8 @@ export default function PlayerStatsPage() {
                     color: 'white',
                     boxShadow: 'none',
                     minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
+                    position: 'relative',
+                    zIndex: 99999,
                 }}>
                     {/* Centered Title */}
                     <Box sx={{
@@ -2067,6 +2069,8 @@ export default function PlayerStatsPage() {
                         py: { xs: 1.5, md: 1.3 },
                         maxWidth: '1230px',
                         mx: 'auto',
+                        position: 'relative',
+                        zIndex: 99999,
                     }}>
                         {/* Search Input */}
                         <Box
@@ -2077,10 +2081,8 @@ export default function PlayerStatsPage() {
                                 maxWidth: { md: 480 },
                                 ml: { xs: 0, md: 0.8 },
                                 position: 'relative',
-                                zIndex: 1200,
-                                isolation: 'isolate',
+                                zIndex: 99999,
                                 mt: { xs: -2, md: 0 }
-
                             }}
                         >
                             <TextField
@@ -2145,15 +2147,17 @@ export default function PlayerStatsPage() {
                                     elevation={6}
                                     sx={{
                                         position: 'absolute',
-                                        top: '100%',
+                                        top: 'calc(100% + 4px)',
                                         left: 0,
                                         right: 0,
-                                        zIndex: 1300,
+                                        zIndex: 100000,
                                         mt: 0,
                                         maxHeight: 320,
                                         overflowY: 'auto',
                                         borderRadius: 2,
                                         background: '#1f1f1f',
+                                        backgroundColor: '#1f1f1f',
+                                        boxShadow: '0 12px 40px rgba(0,0,0,0.85)',
                                         border: '1px solid rgba(255,255,255,0.25)',
                                         p: 1.25,
                                         '&::-webkit-scrollbar': { width: 6 },

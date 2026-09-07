@@ -2366,6 +2366,8 @@ export default function CareerPage() {
               boxShadow: 'none',
               minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
               overflow: 'visible',
+              position: 'relative',
+              zIndex: 99999,
             }}>
 
               {/* Centered Title */}
@@ -2422,7 +2424,7 @@ export default function CareerPage() {
                 maxWidth: '1200px',
                 mx: 'auto',
                 position: 'relative',
-                zIndex: 2,
+                zIndex: 99999,
               }}>
                 {/* Search Input */}
                 <Box
@@ -2434,8 +2436,7 @@ export default function CareerPage() {
                     maxWidth: { md: 480 },
                     ml: { xs: 0, md: 0.8 },
                     position: 'relative',
-                    zIndex: 1500,
-                    isolation: 'isolate',
+                    zIndex: 99999,
                     mt: { xs: -6, md: 0 }
                   }}
                 >
@@ -2517,7 +2518,7 @@ export default function CareerPage() {
                         top: 'calc(100% + 4px)',
                         left: 0,
                         right: 0,
-                        zIndex: 1600,
+                        zIndex: 100000,
                         mt: 0,
                         width: '100%',
                         boxSizing: 'border-box',
@@ -2526,6 +2527,8 @@ export default function CareerPage() {
                         overflowX: 'hidden',
                         borderRadius: 2,
                         background: '#1f1f1f',
+                        backgroundColor: '#1f1f1f',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.85)',
                         border: '1px solid rgba(255,255,255,0.25)',
                         p: 1.25,
                         '&::-webkit-scrollbar': { width: 6 },
