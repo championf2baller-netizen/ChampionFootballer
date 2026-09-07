@@ -1772,6 +1772,9 @@ export default function GlobalTrophyRoom() {
 
   const handleLeagueSelect = (id: string | 'all') => {
     const newId = id === 'all' ? 'all' : String(id);
+    if (newId === selectedLeagueId && (leagueSeasons.length > 0 || seasonsChecked)) {
+      return;
+    }
     setSelectedLeagueId(newId);
     if (newId !== 'all') {
       try {
