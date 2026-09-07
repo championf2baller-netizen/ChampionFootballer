@@ -761,10 +761,16 @@ export default function PlayerStatsPage() {
 
     const filteredTeammates = useMemo(() => {
         const q = search.trim().toLowerCase();
-        if (!q) return teammates;
-        return teammates.filter(p => {
-            const full = (p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim()).toLowerCase();
-            return full.includes(q);
+        const list = q
+            ? teammates.filter(p => {
+                const full = (p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim()).toLowerCase();
+                return full.includes(q);
+            })
+            : teammates;
+        return [...list].sort((a, b) => {
+            const nameA = (a.name || `${a.firstName ?? ''} ${a.lastName ?? ''}`.trim()).toLowerCase();
+            const nameB = (b.name || `${b.firstName ?? ''} ${b.lastName ?? ''}`.trim()).toLowerCase();
+            return nameA.localeCompare(nameB);
         });
     }, [search, teammates]);
 
