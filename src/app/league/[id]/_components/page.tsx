@@ -2146,9 +2146,39 @@ export default function LeagueDetailPage() {
         }
     };
 
-    const inactiveLeagueMatchMessage = league && leagueIsCompleted(league)
-        ? 'This league is completed. New matches are disabled for completed leagues.'
-        : 'This league is currently inactive. To create new matches, please reactivate the league in League Settings.';
+    const isMatchCreationAllowed = React.useMemo(() => {
+        if (!league) return false;
+        if (league.active === false) return false;
+        if (leagueIsCompleted(league)) return false;
+
+        const seasonsArr = (league as any)?.seasons || (Array.isArray(seasonOptions) ? seasonOptions : []);
+        if (Array.isArray(seasonsArr) && seasonsArr.length > 0) {
+            if (selectedSeasonId) {
+                const sel = seasonsArr.find((s: any) => String(s?.id) === String(selectedSeasonId));
+                if (sel && (sel.isActive === false || sel.archived === true)) return false;
+            } else {
+                const activeSeasonExists = seasonsArr.some((s: any) => s?.isActive !== false && !s?.archived);
+                if (!activeSeasonExists) return false;
+            }
+        }
+        return true;
+    }, [league, selectedSeasonId, seasonOptions, leagueIsCompleted]);
+
+    const inactiveLeagueMatchMessage = React.useMemo(() => {
+        if (league && leagueIsCompleted(league)) {
+            return 'This league is completed. New matches are disabled for completed leagues.';
+        }
+        if (league && selectedSeasonId) {
+            const seasonsArr = (league as any)?.seasons || (Array.isArray(seasonOptions) ? seasonOptions : []);
+            if (Array.isArray(seasonsArr)) {
+                const sel = seasonsArr.find((s: any) => String(s?.id) === String(selectedSeasonId));
+                if (sel && sel.isActive === false) {
+                    return 'This season is inactive. New matches are disabled for inactive seasons.';
+                }
+            }
+        }
+        return 'This season or league is currently inactive. To create new matches, please reactivate it in League Settings.';
+    }, [league, selectedSeasonId, seasonOptions, leagueIsCompleted]);
 
     // Current season number resolver (no `any`; checks currentSeason, active `seasons`, computedStatus, and top-level fields)
     const resolveSeasonNumber = (l?: League | null): number | undefined => {
@@ -5006,7 +5036,7 @@ export default function LeagueDetailPage() {
                                     // p: 2
                                 }}>
                                     {isAdmin && (
-                                        league?.active ? (
+                                        isMatchCreationAllowed ? (
                                             <Link href={`/league/${leagueId}/match`} passHref>
                                                 <Button
                                                     fullWidth
@@ -6646,7 +6676,7 @@ export default function LeagueDetailPage() {
                                                 </IconButton>
                                             </Box>
                                             {isAdmin && (
-                                                league?.active ? (
+                                                isMatchCreationAllowed ? (
                                                     <Link href={`/league/${leagueId}/match`} passHref>
                                                         <button className="bg-[#e16419] text-white font-semibold px-5 py-2 rounded inline-flex items-center whitespace-nowrap justify-center">
                                                             + New Match

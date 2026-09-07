@@ -1407,6 +1407,21 @@ export default function AllMatches() {
         handleLeaguesDropdownClose();
     };
 
+    const isMatchCreationDisabled = React.useMemo(() => {
+        if (!league?.id) return false;
+        if (league.active === false) return true;
+        if (leagueIsCompleted(league)) return true;
+        if (Array.isArray(seasons) && seasons.length > 0) {
+            const currentSel = (selectedSeason && selectedSeason !== 'all')
+                ? seasons.find((s) => String(s.id) === String(selectedSeason) || String(s.seasonNumber) === String(selectedSeason))
+                : seasons.find((s) => s.isActive !== false && !(s as any).archived) || seasons[0];
+            if (currentSel && (currentSel.isActive === false || (currentSel as any).archived === true)) {
+                return true;
+            }
+        }
+        return false;
+    }, [league, seasons, selectedSeason, leagueIsCompleted]);
+
     const handleCreateMatchClick = () => {
         if (!league?.id) {
             toast.error('Please select a league first.');
@@ -1417,6 +1432,26 @@ export default function AllMatches() {
         if (!isLeagueAdmin) {
             toast.error('Only league admins can create matches.');
             return;
+        }
+
+        if (league.active === false) {
+            toast.error('This league is currently inactive. New matches are disabled.');
+            return;
+        }
+
+        if (leagueIsCompleted(league)) {
+            toast.error('This league is completed. New matches are disabled for completed leagues.');
+            return;
+        }
+
+        if (Array.isArray(seasons) && seasons.length > 0) {
+            const currentSel = (selectedSeason && selectedSeason !== 'all')
+                ? seasons.find((s) => String(s.id) === String(selectedSeason) || String(s.seasonNumber) === String(selectedSeason))
+                : seasons.find((s) => s.isActive !== false && !(s as any).archived) || seasons[0];
+            if (currentSel && (currentSel.isActive === false || (currentSel as any).archived === true)) {
+                toast.error('This season is inactive. New matches are disabled for inactive seasons.');
+                return;
+            }
         }
 
         router.push(`/league/${league.id}/match`);
@@ -2091,12 +2126,12 @@ export default function AllMatches() {
                                 variant="contained"
                                 onClick={handleCreateMatchClick}
                                 sx={{
-                                     color: 'white',
+                                     color: isMatchCreationDisabled ? 'rgba(255,255,255,0.45)' : 'white',
                                                    fontFamily: 'Arial, Helvetica, sans-serif',
                                                    fontWeight: 'semi-bold',
                                                    fontSize: { xs: '15px', md: '18px' },
-                                                   bgcolor: '#0388E3',
-                                                   '&:hover': { bgcolor: '#0266b8' },
+                                                   bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.12)' : '#0388E3',
+                                                   '&:hover': { bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.18)' : '#0266b8' },
                                                    borderRadius: 1,
                                                    width: { xs: '100%', sm: 'auto' },
                                                    minHeight: { xs: 42, md: 'auto' },
