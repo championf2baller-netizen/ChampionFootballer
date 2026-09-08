@@ -1577,7 +1577,7 @@ const PlayerProfileCard = () => {
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_age_input', 'Age')}</Typography>
                             <StyledTextField size="small" type="number" value={age} onChange={e => setAge(e.target.value)} fullWidth placeholder="00" sx={{ mb: 1 }} />
                           </Grid>
-                          <Grid item xs={6} sm={6}>
+                          <Grid item xs={12} sm={6}>
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_gender', 'Gender')}</Typography>
                             <Card
                               sx={{
@@ -1600,16 +1600,17 @@ const PlayerProfileCard = () => {
                                     sx={{
                                       width: '100%',
                                       justifyContent: 'space-between',
-                                      flexWrap: 'nowrap',
-                                      columnGap: { xs: 0.4, sm: 1.2 },
+                                      flexWrap: 'wrap',
+                                      columnGap: { xs: 0.4, sm: 1 },
+                                      rowGap: 0.5,
                                       '& .MuiFormControlLabel-root': {
                                         m: 0,
-                                        flex: '1 1 0',
+                                        flex: '1 1 auto',
                                         minWidth: 0,
                                         justifyContent: 'center',
                                       },
                                       '& .MuiFormControlLabel-label': {
-                                        fontSize: { xs: 12, sm: 13 },
+                                        fontSize: { xs: 11, sm: 12 },
                                         color: themeColors.textDim,
                                         letterSpacing: .2,
                                         whiteSpace: 'nowrap',
@@ -1618,6 +1619,7 @@ const PlayerProfileCard = () => {
                                   >
                                     <FormControlLabel value="male" control={<StyledRadio size="small" sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }} />} label="Male" />
                                     <FormControlLabel value="female" control={<StyledRadio size="small" sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }} />} label="Female" />
+                                    <FormControlLabel value="prefer not to say" control={<StyledRadio size="small" sx={{ '& .MuiSvgIcon-root': { fontSize: 18 } }} />} label="Prefer not to say" />
                                   </RadioGroup>
                                 </Box>
                               </FormControl>

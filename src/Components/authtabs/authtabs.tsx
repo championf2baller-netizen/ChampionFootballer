@@ -1581,12 +1581,16 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                     }}
                     renderValue={(selected) => {
                       if (!selected) return <span style={{ color: '#757575' }}>Gender</span>
-                      return selected === 'male' ? 'Male' : 'Female'
+                      if (selected === 'male') return 'Male'
+                      if (selected === 'female') return 'Female'
+                      if (selected === 'prefer not to say') return 'Prefer not to say'
+                      return selected
                     }}
                     required
                   >
                     <MenuItem value="male">Male</MenuItem>
                     <MenuItem value="female">Female</MenuItem>
+                    <MenuItem value="prefer not to say">Prefer not to say</MenuItem>
                   </Select>
                 </FormControl>
               ) : (
@@ -1602,6 +1606,12 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                       value="female"
                       control={<Radio sx={{ color: 'black', '&.Mui-checked': { color: '#E56A16' } }} />}
                       label="Female"
+                      sx={{ color: 'black' }}
+                    />
+                    <FormControlLabel
+                      value="prefer not to say"
+                      control={<Radio sx={{ color: 'black', '&.Mui-checked': { color: '#E56A16' } }} />}
+                      label="Prefer not to say"
                       sx={{ color: 'black' }}
                     />
                   </RadioGroup>
