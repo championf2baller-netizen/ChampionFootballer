@@ -1176,7 +1176,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       return
     }
 
-    const finalLeagueActive = seasonIsActive === true ? true : isActive;
+    const finalLeagueActive = isActive;
 
     const updatedData: LeagueUpdatePayload = {
       name,
