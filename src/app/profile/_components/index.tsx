@@ -1466,7 +1466,7 @@ const PlayerProfileCard = () => {
                               ))}
                             </StyledTextField>
                           </Grid>
-                          <Grid item xs={6} sm={6}>
+                          <Grid item xs={8} sm={8} md={6}>
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_phone_input', 'Phone Number')}</Typography>
                             <StyledTextField
                               size="small"
@@ -1497,8 +1497,8 @@ const PlayerProfileCard = () => {
                                       disableUnderline
                                       MenuProps={selectMenuProps}
                                       sx={{
-                                        minWidth: 78,
-                                        mr: 1,
+                                        minWidth: { xs: 65, sm: 76 },
+                                        mr: 0.5,
                                         height: "100%",
                                         display: "flex",
                                         alignItems: "center",
@@ -1507,7 +1507,8 @@ const PlayerProfileCard = () => {
                                           fontSize: "0.85rem",
                                           display: "flex",
                                           alignItems: "center",
-                                          gap: "8px",
+                                          gap: "4px",
+                                          pr: "18px !important",
                                         },
                                         "& .MuiSvgIcon-root": { color: themeColors.text },
                                       }}
@@ -1517,22 +1518,22 @@ const PlayerProfileCard = () => {
                                         const flagUrl = getCountryFlagUrl(code)
                                         const phoneDial = c?.phonecode ? `+${c.phonecode}` : ""
                                         return (
-                                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                                             {flagUrl ? (
                                               <Box
                                                 component="img"
                                                 src={flagUrl}
                                                 alt={`${code} flag`}
                                                 sx={{
-                                                  width: 20,
-                                                  height: 15,
+                                                  width: 18,
+                                                  height: 13,
                                                   borderRadius: "2px",
                                                   objectFit: "cover",
                                                   border: "1px solid rgba(255,255,255,0.18)",
                                                 }}
                                               />
                                             ) : null}
-                                            <Box component="span" sx={{ color: themeColors.text }}>
+                                            <Box component="span" sx={{ color: themeColors.text, fontSize: "0.8rem" }}>
                                               {phoneDial}
                                             </Box>
                                           </Box>
@@ -1573,7 +1574,7 @@ const PlayerProfileCard = () => {
                               sx={{ mb: 1 }}
                             />
                           </Grid>
-                          <Grid item xs={6} sm={6}>
+                          <Grid item xs={4} sm={4} md={6}>
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_age_input', 'Age')}</Typography>
                             <StyledTextField size="small" type="number" value={age} onChange={e => setAge(e.target.value)} fullWidth placeholder="00" sx={{ mb: 1 }} />
                           </Grid>
