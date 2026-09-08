@@ -38,6 +38,7 @@ import SearchIcon from '@/Components/images/searchicon.png';
 import TableGraphIcon from '@/Components/images/tablegrapicon.png';
 import AllPlayersLoadingSkeleton from '@/Components/loading/AllPlayersLoadingSkeleton';
 import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { getXPTier } from '@/Components/XPStarMilestoneCard';
 
 // Lazy load CloseButton
 const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
@@ -1650,17 +1651,16 @@ const AllPlayersPage = () => {
               }}
             >
               {/* Table Header */}
-              <Box sx={{
+              <Box className="league-header-row" sx={{
                 display: 'flex',
                 alignItems: 'center',
                 position: 'sticky',
                 top: 0,
                 zIndex: 12,
-                py: { xs: 2, sm: 1.5, md: 1.5 },
+                py: 1.5,
                 pl: 0,
                 pr: { xs: 2, sm: 3 },
                 backgroundColor: '#dddddd',
-                // borderRadius: '8px 8px 0 0',
                 borderBottom: '1px solid rgba(0,0,0,0.12)',
                 borderTopLeftRadius: '8px',
                 borderTopRightRadius: '8px',
@@ -1671,22 +1671,22 @@ const AllPlayersPage = () => {
                   aria-haspopup="menu"
                   aria-expanded={allPositionsMenuOpen ? 'true' : undefined}
                   sx={{
-                    width: { xs: 196, sm: 280, md: 320 },
-                    minWidth: { xs: 196, sm: 280, md: 320 },
+                    width: { xs: 170, sm: 230, md: 260 },
+                    minWidth: { xs: 170, sm: 230, md: 260 },
                     flexShrink: 0,
                     display: 'flex',
                     alignItems: 'center',
                     pl: { xs: 2, sm: 3 },
-                    pr: { xs: 1.2, sm: 2 },
+                    pr: { xs: 1, sm: 1.5 },
                     cursor: 'pointer',
                     userSelect: 'none',
                     position: 'sticky',
                     left: 0,
                     zIndex: 3,
                     backgroundColor: '#dddddd',
-                    boxShadow: '8px 0 12px -12px rgba(0,0,0,0.6)',
+                    borderTopLeftRadius: '8px',
                   }}>
-                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
+                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
                     {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
                   </Typography>
                   <Box
@@ -1725,7 +1725,7 @@ const AllPlayersPage = () => {
                   <MenuItem
                     selected={selectedPosition === 'all'}
                     onClick={() => handlePositionChange('all')}
-                    sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
+                    sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
                   >
                     All Positions
                   </MenuItem>
@@ -1741,35 +1741,64 @@ const AllPlayersPage = () => {
                   ))}
                 </Menu>
 
-                {/* Playing Style */}
-                <Box sx={{
-                  width: { xs: 108, sm: 150, md: 180 },
-                  minWidth: { xs: 108, sm: 150, md: 180 },
-                  flexShrink: 0,
-                  pr: { xs: 0.5, sm: 2 },
-                  pl: { xs: 1.5, sm: 2.5 },
-                  display: 'block',
-                }}>
-                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
-                    STYLE
-                  </Typography>
-                </Box>
+                {/* Flexible Spacer pushing the 4 columns to the right side */}
+                <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                {/* Spacer */}
-                <Box sx={{ flex: 1 }} />
+                {/* Right columns container with clean gap between headings */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                  {/* Playing Style Header */}
+                  <Box sx={{
+                    width: { xs: 100, sm: 130, md: 150 },
+                    minWidth: { xs: 100, sm: 130, md: 150 },
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                      STYLE
+                    </Typography>
+                  </Box>
 
-                {/* View Stats */}
-                <Box sx={{ minWidth: { xs: 90, sm: 120 }, textAlign: 'center' }}>
-                  <Typography className="league-table-heading" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
-                    {isMobile ? 'STATS' : 'VIEW STATS'}
-                  </Typography>
-                </Box>
+                  {/* XP Status Header */}
+                  <Box sx={{
+                    width: { xs: 90, sm: 120, md: 135 },
+                    minWidth: { xs: 90, sm: 120, md: 135 },
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                      XP STATUS
+                    </Typography>
+                  </Box>
 
-                {/* XP Points */}
-                <Box sx={{ minWidth: { xs: 90, sm: 120 }, ml: { xs: 1, sm: 1.5, md: 5.5 }, textAlign: 'center' }}>
-                  <Typography className="league-table-heading1" sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>
-                    CAREER xp
-                  </Typography>
+                  {/* View Stats Header */}
+                  <Box sx={{
+                    width: { xs: 75, sm: 100, md: 115 },
+                    minWidth: { xs: 75, sm: 100, md: 115 },
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                      {isMobile ? 'STATS' : 'VIEW STATS'}
+                    </Typography>
+                  </Box>
+
+                  {/* XP Points Header */}
+                  <Box sx={{
+                    width: { xs: 75, sm: 100, md: 115 },
+                    minWidth: { xs: 75, sm: 100, md: 115 },
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
+                      CAREER xp
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
 
@@ -1806,212 +1835,170 @@ const AllPlayersPage = () => {
                   px: 0,
                   pb: { xs: 0, sm: 1.5 },
                   pt: 0.5,
-
                 }}>
                   <List sx={{ p: 0 }}>
                     {sortedPlayers.map((player: Player, idx: number) => {
-                      const isSelected = selectedPlayerId === player.id;
-                      let textColor = '#fff';
-                      let fontWeight = 500;
-                      if (idx === 0) {
-                        textColor = '#fff';
-                        fontWeight = 700;
-                      }
-                      // Alternating row colors
                       const rowBgColor = idx % 2 === 0 ? '#383838' : '#2b2b2b';
                       const rowBgColorHover = idx % 2 === 0 ? '#464646' : '#3a3a3a';
+                      const isLast = idx === sortedPlayers.length - 1;
+                      const playerXp = getCpPoints(player) ?? 0;
+                      const xpStatusTitle = getXPTier(playerXp).title;
 
                       return (
-                        <React.Fragment key={player.id}>
-                          <ListItem
-                            onClick={() => {
-                              setSelectedPlayerId(player.id);
-                              router.push(`/player/${player.id}`);
-                            }}
-                            sx={{
-                              position: 'static',
-                              display: 'flex',
-                              alignItems: 'center',
-                              height: { xs: 58, sm: 72 },
-                              minHeight: { xs: 58, sm: 72 },
-                              py: 0,
-                              pl: 0,
-                              pr: { xs: 2, sm: 3 },
-                              backgroundColor: rowBgColor,
-                              borderBottom: '1px solid rgba(255,255,255,0.08)',
-                              color: textColor,
-                              fontWeight: 'bold',
-                              cursor: 'pointer',
-                              transition: 'background-color 0.2s',
-                              '&:hover': {
-                                backgroundColor: rowBgColorHover,
-                              }
-                            }}
-                          >
-                            {/* Avatar + Name column (fixed width for stable alignment) */}
-                            <Box sx={{
-                              width: { xs: 196, sm: 280, md: 320 },
-                              minWidth: { xs: 196, sm: 280, md: 320 },
-                              height: '100%',
-                              flexShrink: 0,
-                              display: 'flex',
-                              alignItems: 'center',
-                              pl: { xs: 2, sm: 3 },
-                              pr: { xs: 1.2, sm: 2 },
-                              backgroundColor: rowBgColor,
-                              transition: 'background-color 0.2s, box-shadow 0.2s',
-                              '.MuiListItem-root:hover &': {
-                                backgroundColor: rowBgColorHover,
-                                boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
-                              },
-                              position: 'sticky',
-                              left: 0,
-                              zIndex: 3,
-                              boxShadow: '8px 0 12px -12px rgba(0,0,0,0.6)',
-                            }}>
-                              <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
-                                <Box sx={{
-                                  position: 'relative',
-                                  width: 40,
-                                  height: 40,
-                                  borderRadius: '50%',
-                                  overflow: 'hidden',
-                                  backgroundColor: 'rgba(255,255,255,0.1)'
-                                }}>
-                                  {player.profilePicture ? (
-                                    <Box
-                                      component="img"
-                                      src={player.profilePicture}
-                                      alt={player.name}
-                                      sx={{
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover',
-                                        display: 'block',
-                                      }}
-                                    />
-                                  ) : (
-                                    <Box
-                                      sx={{
-                                        width: '100%',
-                                        height: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        backgroundColor: getAvatarBackgroundColor(getPlayerName(player)),
-                                        color: '#fff',
-                                        fontWeight: 700,
-                                        fontSize: 12,
-                                        textTransform: 'uppercase',
-                                        letterSpacing: 0.4,
-                                      }}
-                                    >
-                                      {getAvatarInitials({
-                                        name: getPlayerName(player),
-                                        firstName: player.firstName,
-                                        lastName: player.lastName,
-                                      })}
-                                    </Box>
-                                  )}
-                                </Box>
-                              </ListItemAvatar>
-
-                              <Box sx={{ minWidth: 0, flex: 1 }}>
-                                <Typography
-                                  className="league-table-row-text"
-                                  noWrap
-                                  sx={{
-                                    fontWeight: 700,
-                                    fontSize: { xs: 14, sm: 15, md: 18 },
-                                    color: '#fff',
-                                    lineHeight: 1.4,
-                                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                                    textTransform: 'uppercase',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                  }}
-                                >
-                                  {getPlayerCardStyleName(player)}
-                                </Typography>
-                                <Typography
-                                  className="league-player-pos"
-                                  sx={{
-                                    fontSize: { xs: 12, sm: 12 },
-                                    color: 'rgba(255,255,255,0.6)',
-                                    mt: 0.25,
-                                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif'
-                                  }}
-                                >
-                                  {getPositionLabel(player)}
-                                </Typography>
+                        <ListItem
+                          key={player.id}
+                          className="league-table-row-text league-row"
+                          onClick={() => {
+                            setSelectedPlayerId(player.id);
+                            router.push(`/player/${player.id}`);
+                          }}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            pl: 0,
+                            pr: { xs: 2, sm: 3 },
+                            backgroundColor: rowBgColor,
+                            borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                            color: '#fff',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s',
+                            '&:hover': { backgroundColor: rowBgColorHover },
+                            borderBottomLeftRadius: isLast ? '8px' : 0,
+                            borderBottomRightRadius: isLast ? '8px' : 0,
+                            minHeight: { xs: '58px', sm: '72px' },
+                          }}
+                        >
+                          {/* Avatar + Name column */}
+                          <Box sx={{
+                            width: { xs: 170, sm: 230, md: 260 },
+                            minWidth: { xs: 170, sm: 230, md: 260 },
+                            flexShrink: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            pl: { xs: 2, sm: 3 },
+                            pr: { xs: 1, sm: 1.5 },
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 2,
+                            backgroundColor: rowBgColor,
+                            transition: 'background-color 0.2s',
+                            alignSelf: 'stretch',
+                            '.MuiListItem-root:hover &': {
+                              backgroundColor: rowBgColorHover,
+                            },
+                            borderBottomLeftRadius: isLast ? '8px' : 0,
+                          }}>
+                            <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
+                              <Box sx={{
+                                position: 'relative',
+                                width: { xs: 38, sm: 42 },
+                                height: { xs: 38, sm: 42 },
+                                borderRadius: '50%',
+                                overflow: 'hidden',
+                                backgroundColor: 'rgba(255,255,255,0.1)'
+                              }}>
+                                {player.profilePicture ? (
+                                  <Box
+                                    component="img"
+                                    src={player.profilePicture}
+                                    alt={player.name}
+                                    sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                  />
+                                ) : (
+                                  <Box
+                                    sx={{
+                                      width: '100%',
+                                      height: '100%',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      backgroundColor: getAvatarBackgroundColor(getPlayerName(player)),
+                                      color: '#fff',
+                                      fontWeight: 800,
+                                      fontSize: { xs: 12, sm: 13 },
+                                      textTransform: 'uppercase',
+                                      letterSpacing: 0.4,
+                                    }}
+                                  >
+                                    {getAvatarInitials({
+                                      name: getPlayerName(player),
+                                      firstName: player.firstName,
+                                      lastName: player.lastName,
+                                    })}
+                                  </Box>
+                                )}
                               </Box>
+                            </ListItemAvatar>
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {getPlayerCardStyleName(player)}
+                              </Typography>
+                              <Typography className="league-player-pos" sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                                {getPositionLabel(player)}
+                              </Typography>
                             </Box>
+                          </Box>
 
-                            {/* Playing Style Column */}
+                          {/* Flexible Spacer pushing the 4 columns to the right side */}
+                          <Box sx={{ flex: 1, minWidth: 10 }} />
+
+                          {/* Right columns container with matching clean gap */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                            {/* Playing Style column */}
                             <Box sx={{
-                              width: { xs: 108, sm: 150, md: 180 },
-                              minWidth: { xs: 108, sm: 150, md: 180 },
+                              width: { xs: 100, sm: 130, md: 150 },
+                              minWidth: { xs: 100, sm: 130, md: 150 },
                               flexShrink: 0,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'flex-start',
-                              pr: { xs: 0.5, sm: 2 },
-                              pl: { xs: 1.5, sm: 2.5 }
                             }}>
-                              <Typography
-                                className="league-table-row-text"
-                                sx={{
-                                  fontSize: { xs: 14, sm: 15, md: 18 },
-                                  color: 'rgba(255,255,255,0.9)',
-                                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                                  fontWeight: 'bold',
-                                }}
-                              >
+                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
                                 {getPlayingStyle(player)}
                               </Typography>
                             </Box>
 
-                            {/* Spacer */}
-                            <Box sx={{ flex: 1 }} />
-
-                            {/* View Stats Icon */}
+                            {/* XP Status column */}
                             <Box sx={{
-                              minWidth: { xs: 90, sm: 120 },
+                              width: { xs: 90, sm: 120, md: 135 },
+                              minWidth: { xs: 90, sm: 120, md: 135 },
+                              flexShrink: 0,
                               display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center'
+                              alignItems: 'center',
+                              justifyContent: 'flex-start',
                             }}>
-                              <Image
-                                src={TableGraphIcon}
-                                alt="View Stats"
-                                width={isMobile ? 23 : 30}
-                                height={isMobile ? 23 : 30}
-                                style={{ objectFit: 'contain' }}
-                              />
-                            </Box>
-
-                            {/* XP Points */}
-                            <Box sx={{
-                              minWidth: { xs: 90, sm: 120 },
-                              ml: { xs: 1, sm: 1.5, md: 5.5 },
-                              textAlign: 'center'
-                            }}>
-                              <Typography
-                                className="league-table-row-text"
-                                sx={{
-                                  fontWeight: 800,
-                                  fontSize: { xs: 14, sm: 15, md: 18 },
-                                  color: '#fff',
-                                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                                  textTransform: 'uppercase'
-                                }}
-                              >
-                                {getCpPoints(player)?.toLocaleString()}
+                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                {xpStatusTitle}
                               </Typography>
                             </Box>
-                          </ListItem>
-                        </React.Fragment>
+
+                            {/* View Stats column */}
+                            <Box sx={{
+                              width: { xs: 75, sm: 100, md: 115 },
+                              minWidth: { xs: 75, sm: 100, md: 115 },
+                              flexShrink: 0,
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}>
+                              <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
+                            </Box>
+
+                            {/* XP Points column */}
+                            <Box sx={{
+                              width: { xs: 75, sm: 100, md: 115 },
+                              minWidth: { xs: 75, sm: 100, md: 115 },
+                              flexShrink: 0,
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}>
+                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
+                                {playerXp.toLocaleString()}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </ListItem>
                       );
                     })}
                   </List>
