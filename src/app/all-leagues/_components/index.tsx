@@ -72,6 +72,17 @@ const formatLeagueName = (name: string | undefined | null): string => {
   return `${capitalizedName}`;
 };
 
+const getApiBaseUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl !== 'undefined' && envUrl.trim().length > 0) {
+    return envUrl.trim().replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://localhost:5000';
+  }
+  return 'https://cfbackend.championfootballer.co.uk';
+};
+
 // Safe type guards/utilities
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 const toFiniteNumber = (v: unknown): number | undefined => {
@@ -333,14 +344,6 @@ function LeagueMembersDialog({
 
   useEffect(() => {
     if (!open) return;
-    const getApiBaseUrl = () => {
-      if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-        return 'http://localhost:5000';
-      }
-      return 'https://cfbackend.championfootballer.co.uk';
-    };
-
     fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
       cache: 'no-store',
       headers: { 'Cache-Control': 'no-cache, no-store' }
@@ -1148,14 +1151,17 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     }
   }, [selectedSeasonId, seasons])
 
+  const lastSelectedSeasonIdRef = React.useRef<string | null>(null)
+
   // Update values when selected season changes
   useEffect(() => {
-    if (currentSeason) {
+    if (currentSeason && lastSelectedSeasonIdRef.current !== selectedSeasonId) {
+      lastSelectedSeasonIdRef.current = selectedSeasonId
       setSeasonMaxGames(currentSeason.maxGames || league.maxGames || 20)
       setSeasonShowPoints(currentSeason.showPoints !== false)
       setSeasonIsActive(currentSeason.isActive === true)
     }
-  }, [currentSeason, league.maxGames])
+  }, [currentSeason, selectedSeasonId, league.maxGames])
 
   const handleUpdate = async () => {
     if (!canManageLeagueSettings) return
@@ -1170,9 +1176,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       return
     }
 
+    const finalLeagueActive = seasonIsActive === true ? true : isActive;
+
     const updatedData: LeagueUpdatePayload = {
       name,
-      active: isActive,
+      active: finalLeagueActive,
       maxGames: league.maxGames || 20, // Keep league-level maxGames for backward compatibility
       showPoints,
       admins: adminId ? [adminId] : [],
@@ -1259,14 +1267,14 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     }
 
     const endpointCandidates = [
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}`, body: leaguePatchPayload },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}`, body: leaguePatchPayload },
-      { method: 'POST', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
-      { method: 'POST', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}`, body: leaguePatchPayload },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}`, body: leaguePatchPayload },
+      { method: 'POST', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
+      { method: 'POST', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
     ] as const
 
     let lastMessage = 'Failed to archive season'
@@ -1391,7 +1399,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     setArchivedMatchesLoading(true);
     try {
       const bust = Date.now();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}?bust=${bust}`, {
+      const res = await fetch(`${getApiBaseUrl()}/leagues/${league.id}?bust=${bust}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const jsonUnknown: unknown = await res.json().catch(() => ({}));
@@ -1421,7 +1429,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     if (!token) return;
     setArchivedMatchActionId(matchId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/matches/${matchId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1453,7 +1461,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     if (!window.confirm('Permanently delete this archived match? It cannot be restored later, but player stats/history will stay preserved.')) return;
     setArchivedMatchActionId(matchId);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}`, {
+      const res = await fetch(`${getApiBaseUrl()}/matches/${matchId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -1487,11 +1495,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     setArchivedSeasonActionId(seasonId)
     try {
       const candidates: Array<{ method: 'POST' | 'PATCH'; url: string; body?: Record<string, unknown> }> = [
-        { method: 'POST', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${seasonId}/restore` },
-        { method: 'POST', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${seasonId}/restore` },
-        { method: 'POST', url: `${process.env.NEXT_PUBLIC_API_URL}/api/seasons/${seasonId}/restore` },
-        { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${seasonId}/status`, body: { archived: false } },
-        { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${seasonId}/status`, body: { archived: false } },
+        { method: 'POST', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${seasonId}/restore` },
+        { method: 'POST', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${seasonId}/restore` },
+        { method: 'POST', url: `${getApiBaseUrl()}/api/seasons/${seasonId}/restore` },
+        { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${seasonId}/status`, body: { archived: false } },
+        { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${seasonId}/status`, body: { archived: false } },
       ]
 
       let done = false
@@ -1547,10 +1555,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     setArchivedSeasonActionId(seasonId)
     try {
       const candidates = [
-        { method: 'DELETE', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${seasonId}` },
-        { method: 'DELETE', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${seasonId}` },
-        { method: 'DELETE', url: `${process.env.NEXT_PUBLIC_API_URL}/api/seasons/${seasonId}` },
-        { method: 'DELETE', url: `${process.env.NEXT_PUBLIC_API_URL}/seasons/${seasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${seasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${seasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/api/seasons/${seasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/seasons/${seasonId}` },
       ] as const
 
       let done = false
@@ -1667,9 +1675,9 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     if (!confirmed) return
 
     const attempts = [
-      `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}/leave`,
-      `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}/leave`,
-      `${process.env.NEXT_PUBLIC_API_URL}/api/seasons/${selectedSeasonId}/leave`,
+      `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/leave`,
+      `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/leave`,
+      `${getApiBaseUrl()}/api/seasons/${selectedSeasonId}/leave`,
     ]
 
     let success = false
@@ -1722,10 +1730,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     };
 
     const statusEndpoints = [
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}`, body: statusPayload },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}`, body: statusPayload },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: statusPayload },
-      { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: statusPayload }
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}`, body: statusPayload },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}`, body: statusPayload },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: statusPayload },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: statusPayload }
     ] as const;
 
     let saved = false;
@@ -1765,10 +1773,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
           status: 'inactive'
         };
         const deactivateEndpoints = [
-          { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${other.id}`, body: deactivatePayload },
-          { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${other.id}`, body: deactivatePayload },
-          { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${league.id}/seasons/${other.id}/status`, body: deactivatePayload },
-          { method: 'PATCH', url: `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/seasons/${other.id}/status`, body: deactivatePayload }
+          { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${other.id}`, body: deactivatePayload },
+          { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${other.id}`, body: deactivatePayload },
+          { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${other.id}/status`, body: deactivatePayload },
+          { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${other.id}/status`, body: deactivatePayload }
         ] as const;
 
         for (const endpoint of deactivateEndpoints) {
