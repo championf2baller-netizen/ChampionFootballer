@@ -690,8 +690,6 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
         }
       }
 
-      toast.success(successMessage);
-
       // Clear caches before redirecting to the newly-created season table
       try {
         leagueAPI.invalidateCache();

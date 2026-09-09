@@ -3301,7 +3301,7 @@ function AllLeagues() {
         }
       }
     }
-  }, [adminSettingsLeague, leagues, selectedLeague]);
+  }, [adminSettingsLeague?.id, leagues, selectedLeague?.id]);
 
   // Dynamic years: extract from createdAt or updatedAt, show all years that have leagues.
   const yearOptions = useMemo(() => {
@@ -4271,7 +4271,6 @@ function AllLeagues() {
       }));
       dispatchLeagueMutationEvent('league-updated', { leagueId, reason: 'season-created-reactivated' });
 
-      toast.success(successMessage);
       await fetchAllLeagues();
 
       const params = new URLSearchParams();

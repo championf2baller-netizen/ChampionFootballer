@@ -245,8 +245,12 @@ export default function FetchAuthMonitor() {
         }
         return res;
       } catch (err) {
-        if (debug()) console.error("[FetchAuthMonitor] Patch error, falling back", err);
-        return originalFetch(input, init);
+        if (debug()) console.error("[FetchAuthMonitor] Fetch error, falling back", err);
+        try {
+          return await originalFetch(input, init);
+        } catch {
+          throw err;
+        }
       }
     };
 
