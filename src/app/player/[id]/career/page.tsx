@@ -3410,6 +3410,7 @@ export default function CareerPage() {
                                     domain={[0, maxCumulativePoints]}
                                   />
                                   <Tooltip
+                                    isAnimationActive={false}
                                     content={({ active, payload, label }) => {
                                       if (!active || !payload || !payload.length) return null;
                                       const item = payload[0].payload;
@@ -3463,6 +3464,7 @@ export default function CareerPage() {
                                     name="Total XP Points"
                                     maxBarSize={35}
                                     radius={[3, 3, 0, 0]}
+                                    isAnimationActive={false}
                                   />
 
                                   {/* Line for cumulative points - Magenta/Pink */}
@@ -3475,6 +3477,7 @@ export default function CareerPage() {
                                     strokeWidth={2}
                                     dot={{ r: 3, stroke: themeColors.chartLine, strokeWidth: 1, fill: themeColors.chartLine }}
                                     activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: themeColors.chartLine }}
+                                    isAnimationActive={false}
                                   />
                                 </ComposedChart>
                               </ResponsiveContainer>
@@ -3680,6 +3683,7 @@ export default function CareerPage() {
                                 fillOpacity={0.2}
                                 strokeWidth={2}
                                 dot={{ r: 2, fill: themeColors.chartBar }}
+                                isAnimationActive={false}
                               />
 
                               {/* League Average - Pink */}
@@ -3691,9 +3695,11 @@ export default function CareerPage() {
                                 fillOpacity={0.2}
                                 strokeWidth={2}
                                 dot={{ r: 2, fill: themeColors.pink }}
+                                isAnimationActive={false}
                               />
 
                               <Tooltip
+                                isAnimationActive={false}
                                 contentStyle={{
                                   background: themeColors.surfaceAlt,
                                   border: `1px solid ${themeColors.border}`,
@@ -3814,8 +3820,10 @@ export default function CareerPage() {
                                   endAngle={450}
                                   label={false}
                                   labelLine={false}
+                                  isAnimationActive={false}
                                 />
                                 <Tooltip
+                                  isAnimationActive={false}
                                   content={({ active, payload }: any) => {
                                     if (!active || !payload || !payload.length) return null;
                                     const entry = payload[0];
