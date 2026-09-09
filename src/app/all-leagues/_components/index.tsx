@@ -126,11 +126,15 @@ const normalizeMatches = (v: unknown): Match[] => {
   if (!Array.isArray(v)) return [];
   return v.map((item): Match => {
     const r = isRecord(item) ? item : {};
-    const str = (k: string, fb = ''): string => (typeof r[k] === 'string' ? (r[k] as string) : fb);
+    const str = (k: string, fb = ''): string => (typeof r[k] === 'string' ? (r[k] as string) : (typeof r[k] === 'number' ? String(r[k]) : fb));
     const num = (k: string): number | undefined => (typeof r[k] === 'number' ? (r[k] as number) : undefined);
     const bool = (k: string, fb = false): boolean => (typeof r[k] === 'boolean' ? (r[k] as boolean) : fb);
+    const seasonId = str('seasonId') || str('season_id') || (isRecord(r['season']) ? String((r['season'] as any).id || '') : '');
+
     return {
+      ...(r as any),
       id: str('id'),
+      seasonId,
       date: str('date'),
       location: str('location'),
       status: str('status'),
@@ -138,14 +142,14 @@ const normalizeMatches = (v: unknown): Match[] => {
       awayTeamName: str('awayTeamName'),
       homeTeamGoals: num('homeTeamGoals'),
       awayTeamGoals: num('awayTeamGoals'),
-      availableUsers: [],
-      homeTeamUsers: [],
-      awayTeamUsers: [],
+      availableUsers: Array.isArray(r['availableUsers']) ? r['availableUsers'] : [],
+      homeTeamUsers: Array.isArray(r['homeTeamUsers']) ? r['homeTeamUsers'] : [],
+      awayTeamUsers: Array.isArray(r['awayTeamUsers']) ? r['awayTeamUsers'] : [],
       end: str('end'),
       active: bool('active', true),
       awayTeamImage: str('awayTeamImage'),
       homeTeamImage: str('homeTeamImage'),
-    };
+    } as any;
   });
 };
 
@@ -371,21 +375,18 @@ function LeagueMembersDialog({
     }
   }, [open, openSettingsOnOpen, league, currentUserId])
 
+  const isAdmin = league ? (league.adminId === currentUserId || (league.administrators || []).some((a) => a.id === currentUserId)) : false
+
   const availableSeasonsForCurrentUser = useMemo(() => {
-    if (!league || !currentUserId) return [] as Season[]
+    if (!league) return [] as Season[]
     const leagueWithSeasons = league as League & { seasons?: Season[] }
     const seasons = Array.isArray(leagueWithSeasons.seasons) ? leagueWithSeasons.seasons : []
-    const userId = String(currentUserId).trim()
 
-    return seasons
-      .filter((season) => !Boolean(season.archived) && !Boolean((season as Season & { deleted?: boolean }).deleted))
-      .filter((season) => {
-        const roster = Array.isArray(season.members) && season.members.length > 0
-          ? season.members
-          : (Array.isArray(season.players) ? season.players : [])
-        return roster.some((member) => String(member?.id || '').trim() === userId)
-      })
-      .sort((a, b) => {
+    const validSeasons = seasons.filter((season) => !Boolean((season as Season & { deleted?: boolean }).deleted))
+
+    // If user is league admin, show all seasons (including archived)
+    if (isAdmin) {
+      return validSeasons.sort((a, b) => {
         const activeA = a.isActive ? 1 : 0
         const activeB = b.isActive ? 1 : 0
         if (activeA !== activeB) return activeB - activeA
@@ -394,13 +395,54 @@ function LeagueMembersDialog({
         if (numA !== numB) return numB - numA
         return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' })
       })
-  }, [league, currentUserId])
+    }
+
+    // For non-admin player members, filter seasons where this user is registered or played
+    const userSeasons = validSeasons.filter((season) => {
+      const seasonIdStr = String(season.id || '')
+      const roster = Array.isArray(season.players) && season.players.length > 0
+        ? season.players
+        : (Array.isArray(season.members) ? season.members : [])
+
+      const isRegistered = roster.some((p: any) => {
+        const pid = String(p?.id || p?.userId || p?.user?.id || p || '')
+        return pid === String(currentUserId)
+      })
+      if (isRegistered) return true
+
+      // Check if user played in any match belonging to this season
+      const userPlayedInSeason = (league.matches || []).some((m: any) => {
+        const matchSeasonId = String(m.seasonId || m.season_id || m.season?.id || '')
+        if (matchSeasonId !== seasonIdStr) return false
+
+        const containers = [m.teamA, m.teamB, m.players, m.playerStats, m.stats, m.team1, m.team2, m.homeTeamUsers, m.awayTeamUsers, m.availableUsers]
+        return containers.some((t) => {
+          if (!Array.isArray(t)) return false
+          return t.some((p: any) => String(p?.userId || p?.id || p?.player?.id || p || '') === String(currentUserId))
+        })
+      })
+
+      return userPlayedInSeason
+    })
+
+    const seasonsToUse = userSeasons.length > 0 ? userSeasons : validSeasons
+
+    return seasonsToUse.sort((a, b) => {
+      const activeA = a.isActive ? 1 : 0
+      const activeB = b.isActive ? 1 : 0
+      if (activeA !== activeB) return activeB - activeA
+      const numA = Number(a.seasonNumber || 0)
+      const numB = Number(b.seasonNumber || 0)
+      if (numA !== numB) return numB - numA
+      return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' })
+    })
+  }, [league, isAdmin, currentUserId])
 
   const getSeasonDisplayName = useCallback((season: Season): string => {
     const baseName = season.name?.trim()
-    if (baseName) return baseName
-    if (season.seasonNumber) return `Season ${season.seasonNumber}`
-    return 'Season'
+    const label = baseName || (season.seasonNumber ? `Season ${season.seasonNumber}` : 'Season')
+    if (season.archived) return `${label} (Archived)`
+    return label
   }, [])
 
   const selectedLeaveSeason = useMemo(
@@ -433,24 +475,108 @@ function LeagueMembersDialog({
     });
   }, [availableSeasonsKey, league?.id, open]);
 
-  if (!league) return null
+  const displayedSeasonMembers = useMemo(() => {
+    if (selectedLeaveSeason) {
+      const seasonIdStr = String(selectedLeaveSeason.id || '')
+      const rawRoster = Array.isArray(selectedLeaveSeason.players) && selectedLeaveSeason.players.length > 0
+        ? selectedLeaveSeason.players
+        : (Array.isArray(selectedLeaveSeason.members) && selectedLeaveSeason.members.length > 0 ? selectedLeaveSeason.members : null)
 
-  const isAdmin = league.adminId === currentUserId || (league.administrators || []).some((a) => a.id === currentUserId)
-  const memberCount = (league.members && Array.isArray(league.members)) ? league.members.filter((m: any) => !(m.isGuest || (m.email && String(m.email).toLowerCase().includes('guest')) || m.provider === 'guest' || (m.lastName && String(m.lastName).toLowerCase().includes('guest')))).length : (typeof league.memberCount === 'number' ? league.memberCount : 0)
-  const matchCount = typeof (league as any).totalMatchCount === 'number'
-    ? (league as any).totalMatchCount
-    : (typeof ((league as any).computedStatus as any)?.totalMatchCount === 'number'
-      ? ((league as any).computedStatus as any).totalMatchCount
-      : (league.matches ? league.matches.filter((m: any) => {
-          const isDeleted = Boolean(m.deleted || m.isDeleted);
-          const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase());
-          if (!isDeleted) return true;
-          if (isDeleted && isResult) return true;
-          return false;
-        }).length : 0));
-  const leagueAdmin = (league.members || []).find((m) => m.id === league.adminId)
+      if (rawRoster && rawRoster.length > 0) {
+        const leagueMembersMap = new Map<string, any>()
+        ;(league?.members || []).forEach((m: any) => {
+          if (m?.id) leagueMembersMap.set(String(m.id), m)
+        })
+
+        const mappedRoster = rawRoster.map((item: any) => {
+          const u = item?.user || item || {}
+          const id = String(u.id || item.userId || item.id || '')
+          if (id && leagueMembersMap.has(id)) {
+            return leagueMembersMap.get(id)
+          }
+          return { ...u, id: id || u.id }
+        })
+        return mappedRoster
+      }
+
+      // If season object doesn't carry a pre-populated players array, look at matches in this season to extract participating players
+      const seasonMatches = (league?.matches || []).filter((m: any) => {
+        const matchSeasonId = String(m.seasonId || m.season_id || m.season?.id || '')
+        return matchSeasonId === seasonIdStr
+      })
+      if (seasonMatches.length > 0) {
+        const seasonPlayerIds = new Set<string>()
+        seasonMatches.forEach((m: any) => {
+          const containers = [m.teamA, m.teamB, m.players, m.playerStats, m.stats, m.team1, m.team2, m.homeTeamUsers, m.awayTeamUsers, m.availableUsers]
+          containers.forEach((t) => {
+            if (Array.isArray(t)) {
+              t.forEach((p: any) => {
+                const pid = String(p?.userId || p?.id || p?.player?.id || p || '')
+                if (pid) seasonPlayerIds.add(pid)
+              })
+            }
+          })
+        })
+
+        if (seasonPlayerIds.size > 0) {
+          const matchedMembers = (league?.members || []).filter((m: any) => seasonPlayerIds.has(String(m.id)))
+          if (matchedMembers.length > 0) return matchedMembers
+        }
+      }
+    }
+    return league?.members || []
+  }, [selectedLeaveSeason, league?.members, league?.matches])
+
+  const filteredSeasonMembers = useMemo(() => {
+    const map = new Map<string, any>()
+    for (const item of displayedSeasonMembers) {
+      const u = item?.user || item || {}
+      const id = String(u.id || item.userId || item.id || '')
+      if (!id) continue
+      const firstName = u.firstName || item.firstName || ''
+      const lastName = u.lastName || item.lastName || ''
+      const email = u.email || item.email || ''
+      const provider = u.provider || item.provider || ''
+      const isGuest = Boolean(
+        item.isGuest || u.isGuest ||
+        (email && String(email).toLowerCase().includes('guest')) ||
+        provider === 'guest' ||
+        (lastName && String(lastName).toLowerCase().includes('guest'))
+      )
+      if (!isGuest && !map.has(id)) {
+        map.set(id, { ...u, id, firstName, lastName, email, provider, isGuest })
+      }
+    }
+    return Array.from(map.values())
+  }, [displayedSeasonMembers])
+
+  const memberCount = filteredSeasonMembers.length
+
+  const displayedSeasonMatches = useMemo(() => {
+    const allMatches = league?.matches || []
+    if (selectedLeaveSeason?.id) {
+      const targetSeasonIdStr = String(selectedLeaveSeason.id)
+      return allMatches.filter((m: any) => {
+        const matchSeasonId = String(m.seasonId || m.season_id || m.season?.id || '')
+        return matchSeasonId === targetSeasonIdStr
+      })
+    }
+    return allMatches
+  }, [league?.matches, selectedLeaveSeason?.id])
+
+  const matchCount = displayedSeasonMatches.filter((m: any) => {
+    const isDeleted = Boolean(m.deleted || m.isDeleted)
+    const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase())
+      || (m.homeTeamGoals != null && m.awayTeamGoals != null)
+      || Boolean(m.isResult || m.hasStats)
+    if (!isDeleted) return true
+    if (isDeleted && isResult) return true
+    return false
+  }).length
+
+  const leagueAdmin = league ? ((league.members || []).find((m) => m.id === league.adminId)
     || (league.administrators || []).find((a) => a.id === league.adminId)
-    || (league.administrators || [])[0]
+    || (league.administrators || [])[0]) : null
   const leagueAdminName = `${leagueAdmin?.firstName || ''} ${leagueAdmin?.lastName || ''}`.trim() || 'Not available'
 
   const handleRemoveMember = (memberId: string, memberName: string) => {
@@ -465,6 +591,8 @@ function LeagueMembersDialog({
       onLeaveLeague()
     }
   }
+
+  if (!league) return null
 
   return (
     <Dialog
@@ -583,152 +711,150 @@ function LeagueMembersDialog({
             </Alert>
           </Box>
         )}
-        {!isAdmin && (
-          <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                border: '1px solid rgba(255,255,255,0.08)',
-                bgcolor: 'rgba(255,255,255,0.03)',
-              }}
-            >
-              <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, mb: 1 }}>
-                Select Season
-              </Typography>
-              <FormControl fullWidth size="small">
-                <Select
-                  value={selectedLeaveSeasonId}
-                  onChange={(e) => setSelectedLeaveSeasonId(String(e.target.value || ''))}
-                  displayEmpty
-                  MenuProps={{
-                    ...dropdownMenuBaseProps,
-                    PaperProps: {
-                      sx: {
-                        ...dropdownPaperBaseSx,
-                        bgcolor: '#111827',
+        <Box sx={{ p: { xs: 2, sm: 3 }, display: 'flex', flexDirection: 'column', gap: 2, pb: 1 }}>
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              border: '1px solid rgba(255,255,255,0.08)',
+              bgcolor: 'rgba(255,255,255,0.03)',
+            }}
+          >
+            <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, mb: 1 }}>
+              Select Season
+            </Typography>
+            <FormControl fullWidth size="small">
+              <Select
+                value={selectedLeaveSeasonId}
+                onChange={(e) => setSelectedLeaveSeasonId(String(e.target.value || ''))}
+                displayEmpty
+                MenuProps={{
+                  ...dropdownMenuBaseProps,
+                  PaperProps: {
+                    sx: {
+                      ...dropdownPaperBaseSx,
+                      bgcolor: '#111827',
+                      color: '#E5E7EB',
+                      borderRadius: 2,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      boxShadow: '0 10px 28px rgba(0,0,0,0.45)',
+                      '& .MuiMenuItem-root': {
+                        py: 1,
+                        fontSize: 14,
                         color: '#E5E7EB',
-                        borderRadius: 2,
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        boxShadow: '0 10px 28px rgba(0,0,0,0.45)',
-                        '& .MuiMenuItem-root': {
-                          py: 1,
-                          fontSize: 14,
-                          color: '#E5E7EB',
-                          '&.Mui-selected': {
-                            bgcolor: 'rgba(229,106,22,0.2)',
-                          },
-                          '&.Mui-selected:hover': {
-                            bgcolor: 'rgba(229,106,22,0.28)',
-                          },
-                          '&:hover': {
-                            bgcolor: 'rgba(255,255,255,0.08)',
-                          },
+                        '&.Mui-selected': {
+                          bgcolor: 'rgba(229,106,22,0.2)',
+                        },
+                        '&.Mui-selected:hover': {
+                          bgcolor: 'rgba(229,106,22,0.28)',
+                        },
+                        '&:hover': {
+                          bgcolor: 'rgba(255,255,255,0.08)',
                         },
                       },
                     },
-                  }}
-                  sx={{
-                    bgcolor: '#0f172a',
-                    color: '#E5E7EB',
-                    borderRadius: 1.5,
-                    '& .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(255,255,255,0.2)',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: 'rgba(229,106,22,0.6)',
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: '#e56a16',
-                    },
-                    '& .MuiSvgIcon-root': {
-                      color: '#9CA3AF',
-                    },
-                  }}
-                >
-                  {availableSeasonsForCurrentUser.length > 0 ? (
-                    availableSeasonsForCurrentUser.map((season) => (
-                      <MenuItem key={season.id} value={season.id}>
-                        {getSeasonDisplayName(season)} {season.isActive ? '(Active)' : ''}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem value="" disabled>
-                      <Typography className="empty-state-message" variant="body2">
-                        No season membership found
-                      </Typography>
+                  },
+                }}
+                sx={{
+                  bgcolor: '#0f172a',
+                  color: '#E5E7EB',
+                  borderRadius: 1.5,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(255,255,255,0.2)',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'rgba(229,106,22,0.6)',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#e56a16',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#9CA3AF',
+                  },
+                }}
+              >
+                {availableSeasonsForCurrentUser.length > 0 ? (
+                  availableSeasonsForCurrentUser.map((season) => (
+                    <MenuItem key={season.id} value={season.id}>
+                      {getSeasonDisplayName(season)} {season.isActive ? '(Active)' : ''}
                     </MenuItem>
-                  )}
-                </Select>
-              </FormControl>
-              <Typography sx={{ mt: 1, color: 'rgba(229,231,235,0.68)', fontSize: 12 }}>
-                {selectedLeaveSeason
-                  ? `Selected: ${getSeasonDisplayName(selectedLeaveSeason)}`
-                  : 'Select a season to leave.'}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                border: '1px solid rgba(255,255,255,0.08)',
-                bgcolor: 'rgba(255,255,255,0.03)',
-              }}
-            >
-              <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                League Admin
-              </Typography>
-              <Typography component="div" sx={{ color: '#E5E7EB', fontSize: 18, fontWeight: 700 }}>
-                {leagueAdminName}
-              </Typography>
-            </Box>
-
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    bgcolor: 'rgba(255,255,255,0.03)',
-                  }}
-                >
-                  <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                    Total Players
-                  </Typography>
-                  <Typography sx={{ color: '#E5E7EB', fontSize: 20, fontWeight: 700 }}>
-                    {memberCount}
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={6}>
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    bgcolor: 'rgba(255,255,255,0.03)',
-                  }}
-                >
-                  <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                    Total Matches
-                  </Typography>
-                  <Typography sx={{ color: '#E5E7EB', fontSize: 20, fontWeight: 700 }}>
-                    {matchCount}
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
+                  ))
+                ) : (
+                  <MenuItem value="" disabled>
+                    <Typography className="empty-state-message" variant="body2">
+                      No season membership found
+                    </Typography>
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
+            <Typography sx={{ mt: 1, color: 'rgba(229,231,235,0.68)', fontSize: 12 }}>
+              {selectedLeaveSeason
+                ? `Selected: ${getSeasonDisplayName(selectedLeaveSeason)}`
+                : 'Select a season to filter.'}
+            </Typography>
           </Box>
-        )}
+
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              border: '1px solid rgba(255,255,255,0.08)',
+              bgcolor: 'rgba(255,255,255,0.03)',
+            }}
+          >
+            <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              League Admin
+            </Typography>
+            <Typography component="div" sx={{ color: '#E5E7EB', fontSize: 18, fontWeight: 700 }}>
+              {leagueAdminName}
+            </Typography>
+          </Box>
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  bgcolor: 'rgba(255,255,255,0.03)',
+                }}
+              >
+                <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Total Players
+                </Typography>
+                <Typography sx={{ color: '#E5E7EB', fontSize: 20, fontWeight: 700 }}>
+                  {memberCount}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  bgcolor: 'rgba(255,255,255,0.03)',
+                }}
+              >
+                <Typography sx={{ color: '#9CA3AF', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Total Matches
+                </Typography>
+                <Typography sx={{ color: '#E5E7EB', fontSize: 20, fontWeight: 700 }}>
+                  {matchCount}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
 
         <Typography variant="subtitle2" sx={{ color: '#9CA3AF', px: { xs: 2, sm: 3 }, py: 1.5, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-          League Members
+          League Members ({filteredSeasonMembers.length})
         </Typography>
         <List sx={{ py: 0 }}>
-          {(league.members || []).map((member, index) => {
-            const memberName = `${member.firstName} ${member.lastName}`
+          {filteredSeasonMembers.map((member, index) => {
+            const memberName = `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Player'
             const isLeagueAdmin = member.id === league.adminId || (league.administrators || []).some(a => a.id === member.id)
             const isCurrentUser = member.id === currentUserId
 
@@ -829,16 +955,16 @@ function LeagueMembersDialog({
                       </Tooltip>
                     )}
                   </ListItem>
-                  {index < (league.members?.length || 0) - 1 && (
+                  {index < filteredSeasonMembers.length - 1 && (
                     <Divider sx={{ bgcolor: "rgba(255,255,255,0.08)", mx: 2 }} />
                   )}
                 </Box>
               </Fade>
             )
           })}
-          {(league.members || []).length === 0 && (
+          {filteredSeasonMembers.length === 0 && (
             <Typography className="empty-state-message" variant="body2" sx={{ color: '#9CA3AF', px: { xs: 2, sm: 3 }, py: 2 }}>
-              No members found in this league.
+              No members found for this season.
             </Typography>
           )}
         </List>
@@ -6152,7 +6278,9 @@ function AllLeagues() {
                                   if (Array.isArray(league.matches)) {
                                     return league.matches.filter((m: any) => {
                                       const isDeleted = Boolean(m.deleted || m.isDeleted);
-                                      const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase());
+                                      const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase())
+                                        || (m.homeTeamGoals != null && m.awayTeamGoals != null)
+                                        || Boolean(m.isResult || m.hasStats);
                                       if (!isDeleted) return true;
                                       if (isDeleted && isResult) return true;
                                       return false;
