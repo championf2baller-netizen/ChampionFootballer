@@ -2306,6 +2306,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 <TextField
                   fullWidth
                   type="number"
+                  inputProps={{ min: 0, max: 999 }}
                   value={seasonMaxGames === 0 || seasonMaxGames === '0' ? '' : seasonMaxGames}
                   onFocus={(e) => {
                     e.target.select();
@@ -2313,18 +2314,30 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                       setSeasonMaxGames('');
                     }
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === '') {
                       setSeasonMaxGames('');
                     } else {
-                      const num = Number(val);
-                      setSeasonMaxGames(isNaN(num) ? '' : num);
+                      const cleaned = val.replace(/[^0-9]/g, '').slice(0, 3);
+                      if (cleaned === '') {
+                        setSeasonMaxGames('');
+                      } else {
+                        const num = Math.max(0, Number(cleaned));
+                        setSeasonMaxGames(isNaN(num) ? '' : num);
+                      }
                     }
                   }}
                   onBlur={() => {
-                    if (seasonMaxGames === '' || seasonMaxGames === null || seasonMaxGames === undefined) {
+                    if (seasonMaxGames === '' || seasonMaxGames === null || seasonMaxGames === undefined || Number(seasonMaxGames) < 0) {
                       setSeasonMaxGames(0);
+                    } else {
+                      setSeasonMaxGames(Math.max(0, Math.min(999, Number(seasonMaxGames))));
                     }
                   }}
                   disabled={!selectedSeasonId || !canManageLeagueSettings}
