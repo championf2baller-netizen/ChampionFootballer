@@ -1186,7 +1186,7 @@ export default function CareerPage() {
           setCareerDashboardData(res.data);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
     if (filters.leagueId && filters.leagueId !== 'all') {
       playerAPI
@@ -1197,7 +1197,7 @@ export default function CareerPage() {
             setAllCareerDashboardData(res.data);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     } else {
       setAllCareerDashboardData(null);
     }
@@ -2280,7 +2280,7 @@ export default function CareerPage() {
         if (filters.leagueId && filters.leagueId !== 'all') {
           localStorage.setItem('preferredSeasonId_' + filters.leagueId, seasonFilter);
         }
-      } catch {}
+      } catch { }
     }
   }, [seasonFilter, filters.leagueId]);
 
@@ -3083,7 +3083,7 @@ export default function CareerPage() {
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: -8, md: 0 } }}>
+          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: 2, md: 0 } }}>
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
                 <CircularProgress size={40} sx={{ color: '#00ff88' }} />
