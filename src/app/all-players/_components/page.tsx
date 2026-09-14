@@ -38,6 +38,7 @@ import SearchIcon from '@/Components/images/searchicon.png';
 import TableGraphIcon from '@/Components/images/tablegrapicon.png';
 import AllPlayersLoadingSkeleton from '@/Components/loading/AllPlayersLoadingSkeleton';
 import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { useAuth } from '@/lib/hooks';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 
 // Lazy load CloseButton
@@ -142,6 +143,7 @@ const AllPlayersPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const dispatch = useDispatch<AppDispatch>();
+  const { user } = useAuth();
   const { playedWithPlayers, leaguePlayers, loading, error } = useAppSelector((state) => state.user);
   const token = useAppSelector((state) => state?.auth.token);
   const [searchQuery, setSearchQuery] = useState('');
@@ -186,7 +188,7 @@ const AllPlayersPage = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && selectedLeague && selectedLeague !== 'all') {
-      try { localStorage.setItem('preferredLeagueId', selectedLeague); } catch {}
+      try { localStorage.setItem('preferredLeagueId', selectedLeague); } catch { }
     }
   }, [selectedLeague]);
 
@@ -197,7 +199,7 @@ const AllPlayersPage = () => {
         if (selectedLeague && selectedLeague !== 'all') {
           localStorage.setItem('preferredSeasonId_' + selectedLeague, selectedSeason);
         }
-      } catch {}
+      } catch { }
     }
   }, [selectedSeason, selectedLeague]);
   const [selectedPosition, setSelectedPosition] = useState<string>('all');
@@ -226,7 +228,7 @@ const AllPlayersPage = () => {
           setCmsMap(map);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
@@ -1899,8 +1901,9 @@ const AllPlayersPage = () => {
                 }}>
                   <List sx={{ p: 0 }}>
                     {sortedPlayers.map((player: Player, idx: number) => {
-                      const rowBgColor = idx % 2 === 0 ? '#383838' : '#2b2b2b';
-                      const rowBgColorHover = idx % 2 === 0 ? '#464646' : '#3a3a3a';
+                      const isCurrentUser = String(player.id) === String(user?.id || '');
+                      const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
+                      const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
                       const isLast = idx === sortedPlayers.length - 1;
                       const playerXp = getCpPoints(player) ?? 0;
                       const xpStatusTitle = getXPTier(playerXp).title;
@@ -1908,7 +1911,7 @@ const AllPlayersPage = () => {
                       return (
                         <ListItem
                           key={player.id}
-                          className="league-table-row-text league-row"
+                          className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
                           onClick={() => {
                             setSelectedPlayerId(player.id);
                             router.push(`/player/${player.id}`);
@@ -1919,7 +1922,7 @@ const AllPlayersPage = () => {
                             pl: 0,
                             pr: { xs: 2, sm: 3 },
                             backgroundColor: rowBgColor,
-                            borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                            borderBottom: 'none',
                             color: '#fff',
                             cursor: 'pointer',
                             transition: 'background-color 0.2s',
@@ -1942,6 +1945,7 @@ const AllPlayersPage = () => {
                             left: 0,
                             zIndex: 2,
                             backgroundColor: rowBgColor,
+                            boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
                             transition: 'background-color 0.2s',
                             alignSelf: 'stretch',
                             '.MuiListItem-root:hover &': {

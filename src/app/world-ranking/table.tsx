@@ -675,10 +675,10 @@ export default function WorldRankingTable() {
                             userSelect: 'none',
                             bgcolor: '#dddddd !important',
                             color: '#000000 !important',
-                            fontWeight: 800,
-                            fontSize: 13,
-                            letterSpacing: 0.5,
-                            fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
+                            fontWeight: 600,
+                            fontSize: 15,
+                            letterSpacing: 0,
+                            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                             textTransform: 'uppercase',
                             py: 1.5,
                             minWidth: colWidths[i],
@@ -722,8 +722,8 @@ export default function WorldRankingTable() {
               <TableBody>
                 {filtered.map((p, idx) => {
                   const isMe = user?.id === p.id;
-                  const rowBg = isMe ? '#114a3e' : (idx % 2 === 0 ? '#242424' : '#1e1e1e');
-                  const rowHoverBg = isMe ? '#165b4c' : '#2c2c2c';
+                  const rowBg = isMe ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
+                  const rowHoverBg = isMe ? '#165b4c' : (idx % 2 === 0 ? '#444444' : '#383838');
                   return (
                     <TableRow
                       key={p.id}

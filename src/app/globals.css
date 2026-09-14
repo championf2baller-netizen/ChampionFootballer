@@ -285,13 +285,13 @@ input:-webkit-autofill:active {
 }
 
 .league-table-heading {
-  font-family: Roboto, Helvetica, Arial, sans-serif !important;
-  font-weight: 800 !important;
-  /* Extra Bold */
+  font-family: var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important;
+  font-weight: 600 !important;
+  /* SemiBold */
   font-style: normal !important;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.25 !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0 !important;
   text-transform: uppercase !important;
   text-align: center !important;
   vertical-align: middle;
@@ -301,13 +301,13 @@ input:-webkit-autofill:active {
 }
 
 .league-table-heading1 {
-  font-family: Roboto, Helvetica, Arial, sans-serif !important;
-  font-weight: 800 !important;
-  /* Extra Bold */
+  font-family: var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important;
+  font-weight: 600 !important;
+  /* SemiBold */
   font-style: normal !important;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.25 !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0 !important;
   text-transform: none !important;
   text-align: center !important;
   vertical-align: middle;
@@ -319,7 +319,7 @@ input:-webkit-autofill:active {
 @media (max-width: 767px) {
   .league-table-heading,
   .league-table-heading1 {
-    font-size: 11px !important;
+    font-size: 12px !important;
   }
 }
 

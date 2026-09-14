@@ -4942,7 +4942,7 @@ export default function LeagueDetailPage() {
                                                     <MenuItem
                                                         selected={selectedMemberPosition === 'all'}
                                                         onClick={() => handleMemberPositionChange('all')}
-                                                        sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
+                                                        sx={{ color: '#000000', fontWeight: 600, fontSize: 14, textTransform: 'uppercase', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}
                                                     >
                                                         All Positions
                                                     </MenuItem>
@@ -5035,8 +5035,9 @@ export default function LeagueDetailPage() {
                                                         const firstName = member.firstName || '';
                                                         const lastName = member.lastName || '';
                                                         const memberDisplayName = `${firstName} ${lastName}`.trim();
-                                                        const rowBgColor = idx % 2 === 0 ? '#383838' : '#2b2b2b';
-                                                        const rowBgColorHover = idx % 2 === 0 ? '#464646' : '#3a3a3a';
+                                                        const isCurrentUser = String(member.id) === String(user?.id || '');
+                                                        const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
+                                                        const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
                                                         const isLast = idx === filteredMembersForTable.length - 1;
                                                         const memberXp = getEffectiveMemberXP(member);
                                                         const xpStatusTitle = getXPTier(memberXp).title;
@@ -5044,7 +5045,7 @@ export default function LeagueDetailPage() {
                                                         return (
                                                             <ListItem
                                                                 key={member.id}
-                                                                className="league-table-row-text league-row"
+                                                                className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
                                                                 onClick={() => router.push(`/player/${member.id}`)}
                                                                 sx={{
                                                                     display: 'flex',
@@ -5052,7 +5053,7 @@ export default function LeagueDetailPage() {
                                                                     pl: 0,
                                                                     pr: { xs: 2, sm: 3 },
                                                                     backgroundColor: rowBgColor,
-                                                                    borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                                                                    borderBottom: 'none',
                                                                     color: '#fff',
                                                                     cursor: 'pointer',
                                                                     transition: 'background-color 0.2s',
@@ -5075,6 +5076,7 @@ export default function LeagueDetailPage() {
                                                                     left: 0,
                                                                     zIndex: 2,
                                                                     backgroundColor: rowBgColor,
+                                                                    boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
                                                                     transition: 'background-color 0.2s',
                                                                     alignSelf: 'stretch',
                                                                     '.MuiListItem-root:hover &': {
@@ -6856,16 +6858,16 @@ export default function LeagueDetailPage() {
 
                                                 <>
                                                     <div className="grid mt-0 grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-4 py-3 bg-table-header text-black league-header-row league-header-inset font-bold sticky top-0 z-20 ">
-                                                        <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>#</div>
-                                                        <div className="pl-0 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>NAME</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>MOTM</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>P</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>W</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>D</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>L</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>GD</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>W%</div>
-                                                        <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
+                                                        <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#000000' }}>#</div>
+                                                        <div className="pl-0 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#000000' }}>NAME</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>MOTM</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>P</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>W</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>D</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>L</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>GD</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>W%</div>
+                                                        <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#000000' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
                                                     </div>
                                                     {/* Full width border alag */}
                                                     <div className="w-full border-b border-border" />
