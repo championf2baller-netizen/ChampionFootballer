@@ -18,6 +18,7 @@ import {
 import { SelectChangeEvent } from '@mui/material/Select';
 import dayjs, { Dayjs } from 'dayjs';
 import { useAuth } from '@/lib/hooks';
+import { TokenManager } from '@/lib/tokenManager';
 import { useParams, useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -673,15 +674,30 @@ export default function ScheduleMatchPage() {
   );
 
   const fetchLeague = useCallback(async () => {
-    if (!leagueId || !token) return;
+    const activeToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
+    if (!leagueId || !activeToken) return;
     try {
       setLoading(true);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/${leagueId}?includeMatches=0`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${activeToken}` }
       });
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.message || 'Failed to load league');
-      setLeague({ id: json.league.id, name: json.league.name, active: json.league.active });
+      
+      const leagueObj = json.league || {};
+      const statusStr = String(leagueObj.status || '').toLowerCase();
+      const isExplicitlyInactive = 
+        leagueObj.active === false || 
+        leagueObj.isActive === false || 
+        leagueObj.archived === true || 
+        statusStr === 'inactive' || 
+        statusStr === 'archived';
+
+      setLeague({ 
+        id: leagueObj.id, 
+        name: leagueObj.name, 
+        active: !isExplicitlyInactive 
+      });
     } catch (e: unknown) {
       if (e instanceof Error) {
         setError(e.message);
@@ -689,7 +705,6 @@ export default function ScheduleMatchPage() {
         setError('Unable to load league');
       }
     } finally {
-
       setLoading(false);
     }
   }, [leagueId, token]);
@@ -699,9 +714,18 @@ export default function ScheduleMatchPage() {
   }, [fetchLeague]);
 
   const handleCreate = async () => {
-    if (!league) return;
     if (!location.trim()) {
       toast.error('Location required');
+      return;
+    }
+    const activeToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
+    if (!activeToken) {
+      toast.error('Authentication required. Please refresh or log in.');
+      return;
+    }
+    const targetLeagueId = league?.id || leagueId;
+    if (!targetLeagueId) {
+      toast.error('League ID missing');
       return;
     }
     setSaving(true);
@@ -722,10 +746,10 @@ export default function ScheduleMatchPage() {
       formData.append('awayCaptain', '');
 
       const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/leagues/${league.id}/matches`,
+        `${process.env.NEXT_PUBLIC_API_URL}/leagues/${targetLeagueId}/matches`,
         {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${activeToken}` },
           body: formData
         }
       );
@@ -1432,12 +1456,12 @@ export default function ScheduleMatchPage() {
                   mt: 1.5
                 }}
               >
-                <Tooltip title={!league.active ? 'League is inactive' : ''} placement="top">
+                <Tooltip title={league && league.active === false ? 'League is inactive' : ''} placement="top">
                   {/* ← span now takes 100% of the grid column */}
                   <span style={{ display: 'inline-block', width: '100%' }}>
                     <GradientButton
                       loading={saving}
-                      disabled={!league.active}
+                      disabled={saving || (league !== null && league.active === false)}
                       onClick={handleCreate}
                     >
                       Save Match
