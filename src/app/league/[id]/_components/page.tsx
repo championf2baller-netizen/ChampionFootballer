@@ -5319,6 +5319,9 @@ export default function LeagueDetailPage() {
                                                                 background: '#222',
                                                                 cursor: 'pointer',
                                                                 border: '1px solid #fff',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                height: '100%',
                                                                 '& .MuiCardContent-root': {
                                                                     pb: 0
                                                                 },
@@ -5360,50 +5363,65 @@ export default function LeagueDetailPage() {
                                                                 </Typography>
                                                             </Box>
 
-                                                            <CardContent sx={{ p: 0 }}>
+                                                            <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                                                 {/* Top Section - Teams & VS */}
                                                                 <Box sx={{
                                                                     pl: 1,
                                                                     pr: 1,
-                                                                    py: 0,
+                                                                    pt: 1.25,
+                                                                    pb: 0.25,
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     justifyContent: 'space-between',
                                                                     borderBottom: '1px solid #fff',
-                                                                    gap: 0
+                                                                    gap: 0,
+                                                                    minHeight: { xs: '102px', sm: '102px' },
+                                                                    maxHeight: { xs: '102px', sm: '102px' },
+                                                                    boxSizing: 'border-box'
                                                                 }}>
                                                                     {/* Home Team */}
                                                                     <Box sx={{
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
+                                                                        width: '31%',
+                                                                        maxWidth: '31%',
                                                                         minWidth: 0,
-                                                                        // width: '30%'
+                                                                        px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.homeTeamImage || HomeTeamImage)}
                                                                             alt={match.homeTeamName}
-                                                                            width={65}
-                                                                            height={65}
+                                                                            width={50}
+                                                                            height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Typography sx={{
-                                                                            color: 'white',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                                            lineHeight: 1.2,
-                                                                            textAlign: 'center',
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                            display: '-webkit-box',
-                                                                            WebkitLineClamp: 2,
-                                                                            WebkitBoxOrient: 'vertical',
-                                                                            wordBreak: 'break-word',
-                                                                            maxWidth: '100%',
+                                                                        <Box sx={{
+                                                                            height: { xs: '2.4em', sm: '2.4em' },
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                             width: '100%',
+                                                                            mt: 0.25,
                                                                         }}>
-                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                                        </Typography>
+                                                                            <Typography sx={{
+                                                                                color: 'white',
+                                                                                fontWeight: 600,
+                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                                lineHeight: 1.15,
+                                                                                textAlign: 'center',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                display: '-webkit-box',
+                                                                                WebkitLineClamp: 2,
+                                                                                WebkitBoxOrient: 'vertical',
+                                                                                wordBreak: 'break-word',
+                                                                                maxWidth: '100%',
+                                                                                width: '100%',
+                                                                            }}>
+                                                                                {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
 
                                                                     {/* VS Center */}
@@ -5412,12 +5430,15 @@ export default function LeagueDetailPage() {
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
+                                                                        width: '38%',
+                                                                        maxWidth: '38%',
+                                                                        flexShrink: 0,
                                                                         minWidth: 0
                                                                     }}>
                                                                         <Typography sx={{
                                                                             fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
                                                                             fontWeight: 600,
-                                                                            fontSize: '2rem',
+                                                                            fontSize: { xs: '1.4rem', sm: '1.8rem' },
                                                                             lineHeight: 0.5,
                                                                             letterSpacing: '-2px',
                                                                             textTransform: 'uppercase',
@@ -5427,9 +5448,10 @@ export default function LeagueDetailPage() {
                                                                         </Typography>
                                                                         <Typography sx={{
                                                                             color: '#ddd',
-                                                                            fontSize: '0.85rem',
+                                                                            fontSize: { xs: '0.72rem', sm: '0.78rem' },
                                                                             textAlign: 'center',
-                                                                            mt: 1
+                                                                            mt: 1,
+                                                                            whiteSpace: 'nowrap'
                                                                         }}>
                                                                             {durationMinutes} Minutes Match
                                                                         </Typography>
@@ -5440,40 +5462,52 @@ export default function LeagueDetailPage() {
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
+                                                                        width: '31%',
+                                                                        maxWidth: '31%',
                                                                         minWidth: 0,
-                                                                        // width: '30%'
+                                                                        px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.awayTeamImage || AwayTeamImage)}
                                                                             alt={match.awayTeamName}
-                                                                            width={65}
-                                                                            height={65}
+                                                                            width={50}
+                                                                            height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Typography sx={{
-                                                                            color: 'white',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                                            lineHeight: 1.2,
-                                                                            textAlign: 'center',
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                            display: '-webkit-box',
-                                                                            WebkitLineClamp: 2,
-                                                                            WebkitBoxOrient: 'vertical',
-                                                                            wordBreak: 'break-word',
-                                                                            maxWidth: '100%',
+                                                                        <Box sx={{
+                                                                            height: { xs: '2.4em', sm: '2.4em' },
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                             width: '100%',
+                                                                            mt: 0.25,
                                                                         }}>
-                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                                        </Typography>
+                                                                            <Typography sx={{
+                                                                                color: 'white',
+                                                                                fontWeight: 600,
+                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                                lineHeight: 1.15,
+                                                                                textAlign: 'center',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                display: '-webkit-box',
+                                                                                WebkitLineClamp: 2,
+                                                                                WebkitBoxOrient: 'vertical',
+                                                                                wordBreak: 'break-word',
+                                                                                maxWidth: '100%',
+                                                                                width: '100%',
+                                                                            }}>
+                                                                                {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
                                                                 </Box>
 
                                                                 {/* Bottom Info Panel */}
                                                                 <Box sx={{
                                                                     display: 'flex',
-                                                                    flexDirection: 'row'
+                                                                    flexDirection: 'row',
+                                                                    flex: 1
                                                                 }}>
                                                                     {/* Left Info Column */}
                                                                     <Box sx={{
@@ -5864,14 +5898,22 @@ export default function LeagueDetailPage() {
                                                             <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                                                 {/* Result Text Banner */}
                                                                 <Box sx={{
-                                                                    // background: match.status === 'RESULT_UPLOADED' ? '#F59E0B' : '#333',
                                                                     py: 0.5,
-                                                                    textAlign: 'center'
+                                                                    minHeight: '26px',
+                                                                    maxHeight: '26px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    textAlign: 'center',
+                                                                    px: 1
                                                                 }}>
                                                                     <Typography sx={{
                                                                         color: 'white',
                                                                         fontSize: '0.75rem',
-                                                                        fontWeight: 400
+                                                                        fontWeight: 400,
+                                                                        whiteSpace: 'nowrap',
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis'
                                                                     }}>
                                                                         {isAwaitingConfirmationStatus(match.status) ? 'Awaiting Confirmation' : resultText}
                                                                     </Typography>
@@ -5881,46 +5923,60 @@ export default function LeagueDetailPage() {
                                                                 <Box sx={{
                                                                     pl: 1,
                                                                     pr: 1,
-                                                                    py: 1,
+                                                                    py: 0.25,
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     justifyContent: 'space-between',
                                                                     borderBottom: '1px solid #fff',
-                                                                    mt: -3.5,
-                                                                    gap: 0
+                                                                    mt: -3,
+                                                                    gap: 0,
+                                                                    minHeight: { xs: '104px', sm: '104px' },
+                                                                    maxHeight: { xs: '104px', sm: '104px' },
+                                                                    boxSizing: 'border-box'
                                                                 }}>
                                                                     {/* Home Team */}
                                                                     <Box sx={{
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
+                                                                        width: '30%',
+                                                                        maxWidth: '30%',
                                                                         minWidth: 0,
+                                                                        px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.homeTeamImage || HomeTeamImage)}
                                                                             alt={match.homeTeamName}
-                                                                            width={65}
-                                                                            height={65}
+                                                                            width={54}
+                                                                            height={54}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Typography sx={{
-                                                                            color: 'white',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                                            lineHeight: 1.2,
-                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
-                                                                            textAlign: 'center',
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                            display: '-webkit-box',
-                                                                            WebkitLineClamp: 2,
-                                                                            WebkitBoxOrient: 'vertical',
-                                                                            wordBreak: 'break-word',
-                                                                            maxWidth: '100%',
+                                                                        <Box sx={{
+                                                                            height: { xs: '2.4em', sm: '2.4em' },
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                             width: '100%',
+                                                                            mt: 0.25,
                                                                         }}>
-                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                                        </Typography>
+                                                                            <Typography sx={{
+                                                                                color: 'white',
+                                                                                fontWeight: 600,
+                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                                lineHeight: 1.15,
+                                                                                textAlign: 'center',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                display: '-webkit-box',
+                                                                                WebkitLineClamp: 2,
+                                                                                WebkitBoxOrient: 'vertical',
+                                                                                wordBreak: 'break-word',
+                                                                                maxWidth: '100%',
+                                                                                width: '100%',
+                                                                            }}>
+                                                                                {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
 
                                                                     {/* Score Center */}
@@ -5929,24 +5985,26 @@ export default function LeagueDetailPage() {
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
-                                                                        mt: 1,
+                                                                        width: '40%',
+                                                                        maxWidth: '40%',
+                                                                        flexShrink: 0,
                                                                         minWidth: 0
                                                                     }}>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.25 }, justifyContent: 'center', width: '100%' }}>
                                                                             {/* Home Goals with label below */}
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
                                                                                 <Typography sx={{
                                                                                     fontWeight: 700,
-                                                                                    fontSize: '2.5rem',
+                                                                                    fontSize: { xs: '1.75rem', sm: '2.1rem' },
                                                                                     lineHeight: 1,
                                                                                     color: 'white',
                                                                                 }}>
                                                                                     {homeGoals}
                                                                                 </Typography>
                                                                                 <Typography sx={{
-                                                                                    fontSize: '0.5rem',
+                                                                                    fontSize: '0.55rem',
                                                                                     color: '#aaa',
-                                                                                    // mt: 0.3
+                                                                                    whiteSpace: 'nowrap'
                                                                                 }}>
                                                                                     Goal Score
                                                                                 </Typography>
@@ -5956,29 +6014,30 @@ export default function LeagueDetailPage() {
                                                                             <Typography sx={{
                                                                                 fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
                                                                                 fontWeight: 600,
-                                                                                fontSize: '1.5rem',
+                                                                                fontSize: { xs: '1.2rem', sm: '1.4rem' },
                                                                                 lineHeight: 0.5,
-                                                                                letterSpacing: '-2px',
+                                                                                letterSpacing: '-1.5px',
                                                                                 textTransform: 'uppercase',
                                                                                 color: 'white',
+                                                                                px: 0.5
                                                                             }}>
                                                                                 V/S
                                                                             </Typography>
 
                                                                             {/* Away Goals with label below */}
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
                                                                                 <Typography sx={{
                                                                                     fontWeight: 700,
-                                                                                    fontSize: '2.5rem',
+                                                                                    fontSize: { xs: '1.75rem', sm: '2.1rem' },
                                                                                     lineHeight: 1,
                                                                                     color: 'white',
                                                                                 }}>
                                                                                     {awayGoals}
                                                                                 </Typography>
                                                                                 <Typography sx={{
-                                                                                    fontSize: '0.5rem',
+                                                                                    fontSize: '0.55rem',
                                                                                     color: '#aaa',
-                                                                                    // mt: 0.3
+                                                                                    whiteSpace: 'nowrap'
                                                                                 }}>
                                                                                     Goal Score
                                                                                 </Typography>
@@ -5986,9 +6045,10 @@ export default function LeagueDetailPage() {
                                                                         </Box>
                                                                         <Typography sx={{
                                                                             color: '#ddd',
-                                                                            fontSize: '0.85rem',
+                                                                            fontSize: { xs: '0.72rem', sm: '0.78rem' },
                                                                             textAlign: 'center',
-                                                                            mt: 0.5
+                                                                            mt: 0.5,
+                                                                            whiteSpace: 'nowrap'
                                                                         }}>
                                                                             {durationMinutes} Minutes Match
                                                                         </Typography>
@@ -5999,33 +6059,44 @@ export default function LeagueDetailPage() {
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
+                                                                        width: '30%',
+                                                                        maxWidth: '30%',
                                                                         minWidth: 0,
+                                                                        px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.awayTeamImage || AwayTeamImage)}
                                                                             alt={match.awayTeamName}
-                                                                            width={65}
-                                                                            height={65}
+                                                                            width={54}
+                                                                            height={54}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Typography sx={{
-                                                                            color: 'white',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                                            lineHeight: 1.2,
-                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
-                                                                            textAlign: 'center',
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                            display: '-webkit-box',
-                                                                            WebkitLineClamp: 2,
-                                                                            WebkitBoxOrient: 'vertical',
-                                                                            wordBreak: 'break-word',
-                                                                            maxWidth: '100%',
+                                                                        <Box sx={{
+                                                                            height: { xs: '2.4em', sm: '2.4em' },
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
                                                                             width: '100%',
+                                                                            mt: 0.25,
                                                                         }}>
-                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                                        </Typography>
+                                                                            <Typography sx={{
+                                                                                color: 'white',
+                                                                                fontWeight: 600,
+                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                                lineHeight: 1.15,
+                                                                                textAlign: 'center',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                display: '-webkit-box',
+                                                                                WebkitLineClamp: 2,
+                                                                                WebkitBoxOrient: 'vertical',
+                                                                                wordBreak: 'break-word',
+                                                                                maxWidth: '100%',
+                                                                                width: '100%',
+                                                                            }}>
+                                                                                {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
+                                                                            </Typography>
+                                                                        </Box>
                                                                     </Box>
                                                                 </Box>
 
@@ -6041,7 +6112,7 @@ export default function LeagueDetailPage() {
                                                                         p: 1.5,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'space-between',
+                                                                        justifyContent: 'flex-start',
                                                                         gap: 1
                                                                     }}>
                                                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -6262,7 +6333,7 @@ export default function LeagueDetailPage() {
                                                                         p: 1,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'space-between',
+                                                                        justifyContent: 'flex-start',
                                                                         gap: 1
                                                                     }}>
                                                                         {isAdmin ? (

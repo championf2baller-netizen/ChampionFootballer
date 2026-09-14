@@ -1192,6 +1192,7 @@ export default function AllMatches() {
                 setMatches(prevMatches => prevMatches.map(m =>
                     m.id === matchId ? { ...m, availableUsers: data.match.availableUsers } : m
                 ));
+                setSelectedMatchDetail(prev => prev && prev.id === matchId ? { ...prev, availableUsers: data.match.availableUsers } : prev);
                 setToastMessage(action === 'available' ? 'You are now available for this match.' : 'You are now unavailable for this match.');
             } else {
                 setToastMessage('Availability updated.');
@@ -2049,7 +2050,7 @@ export default function AllMatches() {
                                 <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem', mb: 1 }}>
                                     Player Availability
                                 </Typography>
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: (match.availableUsers && match.availableUsers.length > 0) ? 2 : 0 }}>
                                     <Chip
                                         label={`Available: ${getAvailabilityCounts(match).availableCount}`}
                                         size="small"
@@ -2061,6 +2062,30 @@ export default function AllMatches() {
                                         sx={{ backgroundColor: '#dc2626', color: 'white', fontWeight: 'bold' }}
                                     />
                                 </Box>
+
+                                {match.availableUsers && match.availableUsers.length > 0 && (
+                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem', mb: 1.5, fontWeight: 'bold' }}>
+                                            Order of acceptance:
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                            {match.availableUsers.map((player, index) => (
+                                                <Box key={player.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                    <Image
+                                                        src={HomeTeamImage}
+                                                        alt="Green Shirt"
+                                                        width={22}
+                                                        height={22}
+                                                        style={{ objectFit: 'contain' }}
+                                                    />
+                                                    <Typography variant="body2" sx={{ color: '#E5E7EB', fontWeight: 500, fontSize: '0.9rem' }}>
+                                                        {index + 1}. {player.firstName} {player.lastName}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+                                    </Box>
+                                )}
                             </Box>
                         )}
                     </Box>
@@ -2917,81 +2942,126 @@ export default function AllMatches() {
 
                                         <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                             {/* Result Banner */}
-                                            <Box sx={{ py: 0.5, textAlign: 'center' }}>
-                                                <Typography sx={{ color: 'white', fontSize: '0.75rem', fontWeight: 400 }}>
+                                            <Box sx={{
+                                                py: 0.5,
+                                                minHeight: '26px',
+                                                maxHeight: '26px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                textAlign: 'center',
+                                                px: 1
+                                            }}>
+                                                <Typography sx={{
+                                                    color: 'white',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 400,
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis'
+                                                }}>
                                                     {isAwaitingConfirmationStatus(match.status) ? 'Awaiting Confirmation' : resultText}
                                                 </Typography>
                                             </Box>
 
                                             {/* Teams & Score */}
-                                            <Box sx={{ pl: 1, pr: 1, py: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #fff', mt: -3.5, gap: 0 }}>
+                                            <Box sx={{
+                                                pl: 1,
+                                                pr: 1,
+                                                py: 0.25,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                borderBottom: '1px solid #fff',
+                                                mt: -3,
+                                                gap: 0,
+                                                minHeight: { xs: '104px', sm: '104px' },
+                                                maxHeight: { xs: '104px', sm: '104px' },
+                                                boxSizing: 'border-box'
+                                            }}>
                                                 {/* Home Team */}
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                    <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={65} height={65} style={{ objectFit: 'contain' }} />
-                                                    <Typography sx={{
-                                                        color: 'white',
-                                                        fontWeight: 600,
-                                                        fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                        lineHeight: 1.2,
-                                                        minHeight: { xs: '2.4em', sm: '2.4em' },
-                                                        textAlign: 'center',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        wordBreak: 'break-word',
-                                                        maxWidth: '100%',
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%', maxWidth: '30%', minWidth: 0, px: 0.5 }}>
+                                                    <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={54} height={54} style={{ objectFit: 'contain' }} />
+                                                    <Box sx={{
+                                                        height: { xs: '2.4em', sm: '2.4em' },
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
                                                         width: '100%',
+                                                        mt: 0.25,
                                                     }}>
-                                                        {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                    </Typography>
+                                                        <Typography sx={{
+                                                            color: 'white',
+                                                            fontWeight: 600,
+                                                            fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                            lineHeight: 1.15,
+                                                            textAlign: 'center',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            wordBreak: 'break-word',
+                                                            maxWidth: '100%',
+                                                            width: '100%',
+                                                        }}>
+                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
 
                                                 {/* Score Center */}
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', mt: 1, minWidth: 0 }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                            <Typography sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, color: 'white' }}>{homeGoals}</Typography>
-                                                            <Typography sx={{ fontSize: '0.5rem', color: '#aaa' }}>Goal Score</Typography>
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '40%', maxWidth: '40%', flexShrink: 0, minWidth: 0 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.25 }, justifyContent: 'center', width: '100%' }}>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
+                                                            <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.1rem' }, lineHeight: 1, color: 'white' }}>{homeGoals}</Typography>
+                                                            <Typography sx={{ fontSize: '0.55rem', color: '#aaa', whiteSpace: 'nowrap' }}>Goal Score</Typography>
                                                         </Box>
-                                                        <Typography sx={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important', fontWeight: 600, fontSize: '1.5rem', lineHeight: 0.5, letterSpacing: '-2px', textTransform: 'uppercase', color: 'white' }}>V/S</Typography>
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                            <Typography sx={{ fontWeight: 700, fontSize: '2.5rem', lineHeight: 1, color: 'white' }}>{awayGoals}</Typography>
-                                                            <Typography sx={{ fontSize: '0.5rem', color: '#aaa' }}>Goal Score</Typography>
+                                                        <Typography sx={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important', fontWeight: 600, fontSize: { xs: '1.2rem', sm: '1.4rem' }, lineHeight: 0.5, letterSpacing: '-1.5px', textTransform: 'uppercase', color: 'white', px: 0.5 }}>V/S</Typography>
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
+                                                            <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.75rem', sm: '2.1rem' }, lineHeight: 1, color: 'white' }}>{awayGoals}</Typography>
+                                                            <Typography sx={{ fontSize: '0.55rem', color: '#aaa', whiteSpace: 'nowrap' }}>Goal Score</Typography>
                                                         </Box>
                                                     </Box>
-                                                    <Typography sx={{ color: '#ddd', fontSize: '0.85rem', textAlign: 'center', mt: 0.5 }}>{durationMinutes} Minutes Match</Typography>
+                                                    <Typography sx={{ color: '#ddd', fontSize: { xs: '0.72rem', sm: '0.78rem' }, textAlign: 'center', mt: 0.5, whiteSpace: 'nowrap' }}>{durationMinutes} Minutes Match</Typography>
                                                 </Box>
 
                                                 {/* Away Team */}
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                    <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={65} height={65} style={{ objectFit: 'contain' }} />
-                                                    <Typography sx={{
-                                                        color: 'white',
-                                                        fontWeight: 600,
-                                                        fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                        lineHeight: 1.2,
-                                                        minHeight: { xs: '2.4em', sm: '2.4em' },
-                                                        textAlign: 'center',
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'ellipsis',
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                        wordBreak: 'break-word',
-                                                        maxWidth: '100%',
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%', maxWidth: '30%', minWidth: 0, px: 0.5 }}>
+                                                    <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={54} height={54} style={{ objectFit: 'contain' }} />
+                                                    <Box sx={{
+                                                        height: { xs: '2.4em', sm: '2.4em' },
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
                                                         width: '100%',
+                                                        mt: 0.25,
                                                     }}>
-                                                        {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                    </Typography>
+                                                        <Typography sx={{
+                                                            color: 'white',
+                                                            fontWeight: 600,
+                                                            fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                            lineHeight: 1.15,
+                                                            textAlign: 'center',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 2,
+                                                            WebkitBoxOrient: 'vertical',
+                                                            wordBreak: 'break-word',
+                                                            maxWidth: '100%',
+                                                            width: '100%',
+                                                        }}>
+                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
                                             </Box>
 
                                             {/* Bottom Info Panel */}
                                             <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                                                 {/* Left Info Column */}
-                                                <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1 }}>
+                                                <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1 }}>
                                                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
                                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
@@ -3219,7 +3289,7 @@ export default function AllMatches() {
                                                 </Box>
 
                                                 {/* Right Admin Column */}
-                                                <Box sx={{ width: '100px', borderLeft: '1px solid #fff', borderTop: 'none', p: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1 }}>
+                                                <Box sx={{ width: '100px', borderLeft: '1px solid #fff', borderTop: 'none', p: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1 }}>
                                                     {isAdmin ? (
                                                         <>
                                                             <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left', ml: '5px' }}> Admin Only</Typography>
@@ -3362,6 +3432,9 @@ export default function AllMatches() {
                                         background: '#222',
                                         cursor: 'pointer',
                                         border: '1px solid #fff',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        height: '100%',
                                         '& .MuiCardContent-root': { pb: 0 },
                                         '& .MuiCardContent-root:last-child': { pb: 0 },
                                         '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)' },
@@ -3375,62 +3448,93 @@ export default function AllMatches() {
                                         </Typography>
                                     </Box>
 
-                                    <CardContent sx={{ p: 0 }}>
+                                    <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                         {/* Teams & VS */}
-                                        <Box sx={{ pl: 1, pr: 1, py: { xs: 0.75, sm: 0 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #fff', gap: { xs: 1, sm: 0 } }}>
+                                        <Box sx={{
+                                            pl: 1,
+                                            pr: 1,
+                                            pt: 1.25,
+                                            pb: 0.25,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            borderBottom: '1px solid #fff',
+                                            gap: { xs: 1, sm: 0 },
+                                            minHeight: { xs: '102px', sm: '102px' },
+                                            maxHeight: { xs: '102px', sm: '102px' },
+                                            boxSizing: 'border-box'
+                                        }}>
                                             {/* Home Team */}
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
-                                                <Typography sx={{
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                    fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                    lineHeight: 1.2,
-                                                    textAlign: 'center',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    wordBreak: 'break-word',
-                                                    maxWidth: '100%',
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '31%', maxWidth: '31%', minWidth: 0, px: 0.5 }}>
+                                                <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={isMobile ? 44 : 50} height={isMobile ? 44 : 50} style={{ objectFit: 'contain' }} />
+                                                <Box sx={{
+                                                    height: { xs: '2.4em', sm: '2.4em' },
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
                                                     width: '100%',
+                                                    mt: 0.25,
                                                 }}>
-                                                    {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                </Typography>
+                                                    <Typography sx={{
+                                                        color: 'white',
+                                                        fontWeight: 600,
+                                                        fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                        lineHeight: 1.15,
+                                                        textAlign: 'center',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        wordBreak: 'break-word',
+                                                        maxWidth: '100%',
+                                                        width: '100%',
+                                                    }}>
+                                                        {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
 
                                             {/* VS Center */}
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
-                                                <Typography sx={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important', fontWeight: 600, fontSize: { xs: '1.4rem', sm: '2rem' }, lineHeight: 0.5, letterSpacing: '-2px', textTransform: 'uppercase', color: 'white' }}>V/S</Typography>
-                                                <Typography sx={{ color: '#ddd', fontSize: { xs: '0.8rem', sm: '0.85rem' }, textAlign: 'center', mt: 1 }}>{durationMinutes} Minutes Match</Typography>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '38%', maxWidth: '38%', flexShrink: 0, minWidth: 0 }}>
+                                                <Typography sx={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important', fontWeight: 600, fontSize: { xs: '1.4rem', sm: '1.8rem' }, lineHeight: 0.5, letterSpacing: '-2px', textTransform: 'uppercase', color: 'white' }}>V/S</Typography>
+                                                <Typography sx={{ color: '#ddd', fontSize: { xs: '0.72rem', sm: '0.78rem' }, textAlign: 'center', mt: 1, whiteSpace: 'nowrap' }}>{durationMinutes} Minutes Match</Typography>
                                             </Box>
 
                                             {/* Away Team */}
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0 }}>
-                                                <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={isMobile ? 54 : 65} height={isMobile ? 54 : 65} style={{ objectFit: 'contain' }} />
-                                                <Typography sx={{
-                                                    color: 'white',
-                                                    fontWeight: 600,
-                                                    fontSize: { xs: '0.85rem', sm: '1rem' },
-                                                    lineHeight: 1.2,
-                                                    textAlign: 'center',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    display: '-webkit-box',
-                                                    WebkitLineClamp: 2,
-                                                    WebkitBoxOrient: 'vertical',
-                                                    wordBreak: 'break-word',
-                                                    maxWidth: '100%',
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '31%', maxWidth: '31%', minWidth: 0, px: 0.5 }}>
+                                                <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={isMobile ? 44 : 50} height={isMobile ? 44 : 50} style={{ objectFit: 'contain' }} />
+                                                <Box sx={{
+                                                    height: { xs: '2.4em', sm: '2.4em' },
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
                                                     width: '100%',
+                                                    mt: 0.25,
                                                 }}>
-                                                    {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                </Typography>
+                                                    <Typography sx={{
+                                                        color: 'white',
+                                                        fontWeight: 600,
+                                                        fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                        lineHeight: 1.15,
+                                                        textAlign: 'center',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        display: '-webkit-box',
+                                                        WebkitLineClamp: 2,
+                                                        WebkitBoxOrient: 'vertical',
+                                                        wordBreak: 'break-word',
+                                                        maxWidth: '100%',
+                                                        width: '100%',
+                                                    }}>
+                                                        {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
+                                                    </Typography>
+                                                </Box>
                                             </Box>
                                         </Box>
 
                                         {/* Bottom Info Panel */}
-                                        <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                                             {/* Left Info Column */}
                                             <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1.5 }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
@@ -3501,6 +3605,35 @@ export default function AllMatches() {
                                                         </Button>
                                                     </Box>
                                                 )}
+                                                <Button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedMatchDetail(match);
+                                                        setMatchDetailModalOpen(true);
+                                                    }}
+                                                    sx={{
+                                                        color: '#00D09E',
+                                                        fontSize: '0.85rem',
+                                                        textTransform: 'none',
+                                                        fontWeight: 600,
+                                                        p: 0,
+                                                        mt: 1,
+                                                        justifyContent: 'flex-start',
+                                                        alignSelf: 'flex-start',
+                                                        textDecoration: 'underline',
+                                                        minWidth: 0,
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        cursor: 'pointer',
+                                                        '&:hover': {
+                                                            color: '#00af80',
+                                                            textDecoration: 'underline',
+                                                            background: 'none',
+                                                        }
+                                                    }}
+                                                >
+                                                    See who is playing
+                                                </Button>
                                             </Box>
 
                                             {/* Right Admin Column */}
