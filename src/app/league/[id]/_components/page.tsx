@@ -5313,6 +5313,9 @@ export default function LeagueDetailPage() {
                                                                 background: '#222',
                                                                 cursor: 'pointer',
                                                                 border: '1px solid #fff',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                height: '100%',
                                                                 '& .MuiCardContent-root': {
                                                                     pb: 0
                                                                 },
@@ -5354,7 +5357,7 @@ export default function LeagueDetailPage() {
                                                                 </Typography>
                                                             </Box>
 
-                                                            <CardContent sx={{ p: 0 }}>
+                                                            <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                                                 {/* Top Section - Teams & VS */}
                                                                 <Box sx={{
                                                                     pl: 1,
@@ -5386,6 +5389,7 @@ export default function LeagueDetailPage() {
                                                                             fontWeight: 600,
                                                                             fontSize: { xs: '0.85rem', sm: '1rem' },
                                                                             lineHeight: 1.2,
+                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
                                                                             textAlign: 'center',
                                                                             overflow: 'hidden',
                                                                             textOverflow: 'ellipsis',
@@ -5449,6 +5453,7 @@ export default function LeagueDetailPage() {
                                                                             fontWeight: 600,
                                                                             fontSize: { xs: '0.85rem', sm: '1rem' },
                                                                             lineHeight: 1.2,
+                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
                                                                             textAlign: 'center',
                                                                             overflow: 'hidden',
                                                                             textOverflow: 'ellipsis',
@@ -5467,7 +5472,8 @@ export default function LeagueDetailPage() {
                                                                 {/* Bottom Info Panel */}
                                                                 <Box sx={{
                                                                     display: 'flex',
-                                                                    flexDirection: 'row'
+                                                                    flexDirection: 'row',
+                                                                    flex: 1
                                                                 }}>
                                                                     {/* Left Info Column */}
                                                                     <Box sx={{
@@ -5475,7 +5481,7 @@ export default function LeagueDetailPage() {
                                                                         p: 1.5,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
+                                                                        justifyContent: 'space-between',
                                                                         gap: 1.5,
                                                                         // pl: 2,
                                                                         // pr: 2
@@ -5631,7 +5637,7 @@ export default function LeagueDetailPage() {
                                                                         py: 1,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
+                                                                        justifyContent: 'space-between',
                                                                         gap: 2
                                                                     }}>
                                                                         {isAdmin ? (
@@ -5796,6 +5802,9 @@ export default function LeagueDetailPage() {
                                                                 overflow: 'hidden',
                                                                 background: '#222',
                                                                 border: '1px solid #fff',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                height: '100%',
                                                                 '& .MuiCardContent-root:last-child': {
                                                                     paddingBottom: 0
                                                                 },
@@ -5852,7 +5861,7 @@ export default function LeagueDetailPage() {
                                                                 </Typography>
                                                             </Box>
 
-                                                            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                                                            <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                                                 {/* Result Text Banner */}
                                                                 <Box sx={{
                                                                     // background: match.status === 'RESULT_UPLOADED' ? '#F59E0B' : '#333',
@@ -5899,6 +5908,7 @@ export default function LeagueDetailPage() {
                                                                             fontWeight: 600,
                                                                             fontSize: { xs: '0.85rem', sm: '1rem' },
                                                                             lineHeight: 1.2,
+                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
                                                                             textAlign: 'center',
                                                                             overflow: 'hidden',
                                                                             textOverflow: 'ellipsis',
@@ -6003,6 +6013,7 @@ export default function LeagueDetailPage() {
                                                                             fontWeight: 600,
                                                                             fontSize: { xs: '0.85rem', sm: '1rem' },
                                                                             lineHeight: 1.2,
+                                                                            minHeight: { xs: '2.4em', sm: '2.4em' },
                                                                             textAlign: 'center',
                                                                             overflow: 'hidden',
                                                                             textOverflow: 'ellipsis',
@@ -6021,7 +6032,8 @@ export default function LeagueDetailPage() {
                                                                 {/* Bottom Info Panel */}
                                                                 <Box sx={{
                                                                     display: 'flex',
-                                                                    flexDirection: 'row'
+                                                                    flexDirection: 'row',
+                                                                    flex: 1
                                                                 }}>
                                                                     {/* Left Info Column */}
                                                                     <Box sx={{
@@ -6029,7 +6041,7 @@ export default function LeagueDetailPage() {
                                                                         p: 1.5,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
+                                                                        justifyContent: 'space-between',
                                                                         gap: 1
                                                                     }}>
                                                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -6250,7 +6262,7 @@ export default function LeagueDetailPage() {
                                                                         p: 1,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
+                                                                        justifyContent: 'space-between',
                                                                         gap: 1
                                                                     }}>
                                                                         {isAdmin ? (
