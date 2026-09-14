@@ -355,17 +355,29 @@ export default function AdminDashboardPage() {
     }
   };
 
+const formatTeamNameWithTeam = (name?: string | null): string => {
+  if (!name) return '';
+  const trimmed = name.trim();
+  if (!trimmed) return '';
+  if (/\bteam$/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `${trimmed} Team`;
+};
+
   const handleSaveMatchDetails = async () => {
     if (!editMatchModal || !selectedLeagueId) return;
     setSavingMatch(true);
     try {
       const matchId = editMatchModal.id;
+      const formattedHomeTeam = editMatchModal.homeTeamName ? formatTeamNameWithTeam(editMatchModal.homeTeamName) : '';
+      const formattedAwayTeam = editMatchModal.awayTeamName ? formatTeamNameWithTeam(editMatchModal.awayTeamName) : '';
       const res = await fetch(`${API_BASE}/leagues/${selectedLeagueId}/matches/${matchId}`, {
         method: 'PATCH',
         headers: getHeaders(),
         body: JSON.stringify({
-          homeTeamName: editMatchModal.homeTeamName,
-          awayTeamName: editMatchModal.awayTeamName,
+          homeTeamName: formattedHomeTeam,
+          awayTeamName: formattedAwayTeam,
           homeScore: Number(editMatchModal.homeScore || 0),
           awayScore: Number(editMatchModal.awayScore || 0),
           status: editMatchModal.status,
@@ -1369,6 +1381,7 @@ export default function AdminDashboardPage() {
                 fullWidth
                 value={editMatchModal?.homeTeamName || ''}
                 onChange={(e) => setEditMatchModal((prev: any) => prev ? { ...prev, homeTeamName: e.target.value } : null)}
+                onBlur={() => setEditMatchModal((prev: any) => prev && prev.homeTeamName ? { ...prev, homeTeamName: formatTeamNameWithTeam(prev.homeTeamName) } : prev)}
                 InputLabelProps={{ style: { color: '#94a3b8' } }}
                 InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
               />
@@ -1379,6 +1392,7 @@ export default function AdminDashboardPage() {
                 fullWidth
                 value={editMatchModal?.awayTeamName || ''}
                 onChange={(e) => setEditMatchModal((prev: any) => prev ? { ...prev, awayTeamName: e.target.value } : null)}
+                onBlur={() => setEditMatchModal((prev: any) => prev && prev.awayTeamName ? { ...prev, awayTeamName: formatTeamNameWithTeam(prev.awayTeamName) } : prev)}
                 InputLabelProps={{ style: { color: '#94a3b8' } }}
                 InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
               />

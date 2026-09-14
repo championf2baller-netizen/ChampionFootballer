@@ -301,6 +301,12 @@ const formatLocationForCard = (location?: string): string => {
         : normalized;
 };
 
+const formatDisplayTeamName = (name?: string | null, fallback: string = 'Team'): string => {
+    if (!name || !name.trim()) return fallback;
+    const trimmed = name.trim();
+    return /\bteam$/i.test(trimmed) ? trimmed : `${trimmed} Team`;
+};
+
 const normalizeId = (value: unknown): string => {
     if (value === null || value === undefined) return '';
     return String(value).trim();
@@ -5400,7 +5406,7 @@ export default function LeagueDetailPage() {
                                                                             maxWidth: '100%',
                                                                             width: '100%',
                                                                         }}>
-                                                                            {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
                                                                         </Typography>
                                                                     </Box>
 
@@ -5464,7 +5470,7 @@ export default function LeagueDetailPage() {
                                                                             maxWidth: '100%',
                                                                             width: '100%',
                                                                         }}>
-                                                                            {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
                                                                         </Typography>
                                                                     </Box>
                                                                 </Box>
@@ -5919,7 +5925,7 @@ export default function LeagueDetailPage() {
                                                                             maxWidth: '100%',
                                                                             width: '100%',
                                                                         }}>
-                                                                            {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
                                                                         </Typography>
                                                                     </Box>
 
@@ -6024,7 +6030,7 @@ export default function LeagueDetailPage() {
                                                                             maxWidth: '100%',
                                                                             width: '100%',
                                                                         }}>
-                                                                            {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
                                                                         </Typography>
                                                                     </Box>
                                                                 </Box>

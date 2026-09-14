@@ -171,6 +171,12 @@ const parseSeasonNumber = (value: unknown): number | null => {
     return null;
 };
 
+const formatDisplayTeamName = (name?: string | null, fallback: string = 'Team'): string => {
+    if (!name || !name.trim()) return fallback;
+    const trimmed = name.trim();
+    return /\bteam$/i.test(trimmed) ? trimmed : `${trimmed} Team`;
+};
+
 const isSeasonActiveLike = (season: SeasonOption): boolean => {
     if (typeof season.isActive === 'boolean') return season.isActive;
     if (typeof season.active === 'boolean') return season.active;
@@ -2938,7 +2944,7 @@ export default function AllMatches() {
                                                         maxWidth: '100%',
                                                         width: '100%',
                                                     }}>
-                                                        {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                        {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
                                                     </Typography>
                                                 </Box>
 
@@ -2977,7 +2983,7 @@ export default function AllMatches() {
                                                         maxWidth: '100%',
                                                         width: '100%',
                                                     }}>
-                                                        {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                        {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
                                                     </Typography>
                                                 </Box>
                                             </Box>
@@ -3394,7 +3400,7 @@ export default function AllMatches() {
                                                     maxWidth: '100%',
                                                     width: '100%',
                                                 }}>
-                                                    {match.homeTeamName || match.homeTeam || 'Home Team'}
+                                                    {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
                                                 </Typography>
                                             </Box>
 
@@ -3423,7 +3429,7 @@ export default function AllMatches() {
                                                     maxWidth: '100%',
                                                     width: '100%',
                                                 }}>
-                                                    {match.awayTeamName || match.awayTeam || 'Away Team'}
+                                                    {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
                                                 </Typography>
                                             </Box>
                                         </Box>

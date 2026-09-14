@@ -334,6 +334,16 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const leagueId = leagueIdProp || (params?.id ? String(params.id) : '');
   const matchId = matchIdProp || (params?.matchId ? String(params.matchId) : '');
 
+  const formatTeamNameWithTeam = (name?: string | null): string => {
+    if (!name) return '';
+    const trimmed = name.trim();
+    if (!trimmed) return '';
+    if (/\bteam$/i.test(trimmed)) {
+      return trimmed;
+    }
+    return `${trimmed} Team`;
+  };
+
   const [league, setLeague] = useState<League | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -1796,8 +1806,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     try {
       const formData = new FormData();
 
-      formData.append('homeTeamName', homeTeamName);
-      formData.append('awayTeamName', awayTeamName);
+      const finalHomeTeam = homeTeamName.trim() ? formatTeamNameWithTeam(homeTeamName) : '';
+      const finalAwayTeam = awayTeamName.trim() ? formatTeamNameWithTeam(awayTeamName) : '';
+
+      formData.append('homeTeamName', finalHomeTeam);
+      formData.append('awayTeamName', finalAwayTeam);
 
       if (matchDate && startTime) {
         const start = matchDate.hour(startTime.hour()).minute(startTime.minute()).second(0).millisecond(0);
@@ -2564,6 +2577,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         placeholder='Enter team name'
                         value={homeTeamName}
                         onChange={e => setHomeTeamName(e.target.value)}
+                        onBlur={() => {
+                          if (homeTeamName.trim()) {
+                            setHomeTeamName(formatTeamNameWithTeam(homeTeamName));
+                          }
+                        }}
                         sx={{
                           ...inputStyles,
                           flex: 1,
@@ -2600,6 +2618,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         placeholder='Enter team name'
                         value={awayTeamName}
                         onChange={e => setAwayTeamName(e.target.value)}
+                        onBlur={() => {
+                          if (awayTeamName.trim()) {
+                            setAwayTeamName(formatTeamNameWithTeam(awayTeamName));
+                          }
+                        }}
                         sx={{
                           ...inputStyles,
                           flex: 1,
