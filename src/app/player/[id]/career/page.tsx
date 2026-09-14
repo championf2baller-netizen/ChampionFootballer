@@ -37,6 +37,22 @@ import { AppDispatch, RootState } from '@/lib/store';
 import { fetchPlayerStats, setLeagueFilter, setYearFilter } from '@/lib/features/playerStatsSlice';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar
+} from 'recharts';
 import { styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from '@/lib/useAuth';
@@ -82,6 +98,23 @@ const themeColors = {
 };
 // Threshold used for auto switch from weekly to monthly aggregation
 const AUTO_SWITCH_THRESHOLD = 26;
+
+const DEFAULT_INFLUENCE_RADAR_DATA = [
+  { metric: 'Goals', Player: 0, 'League Avg': 0 },
+  { metric: 'Assists', Player: 0, 'League Avg': 0 },
+  { metric: 'Clean Sheets', Player: 0, 'League Avg': 0 },
+  { metric: 'Impact', Player: 0, 'League Avg': 0 },
+  { metric: 'Defence', Player: 0, 'League Avg': 0 },
+  { metric: 'Free Kicks', Player: 0, 'League Avg': 0 },
+  { metric: 'Penalties', Player: 0, 'League Avg': 0 },
+  { metric: 'MOTM Votes', Player: 0, 'League Avg': 0 },
+];
+
+const DEFAULT_WIN_LOSS_DATA = [
+  { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
+  { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
+  { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
+];
 
 // ---------- TYPES ----------
 interface PlayerMatchStats {
@@ -430,21 +463,7 @@ type LeagueMetricValues = {
 
 type CardLeagueScope = 'all' | 'current';
 
-// ---------- DYNAMIC RECHARTS ----------
-const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer), { ssr: false });
-const ComposedChart = dynamic(() => import('recharts').then(m => m.ComposedChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then(m => m.Bar), { ssr: false });
-const Line = dynamic(() => import('recharts').then(m => m.Line), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(m => m.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(m => m.YAxis), { ssr: false });
-const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip), { ssr: false });
-const PieChart = dynamic(() => import('recharts').then(m => m.PieChart), { ssr: false });
-const Pie = dynamic(() => import('recharts').then(m => m.Pie), { ssr: false });
-const RadarChart = dynamic(() => import('recharts').then(m => m.RadarChart), { ssr: false });
-const PolarGrid = dynamic(() => import('recharts').then(m => m.PolarGrid), { ssr: false });
-const PolarAngleAxis = dynamic(() => import('recharts').then(m => m.PolarAngleAxis), { ssr: false });
-const PolarRadiusAxis = dynamic(() => import('recharts').then(m => m.PolarRadiusAxis), { ssr: false });
-const Radar = dynamic(() => import('recharts').then(m => m.Radar), { ssr: false });
+// ---------- RECHARTS READY ----------
 
 // ---------- STYLED COMPONENTS ----------
 const GlassCard = styled(Paper)(() => ({
@@ -845,6 +864,11 @@ export default function CareerPage() {
   const [careerDashboardData, setCareerDashboardData] = useState<any>(null);
   const [allCareerDashboardData, setAllCareerDashboardData] = useState<any>(null);
   const [cmsMap, setCmsMap] = useState<Record<string, string>>({});
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     fetch(`${getApiBaseUrl()}/api/static-content?_=${Date.now()}`, {
@@ -1017,10 +1041,10 @@ export default function CareerPage() {
     dispatch(fetchPlayerStats({ playerId, leagueId: filters.leagueId, year: filters.year }));
   }, [playerId, dispatch, filters.leagueId, filters.year, authLoading, refreshNonce]);
 
-  // Reset careerData when refreshNonce or playerId changes to force a fresh fetch
+  // Reset careerData when playerId changes to force a fresh fetch
   useEffect(() => {
     setCareerData(null);
-  }, [playerId, refreshNonce]);
+  }, [playerId]);
 
   // Sync careerData with redux stats data when no filter is active
   useEffect(() => {
@@ -1067,19 +1091,12 @@ export default function CareerPage() {
     const triggerRefresh = () => {
       setRefreshNonce((prev) => prev + 1);
     };
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        triggerRefresh();
-      }
-    };
 
     window.addEventListener('match-created', triggerRefresh as EventListener);
     window.addEventListener('match-updated', triggerRefresh as EventListener);
     window.addEventListener('match-stats-updated', triggerRefresh as EventListener);
     window.addEventListener('cache-cleared', triggerRefresh as EventListener);
     window.addEventListener('data-mutated', triggerRefresh as EventListener);
-    window.addEventListener('focus', triggerRefresh as EventListener);
-    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('match-created', triggerRefresh as EventListener);
@@ -1087,8 +1104,6 @@ export default function CareerPage() {
       window.removeEventListener('match-stats-updated', triggerRefresh as EventListener);
       window.removeEventListener('cache-cleared', triggerRefresh as EventListener);
       window.removeEventListener('data-mutated', triggerRefresh as EventListener);
-      window.removeEventListener('focus', triggerRefresh as EventListener);
-      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [playerId]);
 
@@ -1653,36 +1668,29 @@ export default function CareerPage() {
     const scrollEl = chartScrollRef.current;
     if (!scrollEl) {
       setChartHasHorizontalOverflow(false);
-      // setChartScrollPercent(0);
       return;
     }
-    setContainerWidth(scrollEl.clientWidth);
-    const maxScrollLeft = Math.max(scrollEl.scrollWidth - scrollEl.clientWidth, 0);
-    setChartHasHorizontalOverflow(maxScrollLeft > 0);
-    // setChartScrollPercent(maxScrollLeft > 0 ? (scrollEl.scrollLeft / maxScrollLeft) * 100 : 0);
+    const newWidth = scrollEl.clientWidth;
+    setContainerWidth((prev) => (prev !== newWidth ? newWidth : prev));
+    const maxScrollLeft = Math.max(scrollEl.scrollWidth - newWidth, 0);
+    const hasOverflow = maxScrollLeft > 0;
+    setChartHasHorizontalOverflow((prev) => (prev !== hasOverflow ? hasOverflow : prev));
   }, []);
-
-  // const handleChartSliderChange = useCallback((_event: Event, value: number | number[]) => {
-  //   const sliderValue = Array.isArray(value) ? value[0] : value;
-  //   const scrollEl = chartScrollRef.current;
-  //   if (!scrollEl) return;
-  //   const maxScrollLeft = Math.max(scrollEl.scrollWidth - scrollEl.clientWidth, 0);
-  //   scrollEl.scrollLeft = (sliderValue / 100) * maxScrollLeft;
-  //   setChartScrollPercent(sliderValue);
-  // }, []);
 
   useEffect(() => {
     const scrollEl = chartScrollRef.current;
     if (!scrollEl) return;
     const handleScrollSync = () => {
-      syncChartHorizontalScroll();
+      const maxScrollLeft = Math.max(scrollEl.scrollWidth - scrollEl.clientWidth, 0);
+      const hasOverflow = maxScrollLeft > 0;
+      setChartHasHorizontalOverflow((prev) => (prev !== hasOverflow ? hasOverflow : prev));
     };
     syncChartHorizontalScroll();
     scrollEl.addEventListener('scroll', handleScrollSync, { passive: true });
-    window.addEventListener('resize', handleScrollSync);
+    window.addEventListener('resize', syncChartHorizontalScroll);
     return () => {
       scrollEl.removeEventListener('scroll', handleScrollSync);
-      window.removeEventListener('resize', handleScrollSync);
+      window.removeEventListener('resize', syncChartHorizontalScroll);
     };
   }, [chartMatches.length, groupMode, syncChartHorizontalScroll]);
 
@@ -1802,6 +1810,103 @@ export default function CareerPage() {
   useEffect(() => {
     setRange(null);
   }, [groupingType, chartMatches.length]);
+
+  const renderXAxisTick = useCallback(
+    ({ x, y, payload, index, width: axisWidth }: { x: number; y: number; payload: { value: string | number }; index: number; width?: number }) => {
+      const activeData = chartData.length > 0 ? chartData : performanceData;
+      const currentItem = activeData[index];
+      if (!currentItem) return <g></g>;
+
+      const currentYear = currentItem.year;
+      const isHighlighted = currentYear === activeYear;
+
+      let yearStartIndex = index;
+      while (yearStartIndex > 0 && activeData[yearStartIndex - 1].year === currentYear) {
+        yearStartIndex--;
+      }
+      let yearEndIndex = index;
+      while (yearEndIndex < activeData.length - 1 && activeData[yearEndIndex + 1].year === currentYear) {
+        yearEndIndex++;
+      }
+      const isYearCenter = index === Math.floor((yearStartIndex + yearEndIndex) / 2);
+
+      const count = activeData.length;
+      const widthVal = axisWidth || 800;
+      const step = count > 1 ? widthVal / count : widthVal;
+      const halfStep = step / 2;
+
+      const drawLeftVertical = index === yearStartIndex;
+      const drawRightVertical = index === yearEndIndex;
+
+      const lineLeft = drawLeftVertical ? -halfStep + 3 : -halfStep;
+      const lineRight = drawRightVertical ? halfStep - 3 : halfStep;
+
+      const lineY = 45;
+      const tickHeight = 6;
+
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text
+            x={0}
+            y={0}
+            dx={-5}
+            dy={5}
+            textAnchor="end"
+            fill={isHighlighted ? themeColors.primary : themeColors.textDim}
+            fontSize={10}
+            fontWeight={isHighlighted ? 'bold' : 'normal'}
+            transform="rotate(-90)"
+          >
+            {payload.value}
+          </text>
+
+          {/* Bracket lines for year grouping */}
+          <line
+            x1={lineLeft}
+            y1={lineY}
+            x2={lineRight}
+            y2={lineY}
+            stroke={isHighlighted ? themeColors.primary : 'rgba(255, 255, 255, 0.35)'}
+            strokeWidth={isHighlighted ? 2 : 1}
+          />
+          {drawLeftVertical && (
+            <line
+              x1={lineLeft}
+              y1={lineY}
+              x2={lineLeft}
+              y2={lineY - tickHeight}
+              stroke={isHighlighted ? themeColors.primary : 'rgba(255, 255, 255, 0.35)'}
+              strokeWidth={isHighlighted ? 2 : 1}
+            />
+          )}
+          {drawRightVertical && (
+            <line
+              x1={lineRight}
+              y1={lineY}
+              x2={lineRight}
+              y2={lineY - tickHeight}
+              stroke={isHighlighted ? themeColors.primary : 'rgba(255, 255, 255, 0.35)'}
+              strokeWidth={isHighlighted ? 2 : 1}
+            />
+          )}
+
+          {isYearCenter && (
+            <text
+              x={0}
+              y={lineY + 15}
+              textAnchor="middle"
+              fill={isHighlighted ? themeColors.primary : themeColors.textDim}
+              fontSize={isHighlighted ? 12 : 11}
+              fontWeight="bold"
+            >
+              {currentYear}
+            </text>
+          )}
+        </g>
+      );
+    },
+    [chartData, performanceData, activeYear]
+  );
 
   const influence: InfluenceEntry[] = useMemo(() => {
     // accumulate raw totals
@@ -2001,10 +2106,10 @@ export default function CareerPage() {
     const activeDashboard = influenceLeague === 'all'
       ? (filters.leagueId === 'all' ? careerDashboardData : (allCareerDashboardData || careerDashboardData))
       : careerDashboardData;
-    if (activeDashboard?.influenceRadar) {
+    if (activeDashboard?.influenceRadar && Array.isArray(activeDashboard.influenceRadar) && activeDashboard.influenceRadar.length > 0) {
       return activeDashboard.influenceRadar;
     }
-    return [];
+    return DEFAULT_INFLUENCE_RADAR_DATA;
   }, [influenceLeague, careerDashboardData, allCareerDashboardData, filters.leagueId]);
 
   // Calculate actual win/loss/draw data from backend API
@@ -2012,14 +2117,10 @@ export default function CareerPage() {
     const activeDashboard = winLossLeague === 'all'
       ? (filters.leagueId === 'all' ? careerDashboardData : (allCareerDashboardData || careerDashboardData))
       : careerDashboardData;
-    if (activeDashboard?.winLossBreakdown) {
+    if (activeDashboard?.winLossBreakdown && Array.isArray(activeDashboard.winLossBreakdown) && activeDashboard.winLossBreakdown.length > 0) {
       return activeDashboard.winLossBreakdown;
     }
-    return [
-      { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
-      { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
-      { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
-    ];
+    return DEFAULT_WIN_LOSS_DATA;
   }, [winLossLeague, careerDashboardData, allCareerDashboardData, filters.leagueId]);
 
   // Add synergy types (place near other interfaces)
@@ -2299,9 +2400,9 @@ export default function CareerPage() {
 
   const topTeammateLine = useMemo(() => {
     if (!playerId) return 'Top Teammate: No player selected';
-    if (synergyLoading && !synergyError) return 'Top Teammate: Loading...';
-    if (synergyError) return `Top Teammate: ${synergyError}`;
-    if (participatedMatches === 0) return 'Top Teammate: No top teammate identified yet';
+    if (synergyLoading && !synergyError && !bestPairing) return 'Top Teammate: Loading...';
+    if (synergyError && !bestPairing) return `Top Teammate: ${synergyError}`;
+    if (participatedMatches === 0 && !bestPairing) return 'Top Teammate: No top teammate identified yet';
     if (!bestPairing) return 'Top Teammate: No top teammate identified yet';
     const wins = Number(bestPairing.winsTogether || 0);
     const winWord = wins === 1 ? 'win' : 'wins';
@@ -2310,15 +2411,15 @@ export default function CareerPage() {
 
   const toughestRivalLine = useMemo(() => {
     if (!playerId) return 'No toughest opponent identified yet';
-    if (synergyLoading && !synergyError) return 'Toughest Rival: Loading...';
-    if (synergyError) return `Toughest Rival: ${synergyError}`;
-    if (participatedMatches === 0) return 'No toughest opponent identified yet';
+    if (synergyLoading && !synergyError && !toughestRival) return 'Toughest Rival: Loading...';
+    if (synergyError && !toughestRival) return `Toughest Rival: ${synergyError}`;
+    if (participatedMatches === 0 && !toughestRival) return 'No toughest opponent identified yet';
     if (!toughestRival || Number(toughestRival.lossesAgainst || 0) <= 0) {
       return 'No toughest opponent identified yet';
     }
     const losses = Number(toughestRival.lossesAgainst || 0);
     const lossWord = losses === 1 ? 'loss' : 'losses';
-    const lossRateText = `${Number(toughestRival.lossRate || 0).toFixed(1).replace(/\\.0$/, '')}%`;
+    const lossRateText = `${Number(toughestRival.lossRate || 0).toFixed(1).replace(/\.0$/, '')}%`;
     return `Toughest Rival: ${toughestRival.name || 'Player'} | ${losses} ${lossWord} | ${lossRateText} loss rate`;
   }, [playerId, synergyLoading, synergyError, participatedMatches, toughestRival]);
 
@@ -3089,13 +3190,13 @@ export default function CareerPage() {
           </Box>
 
           {/* Main Content */}
-          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: 2, md: 0 } }}>
-            {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-                <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: 2, md: 0 }, position: 'relative' }}>
+            {loading && (
+              <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
+                <CircularProgress size={22} sx={{ color: '#e56a16' }} />
               </Box>
-            ) : (
-              <Box>
+            )}
+            <Box sx={{ opacity: 1 }}>
                 {/* Performance Over Time Chart */}
                 <GlassCard sx={{ mb: 3, border: `2px solid ${themeColors.border}`, background: '#232528' }}>
                   <Box sx={{ p: 0 }}>
@@ -3176,18 +3277,18 @@ export default function CareerPage() {
                     </Box>
 
                     {/* Chart Title */}
-                    <Box sx={{ textAlign: 'center', pt: 2, pb: 1 }}>
-                      {playerName && (
-                        <Typography sx={{
-                          fontSize: 16,
-                          fontWeight: 'bold',
-                          color: themeColors.primary,
-                          textTransform: 'uppercase',
-                          mb: 0.5
-                        }}>
-                          {playerName}
-                        </Typography>
-                      )}
+                    <Box sx={{ textAlign: 'center', pt: 2, pb: 1, minHeight: 55, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography sx={{
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: themeColors.primary,
+                        textTransform: 'uppercase',
+                        mb: 0.5,
+                        minHeight: 24,
+                        visibility: playerName ? 'visible' : 'hidden'
+                      }}>
+                        {playerName || 'PLAYER'}
+                      </Typography>
                       <Typography sx={{
                         fontSize: 14,
                         fontWeight: 600,
@@ -3223,7 +3324,7 @@ export default function CareerPage() {
                               position: 'relative',
                             }}
                           >
-                            <ResponsiveContainer width={65} height="100%" debounce={50}>
+                            <ResponsiveContainer width={65} height="100%">
                               <ComposedChart
                                 data={chartData.length > 0 ? chartData : performanceData}
                                 margin={{ top: 10, left: 15, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
@@ -3282,7 +3383,7 @@ export default function CareerPage() {
                                 height: 'calc(100% - 8px)',
                               }}
                             >
-                              <ResponsiveContainer width={chartWidth} height="100%" debounce={50}>
+                              <ResponsiveContainer width={chartWidth} height="100%">
                                 <ComposedChart
                                   data={chartData.length > 0 ? chartData : performanceData}
                                   margin={{ top: 10, left: 10, right: 10, bottom: groupMode === 'monthly' ? 65 : 75 }}
@@ -3298,99 +3399,7 @@ export default function CareerPage() {
                                 >
                                   <XAxis
                                     dataKey="label"
-                                    tick={({ x, y, payload, index, width: axisWidth }: { x: number; y: number; payload: { value: string | number }; index: number; width?: number }) => {
-                                      const activeData = chartData.length > 0 ? chartData : performanceData;
-                                      const currentItem = activeData[index];
-                                      if (!currentItem) return <g></g>;
-
-                                      const currentYear = currentItem.year;
-                                      const isHighlighted = currentYear === activeYear;
-
-                                      let yearStartIndex = index;
-                                      while (yearStartIndex > 0 && activeData[yearStartIndex - 1].year === currentYear) {
-                                        yearStartIndex--;
-                                      }
-                                      let yearEndIndex = index;
-                                      while (yearEndIndex < activeData.length - 1 && activeData[yearEndIndex + 1].year === currentYear) {
-                                        yearEndIndex++;
-                                      }
-                                      const isYearCenter = index === Math.floor((yearStartIndex + yearEndIndex) / 2);
-
-                                      const count = activeData.length;
-                                      const widthVal = axisWidth || 800;
-                                      const step = count > 1 ? widthVal / count : widthVal;
-                                      const halfStep = step / 2;
-
-                                      const drawLeftVertical = index === yearStartIndex;
-                                      const drawRightVertical = index === yearEndIndex;
-
-                                      const lineLeft = drawLeftVertical ? -halfStep + 3 : -halfStep;
-                                      const lineRight = drawRightVertical ? halfStep - 3 : halfStep;
-
-                                      const lineY = 45;
-                                      const tickHeight = 6;
-
-                                      return (
-                                        <g transform={`translate(${x},${y})`}>
-                                          <text
-                                            x={0}
-                                            y={0}
-                                            dx={-5}
-                                            dy={5}
-                                            textAnchor="end"
-                                            fill={isHighlighted ? themeColors.primary : themeColors.textDim}
-                                            fontSize={10}
-                                            fontWeight={isHighlighted ? 'bold' : 'normal'}
-                                            transform="rotate(-90)"
-                                          >
-                                            {payload.value}
-                                          </text>
-
-                                          {/* Bracket lines for year grouping */}
-                                          <line
-                                            x1={lineLeft}
-                                            y1={lineY}
-                                            x2={lineRight}
-                                            y2={lineY}
-                                            stroke={isHighlighted ? themeColors.primary : "rgba(255, 255, 255, 0.35)"}
-                                            strokeWidth={isHighlighted ? 2 : 1}
-                                          />
-                                          {drawLeftVertical && (
-                                            <line
-                                              x1={lineLeft}
-                                              y1={lineY}
-                                              x2={lineLeft}
-                                              y2={lineY - tickHeight}
-                                              stroke={isHighlighted ? themeColors.primary : "rgba(255, 255, 255, 0.35)"}
-                                              strokeWidth={isHighlighted ? 2 : 1}
-                                            />
-                                          )}
-                                          {drawRightVertical && (
-                                            <line
-                                              x1={lineRight}
-                                              y1={lineY}
-                                              x2={lineRight}
-                                              y2={lineY - tickHeight}
-                                              stroke={isHighlighted ? themeColors.primary : "rgba(255, 255, 255, 0.35)"}
-                                              strokeWidth={isHighlighted ? 2 : 1}
-                                            />
-                                          )}
-
-                                          {isYearCenter && (
-                                            <text
-                                              x={0}
-                                              y={lineY + 15}
-                                              textAnchor="middle"
-                                              fill={isHighlighted ? themeColors.primary : themeColors.textDim}
-                                              fontSize={isHighlighted ? 12 : 11}
-                                              fontWeight="bold"
-                                            >
-                                              {currentYear}
-                                            </text>
-                                          )}
-                                        </g>
-                                      );
-                                    }}
+                                    tick={renderXAxisTick}
                                     interval={0}
                                     tickLine={{ stroke: themeColors.border }}
                                     axisLine={{ stroke: themeColors.border }}
@@ -3495,7 +3504,7 @@ export default function CareerPage() {
                               position: 'relative',
                             }}
                           >
-                            <ResponsiveContainer width={70} height="100%" debounce={50}>
+                            <ResponsiveContainer width={70} height="100%">
                               <ComposedChart
                                 data={chartData.length > 0 ? chartData : performanceData}
                                 margin={{ top: 10, left: 0, right: 15, bottom: groupMode === 'monthly' ? 65 : 75 }}
@@ -3648,7 +3657,7 @@ export default function CareerPage() {
                         </Typography>
 
                         <Box sx={{ height: 160 }}>
-                          <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                          <ResponsiveContainer width="100%" height="100%">
                             <RadarChart
                               data={influenceRadarData}
                               outerRadius={55}
@@ -3806,65 +3815,61 @@ export default function CareerPage() {
                         </Typography>
 
                         <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {actualWinLossData.every((d: any) => d.value === 0) ? (
-                            <Typography sx={{ fontSize: 12, color: themeColors.textDim }}>No match data available</Typography>
-                          ) : (
-                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                              <PieChart>
-                                <Pie
-                                  data={actualWinLossData}
-                                  dataKey="value"
-                                  nameKey="name"
-                                  cx="50%"
-                                  cy="50%"
-                                  outerRadius={55}
-                                  paddingAngle={2}
-                                  startAngle={90}
-                                  endAngle={450}
-                                  label={false}
-                                  labelLine={false}
-                                  isAnimationActive={false}
-                                  activeShape={false}
-                                />
-                                <Tooltip
-                                  isAnimationActive={false}
-                                  wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
-                                  useTranslate3d={true}
-                                  content={({ active, payload }: any) => {
-                                    if (!active || !payload || !payload.length) return null;
-                                    const entry = payload[0];
-                                    const item = entry.payload;
-                                    const name = entry.name;
-                                    const value = entry.value;
-                                    const color = item.color || entry.color || themeColors.text;
-                                    return (
-                                      <Box
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={actualWinLossData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={55}
+                                paddingAngle={2}
+                                startAngle={90}
+                                endAngle={450}
+                                label={false}
+                                labelLine={false}
+                                isAnimationActive={false}
+                                activeShape={false}
+                              />
+                              <Tooltip
+                                isAnimationActive={false}
+                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                                useTranslate3d={true}
+                                content={({ active, payload }: any) => {
+                                  if (!active || !payload || !payload.length) return null;
+                                  const entry = payload[0];
+                                  const item = entry.payload;
+                                  const name = entry.name;
+                                  const value = entry.value;
+                                  const color = item.color || entry.color || themeColors.text;
+                                  return (
+                                    <Box
+                                      sx={{
+                                        background: themeColors.surfaceAlt,
+                                        border: `1px solid ${themeColors.border}`,
+                                        borderRadius: 1,
+                                        p: 1.2,
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                                        pointerEvents: 'none',
+                                      }}
+                                    >
+                                      <Typography
                                         sx={{
-                                          background: themeColors.surfaceAlt,
-                                          border: `1px solid ${themeColors.border}`,
-                                          borderRadius: 1,
-                                          p: 1.2,
-                                          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                                          pointerEvents: 'none',
+                                          fontSize: 11,
+                                          fontWeight: 700,
+                                          color: color,
+                                          textTransform: 'uppercase',
                                         }}
                                       >
-                                        <Typography
-                                          sx={{
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            color: color,
-                                            textTransform: 'uppercase',
-                                          }}
-                                        >
-                                          {name} : {value}%
-                                        </Typography>
-                                      </Box>
-                                    );
-                                  }}
-                                />
-                              </PieChart>
-                            </ResponsiveContainer>
-                          )}
+                                        {name} : {value}%
+                                      </Typography>
+                                    </Box>
+                                  );
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
                         </Box>
 
                       </CardContent>
@@ -4230,10 +4235,9 @@ export default function CareerPage() {
                   </Typography>
                 </Box>
               </Box>
-            )}
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </Box>
-  );
+        </Container>
+      </Box>
+    );
 }
