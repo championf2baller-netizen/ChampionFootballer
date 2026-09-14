@@ -769,7 +769,8 @@ export default function ScheduleMatchPage() {
           
           if (storedCache) {
             const cacheData = JSON.parse(storedCache);
-            const leagueCacheKey = `leagues_${league.id}`;
+            const currentLeagueId = String(league?.id || leagueId);
+            const leagueCacheKey = `leagues_${currentLeagueId}`;
             
             // If league exists in cache, add new match to it
             if (cacheData[leagueCacheKey]) {
@@ -823,11 +824,12 @@ export default function ScheduleMatchPage() {
         
         // 📢 STEP 3: Dispatch events to update UI everywhere
         console.log('📢 Dispatching events...');
+        const effectiveLeagueId = String(league?.id || leagueId);
         
         window.dispatchEvent(new CustomEvent('match-created', { 
           detail: { 
             match: json.match, 
-            leagueId: league.id, 
+            leagueId: effectiveLeagueId, 
             timestamp: Date.now() 
           } 
         }));
@@ -842,7 +844,7 @@ export default function ScheduleMatchPage() {
         
         window.dispatchEvent(new CustomEvent('league-updated', {
           detail: { 
-            leagueId: league.id, 
+            leagueId: effectiveLeagueId, 
             timestamp: Date.now() 
           }
         }));
@@ -851,7 +853,7 @@ export default function ScheduleMatchPage() {
       }
       
       toast.success('Match created');
-      router.push(`/league/${league.id}?tab=matches`);
+      router.push(`/league/${String(league?.id || leagueId)}?tab=matches`);
     } catch (e: unknown) {
       const errorMsg = e instanceof Error ? e.message : 'Unable to create match';
       setError(errorMsg);

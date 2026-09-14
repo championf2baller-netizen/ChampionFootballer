@@ -798,6 +798,7 @@ export default function LeagueDetailPage() {
     // Season dropdown state
     const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
     const [seasonDropdownAnchor, setSeasonDropdownAnchor] = useState<null | HTMLElement>(null);
+    const lastSyncedQuerySeasonIdRef = React.useRef<string | null>(initialSeasonIdFromQuery || null);
     const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(() => {
         if (initialSeasonIdFromQuery) return initialSeasonIdFromQuery;
         if (typeof window !== 'undefined') {
@@ -1112,10 +1113,11 @@ export default function LeagueDetailPage() {
         const querySeasonId = typeof searchParams?.get === 'function'
             ? (searchParams.get('seasonId') || '').trim()
             : '';
-        if (querySeasonId && querySeasonId !== selectedSeasonId) {
+        if (querySeasonId && querySeasonId !== lastSyncedQuerySeasonIdRef.current) {
+            lastSyncedQuerySeasonIdRef.current = querySeasonId;
             setSelectedSeasonId(querySeasonId);
         }
-    }, [searchParams, selectedSeasonId]);
+    }, [searchParams]);
 
     // Show creation message after redirect from season creation flows
     useEffect(() => {
@@ -2066,13 +2068,30 @@ export default function LeagueDetailPage() {
     // Handle season selection
     const handleSeasonSelect = async (seasonId: string) => {
         console.log('🎯 Season selected:', seasonId);
-        setSelectedSeasonId(seasonId);
+        const normalizedSeasonId = String(seasonId).trim();
+        setSelectedSeasonId(normalizedSeasonId);
+        lastSyncedQuerySeasonIdRef.current = normalizedSeasonId;
         handleSeasonDropdownClose();
+
+        try {
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('preferredSeasonId', normalizedSeasonId);
+                if (leagueId) {
+                    localStorage.setItem('preferredSeasonId_' + leagueId, normalizedSeasonId);
+                }
+            }
+        } catch { }
+
+        // Keep URL in sync so tab switching and refreshes retain the selected season
+        try {
+            const currentTab = encodeURIComponent(section || 'table');
+            router.replace(`/league/${encodeURIComponent(leagueId)}?tab=${currentTab}&seasonId=${encodeURIComponent(normalizedSeasonId)}`, { scroll: false });
+        } catch { }
 
         // 🔄 Refresh league data to get latest season settings
         if (token && leagueId) {
             console.log('🔄 Refreshing league data after season selection...');
-            await fetchLeagueDetails(seasonId);
+            await fetchLeagueDetails(normalizedSeasonId);
         }
     };
 
@@ -2309,22 +2328,46 @@ export default function LeagueDetailPage() {
     // Get selected season number from selectedSeasonId
     const selectedSeasonNumber = React.useMemo(() => {
         if (!selectedSeasonId || !league) return currentSeasonNumber;
+        const normalizedSelectedId = String(selectedSeasonId).trim();
+
+        // 1) First check dedicated seasonOptions (fresh/authoritative)
+        const seasonFromOptions = seasonOptions.find((season) =>
+            String(season.id).trim() === normalizedSelectedId
+        );
+        if (seasonFromOptions && seasonFromOptions.seasonNumber > 0) {
+            return seasonFromOptions.seasonNumber;
+        }
+
+        // 2) Check league.seasons
         const seasonsUnknown = (league as unknown as Record<string, unknown>)?.seasons;
         if (Array.isArray(seasonsUnknown)) {
             const season = seasonsUnknown.find((s: unknown) => {
                 const seasonObj = s as Record<string, unknown>;
-                return String(seasonObj?.id || '') === selectedSeasonId;
+                const sid = String(seasonObj?.id ?? seasonObj?._id ?? '').trim();
+                return sid === normalizedSelectedId;
             });
             if (season) {
                 const seasonObj = season as Record<string, unknown>;
-                return Number(seasonObj?.seasonNumber || currentSeasonNumber);
+                const num = Number(seasonObj?.seasonNumber);
+                if (Number.isFinite(num) && num > 0) return num;
             }
         }
 
-        const seasonFromOptions = seasonOptions.find((season) => season.id === selectedSeasonId);
-        if (seasonFromOptions && seasonFromOptions.seasonNumber > 0) {
-            return seasonFromOptions.seasonNumber;
+        // 3) Check league.currentSeason
+        const currentSeasonObj = (league as unknown as Record<string, unknown>)?.currentSeason as Record<string, unknown> | undefined;
+        if (currentSeasonObj && String(currentSeasonObj.id ?? currentSeasonObj._id ?? '').trim() === normalizedSelectedId) {
+            const num = Number(currentSeasonObj.seasonNumber);
+            if (Number.isFinite(num) && num > 0) return num;
         }
+
+        // 4) Check if selectedSeasonId directly matches a seasonNumber
+        if (/^\d+$/.test(normalizedSelectedId)) {
+            const parsedNum = Number(normalizedSelectedId);
+            if (parsedNum > 0 && seasonOptions.some(s => s.seasonNumber === parsedNum)) {
+                return parsedNum;
+            }
+        }
+
         return currentSeasonNumber;
     }, [selectedSeasonId, league, currentSeasonNumber, seasonOptions]);
 
@@ -4328,8 +4371,9 @@ export default function LeagueDetailPage() {
                                             const availableSeasons: Array<{ id: string, seasonNumber: number }> = [];
                                             const addUniqueSeason = (id: string, seasonNumber: number) => {
                                                 if (!id || seasonNumber <= 0) return;
-                                                if (!availableSeasons.some((season) => season.id === id)) {
-                                                    availableSeasons.push({ id, seasonNumber });
+                                                const existingIndex = availableSeasons.findIndex(s => s.seasonNumber === seasonNumber || String(s.id).trim() === String(id).trim());
+                                                if (existingIndex === -1) {
+                                                    availableSeasons.push({ id: String(id).trim(), seasonNumber });
                                                 }
                                             };
 
@@ -4387,49 +4431,52 @@ export default function LeagueDetailPage() {
                                                 );
                                             }
 
-                                            return availableSeasons.map((season) => (
-                                                <MenuItem
-                                                    key={season.id}
-                                                    onClick={() => handleSeasonSelect(season.id)}
-                                                    sx={{
-                                                        borderRadius: 1.5,
-                                                        mx: 0.5,
-                                                        my: 0.25,
-                                                        py: 1.25,
-                                                        px: 1.5,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 1,
-                                                        color: '#E5E7EB',
-                                                        transition: 'all 0.2s ease',
-                                                        background: season.seasonNumber === currentSeasonNumber
-                                                            ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)'
-                                                            : 'transparent',
-                                                        border: season.seasonNumber === currentSeasonNumber
-                                                            ? '1px solid rgba(3,136,227,0.35)'
-                                                            : 'none',
-                                                        '&:hover': {
-                                                            transform: 'translateY(-1px)',
-                                                            background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-                                                        },
-                                                    }}
-                                                >
-                                                    <ListItemIcon sx={{ minWidth: 36 }}>
-                                                        <Calendar size={16} color={season.seasonNumber === currentSeasonNumber ? '#FFFFFF' : '#9CA3AF'} />
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={`Season ${season.seasonNumber}`}
+                                            return availableSeasons.map((season) => {
+                                                const isSelected = String(season.id).trim() === String(selectedSeasonId || '').trim() || season.seasonNumber === selectedSeasonNumber;
+                                                return (
+                                                    <MenuItem
+                                                        key={season.id}
+                                                        onClick={() => handleSeasonSelect(season.id)}
                                                         sx={{
-                                                            '& .MuiListItemText-primary': {
-                                                                fontSize: '0.95rem',
-                                                                fontWeight: season.seasonNumber === currentSeasonNumber ? 700 : 500,
-                                                                letterSpacing: 0.2,
-                                                                color: season.seasonNumber === currentSeasonNumber ? '#FFFFFF' : '#E5E7EB'
-                                                            }
+                                                            borderRadius: 1.5,
+                                                            mx: 0.5,
+                                                            my: 0.25,
+                                                            py: 1.25,
+                                                            px: 1.5,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 1,
+                                                            color: '#E5E7EB',
+                                                            transition: 'all 0.2s ease',
+                                                            background: isSelected
+                                                                ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)'
+                                                                : 'transparent',
+                                                            border: isSelected
+                                                                ? '1px solid rgba(3,136,227,0.35)'
+                                                                : 'none',
+                                                            '&:hover': {
+                                                                transform: 'translateY(-1px)',
+                                                                background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                                                            },
                                                         }}
-                                                    />
-                                                </MenuItem>
-                                            ));
+                                                    >
+                                                        <ListItemIcon sx={{ minWidth: 36 }}>
+                                                            <Calendar size={16} color={isSelected ? '#FFFFFF' : '#9CA3AF'} />
+                                                        </ListItemIcon>
+                                                        <ListItemText
+                                                            primary={`Season ${season.seasonNumber}`}
+                                                            sx={{
+                                                                '& .MuiListItemText-primary': {
+                                                                    fontSize: '0.95rem',
+                                                                    fontWeight: isSelected ? 700 : 500,
+                                                                    letterSpacing: 0.2,
+                                                                    color: isSelected ? '#FFFFFF' : '#E5E7EB'
+                                                                }
+                                                            }}
+                                                        />
+                                                    </MenuItem>
+                                                );
+                                            });
                                         })()}
                                     </Menu>
 
@@ -4639,7 +4686,8 @@ export default function LeagueDetailPage() {
                                                 //     return;
                                                 // }
                                                 setSection('table');
-                                                router.replace(`/league/${leagueId}?tab=table`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=table${seasonParam}`);
                                             }}
                                             startIcon={<Image src={LeagueTable} alt="League Table" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'table' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
@@ -4667,7 +4715,8 @@ export default function LeagueDetailPage() {
                                             }}
                                             onClick={() => {
                                                 setSection('results');
-                                                router.replace(`/league/${leagueId}?tab=results`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=results${seasonParam}`);
                                             }}
                                             startIcon={<Image src={MATCHRESULT} alt="Results" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'results' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
@@ -4694,7 +4743,8 @@ export default function LeagueDetailPage() {
                                             }}
                                             onClick={() => {
                                                 setSection('matches');
-                                                router.replace(`/league/${leagueId}?tab=matches`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=matches${seasonParam}`);
                                             }}
                                             startIcon={<Image src={FIXTURES} alt="Fixtures" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'matches' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
@@ -4720,7 +4770,8 @@ export default function LeagueDetailPage() {
                                             }}
                                             onClick={() => {
                                                 setSection('leaderboard');
-                                                router.replace(`/league/${leagueId}?tab=leaderboard`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=leaderboard${seasonParam}`);
                                             }}
                                             startIcon={<Image src={LEADERBOARD} alt="Leaderboard" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'leaderboard' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
@@ -4747,7 +4798,8 @@ export default function LeagueDetailPage() {
                                             }}
                                             onClick={() => {
                                                 setSection('members');
-                                                router.replace(`/league/${leagueId}?tab=members`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=members${seasonParam}`);
                                             }}
                                             startIcon={<Image src={PLAYERIMAGE} alt="Players" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'members' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
@@ -4773,7 +4825,8 @@ export default function LeagueDetailPage() {
                                             }}
                                             onClick={() => {
                                                 setSection('dream-team');
-                                                router.replace(`/league/${leagueId}?tab=dream-team`);
+                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=dream-team${seasonParam}`);
                                             }}
                                             startIcon={<Image src={DREATEAM} alt="Dream Team" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'dream-team' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
                                         >
