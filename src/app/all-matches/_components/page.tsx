@@ -1529,7 +1529,7 @@ export default function AllMatches() {
                 ? seasons.find((s) => String(s.id) === String(selectedSeason) || String(s.seasonNumber) === String(selectedSeason))
                 : seasons.find((s) => s.isActive !== false && !(s as any).archived) || seasons[0];
             if (currentSel && (currentSel.isActive === false || (currentSel as any).archived === true)) {
-                toast.error('This season is inactive. New matches are disabled for inactive seasons.');
+                toast.error('Cannot create a new match because this season is inactive. Please make the season active before creating new matches.');
                 return;
             }
         }

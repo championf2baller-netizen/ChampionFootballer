@@ -2254,7 +2254,7 @@ export default function LeagueDetailPage() {
             if (Array.isArray(seasonsArr)) {
                 const sel = seasonsArr.find((s: any) => String(s?.id) === String(selectedSeasonId));
                 if (sel && sel.isActive === false) {
-                    return 'This season is inactive. New matches are disabled for inactive seasons.';
+                    return 'Cannot create a new match because this season is inactive. Please make the season active before creating new matches.';
                 }
             }
         }
