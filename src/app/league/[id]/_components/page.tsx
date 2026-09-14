@@ -45,7 +45,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '@/lib/hooks';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Trophy, Calendar, Copy, Edit, Settings, Shield, ChevronDown, Trash2, Undo2, Users, Flame, Search, Table, Plus, Share2, MapPin, Crown, Lock } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Copy, Edit, Settings, Shield, ChevronDown, Trash2, Undo2, Users, Flame, Search, Table, Plus, Share2, MapPin, Crown, Lock, RefreshCw } from 'lucide-react';
 import { Tooltip, Slide } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -57,6 +57,7 @@ import MatchResultLoadingSkeleton from '@/Components/loading/MatchResultLoadingS
 import PlayerCardLoadingSkeleton from '@/Components/loading/PlayerCardLoadingSkeleton';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
+import { TokenManager } from '@/lib/tokenManager';
 import PLAYERIMAGE from '@/Components/images/players.png'
 import HomeTeamImage from '@/Components/images/hometeamshirt.png'
 import AwayTeamImage from '@/Components/images/awayteamshirt.png'
@@ -1162,12 +1163,13 @@ export default function LeagueDetailPage() {
     console.log('league', league)
 
     const fetchLeagueDetails = useCallback(async (seasonIdOverride?: string | null) => {
-        if (!token || !leagueId || isSigningOut) return;
+        const effectiveToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
+        if (!effectiveToken || !leagueId || isSigningOut) return;
         setLeagueDetailsAttempted(true);
         setLeagueDetailsLoading(true);
         try {
             setError((prev) => (prev === 'No leagues found' ? prev : null));
-            console.log("Fetching league details - Token:", token ? 'Present' : 'Missing');
+            console.log("Fetching league details - Token:", effectiveToken ? 'Present' : 'Missing');
 
             // Add cache busting to force fresh data from backend
             const params = new URLSearchParams();
@@ -1187,31 +1189,48 @@ export default function LeagueDetailPage() {
             let lastStatus = 0;
             let lastMessage = '';
 
-            for (const url of detailUrls) {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    cache: 'no-store',
-                });
+            for (let attempt = 0; attempt < 2; attempt++) {
+                const currentAuthToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null) || effectiveToken;
+                if (!currentAuthToken) break;
 
-                const payloadUnknown: unknown = await response.json().catch(() => ({}));
-                const payloadRecord = isRecord(payloadUnknown) ? payloadUnknown : {};
+                for (const url of detailUrls) {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${currentAuthToken}`
+                        },
+                        cache: 'no-store',
+                    });
 
-                if (response.ok && (payloadRecord.success !== false || payloadRecord.league)) {
-                    data = payloadRecord;
-                    break;
+                    const payloadUnknown: unknown = await response.json().catch(() => ({}));
+                    const payloadRecord = isRecord(payloadUnknown) ? payloadUnknown : {};
+
+                    if (response.ok && (payloadRecord.success !== false || payloadRecord.league)) {
+                        data = payloadRecord;
+                        break;
+                    }
+
+                    lastStatus = response.status;
+                    const apiMessage = String(
+                        payloadRecord.message ??
+                        payloadRecord.error ??
+                        payloadRecord.detail ??
+                        ''
+                    ).trim();
+                    if (apiMessage) lastMessage = apiMessage;
                 }
 
-                lastStatus = response.status;
-                const apiMessage = String(
-                    payloadRecord.message ??
-                    payloadRecord.error ??
-                    payloadRecord.detail ??
-                    ''
-                ).trim();
-                if (apiMessage) lastMessage = apiMessage;
+                if (data) break;
+
+                // On first failure if 401/403 or network issue, attempt storage token recovery and retry once after 250ms delay
+                if (attempt === 0) {
+                    const recovered = typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null;
+                    if (recovered) {
+                        console.log('🔄 Token recovered via TokenManager, retrying league details fetch...');
+                        await new Promise((resolve) => setTimeout(resolve, 250));
+                        continue;
+                    }
+                }
             }
 
             if (!data) {
@@ -1381,8 +1400,9 @@ export default function LeagueDetailPage() {
 
     useEffect(() => {
         // Wait for auth to finish loading, user to be authenticated, and token to be available
-        if (authLoading) return;
-        if (!isAuthenticated || !token || !leagueId) return;
+        if (authLoading || isSigningOut) return;
+        const currentToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
+        if (!currentToken || !leagueId) return;
         fetchLeagueDetails();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token, authLoading, isAuthenticated, leagueId]);
@@ -3252,23 +3272,38 @@ export default function LeagueDetailPage() {
                 }}
             >
                 <Container maxWidth="lg">
-                    <Button
-                        startIcon={<ArrowLeft />}
-                        onClick={handleBackToAllLeagues}
-                        sx={{
-                            mb: 2,
-                            color: 'white',
-                            backgroundColor: '#388e3c',
-                            '&:hover': { backgroundColor: '#388e3c' },
-                        }}
-                    >
-                        Back to All Leagues
-                    </Button>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
+                        <Button
+                            startIcon={<ArrowLeft />}
+                            onClick={handleBackToAllLeagues}
+                            sx={{
+                                color: 'white',
+                                backgroundColor: '#388e3c',
+                                '&:hover': { backgroundColor: '#2e7d32' },
+                            }}
+                        >
+                            Back to All Leagues
+                        </Button>
+                        <Button
+                            startIcon={<RefreshCw size={16} />}
+                            onClick={() => {
+                                setError(null);
+                                void fetchLeagueDetails();
+                            }}
+                            sx={{
+                                color: 'white',
+                                backgroundColor: '#e56a16',
+                                '&:hover': { backgroundColor: '#d1590d' },
+                            }}
+                        >
+                            Retry Loading
+                        </Button>
+                    </Box>
                     <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                        Unable to load league details.
+                        {error || 'Unable to load league details.'}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)', mt: 1 }}>
-                        Please open another league or refresh this page.
+                        Please verify your connection or select another league.
                     </Typography>
                 </Container>
             </Box>
@@ -3314,13 +3349,28 @@ export default function LeagueDetailPage() {
                         onClick={onClose}
                         sx={{
                             position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: '#9CA3AF',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                            right: 12,
+                            top: 12,
+                            color: '#fff',
+                            bgcolor: 'rgba(255, 255, 255, 0.12)',
+                            border: '1.5px solid rgba(255, 255, 255, 0.35)',
+                            borderRadius: '50%',
+                            width: 32,
+                            height: 32,
+                            p: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                bgcolor: '#e56a16',
+                                borderColor: '#e56a16',
+                                color: '#fff',
+                                transform: 'scale(1.08)',
+                            }
                         }}
                     >
-                        <CloseIcon />
+                        <CloseIcon sx={{ fontSize: 18 }} />
                     </IconButton>
                 </DialogTitle>
 
@@ -7651,8 +7701,33 @@ export default function LeagueDetailPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                         <Image src={cflogo} alt="CF Logo" width={isMobile ? 200 : 300} height={isMobile ? 200 : 300} style={{ objectFit: 'contain', maxWidth: '85%' }} />
                     </Box>
-                    <IconButton onClick={() => setOpenQuickView(false)} sx={{ color: '#fff', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                        <CloseIcon />
+                    <IconButton
+                        onClick={() => setOpenQuickView(false)}
+                        sx={{
+                            color: '#fff',
+                            position: 'absolute',
+                            right: 12,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            bgcolor: 'rgba(255, 255, 255, 0.12)',
+                            border: '1.5px solid rgba(255, 255, 255, 0.35)',
+                            borderRadius: '50%',
+                            width: 32,
+                            height: 32,
+                            p: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                bgcolor: '#e56a16',
+                                borderColor: '#e56a16',
+                                color: '#fff',
+                                transform: 'translateY(-50%) scale(1.08)',
+                            }
+                        }}
+                    >
+                        <CloseIcon sx={{ fontSize: 18 }} />
                     </IconButton>
                 </DialogTitle>
 

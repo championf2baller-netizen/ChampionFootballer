@@ -1995,9 +1995,30 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ position: 'absolute', right: 8, top: 8, color: '#9CA3AF', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}
+          sx={{
+            position: 'absolute',
+            right: 12,
+            top: 12,
+            color: '#fff',
+            bgcolor: 'rgba(255, 255, 255, 0.12)',
+            border: '1.5px solid rgba(255, 255, 255, 0.35)',
+            borderRadius: '50%',
+            width: 32,
+            height: 32,
+            p: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              bgcolor: '#e56a16',
+              borderColor: '#e56a16',
+              color: '#fff',
+              transform: 'scale(1.08)',
+            }
+          }}
         >
-          <Close />
+          <Close sx={{ fontSize: 18 }} />
         </IconButton>
       </DialogTitle>
 
@@ -2808,9 +2829,30 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
           <IconButton
             aria-label="close"
             onClick={() => setArchivedSeasonsOpen(false)}
-            sx={{ position: 'absolute', right: 8, top: 8, color: '#9CA3AF', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}
+            sx={{
+              position: 'absolute',
+              right: 12,
+              top: 12,
+              color: '#fff',
+              bgcolor: 'rgba(255, 255, 255, 0.12)',
+              border: '1.5px solid rgba(255, 255, 255, 0.35)',
+              borderRadius: '50%',
+              width: 32,
+              height: 32,
+              p: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: '#e56a16',
+                borderColor: '#e56a16',
+                color: '#fff',
+                transform: 'scale(1.08)',
+              }
+            }}
           >
-            <Close />
+            <Close sx={{ fontSize: 18 }} />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ borderColor: 'rgba(255,255,255,0.08)' }}>
