@@ -808,12 +808,14 @@ export default function CareerPage() {
 
     const validList = list.filter(isLeagueValidForPerformance);
 
-    if (!filters.year || filters.year === 'all') {
-      return validList;
+    let filteredList = validList;
+    if (filters.year && filters.year !== 'all') {
+      const effectiveYear = String(filters.year);
+      filteredList = validList.filter((l) => isLeagueInYear(l, effectiveYear));
     }
-
-    const effectiveYear = String(filters.year);
-    return validList.filter((l) => isLeagueInYear(l, effectiveYear));
+    return [...filteredList].sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+    );
   }, [data?.leagues, careerData?.leagues, filters.year]);
   const { user, token, loading: authLoading } = useAuth();
   const params = useParams();
@@ -945,11 +947,15 @@ export default function CareerPage() {
       : (data?.leagues || careerData?.leagues || [])) as LeagueWithMatches[])
       .filter(isLeagueValidForPerformance);
 
+    const sortedLeagues = [...sourceLeagues].sort((a, b) =>
+      (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+    );
+
     if (!filters.year || filters.year === 'all') {
-      setAvailableLeagues(sourceLeagues);
+      setAvailableLeagues(sortedLeagues);
     } else {
       const yearStr = String(filters.year);
-      setAvailableLeagues(sourceLeagues.filter((l) => isLeagueInYear(l, yearStr)));
+      setAvailableLeagues(sortedLeagues.filter((l) => isLeagueInYear(l, yearStr)));
     }
   }, [leaguesFromRedux, data?.leagues, careerData?.leagues, filters.year]);
 
@@ -2387,7 +2393,7 @@ export default function CareerPage() {
               minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
               overflow: 'visible',
               position: 'relative',
-              zIndex: 99999,
+              zIndex: 10,
             }}>
 
               {/* Centered Title */}
@@ -2444,7 +2450,7 @@ export default function CareerPage() {
                 maxWidth: '1200px',
                 mx: 'auto',
                 position: 'relative',
-                zIndex: 99999,
+                zIndex: 10,
               }}>
                 {/* Search Input */}
                 <Box
@@ -2456,7 +2462,7 @@ export default function CareerPage() {
                     maxWidth: { md: 480 },
                     ml: { xs: 0, md: 0.8 },
                     position: 'relative',
-                    zIndex: 99999,
+                    zIndex: 20,
                     mt: { xs: -6, md: 0 }
                   }}
                 >
@@ -3217,7 +3223,7 @@ export default function CareerPage() {
                               position: 'relative',
                             }}
                           >
-                            <ResponsiveContainer width={65} height="100%">
+                            <ResponsiveContainer width={65} height="100%" debounce={50}>
                               <ComposedChart
                                 data={chartData.length > 0 ? chartData : performanceData}
                                 margin={{ top: 10, left: 15, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
@@ -3276,19 +3282,10 @@ export default function CareerPage() {
                                 height: 'calc(100% - 8px)',
                               }}
                             >
-                              <ResponsiveContainer width={chartWidth} height="100%">
+                              <ResponsiveContainer width={chartWidth} height="100%" debounce={50}>
                                 <ComposedChart
                                   data={chartData.length > 0 ? chartData : performanceData}
                                   margin={{ top: 10, left: 10, right: 10, bottom: groupMode === 'monthly' ? 65 : 75 }}
-                                  onMouseMove={(state) => {
-                                    if (state && typeof state.activeTooltipIndex === 'number') {
-                                      const activeData = chartData.length > 0 ? chartData : performanceData;
-                                      const item = activeData[state.activeTooltipIndex];
-                                      if (item && item.year && item.year !== activeYear) {
-                                        setActiveYear(item.year);
-                                      }
-                                    }
-                                  }}
                                   onClick={(state) => {
                                     if (state && typeof state.activeTooltipIndex === 'number') {
                                       const activeData = chartData.length > 0 ? chartData : performanceData;
@@ -3411,6 +3408,9 @@ export default function CareerPage() {
                                   />
                                   <Tooltip
                                     isAnimationActive={false}
+                                    wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)', pointerEvents: 'none' }}
+                                    useTranslate3d={true}
                                     content={({ active, payload, label }) => {
                                       if (!active || !payload || !payload.length) return null;
                                       const item = payload[0].payload;
@@ -3495,7 +3495,7 @@ export default function CareerPage() {
                               position: 'relative',
                             }}
                           >
-                            <ResponsiveContainer width={70} height="100%">
+                            <ResponsiveContainer width={70} height="100%" debounce={50}>
                               <ComposedChart
                                 data={chartData.length > 0 ? chartData : performanceData}
                                 margin={{ top: 10, left: 0, right: 15, bottom: groupMode === 'monthly' ? 65 : 75 }}
@@ -3648,7 +3648,7 @@ export default function CareerPage() {
                         </Typography>
 
                         <Box sx={{ height: 160 }}>
-                          <ResponsiveContainer width="100%" height="100%">
+                          <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <RadarChart
                               data={influenceRadarData}
                               outerRadius={55}
@@ -3700,12 +3700,15 @@ export default function CareerPage() {
 
                               <Tooltip
                                 isAnimationActive={false}
+                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                                useTranslate3d={true}
                                 contentStyle={{
                                   background: themeColors.surfaceAlt,
                                   border: `1px solid ${themeColors.border}`,
                                   borderRadius: 4,
                                   color: themeColors.text,
                                   fontSize: 10,
+                                  pointerEvents: 'none',
                                 }}
                               />
                             </RadarChart>
@@ -3806,7 +3809,7 @@ export default function CareerPage() {
                           {actualWinLossData.every((d: any) => d.value === 0) ? (
                             <Typography sx={{ fontSize: 12, color: themeColors.textDim }}>No match data available</Typography>
                           ) : (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                               <PieChart>
                                 <Pie
                                   data={actualWinLossData}
@@ -3821,9 +3824,12 @@ export default function CareerPage() {
                                   label={false}
                                   labelLine={false}
                                   isAnimationActive={false}
+                                  activeShape={false}
                                 />
                                 <Tooltip
                                   isAnimationActive={false}
+                                  wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                                  useTranslate3d={true}
                                   content={({ active, payload }: any) => {
                                     if (!active || !payload || !payload.length) return null;
                                     const entry = payload[0];

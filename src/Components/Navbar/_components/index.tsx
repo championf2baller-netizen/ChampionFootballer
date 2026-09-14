@@ -2934,7 +2934,10 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   open={openProfileMenu}
                   onClose={handleProfileMenuClose}
                   TransitionComponent={SlideFade}
-                  sx={{ zIndex: 9999 }}
+                  sx={{ zIndex: 999999 }}
+                  // PopoverProps={{
+                  //   sx: { zIndex: 999999 }
+                  // }}
                   PaperProps={{
                     sx: {
                       p: 0.5,
@@ -2949,6 +2952,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       backdropFilter: 'blur(10px)',
                       boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
                       overflow: 'hidden',
+                      zIndex: 999999
                     },
                   }}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

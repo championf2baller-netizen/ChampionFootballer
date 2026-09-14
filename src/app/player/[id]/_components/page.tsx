@@ -2026,7 +2026,7 @@ export default function PlayerStatsPage() {
                     boxShadow: 'none',
                     minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
                     position: 'relative',
-                    zIndex: 99999,
+                    zIndex: 10,
                 }}>
                     {/* Centered Title */}
                     <Box sx={{
@@ -2081,7 +2081,7 @@ export default function PlayerStatsPage() {
                         maxWidth: '1230px',
                         mx: 'auto',
                         position: 'relative',
-                        zIndex: 99999,
+                        zIndex: 10,
                     }}>
                         {/* Search Input */}
                         <Box
@@ -2092,7 +2092,7 @@ export default function PlayerStatsPage() {
                                 maxWidth: { md: 480 },
                                 ml: { xs: 0, md: 0.8 },
                                 position: 'relative',
-                                zIndex: 99999,
+                                zIndex: 20,
                                 mt: { xs: -2, md: 0 }
                             }}
                         >
