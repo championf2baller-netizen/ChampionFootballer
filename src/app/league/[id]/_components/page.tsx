@@ -1358,6 +1358,7 @@ export default function LeagueDetailPage() {
             if (selectedSeasonId) {
                 params.append('seasonId', selectedSeasonId);
             }
+            params.append('_t', Date.now().toString());
 
             const url = `${process.env.NEXT_PUBLIC_API_URL}/dream-team?${params.toString()}`;
             console.log('🔍 Fetching Dream Team from URL:', url);
@@ -6438,22 +6439,138 @@ export default function LeagueDetailPage() {
 
                                                 {/* Overlay players */}
                                                 {(() => {
-                                                    const playersToShow = [
-                                                        ...(dreamTeam?.goalkeeper || []),
-                                                        ...(dreamTeam?.defenders || []),
-                                                        ...(dreamTeam?.midfielders || []),
-                                                        ...(dreamTeam?.forwards || [])
-                                                    ].slice(0, 5);
+                                                    const isValidPositionPlayer = (p: any) => {
+                                                        if (!p) return false;
+                                                        const pos = String(p.position || p.positionType || '').trim().toLowerCase();
+                                                        return pos !== '' && pos !== 'null' && pos !== 'undefined' && pos !== 'n/a' && pos !== 'none' && pos !== '-' && pos !== 'unassigned';
+                                                    };
 
-                                                    const positions = [
-                                                        { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } }, // Defender 1 (left)
-                                                        { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } }, // Defender 2 (right)
-                                                        { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } }, // Midfielder 1 (left)
-                                                        { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } }, // Midfielder 2 (right)
-                                                        { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } }, // Attacker (center)
-                                                    ];
+                                                    const sortByXP = (a: any, b: any) => {
+                                                        const xpA = Number(a.xp ?? a.stats?.xp ?? 0);
+                                                        const xpB = Number(b.xp ?? b.stats?.xp ?? 0);
+                                                        if (xpB !== xpA) return xpB - xpA;
+                                                        return Number(b.score || 0) - Number(a.score || 0);
+                                                    };
 
-                                                    if (playersToShow.length === 0) {
+                                                    const isRightSide = (p: any) => {
+                                                        if (!p) return false;
+                                                        const str = `${p.position || ''} ${p.positionType || ''}`.toLowerCase();
+                                                        return (
+                                                            str.includes('right') ||
+                                                            str.includes(' rm') || str.startsWith('rm') ||
+                                                            str.includes(' rw') || str.startsWith('rw') ||
+                                                            str.includes(' rb') || str.startsWith('rb') ||
+                                                            str.includes(' rwb') || str.startsWith('rwb')
+                                                        );
+                                                    };
+
+                                                    const isLeftSide = (p: any) => {
+                                                        if (!p) return false;
+                                                        const str = `${p.position || ''} ${p.positionType || ''}`.toLowerCase();
+                                                        return (
+                                                            str.includes('left') ||
+                                                            str.includes(' lm') || str.startsWith('lm') ||
+                                                            str.includes(' lw') || str.startsWith('lw') ||
+                                                            str.includes(' lb') || str.startsWith('lb') ||
+                                                            str.includes(' lwb') || str.startsWith('lwb')
+                                                        );
+                                                    };
+
+                                                    const mappedPlayers: Array<{ player: any; slot: { left: any; top: any }; key: string }> = [];
+
+                                                    // 1. Goalkeeper (1 player)
+                                                    const gks = (dreamTeam?.goalkeeper || []).filter(isValidPositionPlayer).sort(sortByXP);
+                                                    if (gks[0]) {
+                                                        mappedPlayers.push({
+                                                            player: gks[0],
+                                                            slot: { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } },
+                                                            key: `gk-${gks[0].id}`
+                                                        });
+                                                    }
+
+                                                    // 2. Defenders (up to 2 players - Strict Left / Right XP Slotting)
+                                                    const defs = (dreamTeam?.defenders || []).filter(isValidPositionPlayer).sort(sortByXP);
+                                                    let leftDef: any = null;
+                                                    let rightDef: any = null;
+
+                                                    // Pass 1: Assign explicit side players to their matching slot (highest XP wins)
+                                                    defs.forEach((p) => {
+                                                        if (isLeftSide(p)) {
+                                                            if (!leftDef) leftDef = p;
+                                                        } else if (isRightSide(p)) {
+                                                            if (!rightDef) rightDef = p;
+                                                        }
+                                                    });
+                                                    // Pass 2: Neutral players fill open slots
+                                                    defs.forEach((p) => {
+                                                        if (p === leftDef || p === rightDef) return;
+                                                        if (isLeftSide(p) || isRightSide(p)) return; // Exclude side player if higher XP player won that side
+                                                        if (!leftDef) leftDef = p;
+                                                        else if (!rightDef) rightDef = p;
+                                                    });
+
+                                                    if (leftDef) {
+                                                        mappedPlayers.push({
+                                                            player: leftDef,
+                                                            slot: { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } },
+                                                            key: `def-left-${leftDef.id}`
+                                                        });
+                                                    }
+                                                    if (rightDef) {
+                                                        mappedPlayers.push({
+                                                            player: rightDef,
+                                                            slot: { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } },
+                                                            key: `def-right-${rightDef.id}`
+                                                        });
+                                                    }
+
+                                                    // 3. Midfielders (up to 2 players - Strict Left / Right XP Slotting)
+                                                    const mids = (dreamTeam?.midfielders || []).filter(isValidPositionPlayer).sort(sortByXP);
+                                                    let leftMid: any = null;
+                                                    let rightMid: any = null;
+
+                                                    // Pass 1: Assign explicit side players to their matching slot (highest XP wins)
+                                                    mids.forEach((p) => {
+                                                        if (isLeftSide(p)) {
+                                                            if (!leftMid) leftMid = p;
+                                                        } else if (isRightSide(p)) {
+                                                            if (!rightMid) rightMid = p;
+                                                        }
+                                                    });
+                                                    // Pass 2: Neutral players fill open slots
+                                                    mids.forEach((p) => {
+                                                        if (p === leftMid || p === rightMid) return;
+                                                        if (isLeftSide(p) || isRightSide(p)) return; // Exclude side player if higher XP player won that side
+                                                        if (!leftMid) leftMid = p;
+                                                        else if (!rightMid) rightMid = p;
+                                                    });
+
+                                                    if (leftMid) {
+                                                        mappedPlayers.push({
+                                                            player: leftMid,
+                                                            slot: { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } },
+                                                            key: `mid-left-${leftMid.id}`
+                                                        });
+                                                    }
+                                                    if (rightMid) {
+                                                        mappedPlayers.push({
+                                                            player: rightMid,
+                                                            slot: { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } },
+                                                            key: `mid-right-${rightMid.id}`
+                                                        });
+                                                    }
+
+                                                    // 4. Forwards (1 player)
+                                                    const fwds = (dreamTeam?.forwards || []).filter(isValidPositionPlayer).sort(sortByXP);
+                                                    if (fwds[0]) {
+                                                        mappedPlayers.push({
+                                                            player: fwds[0],
+                                                            slot: { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } },
+                                                            key: `fwd-${fwds[0].id}`
+                                                        });
+                                                    }
+
+                                                    if (mappedPlayers.length === 0) {
                                                         return (
                                                             <Box sx={{
                                                                 position: 'absolute',
@@ -6470,16 +6587,15 @@ export default function LeagueDetailPage() {
                                                         );
                                                     }
 
-                                                    return playersToShow.map((player, idx) => {
-                                                        const pos = positions[idx];
-                                                        if (!player || !pos) return null;
+                                                    return mappedPlayers.map(({ player, slot, key }) => {
+                                                        if (!player || !slot) return null;
                                                         return (
                                                             <Box
-                                                                key={`player-${idx}-${player.id}`}
+                                                                key={key}
                                                                 sx={{
                                                                     position: 'absolute',
-                                                                    left: pos.left,
-                                                                    top: pos.top,
+                                                                    left: slot.left,
+                                                                    top: slot.top,
                                                                     transform: 'translate(-50%, -50%)',
                                                                     textAlign: 'center',
                                                                     zIndex: 2,
