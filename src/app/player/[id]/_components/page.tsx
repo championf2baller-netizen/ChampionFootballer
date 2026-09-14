@@ -378,7 +378,18 @@ export default function PlayerStatsPage() {
         return !endDate;
     }, []);
 
-    const [selectedSeason, setSelectedSeason] = useState<string>('all');
+    const [selectedSeason, setSelectedSeason] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            const storedLeague = localStorage.getItem('preferredLeagueId');
+            if (storedLeague && storedLeague !== 'all') {
+                const storedForLeague = localStorage.getItem('preferredSeasonId_' + storedLeague);
+                if (storedForLeague && storedForLeague !== 'all') return storedForLeague;
+            }
+            const stored = localStorage.getItem('preferredSeasonId');
+            if (stored && stored !== 'all') return stored;
+        }
+        return 'all';
+    });
     const [seasons, setSeasons] = useState<PlayerSeasonOption[]>([]);
     const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
     const [leagueDropdownOpen, setLeagueDropdownOpen] = useState(false);
@@ -389,6 +400,17 @@ export default function PlayerStatsPage() {
     const [preferredLeagueId, setPreferredLeagueId] = useState<string | null>(null);
     const [preferredLeagueLoaded, setPreferredLeagueLoaded] = useState(false);
     const filtersInitialized = useRef(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && selectedSeason && selectedSeason !== 'all') {
+            try {
+                localStorage.setItem('preferredSeasonId', selectedSeason);
+                if (leagueId && leagueId !== 'all') {
+                    localStorage.setItem('preferredSeasonId_' + leagueId, selectedSeason);
+                }
+            } catch {}
+        }
+    }, [selectedSeason, leagueId]);
 
     const getSeasonSortScore = useCallback((season: { seasonNumber?: number; startDate?: string; endDate?: string; name?: string }): number => {
         if (typeof season.seasonNumber === 'number' && Number.isFinite(season.seasonNumber)) {
@@ -559,12 +581,25 @@ export default function PlayerStatsPage() {
                         const visibleSeasons = sortedSeasons.filter((season) => !isSeasonExplicitlyDeclined(season));
                         const activeVisibleSeason = visibleSeasons.find((season) => isSeasonActiveLike(season));
                         const storedSeasonId = typeof window !== 'undefined' ? (localStorage.getItem('preferredSeasonId_' + leagueId) || localStorage.getItem('preferredSeasonId')) : null;
-                        const preferredSeasonObj = storedSeasonId ? visibleSeasons.find((s: any) => String(s.id) === String(storedSeasonId)) : null;
-                        const defaultSeason = preferredSeasonObj || activeVisibleSeason || visibleSeasons[0] || sortedSeasons[0];
+                        const preferredSeasonObj = storedSeasonId && storedSeasonId !== 'all' ? visibleSeasons.find((s: any) => String(s.id).trim() === String(storedSeasonId).trim() || (s.seasonNumber !== undefined && String(s.seasonNumber) === String(storedSeasonId).trim())) : null;
+                        const defaultSeason = preferredSeasonObj
+                            || (selectedSeason && selectedSeason !== 'all' && visibleSeasons.find((s: any) => String(s.id) === String(selectedSeason)))
+                            || activeVisibleSeason
+                            || visibleSeasons[0]
+                            || sortedSeasons[0];
 
                         setSeasons(sortedSeasons);
                         console.log('📋 Fetched seasons from /leagues/:id/seasons API:', sortedSeasons);
-                        setSelectedSeason(defaultSeason?.id || 'all');
+                        const chosenSeasonId = defaultSeason?.id || 'all';
+                        setSelectedSeason(chosenSeasonId);
+                        if (chosenSeasonId && chosenSeasonId !== 'all') {
+                            try {
+                                localStorage.setItem('preferredSeasonId', chosenSeasonId);
+                                if (leagueId && leagueId !== 'all') {
+                                    localStorage.setItem('preferredSeasonId_' + leagueId, chosenSeasonId);
+                                }
+                            } catch {}
+                        }
                     } else {
                         setSeasons([]);
                         setSelectedSeason('all');
@@ -1704,7 +1739,15 @@ export default function PlayerStatsPage() {
         setLeagueDropdownOpen(false);
         dispatch(setLeagueFilter(value));
         if (typeof window !== 'undefined' && value) {
-            try { localStorage.setItem('preferredLeagueId', value); } catch {}
+            try {
+                localStorage.setItem('preferredLeagueId', value);
+                if (value !== 'all') {
+                    const storedSeasonId = localStorage.getItem('preferredSeasonId_' + value);
+                    if (storedSeasonId && storedSeasonId !== 'all') {
+                        setSelectedSeason(storedSeasonId);
+                    }
+                }
+            } catch {}
         }
     };
 
@@ -2601,8 +2644,17 @@ export default function PlayerStatsPage() {
                                         className="filter-select"
                                         value={selectedSeason}
                                         onChange={(e) => {
-                                            setSelectedSeason(e.target.value);
+                                            const val = e.target.value;
+                                            setSelectedSeason(val);
                                             setSeasonDropdownOpen(false);
+                                            if (val !== 'all') {
+                                                try {
+                                                    localStorage.setItem('preferredSeasonId', val);
+                                                    if (leagueId && leagueId !== 'all') {
+                                                        localStorage.setItem('preferredSeasonId_' + leagueId, val);
+                                                    }
+                                                } catch {}
+                                            }
                                         }}
                                         onMouseDown={() => {
                                             if (leagueId !== 'all') {
@@ -2722,6 +2774,14 @@ export default function PlayerStatsPage() {
                                                     onClick={() => {
                                                         setSelectedSeason(season.id);
                                                         setSeasonDropdownOpen(false);
+                                                        if (season.id !== 'all') {
+                                                            try {
+                                                                localStorage.setItem('preferredSeasonId', season.id);
+                                                                if (leagueId && leagueId !== 'all') {
+                                                                    localStorage.setItem('preferredSeasonId_' + leagueId, season.id);
+                                                                }
+                                                            } catch {}
+                                                        }
                                                     }}
                                                     sx={{
                                                         color: '#fff',
