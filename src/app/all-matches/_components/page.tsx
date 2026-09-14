@@ -3362,9 +3362,6 @@ export default function AllMatches() {
                                         background: '#222',
                                         cursor: 'pointer',
                                         border: '1px solid #fff',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        height: '100%',
                                         '& .MuiCardContent-root': { pb: 0 },
                                         '& .MuiCardContent-root:last-child': { pb: 0 },
                                         '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 25px rgba(0, 0, 0, 0.4)' },
@@ -3378,7 +3375,7 @@ export default function AllMatches() {
                                         </Typography>
                                     </Box>
 
-                                    <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
+                                    <CardContent sx={{ p: 0 }}>
                                         {/* Teams & VS */}
                                         <Box sx={{ pl: 1, pr: 1, py: { xs: 0.75, sm: 0 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #fff', gap: { xs: 1, sm: 0 } }}>
                                             {/* Home Team */}
@@ -3389,7 +3386,6 @@ export default function AllMatches() {
                                                     fontWeight: 600,
                                                     fontSize: { xs: '0.85rem', sm: '1rem' },
                                                     lineHeight: 1.2,
-                                                    minHeight: { xs: '2.4em', sm: '2.4em' },
                                                     textAlign: 'center',
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
@@ -3418,7 +3414,6 @@ export default function AllMatches() {
                                                     fontWeight: 600,
                                                     fontSize: { xs: '0.85rem', sm: '1rem' },
                                                     lineHeight: 1.2,
-                                                    minHeight: { xs: '2.4em', sm: '2.4em' },
                                                     textAlign: 'center',
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
@@ -3435,9 +3430,9 @@ export default function AllMatches() {
                                         </Box>
 
                                         {/* Bottom Info Panel */}
-                                        <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'row' }}>
                                             {/* Left Info Column */}
-                                            <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.5 }}>
+                                            <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1.5 }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
                                                         <Image src={CalendarImg} alt="Date" width={16} height={16} />
@@ -3509,7 +3504,7 @@ export default function AllMatches() {
                                             </Box>
 
                                             {/* Right Admin Column */}
-                                            <Box sx={{ width: '95px', borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 2, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 2 }}>
+                                            <Box sx={{ width: '95px', borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 2, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2 }}>
                                                 {isAdmin ? (
                                                     <>
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left' }}> Admin Only</Typography>
