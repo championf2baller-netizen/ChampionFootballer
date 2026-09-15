@@ -1366,6 +1366,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     setArchiveSeasonConfirmOpen(true)
   }, [currentSeason, selectedSeasonId])
 
+  const currentSeasonMatchCount = useMemo(() => {
+    return selectedSeasonId ? getSeasonMatchCount(selectedSeasonId) : 0
+  }, [getSeasonMatchCount, selectedSeasonId])
+
   const handleArchiveSelectedSeason = useCallback(async () => {
     if (!currentSeason || !selectedSeasonId) {
       toast.error('Please select a season first')
@@ -1378,6 +1382,72 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
 
     const seasonLabel = getSeasonLabel(currentSeason)
     setSeasonArchiveLoading(true)
+
+    const matchCount = getSeasonMatchCount(selectedSeasonId)
+    const hasMatches = matchCount > 0
+
+    // If season has NO matches, permanently delete directly instead of archiving
+    if (!hasMatches) {
+      const deleteCandidates = [
+        { method: 'DELETE', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/api/seasons/${selectedSeasonId}` },
+        { method: 'DELETE', url: `${getApiBaseUrl()}/seasons/${selectedSeasonId}` },
+      ] as const
+
+      let deleted = false
+      let lastMessage = 'Failed to permanently delete season'
+
+      for (const candidate of deleteCandidates) {
+        try {
+          const response = await fetch(candidate.url, {
+            method: candidate.method,
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          })
+
+          const payloadUnknown: unknown = await response.json().catch(() => ({}))
+          const payload = isRecord(payloadUnknown)
+            ? payloadUnknown as { success?: boolean; message?: string }
+            : {}
+
+          if (response.ok && payload.success !== false) {
+            deleted = true
+            break
+          }
+          if (payload.message) lastMessage = payload.message
+        } catch {}
+      }
+
+      if (!deleted) {
+        setSeasonArchiveLoading(false)
+        toast.error(lastMessage)
+        return
+      }
+
+      setDeletedSeasonIds((prev) => (prev.includes(selectedSeasonId) ? prev : [...prev, selectedSeasonId]))
+      setArchivedSeasonIds((prev) => prev.filter((id) => id !== selectedSeasonId))
+      setRestoredSeasonIds((prev) => prev.filter((id) => id !== selectedSeasonId))
+
+      const remainingSeasons = seasons.filter((s) => s.id !== selectedSeasonId)
+      if (remainingSeasons.length > 0) {
+        const nextSeason = remainingSeasons.find((s) => s.isActive) || remainingSeasons[0]
+        setSelectedSeasonId(nextSeason.id)
+        setSeasonMaxGames(nextSeason.maxGames || league.maxGames || 20)
+        setSeasonShowPoints(nextSeason.showPoints !== false)
+      } else {
+        setSelectedSeasonId('')
+      }
+
+      setArchiveSeasonConfirmOpen(false)
+      setSeasonArchiveLoading(false)
+      toast.success(`${seasonLabel} has no matches and was permanently deleted successfully`)
+      if (onMembersChanged) {
+        await Promise.resolve(onMembersChanged())
+      }
+      return
+    }
 
     const leaguePatchPayload = {
       name,
@@ -1491,7 +1561,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     selectedSeasonId,
     token,
     league?.id,
-    league.maxGames,
+    league?.maxGames,
     seasons,
     onMembersChanged,
     getSeasonLabel,
@@ -2653,7 +2723,9 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   minHeight: { xs: 42, md: 'auto' },
                 }}
               >
-                {seasonArchiveLoading ? 'Archiving Season...' : 'Delete Season'}
+                {seasonArchiveLoading
+                  ? (currentSeasonMatchCount === 0 ? 'Deleting Season...' : 'Archiving Season...')
+                  : 'Delete Season'}
               </Button>
               <Button
                 variant="contained"
@@ -2787,11 +2859,13 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         }}
       >
         <DialogTitle sx={{ fontWeight: 700, color: '#E5E7EB' }}>
-          Archive Selected Season
+          {currentSeasonMatchCount === 0 ? 'Delete Season' : 'Archive Selected Season'}
         </DialogTitle>
         <DialogContent>
           <Typography sx={{ color: '#9CA3AF' }}>
-            {`"${getSeasonLabel(currentSeason)}" season will be archived. Do you want to continue?`}
+            {currentSeasonMatchCount === 0
+              ? `"${getSeasonLabel(currentSeason)}" season has no matches and will be permanently deleted. Do you want to continue?`
+              : `"${getSeasonLabel(currentSeason)}" season will be archived. Do you want to continue?`}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 2, pb: 2 }}>
@@ -2808,7 +2882,9 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
             onClick={handleArchiveSelectedSeason}
             disabled={seasonArchiveLoading}
           >
-            {seasonArchiveLoading ? 'Archiving...' : 'Archive Season'}
+            {seasonArchiveLoading
+              ? (currentSeasonMatchCount === 0 ? 'Deleting...' : 'Archiving...')
+              : (currentSeasonMatchCount === 0 ? 'Delete Season' : 'Archive Season')}
           </Button>
         </DialogActions>
       </Dialog>
