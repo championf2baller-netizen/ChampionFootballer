@@ -336,12 +336,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
   const formatTeamNameWithTeam = (name?: string | null): string => {
     if (!name) return '';
-    const trimmed = name.trim();
-    if (!trimmed) return '';
-    if (/\bteam$/i.test(trimmed)) {
-      return trimmed;
-    }
-    return `${trimmed} Team`;
+    return name.trim();
   };
 
   const [league, setLeague] = useState<League | null>(null);
@@ -1812,8 +1807,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     try {
       const formData = new FormData();
 
-      const finalHomeTeam = homeTeamName.trim() ? formatTeamNameWithTeam(homeTeamName) : '';
-      const finalAwayTeam = awayTeamName.trim() ? formatTeamNameWithTeam(awayTeamName) : '';
+      const finalHomeTeam = homeTeamName.trim();
+      const finalAwayTeam = awayTeamName.trim();
 
       formData.append('homeTeamName', finalHomeTeam);
       formData.append('awayTeamName', finalAwayTeam);
@@ -2608,9 +2603,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         value={homeTeamName}
                         onChange={e => setHomeTeamName(e.target.value)}
                         onBlur={() => {
-                          if (homeTeamName.trim()) {
-                            setHomeTeamName(formatTeamNameWithTeam(homeTeamName));
-                          }
+                          setHomeTeamName(prev => prev.trim());
                         }}
                         sx={{
                           ...inputStyles,
@@ -2649,9 +2642,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         value={awayTeamName}
                         onChange={e => setAwayTeamName(e.target.value)}
                         onBlur={() => {
-                          if (awayTeamName.trim()) {
-                            setAwayTeamName(formatTeamNameWithTeam(awayTeamName));
-                          }
+                          setAwayTeamName(prev => prev.trim());
                         }}
                         sx={{
                           ...inputStyles,

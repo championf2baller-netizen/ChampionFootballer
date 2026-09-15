@@ -303,8 +303,7 @@ const formatLocationForCard = (location?: string): string => {
 
 const formatDisplayTeamName = (name?: string | null, fallback: string = 'Team'): string => {
     if (!name || !name.trim()) return fallback;
-    const trimmed = name.trim();
-    return /\bteam$/i.test(trimmed) ? trimmed : `${trimmed} Team`;
+    return name.trim();
 };
 
 const normalizeId = (value: unknown): string => {

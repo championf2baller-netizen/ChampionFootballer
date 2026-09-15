@@ -4197,7 +4197,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     // mt: 0.5,
                                 }}
                             >
-                                {match?.homeTeamName || 'Home'} Team
+                                {match?.homeTeamName || 'Home Team'}
                             </Typography>
                             <TextField
                                 type="number"
@@ -4301,7 +4301,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     // mt: 0.5,
                                 }}
                             >
-                                {match?.awayTeamName || 'Away'} Team
+                                {match?.awayTeamName || 'Away Team'}
                             </Typography>
                             <TextField
                                 type="number"

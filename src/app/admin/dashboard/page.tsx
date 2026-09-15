@@ -357,12 +357,7 @@ export default function AdminDashboardPage() {
 
 const formatTeamNameWithTeam = (name?: string | null): string => {
   if (!name) return '';
-  const trimmed = name.trim();
-  if (!trimmed) return '';
-  if (/\bteam$/i.test(trimmed)) {
-    return trimmed;
-  }
-  return `${trimmed} Team`;
+  return name.trim();
 };
 
   const handleSaveMatchDetails = async () => {
@@ -370,8 +365,8 @@ const formatTeamNameWithTeam = (name?: string | null): string => {
     setSavingMatch(true);
     try {
       const matchId = editMatchModal.id;
-      const formattedHomeTeam = editMatchModal.homeTeamName ? formatTeamNameWithTeam(editMatchModal.homeTeamName) : '';
-      const formattedAwayTeam = editMatchModal.awayTeamName ? formatTeamNameWithTeam(editMatchModal.awayTeamName) : '';
+      const formattedHomeTeam = editMatchModal.homeTeamName ? editMatchModal.homeTeamName.trim() : '';
+      const formattedAwayTeam = editMatchModal.awayTeamName ? editMatchModal.awayTeamName.trim() : '';
       const res = await fetch(`${API_BASE}/leagues/${selectedLeagueId}/matches/${matchId}`, {
         method: 'PATCH',
         headers: getHeaders(),
@@ -1381,7 +1376,7 @@ const formatTeamNameWithTeam = (name?: string | null): string => {
                 fullWidth
                 value={editMatchModal?.homeTeamName || ''}
                 onChange={(e) => setEditMatchModal((prev: any) => prev ? { ...prev, homeTeamName: e.target.value } : null)}
-                onBlur={() => setEditMatchModal((prev: any) => prev && prev.homeTeamName ? { ...prev, homeTeamName: formatTeamNameWithTeam(prev.homeTeamName) } : prev)}
+                onBlur={() => setEditMatchModal((prev: any) => prev && prev.homeTeamName ? { ...prev, homeTeamName: prev.homeTeamName.trim() } : prev)}
                 InputLabelProps={{ style: { color: '#94a3b8' } }}
                 InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
               />
@@ -1392,7 +1387,7 @@ const formatTeamNameWithTeam = (name?: string | null): string => {
                 fullWidth
                 value={editMatchModal?.awayTeamName || ''}
                 onChange={(e) => setEditMatchModal((prev: any) => prev ? { ...prev, awayTeamName: e.target.value } : null)}
-                onBlur={() => setEditMatchModal((prev: any) => prev && prev.awayTeamName ? { ...prev, awayTeamName: formatTeamNameWithTeam(prev.awayTeamName) } : prev)}
+                onBlur={() => setEditMatchModal((prev: any) => prev && prev.awayTeamName ? { ...prev, awayTeamName: prev.awayTeamName.trim() } : prev)}
                 InputLabelProps={{ style: { color: '#94a3b8' } }}
                 InputProps={{ style: { color: '#fff', backgroundColor: 'rgba(15,23,42,0.6)' } }}
               />
