@@ -245,15 +245,15 @@ input:-webkit-autofill:active {
 }
 
 /* Small left-right spacing inside the table */
-.league-row-inset {
+/* .league-row-inset {
   margin-left: 12px;
   margin-right: 12px;
-}
+} */
 
 .league-header-inset {
   /* Keep header column grid width aligned with row grid width */
-  margin-left: 12px;
-  margin-right: 12px;
+  margin-left: 9px;
+  margin-right: 9px;
   /* Keep content inset but visually stretch header background to full width */
   box-shadow: -12px 0 0 var(--league-table-header-bg), 12px 0 0 var(--league-table-header-bg);
 }
@@ -317,6 +317,7 @@ input:-webkit-autofill:active {
 }
 
 @media (max-width: 767px) {
+
   .league-table-heading,
   .league-table-heading1 {
     font-size: 12px !important;

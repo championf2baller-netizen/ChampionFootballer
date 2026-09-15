@@ -1693,7 +1693,7 @@ const AllPlayersPage = () => {
             mx: 'auto',
             px: { xs: 2, sm: 3, md: 7.5 },
             pb: 4,
-            mt: 3,
+            mt: 0,
           }}
         >
           <Box
