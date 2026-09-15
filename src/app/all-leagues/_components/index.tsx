@@ -367,7 +367,7 @@ function LeagueMembersDialog({
           setCmsLeagueDetailsBanner(banner);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [open]);
 
   useEffect(() => {
@@ -485,9 +485,9 @@ function LeagueMembersDialog({
 
       if (rawRoster && rawRoster.length > 0) {
         const leagueMembersMap = new Map<string, any>()
-        ;(league?.members || []).forEach((m: any) => {
-          if (m?.id) leagueMembersMap.set(String(m.id), m)
-        })
+          ; (league?.members || []).forEach((m: any) => {
+            if (m?.id) leagueMembersMap.set(String(m.id), m)
+          })
 
         const mappedRoster = rawRoster.map((item: any) => {
           const u = item?.user || item || {}
@@ -3166,7 +3166,7 @@ function AllLeagues() {
           setCmsMap(map);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
@@ -5861,7 +5861,7 @@ function AllLeagues() {
                   transition: 'all 0.3s ease',
                 }}
               >
-                {getCms('page_all_leagues_live_tab', 'Current / Live Leagues')}
+                {getCms('page_all_leagues_live_tab', 'Live Leagues')}
               </Button>
             </Box>
           </Box>

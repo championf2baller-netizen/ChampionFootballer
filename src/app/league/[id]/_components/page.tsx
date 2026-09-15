@@ -1243,6 +1243,11 @@ export default function LeagueDetailPage() {
 
             if (!data) {
                 const messageNormalized = lastMessage.toLowerCase();
+                if (messageNormalized.includes('invalid seasonid')) {
+                    setSelectedSeasonId(null);
+                    void fetchLeagueDetails(null);
+                    return;
+                }
                 const looksLikeAccessIssue =
                     lastStatus === 401 ||
                     lastStatus === 403 ||

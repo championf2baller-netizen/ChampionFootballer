@@ -2414,20 +2414,34 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         <TextField
                           {...params}
                           placeholder="Choose captain"
+                          // sx={{
+                          //   ...autocompleteStyles,
+                          //   '& .MuiOutlinedInput-root': {
+                          //     ...autocompleteStyles['& .MuiOutlinedInput-root'],
+                          //     borderRadius: 1,
+                          //     '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
+                          //     '&:hover fieldset': { borderColor: '#00a77f' },
+                          //     '&.Mui-focused fieldset': { borderColor: '#00a77f' }
+                          //   },
+                          //   '& .MuiAutocomplete-clearIndicator': { color: 'white' },
+                          //   '& .MuiAutocomplete-popupIndicator': { color: 'white' }
+                          // }}
+                          // FormHelperTextProps={{ sx: { color: '#ffb300' } }}
+                          // placeholder="Choose captain"
                           sx={{
                             ...autocompleteStyles,
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
-                              '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
-                              '&:hover fieldset': { borderColor: '#00a77f' },
-                              '&.Mui-focused fieldset': { borderColor: '#00a77f' }
+                              '& fieldset': { borderColor: '#e56a16', borderRadius: 1 },
+                              '&:hover fieldset': { borderColor: '#e56a16' },
+                              '&.Mui-focused fieldset': { borderColor: '#e56a16' }
                             },
                             '& .MuiAutocomplete-clearIndicator': { color: 'white' },
                             '& .MuiAutocomplete-popupIndicator': { color: 'white' }
                           }}
-                          helperText={homeCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                           FormHelperTextProps={{ sx: { color: '#ffb300' } }}
+                          helperText={homeCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                         />
                       )}
                       renderOption={(props, option, { selected }) => {
@@ -2509,8 +2523,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiAutocomplete-clearIndicator': { color: 'white' },
                             '& .MuiAutocomplete-popupIndicator': { color: 'white' }
                           }}
-                          helperText={awayCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                           FormHelperTextProps={{ sx: { color: '#ffb300' } }}
+                          helperText={awayCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                         />
                       )}
                       renderOption={(props, option, { selected }) => {
