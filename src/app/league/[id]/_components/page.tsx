@@ -807,8 +807,8 @@ export default function LeagueDetailPage() {
     const lastSyncedQuerySeasonIdRef = React.useRef<string | null>(initialSeasonIdFromQuery || null);
     const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(() => {
         if (initialSeasonIdFromQuery) return initialSeasonIdFromQuery;
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('preferredSeasonId_' + leagueId) || localStorage.getItem('preferredSeasonId') || null;
+        if (typeof window !== 'undefined' && leagueId) {
+            return localStorage.getItem('preferredSeasonId_' + leagueId) || null;
         }
         return null;
     });
@@ -1625,16 +1625,20 @@ export default function LeagueDetailPage() {
             return true;
         }
 
-        // Season-level fallback kept in sync with All Leagues.
-        const seasons = Array.isArray(withFlags.seasons) ? withFlags.seasons : [];
-        if (seasons.length > 0) {
+        // If league is explicitly active, it is NOT completed
+        if (l?.active === true || status === 'active' || status === 'live') {
+            return false;
+        }
+
+        // Season-level fallback kept in sync with All Leagues (exclude archived seasons).
+        const nonArchivedSeasons = Array.isArray(withFlags.seasons) ? withFlags.seasons.filter((s) => !Boolean(s?.archived)) : [];
+        if (nonArchivedSeasons.length > 0) {
             const seasonDoneTokens = new Set([
                 'completed',
                 'complete',
                 'finished',
                 'ended',
                 'locked',
-                'archived',
                 'result_published',
                 'result_uploaded',
                 'result_complete',
@@ -1642,14 +1646,13 @@ export default function LeagueDetailPage() {
                 'result_ended',
                 'result_done',
             ]);
-            const hasActiveSeason = seasons.some((s) => s?.isActive === true && s?.archived !== true);
-            const hasArchivedOrCompletedSeason = seasons.some((s) => {
+            const hasActiveSeason = nonArchivedSeasons.some((s) => s?.isActive === true);
+            const hasCompletedSeason = nonArchivedSeasons.some((s) => {
                 if (!s) return false;
-                if (s.archived === true) return true;
                 const st = typeof s.status === 'string' ? s.status.toLowerCase().trim() : '';
                 return seasonDoneTokens.has(st);
             });
-            if (!hasActiveSeason && hasArchivedOrCompletedSeason) return true;
+            if (!hasActiveSeason && hasCompletedSeason) return true;
         }
 
         return false;
@@ -1876,6 +1879,7 @@ export default function LeagueDetailPage() {
 
     useEffect(() => {
         if (!token || !leagueId || isSigningOut || allLeagues.length === 0) return;
+        if (!hasLoadedAllLeagues || leagueDetailsLoading || !leagueDetailsAttempted) return;
 
         // If current route league already loaded, do not auto-switch to another league.
         if (league && String(league.id) === String(leagueId)) return;
@@ -1906,7 +1910,7 @@ export default function LeagueDetailPage() {
 
         setError(null);
         router.replace(`/league/${encodeURIComponent(fallbackLeagueId)}?tab=table`, { scroll: false });
-    }, [token, leagueId, allLeagues, router, league, isSigningOut]);
+    }, [token, leagueId, allLeagues, router, league, isSigningOut, hasLoadedAllLeagues, leagueDetailsLoading, leagueDetailsAttempted]);
 
     useEffect(() => {
         if (authLoading) return;

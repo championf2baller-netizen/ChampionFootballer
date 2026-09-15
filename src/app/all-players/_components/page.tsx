@@ -461,16 +461,22 @@ const AllPlayersPage = () => {
       return true;
     }
 
-    // Season-level fallback kept in sync with league detail page
-    const seasons = Array.isArray(l?.seasons) ? l.seasons : [];
-    if (seasons.length > 0) {
+    // If league is explicitly active, it is NOT completed
+    if (l?.active === true || status === 'active' || status === 'live') {
+      return false;
+    }
+
+    // Season-level fallback kept in sync with league detail page (exclude archived seasons)
+    const nonArchivedSeasons = Array.isArray(l?.seasons)
+      ? l.seasons.filter((s) => !Boolean((s as SeasonOption & { archived?: boolean })?.archived))
+      : [];
+    if (nonArchivedSeasons.length > 0) {
       const seasonDoneTokens = new Set([
         'completed',
         'complete',
         'finished',
         'ended',
         'locked',
-        'archived',
         'result_published',
         'result_uploaded',
         'result_complete',
@@ -479,15 +485,14 @@ const AllPlayersPage = () => {
         'result_done',
       ]);
 
-      const hasActiveSeason = seasons.some((season) => (season?.isActive === true));
-      const hasArchivedOrCompletedSeason = seasons.some((season) => {
+      const hasActiveSeason = nonArchivedSeasons.some((season) => (season?.isActive === true));
+      const hasCompletedSeason = nonArchivedSeasons.some((season) => {
         const statusRaw = (season as SeasonOption & { status?: unknown; archived?: boolean })?.status;
         const statusText = typeof statusRaw === 'string' ? statusRaw.toLowerCase().trim() : '';
-        const isArchived = (season as SeasonOption & { archived?: boolean })?.archived === true;
-        return isArchived || seasonDoneTokens.has(statusText);
+        return seasonDoneTokens.has(statusText);
       });
 
-      if (!hasActiveSeason && hasArchivedOrCompletedSeason) return true;
+      if (!hasActiveSeason && hasCompletedSeason) return true;
     }
 
     return false;

@@ -30,6 +30,7 @@ import { leagueAPI } from '@/lib/api-ultra-fast';
 import Tooltip from '@mui/material/Tooltip';
 import Slide, { SlideProps } from '@mui/material/Slide';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
+import { TokenManager } from '@/lib/tokenManager';
 
 
 // Lazy load heavy components
@@ -1188,7 +1189,8 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
   const [settingsRemoveImage, setSettingsRemoveImage] = useState(false)
   const settingsFileInputRef = React.useRef<HTMLInputElement | null>(null)
   const lastLeagueIdRef = React.useRef<string | null>(null)
-  const { token } = useAuth()
+  const { token: rawAuthToken } = useAuth()
+  const token = rawAuthToken || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null)
   const [archivedMatchesOpen, setArchivedMatchesOpen] = useState(false)
   const [archivedMatchesLoading, setArchivedMatchesLoading] = useState(false)
   const [archivedMatchActionId, setArchivedMatchActionId] = useState<string | null>(null)
@@ -1393,14 +1395,16 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
     }
 
     const endpointCandidates = [
-      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}`, body: leaguePatchPayload },
-      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}`, body: leaguePatchPayload },
       { method: 'POST', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
       { method: 'POST', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
+      { method: 'POST', url: `${getApiBaseUrl()}/api/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
+      { method: 'POST', url: `${getApiBaseUrl()}/seasons/${selectedSeasonId}/archive`, body: { archived: true } },
       { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
       { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}`, body: { archived: true, isActive: false } },
       { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
       { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}/seasons/${selectedSeasonId}/status`, body: { archived: true, active: false, isActive: false } },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/api/leagues/${league.id}`, body: leaguePatchPayload },
+      { method: 'PATCH', url: `${getApiBaseUrl()}/leagues/${league.id}`, body: leaguePatchPayload },
     ] as const
 
     let lastMessage = 'Failed to archive season'
@@ -3171,7 +3175,8 @@ function AllLeagues() {
   const [leagueNameError, setLeagueNameError] = useState<string>('');
   const [inviteCode, setInviteCode] = useState('');
   const [isJoining, setIsJoining] = useState(false);
-  const { token, user } = useAuth();
+  const { token: rawAuthToken, user } = useAuth();
+  const token = rawAuthToken || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
   const [openMembers, setOpenMembers] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState<League | null>(null);
   // Standalone admin settings dialog control
@@ -3216,6 +3221,36 @@ function AllLeagues() {
     []
   );
 
+  const handleNavigateToLeague = useCallback((league: LeagueWithStatus) => {
+    const leagueIdStr = String(league.id);
+    const leagueSeasons = Array.isArray(league.seasons)
+      ? league.seasons.filter((s) => !Boolean((s as Season & { deleted?: boolean }).deleted))
+      : [];
+
+    // Find active season or fallback to first season
+    const targetSeason = leagueSeasons.find((s) => s.isActive) || leagueSeasons[0] || null;
+    const targetSeasonId = targetSeason?.id ? String(targetSeason.id) : '';
+
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(PREFERRED_LEAGUE_KEY, leagueIdStr);
+        localStorage.setItem('selectedLeagueId', leagueIdStr);
+        if (targetSeasonId) {
+          localStorage.setItem(`preferredSeasonId_${leagueIdStr}`, targetSeasonId);
+          localStorage.setItem('preferredSeasonId', targetSeasonId);
+        } else {
+          localStorage.removeItem(`preferredSeasonId_${leagueIdStr}`);
+        }
+      }
+    } catch { }
+
+    const url = targetSeasonId
+      ? `/league/${encodeURIComponent(leagueIdStr)}?tab=table&seasonId=${encodeURIComponent(targetSeasonId)}`
+      : `/league/${encodeURIComponent(leagueIdStr)}?tab=table`;
+
+    router.push(url);
+  }, [router]);
+
   const handleSeasonArchivedInState = useCallback(({ leagueId, seasonId }: { leagueId: string; seasonId: string }) => {
     const applySeasonArchive = <T extends { id: string | number }>(
       leagueItem: (T & { seasons?: Season[] }) | null
@@ -3231,13 +3266,7 @@ function AllLeagues() {
           : season
       );
 
-      const hasActiveNonArchived = updatedSeasons.some((season) => !Boolean(season.archived) && season.isActive);
-      if (!hasActiveNonArchived) {
-        const nextIndex = updatedSeasons.findIndex((season) => !Boolean(season.archived));
-        if (nextIndex >= 0) {
-          updatedSeasons[nextIndex] = { ...updatedSeasons[nextIndex], isActive: true };
-        }
-      }
+      // Inactive seasons must remain inactive; do not auto-activate another season.
 
       return { ...leagueItem, seasons: updatedSeasons };
     };
@@ -3421,17 +3450,20 @@ function AllLeagues() {
       return true;
     }
 
-    // Season-level fallback: if there is no active season and at least one season is archived/completed,
-    // keep the league in completed tab after refresh.
-    const seasons = Array.isArray(withFlags.seasons) ? withFlags.seasons : [];
-    if (seasons.length > 0) {
+    // If league is explicitly active, it is NOT completed
+    if (l.active === true || status === 'active' || status === 'live') {
+      return false;
+    }
+
+    // Season-level fallback: only for genuinely completed non-archived seasons when league is not active
+    const nonArchivedSeasons = Array.isArray(withFlags.seasons) ? withFlags.seasons.filter((s) => !Boolean(s?.archived)) : [];
+    if (nonArchivedSeasons.length > 0) {
       const seasonDoneTokens = new Set([
         'completed',
         'complete',
         'finished',
         'ended',
         'locked',
-        'archived',
         'result_published',
         'result_uploaded',
         'result_complete',
@@ -3439,14 +3471,13 @@ function AllLeagues() {
         'result_ended',
         'result_done',
       ]);
-      const hasActiveSeason = seasons.some((s) => s?.isActive === true && s?.archived !== true);
-      const hasArchivedOrCompletedSeason = seasons.some((s) => {
+      const hasActiveSeason = nonArchivedSeasons.some((s) => s?.isActive === true);
+      const hasCompletedSeason = nonArchivedSeasons.some((s) => {
         if (!s) return false;
-        if (s.archived === true) return true;
         const st = typeof s.status === 'string' ? s.status.toLowerCase().trim() : '';
         return seasonDoneTokens.has(st);
       });
-      if (!hasActiveSeason && hasArchivedOrCompletedSeason) return true;
+      if (!hasActiveSeason && hasCompletedSeason) return true;
     }
 
     return false;
@@ -3461,6 +3492,71 @@ function AllLeagues() {
   const isArchivedLeague = useCallback((l: LeagueWithStatus): boolean => {
     return Boolean((l as LeagueWithStatus & { archived?: boolean }).archived);
   }, []);
+
+  const fetchAllLeagues = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      console.log('Fetching all available leagues...');
+      setLoading(true);
+
+      const statusEndpoints = [
+        `${process.env.NEXT_PUBLIC_API_URL}/leagues/user-leagues?refresh=1&bust=${Date.now()}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/user-leagues?refresh=1&bust=${Date.now()}`,
+      ];
+
+      let leaguesData: any[] | null = null;
+      for (let i = 0; i < statusEndpoints.length; i += 1) {
+        try {
+          const statusResponse = await fetch(statusEndpoints[i], {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store',
+          });
+
+          if (statusResponse.ok) {
+            const statusPayloadUnknown: unknown = await statusResponse.json().catch(() => ({}));
+            const statusPayload = isRecord(statusPayloadUnknown)
+              ? (statusPayloadUnknown as { success?: boolean; leagues?: unknown[] })
+              : {};
+            if (statusPayload.success !== false && Array.isArray(statusPayload.leagues)) {
+              leaguesData = statusPayload.leagues;
+              break;
+            }
+          }
+        } catch (err) {
+          console.warn(`[Leagues] Fetch from ${statusEndpoints[i]} failed:`, err);
+        }
+      }
+
+      if (leaguesData) {
+        const normalizedLeagues: League[] = leaguesData
+          .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
+          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
+
+        const sortedLeagues = sortLeaguesByRecency(normalizedLeagues as LeagueWithStatus[]);
+        const finalLeagues = locallyDeletedLeagueIds.length > 0
+          ? sortedLeagues.filter((leagueItem) => !locallyDeletedLeagueIds.map(String).includes(String(leagueItem.id)))
+          : sortedLeagues;
+
+        setLeagues(finalLeagues);
+
+        // Sync with local cache so deleted leagues are removed from localStorage
+        try {
+          if (typeof window !== 'undefined') {
+            leagueAPI.setAllInstant(finalLeagues as unknown as League[]);
+          }
+        } catch { }
+      } else {
+        console.error('Failed to fetch leagues');
+        toast.error('Failed to fetch leagues');
+      }
+    } catch (error) {
+      console.error('Error fetching leagues:', error);
+      toast.error('An error occurred while fetching leagues');
+    } finally {
+      setLoading(false);
+    }
+  }, [token, locallyDeletedLeagueIds]);
 
   const handleToggleLeagueLiveStatus = useCallback(async (league: LeagueWithStatus, nextLive: boolean) => {
     if (!token) {
@@ -3614,6 +3710,9 @@ function AllLeagues() {
 
       if (!success) throw new Error('Failed to update league status');
 
+      dispatchLeagueMutationEvent('league-updated', { leagueId, reason: 'status-toggle', live: nextLive });
+      await fetchAllLeagues();
+
       toast.success(nextLive ? 'League marked as live' : 'League marked as completed');
     } catch (e: unknown) {
       // Revert to previous state on failure
@@ -3626,7 +3725,7 @@ function AllLeagues() {
     } finally {
       setLeagueLiveUpdatingId(null);
     }
-  }, [token, isLeagueAdminForCurrentUser, leagueLiveUpdatingId]);
+  }, [token, isLeagueAdminForCurrentUser, leagueLiveUpdatingId, dispatchLeagueMutationEvent, fetchAllLeagues]);
 
   // Apply filters: by completion, by year (createdAt) and by league name
   // Archived leagues are always excluded from main list
@@ -3818,70 +3917,7 @@ function AllLeagues() {
   };
 
 
-  const fetchAllLeagues = useCallback(async () => {
-    if (!token) return;
 
-    try {
-      console.log('Fetching all available leagues...');
-      setLoading(true);
-
-      const statusEndpoints = [
-        `${process.env.NEXT_PUBLIC_API_URL}/leagues/user-leagues?refresh=1&bust=${Date.now()}`,
-        `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/user-leagues?refresh=1&bust=${Date.now()}`,
-      ];
-
-      let leaguesData: any[] | null = null;
-      for (let i = 0; i < statusEndpoints.length; i += 1) {
-        try {
-          const statusResponse = await fetch(statusEndpoints[i], {
-            headers: { 'Authorization': `Bearer ${token}` },
-            cache: 'no-store',
-          });
-
-          if (statusResponse.ok) {
-            const statusPayloadUnknown: unknown = await statusResponse.json().catch(() => ({}));
-            const statusPayload = isRecord(statusPayloadUnknown)
-              ? (statusPayloadUnknown as { success?: boolean; leagues?: unknown[] })
-              : {};
-            if (statusPayload.success !== false && Array.isArray(statusPayload.leagues)) {
-              leaguesData = statusPayload.leagues;
-              break;
-            }
-          }
-        } catch (err) {
-          console.warn(`[Leagues] Fetch from ${statusEndpoints[i]} failed:`, err);
-        }
-      }
-
-      if (leaguesData) {
-        const normalizedLeagues: League[] = leaguesData
-          .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
-          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
-
-        const sortedLeagues = sortLeaguesByRecency(normalizedLeagues as LeagueWithStatus[]);
-        const finalLeagues = locallyDeletedLeagueIds.length > 0
-          ? sortedLeagues.filter((leagueItem) => !locallyDeletedLeagueIds.map(String).includes(String(leagueItem.id)))
-          : sortedLeagues;
-
-        setLeagues(finalLeagues);
-
-        // Sync with local cache so deleted leagues are removed from localStorage
-        try {
-          if (typeof window !== 'undefined') {
-            leagueAPI.setAllInstant(finalLeagues as unknown as League[]);
-          }
-        } catch { }
-      } else {
-        console.error('Failed to fetch leagues');
-        toast.error('Failed to fetch leagues');
-      }
-    } catch (error) {
-      console.error('Error fetching leagues:', error);
-      toast.error('An error occurred while fetching leagues');
-    } finally {
-      setLoading(false);
-    }
-  }, [token, locallyDeletedLeagueIds]);
 
   useEffect(() => {
     if (token) {
@@ -4333,6 +4369,16 @@ function AllLeagues() {
       params.set('seasonCreated', '1');
       params.set('seasonCreatedMsg', successMessage);
       if (createdSeasonId) params.set('seasonId', createdSeasonId);
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(PREFERRED_LEAGUE_KEY, String(leagueId));
+          localStorage.setItem('selectedLeagueId', String(leagueId));
+          if (createdSeasonId) {
+            localStorage.setItem(`preferredSeasonId_${leagueId}`, String(createdSeasonId));
+            localStorage.setItem('preferredSeasonId', String(createdSeasonId));
+          }
+        }
+      } catch { }
       router.push(`/league/${leagueId}?${params.toString()}`);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to create new season';
@@ -5881,7 +5927,7 @@ function AllLeagues() {
               return (
                 <Box
                   key={league.id}
-                  onClick={() => router.push(`/league/${league.id}`)}
+                  onClick={() => handleNavigateToLeague(league)}
                   sx={{
                     px: { xs: 3, md: 3 },
                     py: { xs: 2.6, md: 2.8 },
@@ -6471,7 +6517,7 @@ function AllLeagues() {
                                 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  router.push(`/league/${league.id}`);
+                                  handleNavigateToLeague(league);
                                 }}
                               >
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

@@ -854,15 +854,19 @@ export default function PlayerStatsPage() {
             return true;
         }
 
-        const seasons = Array.isArray(withFlags.seasons) ? withFlags.seasons : [];
-        if (seasons.length > 0) {
+        // If league is explicitly active, it is NOT completed
+        if (l?.active === true || status === 'active' || status === 'live') {
+            return false;
+        }
+
+        const nonArchivedSeasons = Array.isArray(withFlags.seasons) ? withFlags.seasons.filter((s) => !Boolean(s?.archived)) : [];
+        if (nonArchivedSeasons.length > 0) {
             const seasonDoneTokens = new Set([
                 'completed',
                 'complete',
                 'finished',
                 'ended',
                 'locked',
-                'archived',
                 'result_published',
                 'result_uploaded',
                 'result_complete',
@@ -870,14 +874,13 @@ export default function PlayerStatsPage() {
                 'result_ended',
                 'result_done',
             ]);
-            const hasActiveSeason = seasons.some((s) => s?.isActive === true && s?.archived !== true);
-            const hasArchivedOrCompletedSeason = seasons.some((s) => {
+            const hasActiveSeason = nonArchivedSeasons.some((s) => s?.isActive === true);
+            const hasCompletedSeason = nonArchivedSeasons.some((s) => {
                 if (!s) return false;
-                if (s.archived === true) return true;
                 const st = typeof s.status === 'string' ? s.status.toLowerCase().trim() : '';
                 return seasonDoneTokens.has(st);
             });
-            if (!hasActiveSeason && hasArchivedOrCompletedSeason) return true;
+            if (!hasActiveSeason && hasCompletedSeason) return true;
         }
 
         return false;
