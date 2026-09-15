@@ -934,13 +934,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         if (!item) return;
         const id = String(item.userId || item.user_id || item.playerId || item.player_id || item.id || item._id || '');
         const val = Number(item.avg ?? item.avgXp ?? item.avg_xp ?? item.averageXP ?? item.xp ?? item.totalXP ?? 0);
-        if (id && Number.isFinite(val) && val > 0) map[id] = Math.round(val);
+        if (id && Number.isFinite(val) && val > 0) map[id] = Math.round((val + Number.EPSILON) * 100) / 100;
       });
     } else if (typeof raw === 'object') {
       Object.entries(raw as Record<string, any>).forEach(([key, val]) => {
         const id = String(key);
         const num = typeof val === 'number' ? val : Number(val?.avg ?? val?.avgXp ?? val?.avg_xp ?? val?.averageXP ?? val?.xp ?? val);
-        if (id && Number.isFinite(num) && num > 0) map[id] = Math.round(num);
+        if (id && Number.isFinite(num) && num > 0) map[id] = Math.round((num + Number.EPSILON) * 100) / 100;
       });
     }
     return map;
@@ -957,8 +957,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         return {} as Record<string, number>;
       }
       const json = await res.json();
-      const rawXp = json?.xp || json?.data?.xp || json;
-      const rawAvg = json?.avg || json?.data?.avg || json;
+      const rawXp = json?.overall_xp || json?.league_xp || json?.xp || json?.data?.xp || json;
+      const rawAvg = json?.overall_avg || json?.league_avg || json?.avg || json?.data?.avg || json;
       const xpMap = normalizeMapPayload(rawXp);
       const avgMap = normalizeMapPayload(rawAvg);
       setUserLeagueXP(xpMap);
@@ -1027,6 +1027,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     if (matchId && token) { void fetchMatchXPBreakdown(); }
   }, [matchId, token, fetchMatchXPBreakdown]);
 
+  useEffect(() => {
+    if (matchId && token && (homeTeamUsers.length > 0 || awayTeamUsers.length > 0)) {
+      fetchPrediction();
+    }
+  }, [matchId, token, homeTeamUsers.length, awayTeamUsers.length, fetchPrediction]);
+
   // Minimal skill display helper for UI only
   const calcSkill = (p?: PlayerOption | null) => {
     if (!p) return 0;
@@ -1051,17 +1057,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const getAvgRating = (p?: PlayerOption | null): number => {
     if (!p) return 0;
     if (p.isGuest) {
-      return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
+      return leagueAvgXPValue > 0 ? (Math.round((leagueAvgXPValue + Number.EPSILON) * 100) / 100) : 15;
     }
     const pId = String(p.id || '');
     const pMongoId = String((p as any)._id || '');
     const v = userLeagueAvgXP[pId] ?? (pMongoId ? userLeagueAvgXP[pMongoId] : undefined);
-    if (typeof v === 'number' && Number.isFinite(v) && v > 0) return Math.round(v);
-    const totalXp = userLeagueXP[pId] ?? (pMongoId ? userLeagueXP[pMongoId] : undefined);
-    if (typeof totalXp === 'number' && Number.isFinite(totalXp) && totalXp > 0) return Math.round(totalXp);
+    if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
+      return Math.round((v + Number.EPSILON) * 100) / 100;
+    }
     const skill = calcSkill(p);
     if (skill > 0) return skill;
-    return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
+    return leagueAvgXPValue > 0 ? (Math.round((leagueAvgXPValue + Number.EPSILON) * 100) / 100) : 15;
   };
 
   // XP-based team percentage calculation

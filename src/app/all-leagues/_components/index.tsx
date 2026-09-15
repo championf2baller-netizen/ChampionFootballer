@@ -238,7 +238,10 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
     totalMatchCount: typeof raw['totalMatchCount'] === 'number' ? raw['totalMatchCount']
       : (typeof (computedStatus as any)?.totalMatchCount === 'number' ? (computedStatus as any).totalMatchCount : undefined),
     seasons: (raw['seasons']
-      ? arr('seasons')
+      ? (arr('seasons') as any[]).map((s: any) => ({
+        ...s,
+        matchCount: typeof s.matchCount === 'number' ? s.matchCount : (typeof s.completedMatches === 'number' ? s.completedMatches : undefined),
+      }))
       : (computedStatus?.seasons || []).map((s: any) => ({
         id: s.seasonId || s.id,
         name: s.seasonName || s.name,
@@ -246,7 +249,8 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
         isActive: s.isActive,
         maxGames: s.maxGames,
         inviteCode: s.inviteCode || s.seasonInviteCode || '',
-        completedMatches: s.completedMatches,
+        matchCount: s.matchCount ?? s.completedMatches ?? 0,
+        completedMatches: s.completedMatches ?? s.matchCount ?? 0,
         isCompleted: s.isCompleted,
         archived: s.archived,
         deleted: s.deleted || s.isDeleted,
@@ -1125,6 +1129,9 @@ interface Season {
   endDate?: string;
   maxGames?: number;
   showPoints?: boolean; // CF Advance Point Scoring per season
+  matchCount?: number;
+  matchesCount?: number;
+  completedMatches?: number;
   members?: User[];
   players?: User[];
   status?: string;
@@ -1351,8 +1358,18 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
 
   const getSeasonMatchCount = useCallback((seasonId?: string): number => {
     if (!seasonId) return 0
+    const targetSeason = allSeasons.find(s => String(s.id) === String(seasonId))
+    if (targetSeason && typeof targetSeason.matchCount === 'number') {
+      return targetSeason.matchCount
+    }
+    if (targetSeason && typeof targetSeason.matchesCount === 'number') {
+      return targetSeason.matchesCount
+    }
+    if (targetSeason && typeof targetSeason.completedMatches === 'number') {
+      return targetSeason.completedMatches
+    }
     return seasonAwareMatches.filter((m) => String(m.seasonId || '') === String(seasonId)).length
-  }, [seasonAwareMatches])
+  }, [allSeasons, seasonAwareMatches])
 
   const closeArchiveSeasonConfirm = useCallback(() => {
     if (!seasonArchiveLoading) setArchiveSeasonConfirmOpen(false)
@@ -1484,6 +1501,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       let allNotFound = true
       let canUseLocalFallback = true
       let localFallbackUsed = false
+      let wasPermanentlyDeleted = false
 
       for (const candidate of endpointCandidates) {
         const response = await fetch(candidate.url, {
@@ -1509,6 +1527,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
 
         if (response.ok && payload.success !== false) {
           archived = true
+          const p = payload as { success?: boolean; message?: string; permanentlyDeleted?: boolean }
+          if (p.permanentlyDeleted || (typeof p.message === 'string' && p.message.toLowerCase().includes('permanently deleted'))) {
+            wasPermanentlyDeleted = true
+          }
           break
         }
 
@@ -1544,9 +1566,13 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       }
 
       setArchiveSeasonConfirmOpen(false)
-      toast.success(localFallbackUsed
-        ? `${seasonLabel} archived locally (backend season endpoint not available)`
-        : `${seasonLabel} archived successfully`)
+      if (wasPermanentlyDeleted || !hasMatches) {
+        toast.success(`${seasonLabel} has no matches and was permanently deleted successfully`)
+      } else {
+        toast.success(localFallbackUsed
+          ? `${seasonLabel} archived locally (backend season endpoint not available)`
+          : `${seasonLabel} archived successfully`)
+      }
       if (!localFallbackUsed && onMembersChanged) {
         await Promise.resolve(onMembersChanged())
       }
@@ -2725,7 +2751,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
               >
                 {seasonArchiveLoading
                   ? (currentSeasonMatchCount === 0 ? 'Deleting Season...' : 'Archiving Season...')
-                  : 'Delete Season'}
+                  : (currentSeasonMatchCount === 0 ? 'Delete Season' : 'Archive Season')}
               </Button>
               <Button
                 variant="contained"
