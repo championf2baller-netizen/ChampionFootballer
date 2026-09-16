@@ -105,7 +105,16 @@ const playerStatsSlice = createSlice({
       })
       .addCase(fetchPlayerStats.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload as PlayerStatsData ?? null;
+        const payload = (action.payload as PlayerStatsData) ?? null;
+        if (payload && Array.isArray(payload.leagues)) {
+          payload.leagues = payload.leagues.filter((l: any) => {
+            if (!l || !l.id) return false;
+            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+            const isDeleted = Boolean(l.deleted) || Boolean(l.isDeleted) || String(l.status || '').toLowerCase() === 'deleted';
+            return !isArchived && !isDeleted;
+          });
+        }
+        state.data = payload;
       })
       .addCase(fetchPlayerStats.rejected, (state, action) => {
         state.loading = false;

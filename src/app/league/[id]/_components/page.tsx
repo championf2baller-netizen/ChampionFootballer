@@ -6211,8 +6211,8 @@ export default function LeagueDetailPage() {
                                                                                         onClick={() => {
                                                                                             if (isCompleted) {
                                                                                                 const toastMsg = !league?.active
-                                                                                                    ? 'league is complete you are no able to add new stats. Please contact admin to update stats.'
-                                                                                                    : 'season is complete you are no able to add new stats. Please contact admin to update stats.';
+                                                                                                    ? 'League is complete you are no able to add new stats. Please contact admin to update stats.'
+                                                                                                    : 'Season is complete you are no able to add new stats. Please contact admin to update stats.';
                                                                                                 toast(toastMsg, {
                                                                                                     icon: '🏆',
                                                                                                     duration: 5000,

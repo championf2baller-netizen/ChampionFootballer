@@ -154,7 +154,9 @@ function hasMatches(l: unknown): l is LeagueWithMatchesTyped {
 
 function isLeagueActiveForFilter(l: LeagueWithMatchesTyped): boolean {
     if (!l) return false;
-    if (l.archived === true) return false;
+    const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived' || String((l as any).status || '').toLowerCase() === 'inactive';
+    const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
+    if (isArchived || isDeleted) return false;
     return true;
 }
 
@@ -889,70 +891,128 @@ export default function PlayerStatsPage() {
     // fetch league list for top League select
     useEffect(() => {
         if (!token) return;
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status?refresh=1&_t=${Date.now()}`, {
-            credentials: 'include',
-            headers: { Authorization: `Bearer ${token}` },
-            cache: 'no-store',
-        })
-            .then(async res => {
-                if (!res.ok) return null;
-                const contentType = res.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) return null;
-                return res.json();
-            })
-            .then(d => {
-                if (d?.success && d?.user) {
-                    const adminLeaguesArr = (d.user.adminLeagues || d.user.administeredLeagues || []) as Array<{ id?: string | number }>;
-                    const adminLeagueIds = new Set<string>(
-                        adminLeaguesArr
-                            .map((l) => String(l?.id))
-                            .filter((id) => id !== 'undefined')
-                    );
+        let isMounted = true;
 
-                    const memberLeagueIds = new Set<string>(
-                        ((d.user.leagues || []) as Array<{ id?: string | number }>)
-                            .map((l) => String(l?.id))
-                            .filter((id) => id !== 'undefined')
-                    );
+        const loadLeagues = async () => {
+            try {
+                let leaguesData: any[] = [];
+                let adminLeagueIds = new Set<string>();
+                let memberLeagueIds = new Set<string>();
 
-                    const userLeagues = [
-                        ...(d.user.leagues || []),
-                        ...adminLeaguesArr,
-                    ] as League[];
+                // 1. Primary source: /leagues/user-leagues (same as all-leagues and all-players)
+                const userLeaguesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/user-leagues?refresh=1&_t=${Date.now()}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    cache: 'no-store',
+                }).catch(() => null);
 
-                    const unique = Array.from(new Map(userLeagues.map(l => [String(l.id), l])).values())
-                        .map((l) => {
-                            const leagueId = String(l.id);
-                            const role: 'ADMIN' | 'MEMBER' | undefined = adminLeagueIds.has(leagueId)
-                                ? 'ADMIN'
-                                : (memberLeagueIds.has(leagueId) ? 'MEMBER' : undefined);
-                            return {
-                                ...l,
-                                userRole: role,
-                            };
-                        });
-
-                    const visibleLeagues = unique.filter(
-                        (l) => l.archived !== true
-                    );
-
-                    visibleLeagues.sort((a, b) => {
-                        const an = (a?.name ?? '').toString().trim().toLowerCase();
-                        const bn = (b?.name ?? '').toString().trim().toLowerCase();
-                        if (an < bn) return -1;
-                        if (an > bn) return 1;
-                        return String(a.id).localeCompare(String(b.id));
-                    });
-
-                    setLeagues(visibleLeagues);
+                if (userLeaguesRes && userLeaguesRes.ok) {
+                    const d = await userLeaguesRes.json().catch(() => null);
+                    if (d?.success && Array.isArray(d?.leagues)) {
+                        leaguesData = d.leagues;
+                    }
                 }
-            })
-            .catch(() => { });
+
+                // 2. Fallback to /auth/status if /leagues/user-leagues returned nothing
+                if (leaguesData.length === 0) {
+                    const authRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status?refresh=1&_t=${Date.now()}`, {
+                        credentials: 'include',
+                        headers: { Authorization: `Bearer ${token}` },
+                        cache: 'no-store',
+                    }).catch(() => null);
+
+                    if (authRes && authRes.ok) {
+                        const d = await authRes.json().catch(() => null);
+                        if (d?.success && d?.user) {
+                            const adminArr = (d.user.adminLeagues || d.user.administeredLeagues || []) as any[];
+                            const memberArr = (d.user.leagues || []) as any[];
+                            adminLeagueIds = new Set<string>(
+                                adminArr
+                                    .map((l) => String(l?.id))
+                                    .filter((id) => id !== 'undefined')
+                            );
+                            memberLeagueIds = new Set<string>(
+                                memberArr
+                                    .map((l) => String(l?.id))
+                                    .filter((id) => id !== 'undefined')
+                            );
+                            leaguesData = [...memberArr, ...adminArr];
+                        }
+                    }
+                }
+
+                if (!isMounted || leaguesData.length === 0) return;
+
+                // Remove duplicates by id
+                const uniqueMap = new Map<string, any>();
+                leaguesData.forEach((l) => {
+                    const id = String(l?.id || '');
+                    if (id && !uniqueMap.has(id)) {
+                        uniqueMap.set(id, l);
+                    }
+                });
+
+                const unique = Array.from(uniqueMap.values()).map((l) => {
+                    const leagueId = String(l.id);
+                    const role: 'ADMIN' | 'MEMBER' | undefined = adminLeagueIds.has(leagueId)
+                        ? 'ADMIN'
+                        : (memberLeagueIds.has(leagueId) ? 'MEMBER' : (l.userRole || undefined));
+                    return {
+                        ...l,
+                        userRole: role,
+                    };
+                });
+
+                // Filter to ONLY Live or Completed leagues, and exclude all Archived and Deleted leagues
+                const visibleLeagues = unique.filter((l) => {
+                    if (!l || !l.id) return false;
+
+                    // Exclude deleted leagues
+                    const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
+                    if (isDeleted) return false;
+
+                    // Exclude archived leagues
+                    const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+                    if (isArchived) return false;
+
+                    // Must be live or completed (consistent with all-leagues and all-matches)
+                    const isCompleted = Boolean(l.isComplete) || Boolean(l.isCompleted) || String(l.status || '').toLowerCase() === 'completed' || leagueIsCompleted(l);
+                    const isLive = (l.active === true || String(l.status || '').toLowerCase() === 'live' || String(l.status || '').toLowerCase() === 'active') && !isCompleted;
+
+                    return isLive || isCompleted;
+                });
+
+                visibleLeagues.sort((a, b) => {
+                    const an = (a?.name ?? '').toString().trim().toLowerCase();
+                    const bn = (b?.name ?? '').toString().trim().toLowerCase();
+                    if (an < bn) return -1;
+                    if (an > bn) return 1;
+                    return String(a.id).localeCompare(String(b.id));
+                });
+
+                if (isMounted) {
+                    setLeagues(visibleLeagues as League[]);
+                }
+            } catch (err) {
+                console.error('Failed to load career page leagues:', err);
+            }
+        };
+
+        loadLeagues();
+
+        return () => {
+            isMounted = false;
+        };
     }, [token, leagueIsCompleted]);
 
     const dropdownLeagues = useMemo(() => {
-        if (year === 'all') return leagues;
-        return leagues.filter((l) => {
+        const cleanLeagues = leagues.filter((l) => {
+            if (!l || !l.id) return false;
+            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+            const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
+            return !isArchived && !isDeleted;
+        });
+        if (year === 'all') return cleanLeagues;
+        return cleanLeagues.filter((l) => {
             const dateStr = (l.createdAt || l.updatedAt || '').trim();
             if (!dateStr) return false;
             const t = Date.parse(dateStr);
@@ -1703,7 +1763,7 @@ export default function PlayerStatsPage() {
 
         // compute valid leagues for the selected year
         const list = ((data?.leagues || []) as LeagueWithMatchesTyped[]).filter((l) =>
-            l && l.archived !== true &&
+            isLeagueActiveForFilter(l) &&
             (val === 'all'
                 ? hasMatches(l)
                 : (l.matches || []).some(m => dayjs(m.date).year().toString() === val) ||

@@ -280,9 +280,15 @@ const isLeagueInYear = (l: LeagueWithMatches, yearStr: string): boolean => {
 };
 
 const isLeagueValidForPerformance = (l: LeagueWithMatches): boolean => {
-  if (!l) return false;
-  if (l.archived === true) return false;
-  return true;
+  if (!l || !l.id) return false;
+  const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived' || String((l as any).status || '').toLowerCase() === 'inactive';
+  const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
+  if (isArchived || isDeleted) return false;
+
+  const isLive = l.active === true || String((l as any).status || '').toLowerCase() === 'live' || String((l as any).status || '').toLowerCase() === 'active';
+  const isCompleted = Boolean((l as any).isComplete) || Boolean((l as any).isCompleted) || String((l as any).status || '').toLowerCase() === 'completed' || (Array.isArray(l.matches) && l.matches.length > 0);
+
+  return isLive || isCompleted;
 };
 
 const isLeagueActiveForFilter = isLeagueValidForPerformance;
