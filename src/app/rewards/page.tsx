@@ -313,13 +313,14 @@ const summarizeUserMatchesByLeague = (userId: string, leagues: League[]): Record
       const isHomeCaptain = sameComparableId(m.homeCaptainId, userId);
       const isAwayCaptain = sameComparableId(m.awayCaptainId, userId);
       const isCaptainWin = (isHomeCaptain && result === 'W') || (isAwayCaptain && result === 'W');
-      const defensiveImpactPicks =
-        (sameComparableId(m.homeDefensiveImpactId, userId) ? 1 : 0) +
-        (sameComparableId(m.awayDefensiveImpactId, userId) ? 1 : 0);
-      const mentalityPicks =
-        (sameComparableId(m.homeMentalityId, userId) ? 1 : 0) +
-        (sameComparableId(m.awayMentalityId, userId) ? 1 : 0);
-      const xFactorPicks = defensiveImpactPicks + mentalityPicks;
+      const hasDefensivePick =
+        sameComparableId(m.homeDefensiveImpactId, userId) ||
+        sameComparableId(m.awayDefensiveImpactId, userId);
+      const hasMentalityPick =
+        sameComparableId(m.homeMentalityId, userId) ||
+        sameComparableId(m.awayMentalityId, userId);
+      const hasXFactorPick = hasDefensivePick || hasMentalityPick;
+      const xFactorPicks = hasXFactorPick ? 1 : 0;
       const motmWinnerId = getTopMotmWinnerId(m.manOfTheMatchVotes);
       const wonMotmAward = sameComparableId(motmWinnerId, userId);
       const cleanSheetTeam = result === 'W' && oppGoals === 0;
@@ -331,7 +332,7 @@ const summarizeUserMatchesByLeague = (userId: string, leagues: League[]): Record
         result,
         motmVotes,
         isCaptainWin,
-        hasXFactorPick: xFactorPicks > 0,
+        hasXFactorPick,
         xFactorPicks,
         wonMotmAward,
         cleanSheetTeam,
@@ -420,9 +421,9 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
     leaderOfLegendsBest = Math.max(leaderOfLegendsBest, captainWinsInLeague);
     leaderOfLegendsCount += Math.floor(captainWinsInLeague / 3);
 
-    const xFactorPicksInLeague = arr.reduce((sum, m) => sum + (m.xFactorPicks || (m.hasXFactorPick ? 1 : 0)), 0);
-    xFactorBest = Math.max(xFactorBest, xFactorPicksInLeague);
-    xFactorCount += Math.floor(xFactorPicksInLeague / 5);
+    const xFactorMatchesInLeague = arr.filter((m) => m.hasXFactorPick).length;
+    xFactorBest = Math.max(xFactorBest, xFactorMatchesInLeague);
+    xFactorCount += Math.floor(xFactorMatchesInLeague / 5);
 
     const motmAwardsInLeague = arr.filter((m) => m.wonMotmAward).length;
     spotlightStarBest = Math.max(spotlightStarBest, motmAwardsInLeague);
