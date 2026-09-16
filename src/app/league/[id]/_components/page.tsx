@@ -2537,7 +2537,7 @@ export default function LeagueDetailPage() {
             console.log('ℹ️ No season selected, returning league without archived matches');
             return {
                 ...league,
-                matches: (league.matches || []).filter(m => !m.archived),
+                matches: (league.matches || []).filter(m => !m.archived || Boolean(league.archived)),
             };
         }
 
@@ -2550,10 +2550,12 @@ export default function LeagueDetailPage() {
             console.log(`   Match ${index + 1}: ${match.homeTeamName} vs ${match.awayTeamName} | seasonId: ${matchSeasonId} | status: ${match.status}`);
         });
 
+        const isSeasonOrLeagueArchived = Boolean(league.archived) || (Array.isArray((league as any)?.seasons) && (league as any).seasons.some((s: any) => String(s?.id || '') === selectedSeasonId && Boolean(s?.archived)));
+
         const filteredMatches = (league.matches || []).filter(match => {
             const matchSeasonId = (match as unknown as Record<string, unknown>)?.seasonId;
             const matches = String(matchSeasonId || '') === selectedSeasonId;
-            const notArchived = !match.archived;
+            const notArchived = !match.archived || isSeasonOrLeagueArchived;
             if (!matches) {
                 console.log(`   ❌ Match ${match.homeTeamName} vs ${match.awayTeamName} excluded (seasonId: ${matchSeasonId} vs ${selectedSeasonId})`);
             }
@@ -2637,8 +2639,8 @@ export default function LeagueDetailPage() {
             }
         }
 
-        // If no season members found from backend, get players who played in matches
-        if (filteredMembers.length === 0 && !seasonMembersPayloadProvided) {
+        // If no season members found from backend or array was empty, get players who played in matches
+        if (filteredMembers.length === 0) {
             console.log('⚠️ No season members from backend, using match players');
             const playersInSeasonSet = new Set<string>();
             filteredMatches.forEach(match => {
@@ -2753,7 +2755,7 @@ export default function LeagueDetailPage() {
 
         // Process matches to build stats for players who played in this season
         filteredLeague.matches
-            .filter(m => !m.archived) // <-- exclude archived
+            .filter(m => !m.archived || Boolean(league?.archived))
             .filter(m => isResultMatch(m) && m.homeTeamGoals != null && m.awayTeamGoals != null)
             .forEach(match => {
                 const homeWon = match.homeTeamGoals! > match.awayTeamGoals!;

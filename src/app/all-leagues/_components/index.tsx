@@ -240,7 +240,11 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
     seasons: (raw['seasons']
       ? (arr('seasons') as any[]).map((s: any) => ({
         ...s,
-        matchCount: typeof s.matchCount === 'number' ? s.matchCount : (typeof s.completedMatches === 'number' ? s.completedMatches : undefined),
+        matchCount: typeof s.matchCount === 'number' ? s.matchCount : (typeof s.totalMatches === 'number' ? s.totalMatches : (typeof s.completedMatches === 'number' ? s.completedMatches : undefined)),
+        totalMatches: typeof s.totalMatches === 'number' ? s.totalMatches : (typeof s.matchCount === 'number' ? s.matchCount : (typeof s.completedMatches === 'number' ? s.completedMatches : undefined)),
+        playerCount: typeof s.playerCount === 'number' ? s.playerCount : (Array.isArray(s.players) ? s.players.length : (Array.isArray(s.members) ? s.members.length : undefined)),
+        members: s.members || s.players || [],
+        players: s.players || s.members || [],
       }))
       : (computedStatus?.seasons || []).map((s: any) => ({
         id: s.seasonId || s.id,
@@ -249,8 +253,12 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
         isActive: s.isActive,
         maxGames: s.maxGames,
         inviteCode: s.inviteCode || s.seasonInviteCode || '',
-        matchCount: s.matchCount ?? s.completedMatches ?? 0,
+        matchCount: s.matchCount ?? s.totalMatches ?? s.completedMatches ?? 0,
+        totalMatches: s.totalMatches ?? s.matchCount ?? s.completedMatches ?? 0,
         completedMatches: s.completedMatches ?? s.matchCount ?? 0,
+        playerCount: s.playerCount ?? s.memberCount ?? 0,
+        members: s.members || s.players || [],
+        players: s.players || s.members || [],
         isCompleted: s.isCompleted,
         archived: s.archived,
         deleted: s.deleted || s.isDeleted,
@@ -3323,15 +3331,17 @@ function AllLeagues() {
     []
   );
 
-  const handleNavigateToLeague = useCallback((league: LeagueWithStatus) => {
+  const handleNavigateToLeague = useCallback((league: LeagueWithStatus, seasonIdParam?: string) => {
     const leagueIdStr = String(league.id);
     const leagueSeasons = Array.isArray(league.seasons)
       ? league.seasons.filter((s) => !Boolean((s as Season & { deleted?: boolean }).deleted))
       : [];
 
-    // Find active season or fallback to first season
-    const targetSeason = leagueSeasons.find((s) => s.isActive) || leagueSeasons[0] || null;
-    const targetSeasonId = targetSeason?.id ? String(targetSeason.id) : '';
+    // Find requested season, or active season or fallback to first season
+    const targetSeason = seasonIdParam
+      ? leagueSeasons.find((s) => String(s.id) === String(seasonIdParam)) || leagueSeasons[0] || null
+      : leagueSeasons.find((s) => s.isActive) || leagueSeasons[0] || null;
+    const targetSeasonId = seasonIdParam ? String(seasonIdParam) : (targetSeason?.id ? String(targetSeason.id) : '');
 
     try {
       if (typeof window !== 'undefined') {
@@ -6773,21 +6783,23 @@ function AllLeagues() {
                   return (
                     <Box
                       key={league.id}
+                      onClick={() => handleNavigateToLeague(league)}
                       sx={{
                         px: { xs: 3, md: 3 },
                         py: { xs: 2.6, md: 2.8 },
                         borderRadius: 3,
-                        cursor: 'not-allowed',
+                        cursor: 'pointer',
                         transition: 'all 0.3s ease',
                         background: 'linear-gradient(90deg, #767676 0%, #000000 100%)',
                         position: 'relative',
                         minHeight: { xs: '140px', md: '160px' },
                         display: 'flex',
                         alignItems: 'center',
-                        opacity: 0.75,
+                        opacity: 0.9,
                         '&:hover': {
-                          opacity: 0.75,
-                          transform: 'none',
+                          opacity: 1,
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
                         }
                       }}
                     >
@@ -7040,7 +7052,23 @@ function AllLeagues() {
                                     fontWeight: 300,
                                     fontSize: { xs: '10px', sm: '16px' }
                                   }}>
-                                    Matches: {league.matches?.length || 0}
+                                    {getCms('page_all_leagues_card_matches_label', 'Total Matches:')} {(() => {
+                                      const l = league as any;
+                                      if (typeof l.totalMatchCount === 'number') return l.totalMatchCount;
+                                      if (typeof l.computedStatus?.totalMatchCount === 'number') return l.computedStatus.totalMatchCount;
+                                      if (Array.isArray(league.matches) && league.matches.length > 0) {
+                                        return league.matches.filter((m: any) => {
+                                          const isDeleted = Boolean(m.deleted || m.isDeleted);
+                                          const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase())
+                                            || (m.homeTeamGoals != null && m.awayTeamGoals != null)
+                                            || Boolean(m.isResult || m.hasStats);
+                                          if (!isDeleted) return true;
+                                          if (isDeleted && isResult) return true;
+                                          return false;
+                                        }).length;
+                                      }
+                                      return l.computedStatus?.matchesPlayed ?? l.computedStatus?.gamesPlayed ?? 0;
+                                    })()}
                                   </Typography>
                                 </Box>
                               </Box>
@@ -7078,18 +7106,29 @@ function AllLeagues() {
                                       justifyContent: 'flex-start',
                                       alignItems: 'center',
                                       height: '100%',
-                                      cursor: 'not-allowed',
-                                      mt: { xs: 1, md: 0 }
+                                      cursor: 'pointer',
+                                      mt: { xs: 1, md: 0 },
+                                      '&:hover .archived-league-view-label': {
+                                        color: '#E56A16 !important',
+                                      }
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleNavigateToLeague(league);
                                     }}
                                   >
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                      <Typography sx={{
-                                        color: 'white',
-                                        fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                        fontWeight: 'semi-bold',
-                                        fontSize: { xs: '22px', md: '22px' }
-                                      }}>
-                                        Archived
+                                      <Typography
+                                        className="archived-league-view-label"
+                                        sx={{
+                                          color: 'white',
+                                          fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
+                                          fontWeight: 600,
+                                          fontSize: { xs: '20px', md: '22px' },
+                                          transition: 'color 0.2s ease',
+                                        }}
+                                      >
+                                        View
                                       </Typography>
                                     </Box>
                                   </Box>
@@ -7144,8 +7183,18 @@ function AllLeagues() {
                       const hasCustomLeagueImage = typeof league?.image === 'string' && league.image.trim().length > 0;
                       const seasonLabel = season.name?.trim() || `Season ${season.seasonNumber || ''}`.trim();
                       const seasonCreatedAt = season.startDate || season.createdAt || league.createdAt;
-                      const seasonMatches = (league.matches || []).filter((m) => String(m.seasonId || '') === String(season.id)).length;
-                      const seasonPlayersCount = (season.members?.length || season.players?.length || 0);
+                      const seasonMatches = typeof (season as any).matchCount === 'number'
+                        ? (season as any).matchCount
+                        : typeof (season as any).totalMatches === 'number'
+                          ? (season as any).totalMatches
+                          : typeof (season as any).completedMatches === 'number'
+                            ? (season as any).completedMatches
+                            : (league.matches || []).filter((m) => String(m.seasonId || '') === String(season.id)).length;
+                      const seasonPlayersCount = typeof (season as any).playerCount === 'number' && (season as any).playerCount > 0
+                        ? (season as any).playerCount
+                        : ((season.members?.length || season.players?.length || 0) > 0
+                          ? (season.members?.length || season.players?.length || 0)
+                          : (typeof league.memberCount === 'number' ? league.memberCount : (league.members?.length || 0)));
                       const seasonActionLoading = archivedSeasonActionId === `${league.id}:${season.id}`;
 
                       const leagueAdmin = (league.members || []).find((m) => m.id === league.adminId)
@@ -7159,17 +7208,24 @@ function AllLeagues() {
                       return (
                         <Box
                           key={`${league.id}-${season.id}`}
+                          onClick={() => handleNavigateToLeague(league, String(season.id))}
                           sx={{
                             px: { xs: 3, md: 3 },
                             py: { xs: 2.6, md: 2.8 },
                             borderRadius: 3,
+                            cursor: 'pointer',
                             transition: 'all 0.3s ease',
                             background: 'linear-gradient(90deg, #767676 0%, #000000 100%)',
                             position: 'relative',
                             minHeight: { xs: '140px', md: '160px' },
                             display: 'flex',
                             alignItems: 'center',
-                            opacity: 0.8,
+                            opacity: 0.9,
+                            '&:hover': {
+                              opacity: 1,
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                            }
                           }}
                         >
                           <Box
@@ -7355,10 +7411,35 @@ function AllLeagues() {
                                     </Grid>
 
                                     <Grid item xs={6} md={6}>
-                                      <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', height: '100%', mt: { xs: 1, md: 0 } }}>
+                                      <Box
+                                        sx={{
+                                          display: 'flex',
+                                          justifyContent: 'flex-start',
+                                          alignItems: 'center',
+                                          height: '100%',
+                                          cursor: 'pointer',
+                                          mt: { xs: 1, md: 0 },
+                                          '&:hover .archived-season-view-label': {
+                                            color: '#E56A16 !important',
+                                          }
+                                        }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleNavigateToLeague(league, String(season.id));
+                                        }}
+                                      >
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                          <Typography sx={{ color: 'white', fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif', fontWeight: 'semi-bold', fontSize: { xs: '22px', md: '22px' } }}>
-                                            Archived
+                                          <Typography
+                                            className="archived-season-view-label"
+                                            sx={{
+                                              color: 'white',
+                                              fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
+                                              fontWeight: 600,
+                                              fontSize: { xs: '20px', md: '22px' },
+                                              transition: 'color 0.2s ease',
+                                            }}
+                                          >
+                                            View
                                           </Typography>
                                         </Box>
                                       </Box>
