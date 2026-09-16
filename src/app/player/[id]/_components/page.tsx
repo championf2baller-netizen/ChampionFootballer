@@ -1386,16 +1386,18 @@ export default function PlayerStatsPage() {
     };
 
     const seasonWiseStats = useMemo<SeasonStats[]>(() => {
-        const leaguesList: LeagueWithMatchesTyped[] = (data?.leagues as LeagueWithMatchesTyped[] | undefined) ?? [];
+        const careerLeagues = (careerData?.leagues as LeagueWithMatchesTyped[] | undefined) ?? [];
+        const currentLeagues = (data?.leagues as LeagueWithMatchesTyped[] | undefined) ?? [];
+        const leaguesList: LeagueWithMatchesTyped[] = careerLeagues.length ? careerLeagues : currentLeagues;
         if (!leaguesList.length || !leagueId || leagueId === 'all') return [];
 
-        const selectedLeague = leaguesList.find(l => sameId(l.id, leagueId));
+        const selectedLeague = careerLeagues.find(l => sameId(l.id, leagueId)) || currentLeagues.find(l => sameId(l.id, leagueId));
         // Allow league even with no matches - user may be a member in seasons with 0 matches
         if (!selectedLeague) return [];
         // If no matches AND no seasons fetched, nothing to show
         if (!hasMatches(selectedLeague) && seasons.length === 0) return [];
 
-        console.log('🔍 Selected League Data:', {
+        console.log('🔍 Selected League Data (Stats Over Season):', {
             leagueId,
             leagueName: selectedLeague.name,
             totalMatches: (selectedLeague.matches || []).length,
@@ -1412,12 +1414,10 @@ export default function PlayerStatsPage() {
             return true;
         });
 
-        console.log('🎯 Player participated in matches:', {
+        console.log('🎯 Player participated in matches (Stats Over Season - All Seasons):', {
             totalLeagueMatches: allLeagueMatches.length,
             playerMatches: playerMatches.length,
             playerId,
-            selectedSeason,
-            isAllSeasons: selectedSeason === 'all',
         });
 
         // Use seasons from state (fetched from /leagues/:id/seasons API)
@@ -1490,11 +1490,7 @@ export default function PlayerStatsPage() {
 
                 const finalSeasonId = matchSeasonId || 'unknown';
 
-                // If a specific season is selected, only include matches from that season
-                if (selectedSeason && selectedSeason !== 'all' && !sameId(finalSeasonId, selectedSeason)) {
-                    return;
-                }
-
+                // Always include all seasons without filtering by selectedSeason
                 if (!seasonMap.has(finalSeasonId)) {
                     seasonMap.set(finalSeasonId, []);
                 }
@@ -1514,18 +1510,13 @@ export default function PlayerStatsPage() {
             apiSeasons.forEach(season => {
                 // Include season unless explicitly declined.
                 if (!isSeasonExplicitlyDeclined(season) && !seasonMap.has(season.id)) {
-                    // If filtering by specific season, only add that one
-                    if (selectedSeason && selectedSeason !== 'all' && !sameId(season.id, selectedSeason)) {
-                        return;
-                    }
                     seasonMap.set(season.id, []);
                     console.log(`📌 Added member season with 0 matches: Season ${season.seasonNumber} (${season.name})`);
                 }
             });
         }
 
-        console.log('📊 Seasons to display in popup:', {
-            selectedSeasonFilter: selectedSeason,
+        console.log('📊 Seasons to display in popup (All Seasons):', {
             seasonsFound: Array.from(seasonMap.keys()),
             seasonCount: seasonMap.size,
             matchesPerSeason: Array.from(seasonMap.entries()).map(([id, matches]) => ({
@@ -1605,7 +1596,7 @@ export default function PlayerStatsPage() {
         console.log('✅ Final season stats for popup:', sortedStats);
 
         return sortedStats;
-    }, [data, leagueId, playerId, seasons, selectedSeason, isSeasonExplicitlyDeclined]);
+    }, [careerData, data, leagueId, playerId, seasons, isSeasonExplicitlyDeclined]);
 
     const yearsOptions = useMemo(() => {
         const years = new Set<number>([dayjs().year()]);
@@ -2940,7 +2931,7 @@ export default function PlayerStatsPage() {
                                     {currentLeagueName}
                                 </Typography>
                                 <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.58px', color: '#3d3d3d', lineHeight: 1.2 }}>
-                                    {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
+                                    STATS OVER SEASONS
                                 </Typography>
                                 <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.55px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {playerName.toUpperCase()}
@@ -2961,7 +2952,7 @@ export default function PlayerStatsPage() {
                             </Typography>
                             <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
                             <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: 17, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#3d3d3d', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-                                {selectedSeason && selectedSeason !== 'all' ? 'SEASON STATS' : 'STATS OVER SEASONS'}
+                                STATS OVER SEASONS
                             </Typography>
                             <Typography sx={{ color: '#777', fontSize: 18, lineHeight: 1 }}>|</Typography>
                             <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.85px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '34%' }}>
