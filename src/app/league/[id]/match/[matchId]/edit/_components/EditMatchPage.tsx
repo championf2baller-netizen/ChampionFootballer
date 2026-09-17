@@ -929,13 +929,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         if (!item) return;
         const id = String(item.userId || item.user_id || item.playerId || item.player_id || item.id || item._id || '');
         const val = Number(item.avg ?? item.avgXp ?? item.avg_xp ?? item.averageXP ?? item.xp ?? item.totalXP ?? 0);
-        if (id && Number.isFinite(val) && val > 0) map[id] = Math.floor((val + 1e-9) * 100) / 100;
+        if (id && Number.isFinite(val) && val > 0) map[id] = Math.round(val);
       });
     } else if (typeof raw === 'object') {
       Object.entries(raw as Record<string, any>).forEach(([key, val]) => {
         const id = String(key);
         const num = typeof val === 'number' ? val : Number(val?.avg ?? val?.avgXp ?? val?.avg_xp ?? val?.averageXP ?? val?.xp ?? val);
-        if (id && Number.isFinite(num) && num > 0) map[id] = Math.floor((num + 1e-9) * 100) / 100;
+        if (id && Number.isFinite(num) && num > 0) map[id] = Math.round(num);
       });
     }
     return map;
@@ -1046,23 +1046,23 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const leagueAvgXPValue = React.useMemo(() => {
     if (nonZeroAvgValues.length === 0) return 0;
     const sum = nonZeroAvgValues.reduce((a, b) => a + b, 0);
-    return Math.floor(((sum / nonZeroAvgValues.length) + 1e-9) * 100) / 100;
+    return Math.round(sum / nonZeroAvgValues.length);
   }, [nonZeroAvgValues]);
 
   const getAvgRating = (p?: PlayerOption | null): number => {
     if (!p) return 0;
     if (p.isGuest) {
-      return leagueAvgXPValue > 0 ? (Math.floor((leagueAvgXPValue + 1e-9) * 100) / 100) : 15;
+      return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
     }
     const pId = String(p.id || '');
     const pMongoId = String((p as any)._id || '');
     const v = userLeagueAvgXP[pId] ?? (pMongoId ? userLeagueAvgXP[pMongoId] : undefined);
     if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
-      return Math.floor((v + 1e-9) * 100) / 100;
+      return Math.round(v);
     }
     const skill = calcSkill(p);
     if (skill > 0) return skill;
-    return leagueAvgXPValue > 0 ? (Math.floor((leagueAvgXPValue + 1e-9) * 100) / 100) : 15;
+    return leagueAvgXPValue > 0 ? Math.round(leagueAvgXPValue) : 15;
   };
 
   // XP-based team percentage calculation
