@@ -1337,7 +1337,7 @@ export default function LeagueDetailPage() {
         } catch (error) {
             console.error('Error fetching league details:', error);
             if (isSigningOut || !isAuthenticated) return;
-            setError('Failed to fetch league details');
+            setError('Unable to connect to server. Please check if the server is running or try again.');
         } finally {
             if (!isSigningOut) setLeagueDetailsLoading(false);
         }
@@ -3301,7 +3301,9 @@ export default function LeagueDetailPage() {
     }
 
     if (!league && !isSigningOut) {
-        const shouldShowLeagueSkeleton = authLoading || leagueDetailsLoading || (!!token && !leagueDetailsAttempted);
+        // Show skeleton loader whenever league is null AND no explicit error has occurred yet.
+        // Never show the error screen on page refresh or while awaiting responses/tokens.
+        const shouldShowLeagueSkeleton = !error || authLoading || leagueDetailsLoading || !leagueDetailsAttempted;
 
         if (shouldShowLeagueSkeleton) {
             return (
@@ -3348,6 +3350,7 @@ export default function LeagueDetailPage() {
                             startIcon={<RefreshCw size={16} />}
                             onClick={() => {
                                 setError(null);
+                                setLeagueDetailsAttempted(false);
                                 void fetchLeagueDetails();
                             }}
                             sx={{
@@ -3360,10 +3363,10 @@ export default function LeagueDetailPage() {
                         </Button>
                     </Box>
                     <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                        {error || 'Unable to load league details.'}
+                        {error}
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)', mt: 1 }}>
-                        Please verify your connection or select another league.
+                        Please verify your server connection or try again.
                     </Typography>
                 </Container>
             </Box>
