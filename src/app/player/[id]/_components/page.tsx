@@ -154,7 +154,7 @@ function hasMatches(l: unknown): l is LeagueWithMatchesTyped {
 
 function isLeagueActiveForFilter(l: LeagueWithMatchesTyped): boolean {
     if (!l) return false;
-    const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived' || String((l as any).status || '').toLowerCase() === 'inactive';
+    const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived';
     const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
     if (isArchived || isDeleted) return false;
     return true;
@@ -971,17 +971,21 @@ export default function PlayerStatsPage() {
                     if (isDeleted) return false;
 
                     // Exclude archived leagues
-                    const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+                    const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived';
                     if (isArchived) return false;
 
-                    // Must be live or completed (consistent with all-leagues and all-matches)
-                    const isCompleted = Boolean(l.isComplete) || Boolean(l.isCompleted) || String(l.status || '').toLowerCase() === 'completed' || leagueIsCompleted(l);
-                    const isLive = (l.active === true || String(l.status || '').toLowerCase() === 'live' || String(l.status || '').toLowerCase() === 'active') && !isCompleted;
-
-                    return isLive || isCompleted;
+                    return true;
                 });
 
-                visibleLeagues.sort((a, b) => {
+                visibleLeagues.sort((a: any, b: any) => {
+                    const getCreatedTs = (l: any): number => {
+                        if (!l || !l.createdAt) return 0;
+                        const t = new Date(l.createdAt).getTime();
+                        return Number.isFinite(t) ? t : 0;
+                    };
+                    const tsA = getCreatedTs(a);
+                    const tsB = getCreatedTs(b);
+                    if (tsA !== tsB) return tsB - tsA;
                     const an = (a?.name ?? '').toString().trim().toLowerCase();
                     const bn = (b?.name ?? '').toString().trim().toLowerCase();
                     if (an < bn) return -1;
@@ -1007,7 +1011,7 @@ export default function PlayerStatsPage() {
     const dropdownLeagues = useMemo(() => {
         const cleanLeagues = leagues.filter((l) => {
             if (!l || !l.id) return false;
-            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived';
             const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
             return !isArchived && !isDeleted;
         });

@@ -109,7 +109,7 @@ const playerStatsSlice = createSlice({
         if (payload && Array.isArray(payload.leagues)) {
           payload.leagues = payload.leagues.filter((l: any) => {
             if (!l || !l.id) return false;
-            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived' || String(l.status || '').toLowerCase() === 'inactive';
+            const isArchived = Boolean(l.archived) || String(l.archived) === 'true' || String(l.status || '').toLowerCase() === 'archived';
             const isDeleted = Boolean(l.deleted) || Boolean(l.isDeleted) || String(l.status || '').toLowerCase() === 'deleted';
             return !isArchived && !isDeleted;
           });

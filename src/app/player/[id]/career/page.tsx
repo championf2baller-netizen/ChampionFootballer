@@ -272,6 +272,12 @@ const getLeagueYears = (l: {
   return Array.from(years);
 };
 
+const getLeagueCreatedTimestamp = (l: any): number => {
+  if (!l || !l.createdAt) return 0;
+  const t = dayjs(l.createdAt).valueOf();
+  return Number.isFinite(t) ? t : 0;
+};
+
 const isLeagueInYear = (l: LeagueWithMatches, yearStr: string): boolean => {
   if (!yearStr || yearStr === 'all') return true;
   const createdY = getLeagueCreatedYear(l);
@@ -281,14 +287,13 @@ const isLeagueInYear = (l: LeagueWithMatches, yearStr: string): boolean => {
 
 const isLeagueValidForPerformance = (l: LeagueWithMatches): boolean => {
   if (!l || !l.id) return false;
-  const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived' || String((l as any).status || '').toLowerCase() === 'inactive';
   const isDeleted = Boolean((l as any).deleted) || Boolean((l as any).isDeleted) || String((l as any).status || '').toLowerCase() === 'deleted';
-  if (isArchived || isDeleted) return false;
+  if (isDeleted) return false;
 
-  const isLive = l.active === true || String((l as any).status || '').toLowerCase() === 'live' || String((l as any).status || '').toLowerCase() === 'active';
-  const isCompleted = Boolean((l as any).isComplete) || Boolean((l as any).isCompleted) || String((l as any).status || '').toLowerCase() === 'completed' || (Array.isArray(l.matches) && l.matches.length > 0);
+  const isArchived = Boolean(l.archived) || String((l as any).archived) === 'true' || String((l as any).status || '').toLowerCase() === 'archived';
+  if (isArchived) return false;
 
-  return isLive || isCompleted;
+  return true;
 };
 
 const isLeagueActiveForFilter = isLeagueValidForPerformance;
@@ -977,9 +982,12 @@ export default function CareerPage() {
       : (data?.leagues || careerData?.leagues || [])) as LeagueWithMatches[])
       .filter(isLeagueValidForPerformance);
 
-    const sortedLeagues = [...sourceLeagues].sort((a, b) =>
-      (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
-    );
+    const sortedLeagues = [...sourceLeagues].sort((a, b) => {
+      const tsA = getLeagueCreatedTimestamp(a);
+      const tsB = getLeagueCreatedTimestamp(b);
+      if (tsA !== tsB) return tsB - tsA;
+      return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
+    });
 
     if (!filters.year || filters.year === 'all') {
       setAvailableLeagues(sortedLeagues);
