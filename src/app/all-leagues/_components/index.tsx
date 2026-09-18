@@ -5068,21 +5068,30 @@ function AllLeagues() {
         },
       });
       const payloadUnknown: unknown = await res.json().catch(() => ({}));
-      const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string } : {};
+      const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string; archived?: boolean } : {};
       if (!res.ok || payload.success === false) throw new Error(payload.message || 'Failed to delete league');
-      toast.success('League deleted');
-      // Remove from local state
+      
       const deletedLeagueId = String(selectedLeague.id);
-      setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
-      setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
-      dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'settings-delete' });
+      const isArchived = Boolean(payload.archived || (payload.message && payload.message.toLowerCase().includes('archive')));
+
+      if (isArchived) {
+        toast.success('League archived');
+        setLeagues(prev => prev.map(l => String(l.id) === deletedLeagueId ? { ...l, active: false, archived: true, status: 'archived' as any } : l));
+        dispatchLeagueMutationEvent('league-updated', { leagueId: deletedLeagueId, reason: 'settings-archive' });
+      } else {
+        toast.success('League deleted');
+        setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
+        setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
+        dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'settings-delete' });
+      }
       setOpenMembers(false);
       setSelectedLeague(null);
+      await fetchAllLeagues();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to delete league';
       toast.error(msg);
     }
-  }, [selectedLeague, token, dispatchLeagueMutationEvent]);
+  }, [selectedLeague, token, fetchAllLeagues, dispatchLeagueMutationEvent]);
 
   const handleArchiveLeagueFromSettings = useCallback(async () => {
     if (!selectedLeague) return;
@@ -5354,22 +5363,28 @@ function AllLeagues() {
         },
       });
       const payloadUnknown: unknown = await res.json().catch(() => ({}));
-      const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string } : {};
+      const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string; archived?: boolean } : {};
       if (!res.ok || payload.success === false) throw new Error(payload.message || 'Failed to delete league');
-      toast.success('League deleted');
-      // Remove from local state
+      
       const deletedLeagueId = String(adminSettingsLeague.id);
-      setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
-      setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
-      dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'admin-settings-delete' });
-      // Clear dialog/selection states
+      const isArchived = Boolean(payload.archived || (payload.message && payload.message.toLowerCase().includes('archive')));
+
+      if (isArchived) {
+        toast.success('League archived');
+        setLeagues(prev => prev.map(l => String(l.id) === deletedLeagueId ? { ...l, active: false, archived: true, status: 'archived' as any } : l));
+        dispatchLeagueMutationEvent('league-updated', { leagueId: deletedLeagueId, reason: 'admin-settings-archive' });
+      } else {
+        toast.success('League deleted');
+        setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
+        setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
+        dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'admin-settings-delete' });
+      }
       setAdminSettingsLeague(null);
       setOpenAdminSettings(false);
       if (selectedLeague && String(selectedLeague.id) === deletedLeagueId) {
         setSelectedLeague(null);
         setOpenMembers(false);
       }
-      // Ensure lists are fresh
       await fetchAllLeagues();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to delete league';
