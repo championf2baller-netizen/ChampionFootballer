@@ -2037,7 +2037,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Home Players</Typography>
                     <Autocomplete
-                      key={`home-${availabilityVersion}`}
+                      key="home-players-autocomplete"
                       multiple
                       options={homePlayerOptions}
                       disableCloseOnSelect
@@ -2066,10 +2066,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) (optionProps.onMouseDown as any)(e);
-                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
@@ -2219,7 +2215,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Away Players</Typography>
                     <Autocomplete
-                      key={`away-${availabilityVersion}`}
+                      key="away-players-autocomplete"
                       multiple
                       options={awayPlayerOptions}
                       disableCloseOnSelect
@@ -2248,10 +2244,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) (optionProps.onMouseDown as any)(e);
-                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
