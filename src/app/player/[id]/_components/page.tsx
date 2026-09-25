@@ -258,6 +258,83 @@ function sumXPAwardedFromMatches(matches: LeagueMatch[] = []): number {
     }, 0);
 }
 
+const getLeagueRoleTag = (league: any, targetPlayerId?: string): 'Admin' | 'Member' => {
+    if (!league) return 'Member';
+    const leagueId = String(league.id || league._id || '').trim();
+
+    // 1. Check explicit userRole property on league (if set to ADMIN / SUPER_ADMIN)
+    const uRole = String(league.userRole || '').toUpperCase();
+    if (uRole === 'ADMIN' || uRole === 'SUPER_ADMIN') return 'Admin';
+
+    // 2. Check logged-in user in localStorage & auth storage
+    if (typeof window !== 'undefined') {
+        try {
+            const keys = ['user', 'currentUser', 'userData'];
+            for (const k of keys) {
+                const str = localStorage.getItem(k);
+                if (!str) continue;
+                const u = JSON.parse(str);
+                if (!u) continue;
+                const currentUserId = String(u.id || u._id || u.userId || u.user_id || '').trim();
+                const adminArr = u.adminLeagues || u.administeredLeagues || u.admin_leagues || [];
+                if (Array.isArray(adminArr) && adminArr.some((al: any) => {
+                    const alId = String(al?.id || al?._id || al || '').trim();
+                    return alId && alId === leagueId;
+                })) {
+                    return 'Admin';
+                }
+                const creatorId = String(league.adminId || league.createdById || league.creatorId || league.userId || league.admin || '').trim();
+                if (currentUserId && creatorId && creatorId === currentUserId) {
+                    return 'Admin';
+                }
+            }
+        } catch { }
+    }
+
+    // 3. Check target player ID or league object administrator arrays / creator fields
+    const pId = String(targetPlayerId || '').trim();
+    if (pId) {
+        const adminArr = league.administrators || league.administeredBy || league.adminUsers || league.administeredLeagues || [];
+        if (Array.isArray(adminArr) && adminArr.some((a: any) => {
+            const aId = String(a?.id || a?._id || a || '').trim();
+            return aId && aId === pId;
+        })) {
+            return 'Admin';
+        }
+        const adminIds = league.adminIds || league.administratorIds || [];
+        if (Array.isArray(adminIds) && adminIds.some((id: any) => String(id || '').trim() === pId)) {
+            return 'Admin';
+        }
+        const creatorId = String(league.adminId || league.createdById || league.creatorId || league.userId || league.admin || '').trim();
+        if (creatorId && creatorId === pId) {
+            return 'Admin';
+        }
+    }
+
+    // 4. Also check logged-in user ID against league administrators array / adminIds
+    if (typeof window !== 'undefined') {
+        try {
+            const userStr = localStorage.getItem('user') || localStorage.getItem('currentUser');
+            if (userStr) {
+                const u = JSON.parse(userStr);
+                const currentUserId = String(u?.id || u?._id || u?.userId || u?.user_id || '').trim();
+                if (currentUserId) {
+                    const adminArr = league.administrators || league.administeredBy || league.adminUsers || league.administeredLeagues || [];
+                    if (Array.isArray(adminArr) && adminArr.some((a: any) => String(a?.id || a?._id || a || '').trim() === currentUserId)) {
+                        return 'Admin';
+                    }
+                    const adminIds = league.adminIds || league.administratorIds || [];
+                    if (Array.isArray(adminIds) && adminIds.some((id: any) => String(id || '').trim() === currentUserId)) {
+                        return 'Admin';
+                    }
+                }
+            }
+        } catch { }
+    }
+
+    return 'Member';
+};
+
 function getReadableTextColor(hexColor: string): string {
     const hex = String(hexColor || '').replace('#', '');
     if (!/^[0-9A-Fa-f]{6}$/.test(hex)) return '#111111';
@@ -899,7 +976,35 @@ export default function PlayerStatsPage() {
                 let adminLeagueIds = new Set<string>();
                 let memberLeagueIds = new Set<string>();
 
-                // 1. Primary source: /leagues/user-leagues (same as all-leagues and all-players)
+                // 1. Fetch /auth/status to get exact user admin/member league sets
+                const authRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status?refresh=1&_t=${Date.now()}`, {
+                    credentials: 'include',
+                    headers: { Authorization: `Bearer ${token}` },
+                    cache: 'no-store',
+                }).catch(() => null);
+
+                if (authRes && authRes.ok) {
+                    const d = await authRes.json().catch(() => null);
+                    if (d?.success && d?.user) {
+                        const adminArr = (d.user.adminLeagues || d.user.administeredLeagues || []) as any[];
+                        const memberArr = (d.user.leagues || []) as any[];
+                        adminLeagueIds = new Set<string>(
+                            adminArr
+                                .map((l) => String(l?.id || l?._id || l))
+                                .filter((id) => id && id !== 'undefined')
+                        );
+                        memberLeagueIds = new Set<string>(
+                            memberArr
+                                .map((l) => String(l?.id || l?._id || l))
+                                .filter((id) => id && id !== 'undefined')
+                        );
+                        if (leaguesData.length === 0) {
+                            leaguesData = [...memberArr, ...adminArr];
+                        }
+                    }
+                }
+
+                // 2. Fetch /leagues/user-leagues for full league objects
                 const userLeaguesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/leagues/user-leagues?refresh=1&_t=${Date.now()}`, {
                     headers: { Authorization: `Bearer ${token}` },
                     cache: 'no-store',
@@ -907,36 +1012,8 @@ export default function PlayerStatsPage() {
 
                 if (userLeaguesRes && userLeaguesRes.ok) {
                     const d = await userLeaguesRes.json().catch(() => null);
-                    if (d?.success && Array.isArray(d?.leagues)) {
+                    if (d?.success && Array.isArray(d?.leagues) && d.leagues.length > 0) {
                         leaguesData = d.leagues;
-                    }
-                }
-
-                // 2. Fallback to /auth/status if /leagues/user-leagues returned nothing
-                if (leaguesData.length === 0) {
-                    const authRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status?refresh=1&_t=${Date.now()}`, {
-                        credentials: 'include',
-                        headers: { Authorization: `Bearer ${token}` },
-                        cache: 'no-store',
-                    }).catch(() => null);
-
-                    if (authRes && authRes.ok) {
-                        const d = await authRes.json().catch(() => null);
-                        if (d?.success && d?.user) {
-                            const adminArr = (d.user.adminLeagues || d.user.administeredLeagues || []) as any[];
-                            const memberArr = (d.user.leagues || []) as any[];
-                            adminLeagueIds = new Set<string>(
-                                adminArr
-                                    .map((l) => String(l?.id))
-                                    .filter((id) => id !== 'undefined')
-                            );
-                            memberLeagueIds = new Set<string>(
-                                memberArr
-                                    .map((l) => String(l?.id))
-                                    .filter((id) => id !== 'undefined')
-                            );
-                            leaguesData = [...memberArr, ...adminArr];
-                        }
                     }
                 }
 
@@ -2542,7 +2619,12 @@ export default function PlayerStatsPage() {
                                 >
                                     <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
                                         {leagueId && leagueId !== 'all'
-                                            ? (leagues.find((l) => sameId(l.id, leagueId))?.name || getCms('page_player_stats_league_placeholder', 'Select League'))
+                                            ? (() => {
+                                                const sel = leagues.find((l) => sameId(l.id, leagueId));
+                                                if (!sel) return getCms('page_player_stats_league_placeholder', 'Select League');
+                                                const tag = getLeagueRoleTag(sel, playerId);
+                                                return `${sel.name || 'League'} (${tag})`;
+                                              })()
                                             : getCms('page_all_leagues_select_placeholder', 'All Leagues')}
                                     </Box>
                                     {/* <ChevronDown size={isDesktop ? 16 : 12} style={{ flexShrink: 0, color: '#9CA3AF' }} /> */}
@@ -2671,23 +2753,26 @@ export default function PlayerStatsPage() {
                                                     }}
                                                 />
                                                 <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                                    {leagueItem.userRole && (
-                                                        <Box
-                                                            sx={{
-                                                                px: 1,
-                                                                py: 0.25,
-                                                                bgcolor: leagueItem.userRole === 'ADMIN' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.15)',
-                                                                color: leagueItem.userRole === 'ADMIN' ? '#1F2937' : '#FFFFFF',
-                                                                borderRadius: '9999px',
-                                                                fontSize: 10,
-                                                                fontWeight: 700,
-                                                                letterSpacing: 0.3,
-                                                                textTransform: 'uppercase',
-                                                            }}
-                                                        >
-                                                            {leagueItem.userRole === 'ADMIN' ? 'Admin' : 'Member'}
-                                                        </Box>
-                                                    )}
+                                                    {(() => {
+                                                        const roleTag = getLeagueRoleTag(leagueItem, playerId);
+                                                        return (
+                                                            <Box
+                                                                sx={{
+                                                                    px: 1,
+                                                                    py: 0.25,
+                                                                    bgcolor: roleTag === 'Admin' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.15)',
+                                                                    color: roleTag === 'Admin' ? '#1F2937' : '#FFFFFF',
+                                                                    borderRadius: '9999px',
+                                                                    fontSize: 10,
+                                                                    fontWeight: 700,
+                                                                    letterSpacing: 0.3,
+                                                                    textTransform: 'uppercase',
+                                                                }}
+                                                            >
+                                                                {roleTag}
+                                                            </Box>
+                                                        );
+                                                    })()}
                                                 </Box>
                                             </MenuItem>
                                         );

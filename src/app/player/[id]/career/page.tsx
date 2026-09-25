@@ -20,6 +20,8 @@ import {
   Menu,
   Select,
   MenuItem,
+  ListItemIcon,
+  ListItemText,
   FormControl,
   SelectChangeEvent,
   Avatar,
@@ -28,6 +30,7 @@ import {
 } from '@mui/material';
 import Image from 'next/image';
 import { ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { Trophy } from 'lucide-react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import SearchIcon from '@/Components/images/searchicon.png';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
@@ -176,6 +179,7 @@ interface SeasonInfo {
 interface LeagueWithMatches {
   id: string;
   name?: string;
+  userRole?: string;
   matches?: LeagueMatch[];
   active?: boolean;
   archived?: boolean;
@@ -186,6 +190,83 @@ interface LeagueWithMatches {
     isCompleted?: boolean;
   };
 }
+
+const getLeagueRoleTag = (league: any, targetPlayerId?: string): 'Admin' | 'Member' => {
+  if (!league) return 'Member';
+  const leagueId = String(league.id || league._id || '').trim();
+
+  // 1. Check explicit userRole property on league (if set to ADMIN / SUPER_ADMIN)
+  const uRole = String(league.userRole || '').toUpperCase();
+  if (uRole === 'ADMIN' || uRole === 'SUPER_ADMIN') return 'Admin';
+
+  // 2. Check logged-in user in localStorage & auth storage
+  if (typeof window !== 'undefined') {
+    try {
+      const keys = ['user', 'currentUser', 'userData'];
+      for (const k of keys) {
+        const str = localStorage.getItem(k);
+        if (!str) continue;
+        const u = JSON.parse(str);
+        if (!u) continue;
+        const currentUserId = String(u.id || u._id || u.userId || u.user_id || '').trim();
+        const adminArr = u.adminLeagues || u.administeredLeagues || u.admin_leagues || [];
+        if (Array.isArray(adminArr) && adminArr.some((al: any) => {
+          const alId = String(al?.id || al?._id || al || '').trim();
+          return alId && alId === leagueId;
+        })) {
+          return 'Admin';
+        }
+        const creatorId = String(league.adminId || league.createdById || league.creatorId || league.userId || league.admin || '').trim();
+        if (currentUserId && creatorId && creatorId === currentUserId) {
+          return 'Admin';
+        }
+      }
+    } catch { }
+  }
+
+  // 3. Check target player ID or league object administrator arrays / creator fields
+  const pId = String(targetPlayerId || '').trim();
+  if (pId) {
+    const adminArr = league.administrators || league.administeredBy || league.adminUsers || league.administeredLeagues || [];
+    if (Array.isArray(adminArr) && adminArr.some((a: any) => {
+      const aId = String(a?.id || a?._id || a || '').trim();
+      return aId && aId === pId;
+    })) {
+      return 'Admin';
+    }
+    const adminIds = league.adminIds || league.administratorIds || [];
+    if (Array.isArray(adminIds) && adminIds.some((id: any) => String(id || '').trim() === pId)) {
+      return 'Admin';
+    }
+    const creatorId = String(league.adminId || league.createdById || league.creatorId || league.userId || league.admin || '').trim();
+    if (creatorId && creatorId === pId) {
+      return 'Admin';
+    }
+  }
+
+  // 4. Also check logged-in user ID against league administrators array / adminIds
+  if (typeof window !== 'undefined') {
+    try {
+      const userStr = localStorage.getItem('user') || localStorage.getItem('currentUser');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        const currentUserId = String(u?.id || u?._id || u?.userId || u?.user_id || '').trim();
+        if (currentUserId) {
+          const adminArr = league.administrators || league.administeredBy || league.adminUsers || league.administeredLeagues || [];
+          if (Array.isArray(adminArr) && adminArr.some((a: any) => String(a?.id || a?._id || a || '').trim() === currentUserId)) {
+            return 'Admin';
+          }
+          const adminIds = league.adminIds || league.administratorIds || [];
+          if (Array.isArray(adminIds) && adminIds.some((id: any) => String(id || '').trim() === currentUserId)) {
+            return 'Admin';
+          }
+        }
+      }
+    } catch { }
+  }
+
+  return 'Member';
+};
 interface PlayerStatsData {
   leagues?: LeagueWithMatches[];
   years?: Array<number | string>;
@@ -2359,6 +2440,29 @@ export default function CareerPage() {
   }, [careerData?.allYears, careerData?.years, data?.allYears, data?.years, data?.leagues, careerData?.leagues, allLeagueMatches]);
 
   useEffect(() => {
+    if (!token) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/status?refresh=1&_t=${Date.now()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d?.success && d?.user && typeof window !== 'undefined') {
+          const existingUserStr = localStorage.getItem('user');
+          const existingUser = existingUserStr ? JSON.parse(existingUserStr) : {};
+          const adminArr = d.user.adminLeagues || d.user.administeredLeagues || [];
+          localStorage.setItem('user', JSON.stringify({
+            ...existingUser,
+            ...d.user,
+            adminLeagues: adminArr,
+            administeredLeagues: adminArr,
+          }));
+        }
+      })
+      .catch(() => { });
+  }, [token]);
+
+  useEffect(() => {
     if (loading) return;
     if (!filters.year || filters.year === 'all') return;
     if (!availableYears.includes(filters.year)) {
@@ -2370,8 +2474,11 @@ export default function CareerPage() {
   const selectedLeagueName = useMemo(() => {
     if (!filters.leagueId || filters.leagueId === 'all') return null;
     const league = availableLeagues.find(l => sameId(l.id, filters.leagueId));
-    return (league as LeagueWithMatches & { name?: string })?.name || `League ${filters.leagueId}`;
-  }, [filters.leagueId, availableLeagues]);
+    if (!league) return `League ${filters.leagueId}`;
+    const name = (league as LeagueWithMatches & { name?: string })?.name || `League ${filters.leagueId}`;
+    const roleTag = getLeagueRoleTag(league, String(params?.id || ''));
+    return `${name} (${roleTag})`;
+  }, [filters.leagueId, availableLeagues, params?.id]);
 
   // Preferred league from localStorage (persisted across pages)
   const [preferredLeagueId, setPreferredLeagueId] = useState<string | null>(null);
@@ -2409,7 +2516,7 @@ export default function CareerPage() {
     if (!seasonFilter || seasonFilter === 'all') return 'All Seasons';
     const selected = availableSeasons.find((s) => sameId(s.id, seasonFilter));
     if (!selected) return 'All Seasons';
-    return `${formatSeasonDisplayLabel(selected)}${selected.isActive ? ' (Active)' : ''}`;
+    return `${formatSeasonDisplayLabel(selected)}`;
   }, [seasonFilter, availableSeasons]);
 
   const topTeammateLine = useMemo(() => {
@@ -2806,377 +2913,496 @@ export default function CareerPage() {
                   }}
                 >
                   {/* Year Filter */}
-                  {isMobile ? (
-                    <>
-                      <button
-                        ref={yearFilterButtonRef}
-                        type="button"
-                        onClick={() => {
-                          setLeagueMenuOpen(false);
-                          setSeasonMenuOpen(false);
-                          setYearMenuOpen((prev) => !prev);
-                        }}
-                        style={{
-                          height: '34px',
-                          padding: '0 20px 0 7px',
-                          marginLeft: '0px',
-                          backgroundColor: 'transparent',
-                          color: '#fff',
-                          border: '1.5px solid #e56a16',
-                          borderRadius: '24px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          outline: 'none',
-                          width: '100%',
-                          fontWeight: 600,
-                          textAlign: 'left',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 12px center',
-                        }}
-                      >
-                        {filters.year && filters.year !== 'all' ? filters.year : getCms('page_player_career_year_placeholder', 'All Years')}
-                      </button>
-                      <Menu
-                        anchorEl={yearFilterButtonRef.current}
-                        open={yearMenuOpen}
-                        onClose={() => setYearMenuOpen(false)}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                        PaperProps={{
-                          sx: {
-                            mt: 0.5,
-                            borderRadius: 1,
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            backgroundColor: '#1a1a1a',
-                            minWidth: yearFilterButtonRef.current?.offsetWidth || 120,
-                            width: 'max-content',
-                            maxWidth: '90vw',
-                          }
-                        }}
-                        MenuListProps={{ sx: { py: 0 } }}
-                      >
-                        <MenuItem
-                          selected={(filters.year || 'all') === 'all'}
-                          onClick={() => handleYearFilterChange('all')}
-                          sx={{
-                            color: '#fff',
-                            fontSize: 11,
-                            minHeight: 34,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                            '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                          }}
-                        >
-                          {getCms('page_player_career_year_placeholder', 'All Years')}
-                        </MenuItem>
-                        {availableYears.map((year) => (
-                          <MenuItem
-                            key={year}
-                            selected={(filters.year || 'all') === year}
-                            onClick={() => handleYearFilterChange(year)}
-                            sx={{
-                              color: '#fff',
-                              fontSize: 11,
-                              minHeight: 34,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                              '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                            }}
-                          >
-                            {year}
-                          </MenuItem>
-                        ))}
-                      </Menu>
-                    </>
-                  ) : (
-                    <select
-                      value={filters.year || 'all'}
-                      onChange={(e) => handleYearFilterChange(e.target.value)}
-                      style={{
-                        height: '39px',
-                        padding: '0 36px 0 12px',
-                        marginLeft: '4px',
-                        backgroundColor: 'transparent',
-                        color: '#fff',
-                        border: '1.5px solid #e56a16',
-                        borderRadius: '24px',
-                        fontSize: '17px',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        width: desktopFilterWidth,
-                        minWidth: desktopFilterWidth,
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        fontWeight: 400,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 12px center',
+                  <button
+                    ref={yearFilterButtonRef}
+                    type="button"
+                    onClick={() => {
+                      setLeagueMenuOpen(false);
+                      setSeasonMenuOpen(false);
+                      setYearMenuOpen((prev) => !prev);
+                    }}
+                    style={{
+                      height: isMobile ? '34px' : '39px',
+                      padding: isMobile ? '0 20px 0 7px' : '0 36px 0 12px',
+                      marginLeft: isMobile ? '0px' : '4px',
+                      backgroundColor: 'transparent',
+                      color: '#fff',
+                      border: '1.5px solid #e56a16',
+                      borderRadius: '24px',
+                      fontSize: isMobile ? '11px' : '15px',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      width: isMobile ? '100%' : desktopFilterWidth,
+                      minWidth: isMobile ? '100%' : desktopFilterWidth,
+                      fontWeight: isMobile ? 600 : 400,
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                    }}
+                  >
+                    {filters.year && filters.year !== 'all' ? filters.year : getCms('page_player_career_year_placeholder', 'All Years')}
+                  </button>
+                  <Menu
+                    anchorEl={yearFilterButtonRef.current}
+                    open={yearMenuOpen}
+                    onClose={() => setYearMenuOpen(false)}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    marginThreshold={0}
+                    MenuListProps={{
+                      sx: {
+                        maxHeight: { xs: 260, sm: 320 },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'rgba(255,255,255,0.08)',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: 'rgba(255,255,255,0.35)',
+                          borderRadius: '999px',
+                        },
+                      },
+                    }}
+                    PaperProps={{
+                      sx: {
+                        p: 0.5,
+                        mt: 1,
+                        minWidth: yearFilterButtonRef.current?.offsetWidth || 150,
+                        width: 'max-content',
+                        maxWidth: { xs: '92vw', sm: 'none' },
+                        bgcolor: 'rgba(15,15,15,0.92)',
+                        color: '#E5E7EB',
+                        borderRadius: 2.5,
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
+                        overflow: 'hidden',
+                      }
+                    }}
+                  >
+                    <MenuItem
+                      selected={(filters.year || 'all') === 'all'}
+                      onClick={() => {
+                        handleYearFilterChange('all');
+                        setYearMenuOpen(false);
+                      }}
+                      sx={{
+                        borderRadius: 1.5,
+                        mx: 0.5,
+                        my: 0.25,
+                        py: 1.25,
+                        px: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        color: '#E5E7EB',
+                        transition: 'all 0.2s ease',
+                        background: (filters.year || 'all') === 'all' ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                        border: (filters.year || 'all') === 'all' ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                        },
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_career_year_placeholder', 'All Years')}</option>
-                      {availableYears.map(year => (
-                        <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{year}</option>
-                      ))}
-                    </select>
-                  )}
+                      <ListItemText
+                        primary={getCms('page_player_career_year_placeholder', 'All Years')}
+                        sx={{
+                          '& .MuiListItemText-primary': {
+                            fontSize: '0.95rem',
+                            fontWeight: (filters.year || 'all') === 'all' ? 700 : 500,
+                            letterSpacing: 0.2,
+                            color: (filters.year || 'all') === 'all' ? '#FFFFFF' : '#E5E7EB'
+                          }
+                        }}
+                      />
+                    </MenuItem>
+                    {availableYears.map((year) => (
+                      <MenuItem
+                        key={year}
+                        selected={(filters.year || 'all') === year}
+                        onClick={() => {
+                          handleYearFilterChange(year);
+                          setYearMenuOpen(false);
+                        }}
+                        sx={{
+                          borderRadius: 1.5,
+                          mx: 0.5,
+                          my: 0.25,
+                          py: 1.25,
+                          px: 1.5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#E5E7EB',
+                          transition: 'all 0.2s ease',
+                          background: (filters.year || 'all') === year ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                          border: (filters.year || 'all') === year ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                          },
+                        }}
+                      >
+                        <ListItemText
+                          primary={year}
+                          sx={{
+                            '& .MuiListItemText-primary': {
+                              fontSize: '0.95rem',
+                              fontWeight: (filters.year || 'all') === year ? 700 : 500,
+                              letterSpacing: 0.2,
+                              color: (filters.year || 'all') === year ? '#FFFFFF' : '#E5E7EB'
+                            }
+                          }}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Menu>
 
                   {/* League Filter */}
-                  {isMobile ? (
-                    <>
-                      <button
-                        ref={leagueFilterButtonRef}
-                        type="button"
-                        onClick={() => {
-                          setYearMenuOpen(false);
-                          setSeasonMenuOpen(false);
-                          setLeagueMenuOpen((prev) => !prev);
-                        }}
-                        style={{
-                          height: '34px',
-                          padding: '0 20px 0 7px',
-                          marginLeft: '0px',
-                          backgroundColor: 'transparent',
-                          color: '#fff',
-                          border: '1.5px solid #e56a16',
-                          borderRadius: '24px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          outline: 'none',
-                          width: '100%',
-                          fontWeight: 600,
-                          textAlign: 'left',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 12px center',
-                        }}
-                      >
-                        {selectedLeagueName || getCms('page_all_leagues_select_placeholder', 'All Leagues')}
-                      </button>
-                      <Menu
-                        anchorEl={leagueFilterButtonRef.current}
-                        open={leagueMenuOpen}
-                        onClose={() => setLeagueMenuOpen(false)}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                        PaperProps={{
-                          sx: {
-                            mt: 0.5,
-                            borderRadius: 1,
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            backgroundColor: '#1a1a1a',
-                            minWidth: leagueFilterButtonRef.current?.offsetWidth || 120,
-                            width: 'max-content',
-                            maxWidth: '90vw',
-                          }
-                        }}
-                        MenuListProps={{ sx: { py: 0 } }}
-                      >
-                        <MenuItem
-                          selected={(filters.leagueId || 'all') === 'all'}
-                          onClick={() => handleLeagueFilterChange('all')}
-                          sx={{
-                            color: '#fff',
-                            fontSize: 11,
-                            minHeight: 34,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                            '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                          }}
-                        >
-                          All Leagues
-                        </MenuItem>
-                        {availableLeagues.map((league: LeagueWithMatches & { name?: string }) => (
-                          <MenuItem
-                            key={league.id}
-                            selected={sameId((filters.leagueId || 'all'), league.id)}
-                            onClick={() => handleLeagueFilterChange(league.id)}
-                            sx={{
-                              color: '#fff',
-                              fontSize: 11,
-                              minHeight: 34,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                              '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                            }}
-                          >
-                            {league.name || `League ${league.id}`}
-                          </MenuItem>
-                        ))}
-                      </Menu>
-                    </>
-                  ) : (
-                    <select
-                      value={filters.leagueId || 'all'}
-                      onChange={(e) => handleLeagueFilterChange(e.target.value)}
-                      style={{
-                        height: '39px',
-                        padding: '0 36px 0 12px',
-                        marginLeft: '4px',
-                        backgroundColor: 'transparent',
-                        color: '#fff',
-                        border: '1.5px solid #e56a16',
-                        borderRadius: '24px',
-                        fontSize: '17px',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        width: desktopFilterWidth,
-                        minWidth: desktopFilterWidth,
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        fontWeight: 400,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 12px center',
+                  <button
+                    ref={leagueFilterButtonRef}
+                    type="button"
+                    onClick={() => {
+                      setYearMenuOpen(false);
+                      setSeasonMenuOpen(false);
+                      setLeagueMenuOpen((prev) => !prev);
+                    }}
+                    style={{
+                      height: isMobile ? '34px' : '39px',
+                      padding: isMobile ? '0 20px 0 7px' : '0 36px 0 12px',
+                      marginLeft: isMobile ? '0px' : '4px',
+                      backgroundColor: 'transparent',
+                      color: '#fff',
+                      border: '1.5px solid #e56a16',
+                      borderRadius: '24px',
+                      fontSize: isMobile ? '11px' : '15px',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      width: isMobile ? '100%' : desktopFilterWidth,
+                      minWidth: isMobile ? '100%' : desktopFilterWidth,
+                      fontWeight: isMobile ? 600 : 400,
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                    }}
+                  >
+                    {selectedLeagueName || getCms('page_all_leagues_select_placeholder', 'All Leagues')}
+                  </button>
+                  <Menu
+                    anchorEl={leagueFilterButtonRef.current}
+                    open={leagueMenuOpen}
+                    onClose={() => setLeagueMenuOpen(false)}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    marginThreshold={0}
+                    MenuListProps={{
+                      sx: {
+                        maxHeight: { xs: 260, sm: 320 },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'rgba(255,255,255,0.08)',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: 'rgba(255,255,255,0.35)',
+                          borderRadius: '999px',
+                        },
+                      },
+                    }}
+                    PaperProps={{
+                      sx: {
+                        p: 0.5,
+                        mt: 1,
+                        minWidth: leagueFilterButtonRef.current?.offsetWidth || 180,
+                        width: 'max-content',
+                        maxWidth: { xs: '92vw', sm: 'none' },
+                        bgcolor: 'rgba(15,15,15,0.92)',
+                        color: '#E5E7EB',
+                        borderRadius: 2.5,
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
+                        overflow: 'hidden',
+                      }
+                    }}
+                  >
+                    <MenuItem
+                      selected={(filters.leagueId || 'all') === 'all'}
+                      onClick={() => {
+                        handleLeagueFilterChange('all');
+                        setLeagueMenuOpen(false);
+                      }}
+                      sx={{
+                        borderRadius: 1.5,
+                        mx: 0.5,
+                        my: 0.25,
+                        py: 1.25,
+                        px: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        color: '#E5E7EB',
+                        transition: 'all 0.2s ease',
+                        background: (filters.leagueId || 'all') === 'all' ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                        border: (filters.leagueId || 'all') === 'all' ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                        },
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>All Leagues</option>
-                      {availableLeagues.map((league: LeagueWithMatches & { name?: string }) => (
-                        <option key={league.id} value={league.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
-                          {league.name || `League ${league.id}`}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <Trophy size={16} color={(filters.leagueId || 'all') === 'all' ? '#FFFFFF' : '#9CA3AF'} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="All Leagues"
+                        sx={{
+                          '& .MuiListItemText-primary': {
+                            fontSize: '0.95rem',
+                            fontWeight: (filters.leagueId || 'all') === 'all' ? 700 : 500,
+                            letterSpacing: 0.2,
+                            color: (filters.leagueId || 'all') === 'all' ? '#FFFFFF' : '#E5E7EB'
+                          }
+                        }}
+                      />
+                    </MenuItem>
+                    {availableLeagues.map((league: LeagueWithMatches & { name?: string }) => {
+                      const roleTag = getLeagueRoleTag(league, String(params?.id || ''));
+                      const isSelected = sameId((filters.leagueId || 'all'), league.id);
+                      return (
+                        <MenuItem
+                          key={league.id}
+                          selected={isSelected}
+                          onClick={() => {
+                            handleLeagueFilterChange(league.id);
+                            setLeagueMenuOpen(false);
+                          }}
+                          sx={{
+                            borderRadius: 1.5,
+                            mx: 0.5,
+                            my: 0.25,
+                            py: 1.25,
+                            px: 1.5,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            color: '#E5E7EB',
+                            transition: 'all 0.2s ease',
+                            background: isSelected ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                            border: isSelected ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                            '&:hover': {
+                              transform: 'translateY(-1px)',
+                              background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                            },
+                          }}
+                        >
+                          <ListItemIcon sx={{ minWidth: 36 }}>
+                            <Trophy size={16} color={isSelected ? '#FFFFFF' : '#9CA3AF'} />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={league.name || `League ${league.id}`}
+                            sx={{
+                              '& .MuiListItemText-primary': {
+                                fontSize: '0.95rem',
+                                fontWeight: isSelected ? 700 : 500,
+                                letterSpacing: 0.2,
+                                color: isSelected ? '#FFFFFF' : '#E5E7EB'
+                              }
+                            }}
+                          />
+                          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box
+                              sx={{
+                                px: 1,
+                                py: 0.25,
+                                bgcolor: roleTag === 'Admin' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.15)',
+                                color: roleTag === 'Admin' ? '#1F2937' : '#FFFFFF',
+                                borderRadius: '9999px',
+                                fontSize: 10,
+                                fontWeight: 700,
+                                letterSpacing: 0.3,
+                                textTransform: 'uppercase',
+                              }}
+                            >
+                              {roleTag === 'Admin' ? 'ADMIN' : 'MEMBER'}
+                            </Box>
+                          </Box>
+                        </MenuItem>
+                      );
+                    })}
+                  </Menu>
 
                   {/* Season Filter */}
-                  {isMobile ? (
-                    <>
-                      <button
-                        ref={seasonFilterButtonRef}
-                        type="button"
-                        onClick={() => {
-                          setYearMenuOpen(false);
-                          setLeagueMenuOpen(false);
-                          setSeasonMenuOpen((prev) => !prev);
-                        }}
-                        style={{
-                          height: '34px',
-                          padding: '0 20px 0 7px',
-                          marginLeft: '0px',
-                          backgroundColor: 'transparent',
-                          color: '#fff',
-                          border: '1.5px solid #e56a16',
-                          borderRadius: '24px',
-                          fontSize: '11px',
-                          cursor: 'pointer',
-                          outline: 'none',
-                          width: '100%',
-                          fontWeight: 600,
-                          textAlign: 'left',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                          backgroundRepeat: 'no-repeat',
-                          backgroundPosition: 'right 12px center',
-                        }}
-                      >
-                        {selectedSeasonLabel}
-                      </button>
-                      <Menu
-                        anchorEl={seasonFilterButtonRef.current}
-                        open={seasonMenuOpen}
-                        onClose={() => setSeasonMenuOpen(false)}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                        PaperProps={{
-                          sx: {
-                            mt: 0.5,
-                            borderRadius: 1,
-                            border: '1px solid rgba(255,255,255,0.25)',
-                            backgroundColor: '#1a1a1a',
-                            minWidth: seasonFilterButtonRef.current?.offsetWidth || 120,
-                            width: 'max-content',
-                            maxWidth: '90vw',
-                          }
-                        }}
-                        MenuListProps={{ sx: { py: 0 } }}
-                      >
-                        <MenuItem
-                          selected={seasonFilter === 'all'}
-                          onClick={() => handleSeasonFilterChange('all')}
-                          sx={{
-                            color: '#fff',
-                            fontSize: 11,
-                            minHeight: 34,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                            '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                          }}
-                        >
-                          {getCms('page_player_career_season_placeholder', 'All Seasons')}
-                        </MenuItem>
-                        {availableSeasons.map((season) => (
-                          <MenuItem
-                            key={season.id}
-                            selected={sameId(seasonFilter, season.id)}
-                            onClick={() => handleSeasonFilterChange(season.id)}
-                            sx={{
-                              color: '#fff',
-                              fontSize: 11,
-                              minHeight: 34,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                              '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                            }}
-                          >
-                            {formatSeasonDisplayLabel(season)}
-                          </MenuItem>
-                        ))}
-                      </Menu>
-                    </>
-                  ) : (
-                    <select
-                      value={seasonFilter}
-                      onChange={(e) => handleSeasonFilterChange(e.target.value)}
-                      style={{
-                        height: '39px',
-                        padding: '0 36px 0 12px',
-                        marginLeft: '4px',
-                        backgroundColor: 'transparent',
-                        color: '#fff',
-                        border: '1.5px solid #e56a16',
-                        borderRadius: '24px',
-                        fontSize: '17px',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        width: desktopFilterWidth,
-                        minWidth: desktopFilterWidth,
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        fontWeight: 400,
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 12px center',
+                  <button
+                    ref={seasonFilterButtonRef}
+                    type="button"
+                    onClick={() => {
+                      setYearMenuOpen(false);
+                      setLeagueMenuOpen(false);
+                      setSeasonMenuOpen((prev) => !prev);
+                    }}
+                    style={{
+                      height: isMobile ? '34px' : '39px',
+                      padding: isMobile ? '0 20px 0 7px' : '0 36px 0 12px',
+                      marginLeft: isMobile ? '0px' : '4px',
+                      backgroundColor: 'transparent',
+                      color: '#fff',
+                      border: '1.5px solid #e56a16',
+                      borderRadius: '24px',
+                      fontSize: isMobile ? '11px' : '15px',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      width: isMobile ? '100%' : desktopFilterWidth,
+                      minWidth: isMobile ? '100%' : desktopFilterWidth,
+                      fontWeight: isMobile ? 600 : 400,
+                      textAlign: 'left',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                    }}
+                  >
+                    {selectedSeasonLabel}
+                  </button>
+                  <Menu
+                    anchorEl={seasonFilterButtonRef.current}
+                    open={seasonMenuOpen}
+                    onClose={() => setSeasonMenuOpen(false)}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    marginThreshold={0}
+                    MenuListProps={{
+                      sx: {
+                        maxHeight: { xs: 260, sm: 320 },
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        scrollbarWidth: 'thin',
+                        '&::-webkit-scrollbar': {
+                          width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          background: 'rgba(255,255,255,0.08)',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          background: 'rgba(255,255,255,0.35)',
+                          borderRadius: '999px',
+                        },
+                      },
+                    }}
+                    PaperProps={{
+                      sx: {
+                        p: 0.5,
+                        mt: 1,
+                        minWidth: seasonFilterButtonRef.current?.offsetWidth || 150,
+                        width: 'max-content',
+                        maxWidth: { xs: '92vw', sm: 'none' },
+                        bgcolor: 'rgba(15,15,15,0.92)',
+                        color: '#E5E7EB',
+                        borderRadius: 2.5,
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
+                        overflow: 'hidden',
+                      }
+                    }}
+                  >
+                    <MenuItem
+                      selected={seasonFilter === 'all'}
+                      onClick={() => {
+                        handleSeasonFilterChange('all');
+                        setSeasonMenuOpen(false);
+                      }}
+                      sx={{
+                        borderRadius: 1.5,
+                        mx: 0.5,
+                        my: 0.25,
+                        py: 1.25,
+                        px: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        color: '#E5E7EB',
+                        transition: 'all 0.2s ease',
+                        background: seasonFilter === 'all' ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                        border: seasonFilter === 'all' ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                        '&:hover': {
+                          transform: 'translateY(-1px)',
+                          background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                        },
                       }}
                     >
-                      <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_player_career_season_placeholder', 'All Seasons')}</option>
-                      {availableSeasons.map(season => (
-                        <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
-                          {formatSeasonDisplayLabel(season)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                      <ListItemText
+                        primary={getCms('page_player_career_season_placeholder', 'All Seasons')}
+                        sx={{
+                          '& .MuiListItemText-primary': {
+                            fontSize: '0.95rem',
+                            fontWeight: seasonFilter === 'all' ? 700 : 500,
+                            letterSpacing: 0.2,
+                            color: seasonFilter === 'all' ? '#FFFFFF' : '#E5E7EB'
+                          }
+                        }}
+                      />
+                    </MenuItem>
+                    {availableSeasons.map((season) => (
+                      <MenuItem
+                        key={season.id}
+                        selected={sameId(seasonFilter, season.id)}
+                        onClick={() => {
+                          handleSeasonFilterChange(season.id);
+                          setSeasonMenuOpen(false);
+                        }}
+                        sx={{
+                          borderRadius: 1.5,
+                          mx: 0.5,
+                          my: 0.25,
+                          py: 1.25,
+                          px: 1.5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: '#E5E7EB',
+                          transition: 'all 0.2s ease',
+                          background: sameId(seasonFilter, season.id) ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
+                          border: sameId(seasonFilter, season.id) ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                          },
+                        }}
+                      >
+                        <ListItemText
+                          primary={formatSeasonDisplayLabel(season)}
+                          sx={{
+                            '& .MuiListItemText-primary': {
+                              fontSize: '0.95rem',
+                              fontWeight: sameId(seasonFilter, season.id) ? 700 : 500,
+                              letterSpacing: 0.2,
+                              color: sameId(seasonFilter, season.id) ? '#FFFFFF' : '#E5E7EB'
+                            }
+                          }}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Menu>
 
                   {/* Clear Button */}
                   <button
@@ -3211,147 +3437,217 @@ export default function CareerPage() {
               </Box>
             )}
             <Box sx={{ opacity: 1 }}>
-                {/* Performance Over Time Chart */}
-                <GlassCard sx={{ mb: 3, border: `2px solid ${themeColors.border}`, background: '#232528' }}>
-                  <Box sx={{ p: 0 }}>
-                    {/* Chart Header with toggles */}
-                    <Box sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      p: 1.5,
-                      borderBottom: `1px solid ${themeColors.border}`,
-                      flexWrap: 'wrap',
-                      gap: 1
+              {/* Performance Over Time Chart */}
+              <GlassCard sx={{ mb: 3, border: `2px solid ${themeColors.border}`, background: '#232528' }}>
+                <Box sx={{ p: 0 }}>
+                  {/* Chart Header with toggles */}
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 1.5,
+                    borderBottom: `1px solid ${themeColors.border}`,
+                    flexWrap: 'wrap',
+                    gap: 1
+                  }}>
+                    {/* Left side - League selector (independent per card) */}
+                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: chartLeague === 'all' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: chartLeague === 'all' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setChartLeague('all')}
+                      >
+                        All Leagues
+                      </Button>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: chartLeague === 'current' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: chartLeague === 'current' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setChartLeague('current')}
+                      >
+                        Current
+                      </Button>
+                    </Box>
+
+                    {/* Right side - Time grouping toggles */}
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      {['weekly', 'monthly'].map((mode) => (
+                        <Button
+                          key={mode}
+                          size="small"
+                          sx={{
+                            background: groupMode === mode ? themeColors.primary : '#2a2a2a',
+                            color: themeColors.text,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            textTransform: 'capitalize',
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: 1,
+                            minWidth: 'auto',
+                            '&:hover': { background: groupMode === mode ? themeColors.primary : '#3a3a3a' }
+                          }}
+                          onClick={() => setGroupMode(mode as 'weekly' | 'monthly')}
+                        >
+                          {mode}
+                        </Button>
+                      ))}
+                    </Box>
+                  </Box>
+
+                  {/* Chart Title */}
+                  <Box sx={{ textAlign: 'center', pt: 2, pb: 1, minHeight: 55, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                    <Typography sx={{
+                      fontSize: 16,
+                      fontWeight: 'bold',
+                      color: themeColors.primary,
+                      textTransform: 'uppercase',
+                      mb: 0.5,
+                      minHeight: 24,
+                      visibility: playerName ? 'visible' : 'hidden'
                     }}>
-                      {/* Left side - League selector (independent per card) */}
-                      <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: chartLeague === 'all' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: chartLeague === 'all' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setChartLeague('all')}
-                        >
-                          All Leagues
-                        </Button>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: chartLeague === 'current' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: chartLeague === 'current' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setChartLeague('current')}
-                        >
-                          Current
-                        </Button>
-                      </Box>
+                      {playerName || 'PLAYER'}
+                    </Typography>
+                    <Typography sx={{
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: themeColors.text,
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5
+                    }}>
+                      XP Performance Time Series
+                    </Typography>
+                  </Box>
 
-                      {/* Right side - Time grouping toggles */}
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        {['weekly', 'monthly'].map((mode) => (
-                          <Button
-                            key={mode}
-                            size="small"
-                            sx={{
-                              background: groupMode === mode ? themeColors.primary : '#2a2a2a',
-                              color: themeColors.text,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              textTransform: 'capitalize',
-                              px: 1.5,
-                              py: 0.5,
-                              borderRadius: 1,
-                              minWidth: 'auto',
-                              '&:hover': { background: groupMode === mode ? themeColors.primary : '#3a3a3a' }
-                            }}
-                            onClick={() => setGroupMode(mode as 'weekly' | 'monthly')}
-                          >
-                            {mode}
-                          </Button>
-                        ))}
-                      </Box>
-                    </Box>
-
-                    {/* Chart Title */}
-                    <Box sx={{ textAlign: 'center', pt: 2, pb: 1, minHeight: 55, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                      <Typography sx={{
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        color: themeColors.primary,
-                        textTransform: 'uppercase',
-                        mb: 0.5,
-                        minHeight: 24,
-                        visibility: playerName ? 'visible' : 'hidden'
-                      }}>
-                        {playerName || 'PLAYER'}
-                      </Typography>
-                      <Typography sx={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: themeColors.text,
-                        textTransform: 'uppercase',
-                        letterSpacing: 0.5
-                      }}>
-                        XP Performance Time Series
-                      </Typography>
-                    </Box>
-
-                    {/* Chart Container with Sticky Y-Axes */}
-                    {(() => {
-                      const activeData = chartData.length > 0 ? chartData : performanceData;
-                      const chartWidth = Math.max(containerWidth, activeData.length * 40);
-                      return (
+                  {/* Chart Container with Sticky Y-Axes */}
+                  {(() => {
+                    const activeData = chartData.length > 0 ? chartData : performanceData;
+                    const chartWidth = Math.max(containerWidth, activeData.length * 40);
+                    return (
+                      <Box
+                        sx={{
+                          width: '100%',
+                          display: 'flex',
+                          position: 'relative',
+                          height: { xs: 250, sm: 280, md: 300 },
+                        }}
+                      >
+                        {/* Sticky Left Y-Axis */}
                         <Box
                           sx={{
-                            width: '100%',
-                            display: 'flex',
+                            width: 65,
+                            flexShrink: 0,
+                            height: '100%',
+                            background: '#232528',
+                            zIndex: 10,
                             position: 'relative',
-                            height: { xs: 250, sm: 280, md: 300 },
                           }}
                         >
-                          {/* Sticky Left Y-Axis */}
+                          <ResponsiveContainer width={65} height="100%">
+                            <ComposedChart
+                              data={chartData.length > 0 ? chartData : performanceData}
+                              margin={{ top: 10, left: 15, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                            >
+                              <YAxis
+                                yAxisId="avg"
+                                stroke={themeColors.textDim}
+                                tick={{ fontSize: 10, fill: themeColors.textDim }}
+                                width={50}
+                                tickLine={{ stroke: themeColors.border }}
+                                axisLine={{ stroke: themeColors.border }}
+                                domain={[0, maxTotalPoints]}
+                                label={{ value: 'Total XP', angle: -90, position: 'insideLeft', style: { fill: themeColors.textDim, fontSize: 10, textAnchor: 'middle' } }}
+                              />
+                              <YAxis
+                                yAxisId="cum"
+                                orientation="right"
+                                hide={true}
+                                domain={[0, maxCumulativePoints]}
+                              />
+                              {/* Dummy XAxis to reserve identical bottom spacing */}
+                              <XAxis dataKey="label" tick={false} tickLine={false} axisLine={false} />
+                              {/* Invisible Bar to force Y-axis generation */}
+                              <Bar
+                                yAxisId="avg"
+                                dataKey="totalPoints"
+                                fill="transparent"
+                                stroke="transparent"
+                                opacity={0}
+                                isAnimationActive={false}
+                              />
+                            </ComposedChart>
+                          </ResponsiveContainer>
+                        </Box>
+
+                        {/* Scrollable Chart Content */}
+                        <Box
+                          ref={chartScrollRef}
+                          sx={{
+                            flexGrow: 1,
+                            overflowX: 'scroll',
+                            overflowY: 'hidden',
+                            pb: 1,
+                            height: '100%',
+                            '&::-webkit-scrollbar': { height: 8 },
+                            '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.15)', borderRadius: 4 },
+                            '&::-webkit-scrollbar-thumb': {
+                              background: themeColors.primary,
+                              borderRadius: 4,
+                            },
+                          }}
+                        >
                           <Box
                             sx={{
-                              width: 65,
-                              flexShrink: 0,
-                              height: '100%',
-                              background: '#232528',
-                              zIndex: 10,
-                              position: 'relative',
+                              width: `${chartWidth}px`,
+                              height: 'calc(100% - 8px)',
                             }}
                           >
-                            <ResponsiveContainer width={65} height="100%">
+                            <ResponsiveContainer width={chartWidth} height="100%">
                               <ComposedChart
                                 data={chartData.length > 0 ? chartData : performanceData}
-                                margin={{ top: 10, left: 15, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                                margin={{ top: 10, left: 10, right: 10, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                                onClick={(state) => {
+                                  if (state && typeof state.activeTooltipIndex === 'number') {
+                                    const activeData = chartData.length > 0 ? chartData : performanceData;
+                                    const item = activeData[state.activeTooltipIndex];
+                                    if (item && item.year) {
+                                      setActiveYear(item.year);
+                                    }
+                                  }
+                                }}
                               >
-                                <YAxis
-                                  yAxisId="avg"
-                                  stroke={themeColors.textDim}
-                                  tick={{ fontSize: 10, fill: themeColors.textDim }}
-                                  width={50}
+                                <XAxis
+                                  dataKey="label"
+                                  tick={renderXAxisTick}
+                                  interval={0}
                                   tickLine={{ stroke: themeColors.border }}
                                   axisLine={{ stroke: themeColors.border }}
+                                />
+                                <YAxis
+                                  yAxisId="avg"
+                                  hide={true}
                                   domain={[0, maxTotalPoints]}
-                                  label={{ value: 'Total XP', angle: -90, position: 'insideLeft', style: { fill: themeColors.textDim, fontSize: 10, textAnchor: 'middle' } }}
                                 />
                                 <YAxis
                                   yAxisId="cum"
@@ -3359,226 +3655,315 @@ export default function CareerPage() {
                                   hide={true}
                                   domain={[0, maxCumulativePoints]}
                                 />
-                                {/* Dummy XAxis to reserve identical bottom spacing */}
-                                <XAxis dataKey="label" tick={false} tickLine={false} axisLine={false} />
-                                {/* Invisible Bar to force Y-axis generation */}
+                                <Tooltip
+                                  isAnimationActive={false}
+                                  wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                                  cursor={{ fill: 'rgba(255, 255, 255, 0.05)', pointerEvents: 'none' }}
+                                  useTranslate3d={true}
+                                  content={({ active, payload, label }) => {
+                                    if (!active || !payload || !payload.length) return null;
+                                    const item = payload[0].payload;
+                                    return (
+                                      <Box
+                                        sx={{
+                                          position: isMobile ? 'fixed' : 'relative',
+                                          ...(isMobile ? {
+                                            top: '50%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -50%)',
+                                            zIndex: 9999,
+                                          } : {}),
+                                          background: themeColors.surfaceAlt,
+                                          border: `1px solid ${themeColors.border}`,
+                                          borderRadius: 1,
+                                          p: 1.5,
+                                          boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                                          pointerEvents: 'none',
+                                        }}
+                                      >
+                                        <Typography sx={{ fontWeight: 600, fontSize: 12, mb: 1, color: themeColors.text }}>
+                                          {label} {item?.year ? `(${item.year})` : ''}
+                                        </Typography>
+                                        {payload.map((entry: any, index: number) => {
+                                          const nameStr = String(entry.name || '');
+                                          const displayName = nameStr.includes('Total') || nameStr.includes('Avg')
+                                            ? 'Total XP Points'
+                                            : nameStr.includes('Cumulative')
+                                              ? 'Cumulative XP Points'
+                                              : nameStr;
+                                          return (
+                                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', background: entry.color || entry.fill || themeColors.chartLine }} />
+                                              <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
+                                                {displayName}: <span style={{ color: themeColors.text, fontWeight: 'bold' }}>{entry.value}</span>
+                                              </Typography>
+                                            </Box>
+                                          );
+                                        })}
+                                      </Box>
+                                    );
+                                  }}
+                                />
+
+                                {/* Bars for average points - Green/Teal */}
                                 <Bar
                                   yAxisId="avg"
                                   dataKey="totalPoints"
-                                  fill="transparent"
-                                  stroke="transparent"
-                                  opacity={0}
+                                  fill={themeColors.chartBar}
+                                  name="Total XP Points"
+                                  maxBarSize={35}
+                                  radius={[3, 3, 0, 0]}
                                   isAnimationActive={false}
                                 />
-                              </ComposedChart>
-                            </ResponsiveContainer>
-                          </Box>
 
-                          {/* Scrollable Chart Content */}
-                          <Box
-                            ref={chartScrollRef}
-                            sx={{
-                              flexGrow: 1,
-                              overflowX: 'scroll',
-                              overflowY: 'hidden',
-                              pb: 1,
-                              height: '100%',
-                              '&::-webkit-scrollbar': { height: 8 },
-                              '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.15)', borderRadius: 4 },
-                              '&::-webkit-scrollbar-thumb': {
-                                background: themeColors.primary,
-                                borderRadius: 4,
-                              },
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: `${chartWidth}px`,
-                                height: 'calc(100% - 8px)',
-                              }}
-                            >
-                              <ResponsiveContainer width={chartWidth} height="100%">
-                                <ComposedChart
-                                  data={chartData.length > 0 ? chartData : performanceData}
-                                  margin={{ top: 10, left: 10, right: 10, bottom: groupMode === 'monthly' ? 65 : 75 }}
-                                  onClick={(state) => {
-                                    if (state && typeof state.activeTooltipIndex === 'number') {
-                                      const activeData = chartData.length > 0 ? chartData : performanceData;
-                                      const item = activeData[state.activeTooltipIndex];
-                                      if (item && item.year) {
-                                        setActiveYear(item.year);
-                                      }
-                                    }
-                                  }}
-                                >
-                                  <XAxis
-                                    dataKey="label"
-                                    tick={renderXAxisTick}
-                                    interval={0}
-                                    tickLine={{ stroke: themeColors.border }}
-                                    axisLine={{ stroke: themeColors.border }}
-                                  />
-                                  <YAxis
-                                    yAxisId="avg"
-                                    hide={true}
-                                    domain={[0, maxTotalPoints]}
-                                  />
-                                  <YAxis
-                                    yAxisId="cum"
-                                    orientation="right"
-                                    hide={true}
-                                    domain={[0, maxCumulativePoints]}
-                                  />
-                                  <Tooltip
-                                    isAnimationActive={false}
-                                    wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
-                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)', pointerEvents: 'none' }}
-                                    useTranslate3d={true}
-                                    content={({ active, payload, label }) => {
-                                      if (!active || !payload || !payload.length) return null;
-                                      const item = payload[0].payload;
-                                      return (
-                                        <Box
-                                          sx={{
-                                            position: isMobile ? 'fixed' : 'relative',
-                                            ...(isMobile ? {
-                                              top: '50%',
-                                              left: '50%',
-                                              transform: 'translate(-50%, -50%)',
-                                              zIndex: 9999,
-                                            } : {}),
-                                            background: themeColors.surfaceAlt,
-                                            border: `1px solid ${themeColors.border}`,
-                                            borderRadius: 1,
-                                            p: 1.5,
-                                            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                                            pointerEvents: 'none',
-                                          }}
-                                        >
-                                          <Typography sx={{ fontWeight: 600, fontSize: 12, mb: 1, color: themeColors.text }}>
-                                            {label} {item?.year ? `(${item.year})` : ''}
-                                          </Typography>
-                                          {payload.map((entry: any, index: number) => {
-                                            const nameStr = String(entry.name || '');
-                                            const displayName = nameStr.includes('Total') || nameStr.includes('Avg')
-                                              ? 'Total XP Points'
-                                              : nameStr.includes('Cumulative')
-                                                ? 'Cumulative XP Points'
-                                                : nameStr;
-                                            return (
-                                              <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', background: entry.color || entry.fill || themeColors.chartLine }} />
-                                                <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                                                  {displayName}: <span style={{ color: themeColors.text, fontWeight: 'bold' }}>{entry.value}</span>
-                                                </Typography>
-                                              </Box>
-                                            );
-                                          })}
-                                        </Box>
-                                      );
-                                    }}
-                                  />
-
-                                  {/* Bars for average points - Green/Teal */}
-                                  <Bar
-                                    yAxisId="avg"
-                                    dataKey="totalPoints"
-                                    fill={themeColors.chartBar}
-                                    name="Total XP Points"
-                                    maxBarSize={35}
-                                    radius={[3, 3, 0, 0]}
-                                    isAnimationActive={false}
-                                  />
-
-                                  {/* Line for cumulative points - Magenta/Pink */}
-                                  <Line
-                                    yAxisId="cum"
-                                    type="monotone"
-                                    dataKey="cumulativePoints"
-                                    name="Cumulative XP Points"
-                                    stroke={themeColors.chartLine}
-                                    strokeWidth={2}
-                                    dot={{ r: 3, stroke: themeColors.chartLine, strokeWidth: 1, fill: themeColors.chartLine }}
-                                    activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: themeColors.chartLine }}
-                                    isAnimationActive={false}
-                                  />
-                                </ComposedChart>
-                              </ResponsiveContainer>
-                            </Box>
-                          </Box>
-
-                          {/* Sticky Right Y-Axis */}
-                          <Box
-                            sx={{
-                              width: 70,
-                              flexShrink: 0,
-                              height: '100%',
-                              background: '#232528',
-                              zIndex: 10,
-                              position: 'relative',
-                            }}
-                          >
-                            <ResponsiveContainer width={70} height="100%">
-                              <ComposedChart
-                                data={chartData.length > 0 ? chartData : performanceData}
-                                margin={{ top: 10, left: 0, right: 15, bottom: groupMode === 'monthly' ? 65 : 75 }}
-                              >
-                                <YAxis
-                                  yAxisId="avg"
-                                  hide={true}
-                                  domain={[0, maxTotalPoints]}
-                                />
-                                <YAxis
-                                  yAxisId="cum"
-                                  orientation="right"
-                                  stroke={themeColors.textDim}
-                                  tick={{ fontSize: 10, fill: themeColors.textDim }}
-                                  width={55}
-                                  tickLine={{ stroke: themeColors.border }}
-                                  axisLine={{ stroke: themeColors.border }}
-                                  domain={[0, maxCumulativePoints]}
-                                  tickCount={5}
-                                  ticks={Array.from({ length: 5 }, (_, i) => Math.round((maxCumulativePoints / 4) * i))}
-                                  label={{ value: 'Cumulative XP', angle: 90, position: 'insideRight', style: { fill: themeColors.textDim, fontSize: 10, textAnchor: 'middle' } }}
-                                />
-                                {/* Dummy XAxis to reserve identical bottom spacing */}
-                                <XAxis dataKey="label" tick={false} tickLine={false} axisLine={false} />
-                                {/* Invisible Line to force Y-axis generation */}
+                                {/* Line for cumulative points - Magenta/Pink */}
                                 <Line
                                   yAxisId="cum"
                                   type="monotone"
                                   dataKey="cumulativePoints"
-                                  stroke="transparent"
-                                  fill="transparent"
-                                  opacity={0}
-                                  dot={false}
+                                  name="Cumulative XP Points"
+                                  stroke={themeColors.chartLine}
+                                  strokeWidth={2}
+                                  dot={{ r: 3, stroke: themeColors.chartLine, strokeWidth: 1, fill: themeColors.chartLine }}
+                                  activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: themeColors.chartLine }}
                                   isAnimationActive={false}
                                 />
                               </ComposedChart>
                             </ResponsiveContainer>
                           </Box>
                         </Box>
-                      );
-                    })()}
 
-                    {/* Chart horizontal scroll indicator (mobile only message) */}
-                    {chartHasHorizontalOverflow && (
-                      <Box
-                        sx={{
-                          pl: '65px',
-                          pr: '70px',
-                          mt: -4,
-                          pb: 2,
-                          display: { xs: 'block', sm: 'none' },
-                        }}
-                      >
-                        <Typography sx={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', textAlign: 'center' }}>
-                          Scroll chart left/right from the date labels
-                        </Typography>
+                        {/* Sticky Right Y-Axis */}
+                        <Box
+                          sx={{
+                            width: 70,
+                            flexShrink: 0,
+                            height: '100%',
+                            background: '#232528',
+                            zIndex: 10,
+                            position: 'relative',
+                          }}
+                        >
+                          <ResponsiveContainer width={70} height="100%">
+                            <ComposedChart
+                              data={chartData.length > 0 ? chartData : performanceData}
+                              margin={{ top: 10, left: 0, right: 15, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                            >
+                              <YAxis
+                                yAxisId="avg"
+                                hide={true}
+                                domain={[0, maxTotalPoints]}
+                              />
+                              <YAxis
+                                yAxisId="cum"
+                                orientation="right"
+                                stroke={themeColors.textDim}
+                                tick={{ fontSize: 10, fill: themeColors.textDim }}
+                                width={55}
+                                tickLine={{ stroke: themeColors.border }}
+                                axisLine={{ stroke: themeColors.border }}
+                                domain={[0, maxCumulativePoints]}
+                                tickCount={5}
+                                ticks={Array.from({ length: 5 }, (_, i) => Math.round((maxCumulativePoints / 4) * i))}
+                                label={{ value: 'Cumulative XP', angle: 90, position: 'insideRight', style: { fill: themeColors.textDim, fontSize: 10, textAnchor: 'middle' } }}
+                              />
+                              {/* Dummy XAxis to reserve identical bottom spacing */}
+                              <XAxis dataKey="label" tick={false} tickLine={false} axisLine={false} />
+                              {/* Invisible Line to force Y-axis generation */}
+                              <Line
+                                yAxisId="cum"
+                                type="monotone"
+                                dataKey="cumulativePoints"
+                                stroke="transparent"
+                                fill="transparent"
+                                opacity={0}
+                                dot={false}
+                                isAnimationActive={false}
+                              />
+                            </ComposedChart>
+                          </ResponsiveContainer>
+                        </Box>
                       </Box>
-                    )}
+                    );
+                  })()}
 
-                    {/* Legend */}
+                  {/* Chart horizontal scroll indicator (mobile only message) */}
+                  {chartHasHorizontalOverflow && (
+                    <Box
+                      sx={{
+                        pl: '65px',
+                        pr: '70px',
+                        mt: -4,
+                        pb: 2,
+                        display: { xs: 'block', sm: 'none' },
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)', textAlign: 'center' }}>
+                        Scroll chart left/right from the date labels
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Legend */}
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: 3,
+                    pb: 2,
+                    pt: 2,
+                    backgroundColor: '#383a3f',
+                    borderTop: `1px solid ${themeColors.border}`,
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 14, height: 10, borderRadius: 1, background: themeColors.chartBar }} />
+                      <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
+                        {getCms('page_player_career_total_xp_legend', 'Total XP Points')}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 14, height: 3, borderRadius: 1, background: themeColors.chartLine }} />
+                      <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
+                        {getCms('page_player_career_cumulative_xp_legend', 'Cumulative XP Points')}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </GlassCard>
+
+              {/* Influence and Win/Loss Row */}
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                {/* Influence Radar Chart */}
+                <Grid item xs={12} md={6}>
+                  <GlassCard sx={{ background: '#27292d' }}>
+                    {/* Header with toggle */}
+                    <Box sx={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      p: 1.5,
+                      borderBottom: `1px solid ${themeColors.border}`,
+                      flexWrap: 'wrap',
+                      gap: 0.5
+                    }}>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: influenceLeague === 'all' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: influenceLeague === 'all' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setInfluenceLeague('all')}
+                      >
+                        {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
+                      </Button>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: influenceLeague === 'current' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: influenceLeague === 'current' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setInfluenceLeague('current')}
+                      >
+                        {getCms('page_player_career_influence_current_btn', 'Current')}
+                      </Button>
+                    </Box>
+
+                    <CardContent sx={{ p: 2, pt: 1, pb: 1 }}>
+                      {/* Title */}
+                      <Typography sx={{
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: themeColors.text,
+                        textAlign: 'center',
+                        textTransform: 'uppercase',
+                        mb: 1
+                      }}>
+                        {getCms('page_player_career_influence_title', 'INFLUENCE')}
+                      </Typography>
+
+                      <Box sx={{ height: 160 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <RadarChart
+                            data={influenceRadarData}
+                            outerRadius={55}
+                            margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                          >
+                            <PolarGrid
+                              gridType="polygon"
+                              stroke={themeColors.border}
+                              strokeWidth={1}
+                            />
+                            <PolarAngleAxis
+                              dataKey="metric"
+                              tick={{ fontSize: 8, fill: themeColors.textDim }}
+                              tickSize={8}
+                              reversed={false}
+                              scale="auto"
+                            />
+                            <PolarRadiusAxis
+                              tick={{ fontSize: 7, fill: themeColors.textFaint }}
+                              tickCount={5}
+                              angle={90}
+                              allowDecimals={false}
+                              domain={[0, 'dataMax + 1']}
+                            />
+
+                            {/* Player Data - Green */}
+                            <Radar
+                              name={playerName || 'Player'}
+                              dataKey={playerName || 'Player'}
+                              stroke={themeColors.chartBar}
+                              fill={themeColors.chartBar}
+                              fillOpacity={0.2}
+                              strokeWidth={2}
+                              dot={{ r: 2, fill: themeColors.chartBar }}
+                              isAnimationActive={false}
+                            />
+
+                            {/* League Average - Pink */}
+                            <Radar
+                              name="League Avg"
+                              dataKey="League Avg"
+                              stroke={themeColors.pink}
+                              fill={themeColors.pink}
+                              fillOpacity={0.2}
+                              strokeWidth={2}
+                              dot={{ r: 2, fill: themeColors.pink }}
+                              isAnimationActive={false}
+                            />
+
+                            <Tooltip
+                              isAnimationActive={false}
+                              wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                              useTranslate3d={true}
+                              contentStyle={{
+                                background: themeColors.surfaceAlt,
+                                border: `1px solid ${themeColors.border}`,
+                                borderRadius: 4,
+                                color: themeColors.text,
+                                fontSize: 10,
+                                pointerEvents: 'none',
+                              }}
+                            />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    </CardContent>
                     <Box sx={{
                       display: 'flex',
                       justifyContent: 'center',
@@ -3589,669 +3974,510 @@ export default function CareerPage() {
                       borderTop: `1px solid ${themeColors.border}`,
                     }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Box sx={{ width: 14, height: 10, borderRadius: 1, background: themeColors.chartBar }} />
-                        <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                          {getCms('page_player_career_total_xp_legend', 'Total XP Points')}
+                        <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.chartBar, borderRadius: 1 }} />
+                        <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
+                          {playerName || 'Player'}
                         </Typography>
                       </Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Box sx={{ width: 14, height: 3, borderRadius: 1, background: themeColors.chartLine }} />
-                        <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                          {getCms('page_player_career_cumulative_xp_legend', 'Cumulative XP Points')}
+                        <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.pink, borderRadius: 1 }} />
+                        <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
+                          {getCms('page_player_career_table_header_league_avg', 'League Average')}
                         </Typography>
                       </Box>
                     </Box>
-                  </Box>
-                </GlassCard>
-
-                {/* Influence and Win/Loss Row */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                  {/* Influence Radar Chart */}
-                  <Grid item xs={12} md={6}>
-                    <GlassCard sx={{ background: '#27292d' }}>
-                      {/* Header with toggle */}
-                      <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        p: 1.5,
-                        borderBottom: `1px solid ${themeColors.border}`,
-                        flexWrap: 'wrap',
-                        gap: 0.5
-                      }}>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: influenceLeague === 'all' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: influenceLeague === 'all' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setInfluenceLeague('all')}
-                        >
-                          {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
-                        </Button>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: influenceLeague === 'current' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: influenceLeague === 'current' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setInfluenceLeague('current')}
-                        >
-                          {getCms('page_player_career_influence_current_btn', 'Current')}
-                        </Button>
-                      </Box>
-
-                      <CardContent sx={{ p: 2, pt: 1, pb: 1 }}>
-                        {/* Title */}
-                        <Typography sx={{
-                          fontSize: 14,
-                          fontWeight: 'bold',
-                          color: themeColors.text,
-                          textAlign: 'center',
-                          textTransform: 'uppercase',
-                          mb: 1
-                        }}>
-                          {getCms('page_player_career_influence_title', 'INFLUENCE')}
-                        </Typography>
-
-                        <Box sx={{ height: 160 }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart
-                              data={influenceRadarData}
-                              outerRadius={55}
-                              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                            >
-                              <PolarGrid
-                                gridType="polygon"
-                                stroke={themeColors.border}
-                                strokeWidth={1}
-                              />
-                              <PolarAngleAxis
-                                dataKey="metric"
-                                tick={{ fontSize: 8, fill: themeColors.textDim }}
-                                tickSize={8}
-                                reversed={false}
-                                scale="auto"
-                              />
-                              <PolarRadiusAxis
-                                tick={{ fontSize: 7, fill: themeColors.textFaint }}
-                                tickCount={5}
-                                angle={90}
-                                allowDecimals={false}
-                                domain={[0, 'dataMax + 1']}
-                              />
-
-                              {/* Player Data - Green */}
-                              <Radar
-                                name={playerName || 'Player'}
-                                dataKey={playerName || 'Player'}
-                                stroke={themeColors.chartBar}
-                                fill={themeColors.chartBar}
-                                fillOpacity={0.2}
-                                strokeWidth={2}
-                                dot={{ r: 2, fill: themeColors.chartBar }}
-                                isAnimationActive={false}
-                              />
-
-                              {/* League Average - Pink */}
-                              <Radar
-                                name="League Avg"
-                                dataKey="League Avg"
-                                stroke={themeColors.pink}
-                                fill={themeColors.pink}
-                                fillOpacity={0.2}
-                                strokeWidth={2}
-                                dot={{ r: 2, fill: themeColors.pink }}
-                                isAnimationActive={false}
-                              />
-
-                              <Tooltip
-                                isAnimationActive={false}
-                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
-                                useTranslate3d={true}
-                                contentStyle={{
-                                  background: themeColors.surfaceAlt,
-                                  border: `1px solid ${themeColors.border}`,
-                                  borderRadius: 4,
-                                  color: themeColors.text,
-                                  fontSize: 10,
-                                  pointerEvents: 'none',
-                                }}
-                              />
-                            </RadarChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      </CardContent>
-                      <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 3,
-                        pb: 2,
-                        pt: 2,
-                        backgroundColor: '#383a3f',
-                        borderTop: `1px solid ${themeColors.border}`,
-                      }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.chartBar, borderRadius: 1 }} />
-                          <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
-                            {playerName || 'Player'}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Box sx={{ width: 10, height: 3, backgroundColor: themeColors.pink, borderRadius: 1 }} />
-                          <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
-                            {getCms('page_player_career_table_header_league_avg', 'League Average')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </GlassCard>
-                  </Grid>
-
-                  {/* Win/Loss Pie Chart */}
-                  <Grid item xs={12} md={6}>
-                    <GlassCard sx={{ background: '#27292d' }}>
-                      {/* Header with toggle */}
-                      <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        alignItems: 'center',
-                        p: 1.5,
-
-                        borderBottom: `1px solid ${themeColors.border}`,
-                        flexWrap: 'wrap',
-                        gap: 0.5
-                      }}>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: winLossLeague === 'all' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: winLossLeague === 'all' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setWinLossLeague('all')}
-                        >
-                          {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
-                        </Button>
-                        <Button
-                          size="small"
-                          sx={{
-                            background: winLossLeague === 'current' ? themeColors.primary : '#2a2a2a',
-                            color: themeColors.text,
-                            fontSize: 10,
-                            fontWeight: 600,
-                            textTransform: 'none',
-                            px: 1.2,
-                            py: 0.4,
-                            borderRadius: 1,
-                            minWidth: 'auto',
-                            '&:hover': { background: winLossLeague === 'current' ? themeColors.primary : '#3a3a3a' }
-                          }}
-                          onClick={() => setWinLossLeague('current')}
-                        >
-                          {getCms('page_player_career_influence_current_btn', 'Current')}
-                        </Button>
-                      </Box>
-
-                      <CardContent sx={{ p: 2, pt: 1, pb: 1 }}>
-                        {/* Title */}
-                        <Typography sx={{
-                          fontSize: 14,
-                          fontWeight: 'bold',
-                          color: themeColors.text,
-                          textAlign: 'center',
-                          textTransform: 'uppercase',
-                          mb: 1
-                        }}>
-                          {getCms('page_player_career_winloss_title', 'WIN/LOSS/DRAW')}
-                        </Typography>
-
-                        <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={actualWinLossData}
-                                dataKey="value"
-                                nameKey="name"
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={55}
-                                paddingAngle={2}
-                                startAngle={90}
-                                endAngle={450}
-                                label={false}
-                                labelLine={false}
-                                isAnimationActive={false}
-                                activeShape={false}
-                              />
-                              <Tooltip
-                                isAnimationActive={false}
-                                wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
-                                useTranslate3d={true}
-                                content={({ active, payload }: any) => {
-                                  if (!active || !payload || !payload.length) return null;
-                                  const entry = payload[0];
-                                  const item = entry.payload;
-                                  const name = entry.name;
-                                  const value = entry.value;
-                                  const color = item.color || entry.color || themeColors.text;
-                                  return (
-                                    <Box
-                                      sx={{
-                                        background: themeColors.surfaceAlt,
-                                        border: `1px solid ${themeColors.border}`,
-                                        borderRadius: 1,
-                                        p: 1.2,
-                                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-                                        pointerEvents: 'none',
-                                      }}
-                                    >
-                                      <Typography
-                                        sx={{
-                                          fontSize: 11,
-                                          fontWeight: 700,
-                                          color: color,
-                                          textTransform: 'uppercase',
-                                        }}
-                                      >
-                                        {name} : {value}%
-                                      </Typography>
-                                    </Box>
-                                  );
-                                }}
-                              />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </Box>
-
-                      </CardContent>
-                      <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 2,
-                        pb: 2,
-                        pt: 2,
-                        backgroundColor: '#383a3f',
-                        borderTop: `1px solid ${themeColors.border}`,
-                      }}>
-                        {actualWinLossData.map((entry: any, index: number) => (
-                          <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Box sx={{
-                              width: 10, height: 10, borderRadius: '50%',
-                              backgroundColor: entry.color
-                            }} />
-                            <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
-                              {entry.name} {entry.value}%
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    </GlassCard>
-                  </Grid>
+                  </GlassCard>
                 </Grid>
 
-                {/* IMPACT Section */}
-                <GlassCard sx={{ mb: 3, background: '#232427' }}>
-                  {/* Orange Header */}
-                  <Box sx={{
-                    // background: themeColors.primary, 
-                    px: 2,
-                    py: 1,
+                {/* Win/Loss Pie Chart */}
+                <Grid item xs={12} md={6}>
+                  <GlassCard sx={{ background: '#27292d' }}>
+                    {/* Header with toggle */}
+                    <Box sx={{
+                      display: 'flex',
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                      p: 1.5,
 
-                    borderRadius: '8px 8px 0 0'
-                  }}>
-                    <Typography sx={{
-                      fontSize: { xs: 14, md: 16 },
-                      fontWeight: 'bold',
-                      color: themeColors.text,
-                      pl: { xs: 1.5, md: 5 },
-                      pt: 1,
-                      textTransform: 'uppercase'
+                      borderBottom: `1px solid ${themeColors.border}`,
+                      flexWrap: 'wrap',
+                      gap: 0.5
                     }}>
-                      {getCms('page_player_career_impact_title', 'IMPACT')}
-                    </Typography>
-                  </Box>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: winLossLeague === 'all' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: winLossLeague === 'all' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setWinLossLeague('all')}
+                      >
+                        {getCms('page_player_career_influence_all_leagues_btn', 'All Leagues')}
+                      </Button>
+                      <Button
+                        size="small"
+                        sx={{
+                          background: winLossLeague === 'current' ? themeColors.primary : '#2a2a2a',
+                          color: themeColors.text,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 1,
+                          minWidth: 'auto',
+                          '&:hover': { background: winLossLeague === 'current' ? themeColors.primary : '#3a3a3a' }
+                        }}
+                        onClick={() => setWinLossLeague('current')}
+                      >
+                        {getCms('page_player_career_influence_current_btn', 'Current')}
+                      </Button>
+                    </Box>
 
-                  <Box sx={{ p: 2 }}>
-                    <Grid container spacing={2} alignItems="flex-start">
-                      {/* Tables Container */}
-                      <Grid item xs={12} md={12} sx={{ px: { xs: 1, md: 0 } }}>
-                        {/* First Table - Expected Per Match */}
-                        <Table
-                          size="small"
-                          sx={{
-                            mb: 2,
-                            width: '100%',
-                            tableLayout: 'fixed',
-                            '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
-                          }}
-                        >
-                          <TableHead>
-                            <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {(() => {
-                              const current = yourStats;
-                              const totalMatches = current.n;
-                              const expectedGoalsPerMatch = totalMatches > 0 ? current.goals / totalMatches : 0;
-                              const expectedAssistsPerMatch = totalMatches > 0 ? current.assists / totalMatches : 0;
-                              const expectedCleanSheetsPerMatch = totalMatches > 0 ? current.cleanSheets / totalMatches : 0;
-                              const winRate = current.winRate;
-
-                              const impactRowsFromApi = careerDashboardData?.impactRows as Array<any> | undefined;
-                              const xgApi = impactRowsFromApi?.find((r) => r.metric?.includes('xG') || r.metric?.includes('goal'));
-                              const xaApi = impactRowsFromApi?.find((r) => r.metric?.includes('xA') || r.metric?.includes('assist'));
-                              const xcsApi = impactRowsFromApi?.find((r) => r.metric?.includes('xCS') || r.metric?.includes('Clean Sheet'));
-                              const wrApi = impactRowsFromApi?.find((r) => r.metric?.includes('Win rate') || r.metric?.includes('win'));
-
-                              const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
-
-                              const displayXg = xgApi?.leagueAverage !== undefined ? xgApi.leagueAverage : formatStatDecimal(leagueAverage.expectedGoals !== undefined ? leagueAverage.expectedGoals : leagueAverage.goals);
-                              const displayXa = xaApi?.leagueAverage !== undefined ? xaApi.leagueAverage : formatStatDecimal(leagueAverage.expectedAssists !== undefined ? leagueAverage.expectedAssists : leagueAverage.assists);
-                              const displayXcs = xcsApi?.leagueAverage !== undefined ? xcsApi.leagueAverage : formatStatDecimal(leagueAverage.expectedCleanSheets !== undefined ? leagueAverage.expectedCleanSheets : leagueAverage.cleanSheets);
-                              const displayWinRate = wrApi?.leagueAverage !== undefined ? wrApi.leagueAverage : (leagueAverage.winRate !== undefined ? `${leagueAverage.winRate.toFixed(0)}%` : '-');
-
-                              return (
-                                <>
-                                  <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xg_label', 'Expected to score a goal (xG)')}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedGoalsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXg}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xa_label', 'Expected to assist a goal (xA)')}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedAssistsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXa}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xcs_label', 'Expected to keep Clean Sheet (xCS)')}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedCleanSheetsPerMatch)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXcs}</TableCell>
-                                  </TableRow>
-                                  <TableRow sx={{ bgcolor: '#383a3e' }}>
-                                    <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{getCms('page_player_career_winrate_label', 'Win rate')}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{winRate.toFixed(0)}%</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>
-                                      {displayWinRate}
-                                    </TableCell>
-                                  </TableRow>
-                                </>
-                              );
-                            })()}
-                          </TableBody>
-                        </Table>
-
-                        {/* Second Table - Actual Stats */}
-                        <Table
-                          size="small"
-                          sx={{
-                            width: '100%',
-                            tableLayout: 'fixed',
-                            '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
-                          }}
-                        >
-                          <TableHead>
-                            <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {(() => {
-                              return leagueComparisonRows.map((row) => {
-                                const isContribution = row.metric === 'Game Contribution Index';
-                                return (
-                                  <TableRow key={row.metric} sx={isContribution ? { bgcolor: '#383a3e' } : undefined}>
-                                    <TableCell
-                                      sx={{
-                                        fontSize: 11,
-                                        py: 0.8,
-                                        color: themeColors.text,
-                                        borderBottom: `1px solid ${themeColors.border}`,
-                                        ...(isContribution ? { bgcolor: '#383a3e' } : {})
-                                      }}
-                                    >
-                                      {getMetricCmsLabel(row.metric)}
-                                    </TableCell>
-                                    <TableCell
-                                      align="center"
-                                      sx={{
-                                        fontSize: 11,
-                                        py: 0.8,
-                                        color: themeColors.text,
-                                        borderBottom: `1px solid ${themeColors.border}`,
-                                        ...(isContribution ? { bgcolor: '#383a3e' } : {})
-                                      }}
-                                    >
-                                      {row.yourDisplay}
-                                    </TableCell>
-                                    <TableCell
-                                      align="center"
-                                      sx={{
-                                        fontSize: 11,
-                                        py: 0.8,
-                                        color: row.leagueAverage > 0 ? themeColors.text : themeColors.textDim,
-                                        borderBottom: `1px solid ${themeColors.border}`,
-                                        ...(isContribution ? { bgcolor: '#383a3e' } : {})
-                                      }}
-                                    >
-                                      {row.leagueDisplay}
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              });
-                            })()}
-                          </TableBody>
-                        </Table>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </GlassCard>
-
-                {/* YOUR TOP STRENGTHS Section */}
-                <GlassCard sx={{ mb: 3, background: '#27292d' }}>
-                  {/* Orange Header */}
-                  <Box sx={{
-                    // background: '#202124', 
-                    px: 2,
-                    py: 1,
-                    borderRadius: '8px 8px 0 0'
-                  }}>
-                    <Typography sx={{
-                      fontSize: 14,
-                      fontWeight: 'bold',
-                      color: themeColors.text,
-                      pl: { xs: 1.5, md: 5 },
-                      pt: 1,
-                      textTransform: 'uppercase'
-                    }}>
-                      {getCms('page_player_career_strengths_title', 'YOUR TOP STRENGTHS')}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ p: 2 }}>
-                    <Grid container spacing={2} alignItems="flex-start">
-                      <Grid item xs={12} md={12} sx={{ px: { xs: 1, md: 0 } }}>
-                        <Table
-                          size="small"
-                          sx={{
-                            width: '100%',
-                            tableLayout: 'fixed',
-                            '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
-                          }}
-                        >
-                          <TableHead>
-                            <TableRow sx={{ backgroundColor: '#202124' }}>
-                              <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
-                              <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {topStrengthRows.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={3} align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 2, color: themeColors.textDim, borderBottom: `1px solid ${themeColors.border}` }}>
-                                  {getCms('page_player_career_strengths_empty', 'No strengths identified yet. Play more matches to unlock your strengths.')}
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              topStrengthRows.map((row) => {
-                                return (
-                                  <TableRow key={row.metric}>
-                                    <TableCell sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getMetricCmsLabel(row.metric)}</TableCell>
-                                    <TableCell align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{row.yourDisplay}</TableCell>
-                                    <TableCell align="center" sx={{ py: 0.8, borderBottom: `1px solid ${themeColors.border}` }}>
-                                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                                        <Typography sx={{ fontSize: { xs: 10, md: 11 }, color: row.leagueAverage > 0 ? themeColors.text : themeColors.textDim }}>
-                                          {row.leagueDisplay}
-                                        </Typography>
-                                      </Box>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              })
-                            )}
-                          </TableBody>
-                        </Table>
-                        {topStrengthNote && (
-                          <Typography sx={{ fontSize: 11, mt: 1.5, pl: { xs: 1.5, md: 5 }, color: themeColors.textDim }}>
-                            {topStrengthNote}
-                          </Typography>
-                        )}
-                        {strongestNarrative && (
-                          <Box
-                            sx={{
-                              mt: 2,
-                              mx: { xs: 1.2, md: 5 },
-                              p: 2,
-                              borderRadius: 1,
-                              background: 'linear-gradient(135deg, rgba(76,175,80,0.12) 0%, rgba(76,175,80,0.06) 100%)',
-                              border: '1px solid rgba(76,175,80,0.3)',
-                              borderLeft: '4px solid #4CAF50',
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                fontSize: 10,
-                                fontWeight: 'bold',
-                                color: '#4CAF50',
-                                textTransform: 'uppercase',
-                                letterSpacing: 0.5,
-                                mb: 0.5,
-                              }}
-                            >
-                              {getCms('page_player_career_key_insight_title', 'Key Insight / Top Strength')}
-                            </Typography>
-                            <Typography
-                              sx={{
-                                fontSize: 12,
-                                fontWeight: 500,
-                                color: '#fff',
-                                lineHeight: 1.4,
-                              }}
-                            >
-                              {strongestNarrative.message}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </GlassCard>
-
-                {/* FOCUS AREA Section (private: only when viewing your own dashboard) */}
-                {canViewPersonalSections && (
-                  <Box
-                    sx={{
-                      mt: 3,
-                      mx: { xs: 1.2, md: 5 },
-                      p: 2,
-                      borderRadius: 1,
-                      background: 'linear-gradient(135deg, rgba(229,106,22,0.12) 0%, rgba(207,35,38,0.12) 100%)',
-                      border: '1px solid rgba(229,106,22,0.3)',
-                      borderLeft: `4px solid ${themeColors.primary}`,
-                      mb: 3,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: 10,
+                    <CardContent sx={{ p: 2, pt: 1, pb: 1 }}>
+                      {/* Title */}
+                      <Typography sx={{
+                        fontSize: 14,
                         fontWeight: 'bold',
-                        color: themeColors.primary,
+                        color: themeColors.text,
+                        textAlign: 'center',
                         textTransform: 'uppercase',
-                        letterSpacing: 0.5,
-                        mb: 0.5,
-                      }}
-                    >
-                      {getCms('page_player_career_focus_title', 'FOCUS AREA')}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 500,
-                        color: '#fff',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {focusSuggestion}
-                    </Typography>
-                  </Box>
-                )}
+                        mb: 1
+                      }}>
+                        {getCms('page_player_career_winloss_title', 'WIN/LOSS/DRAW')}
+                      </Typography>
 
-                {/* Play Best With + Rivalries */}
-                <Box sx={{ mb: 2 }}>
-                  <Typography sx={{
-                    fontSize: 13,
-                    fontWeight: 'bold',
-                    mb: 1,
-                    textAlign: 'center',
-                    lineHeight: 1.45,
-                    color: themeColors.text
-                  }}>
-                    {topTeammateLine}
-                  </Typography>
+                      <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={actualWinLossData}
+                              dataKey="value"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={55}
+                              paddingAngle={2}
+                              startAngle={90}
+                              endAngle={450}
+                              label={false}
+                              labelLine={false}
+                              isAnimationActive={false}
+                              activeShape={false}
+                            />
+                            <Tooltip
+                              isAnimationActive={false}
+                              wrapperStyle={{ pointerEvents: 'none', zIndex: 1000 }}
+                              useTranslate3d={true}
+                              content={({ active, payload }: any) => {
+                                if (!active || !payload || !payload.length) return null;
+                                const entry = payload[0];
+                                const item = entry.payload;
+                                const name = entry.name;
+                                const value = entry.value;
+                                const color = item.color || entry.color || themeColors.text;
+                                return (
+                                  <Box
+                                    sx={{
+                                      background: themeColors.surfaceAlt,
+                                      border: `1px solid ${themeColors.border}`,
+                                      borderRadius: 1,
+                                      p: 1.2,
+                                      boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                                      pointerEvents: 'none',
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        color: color,
+                                        textTransform: 'uppercase',
+                                      }}
+                                    >
+                                      {name} : {value}%
+                                    </Typography>
+                                  </Box>
+                                );
+                              }}
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </Box>
 
+                    </CardContent>
+                    <Box sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: 2,
+                      pb: 2,
+                      pt: 2,
+                      backgroundColor: '#383a3f',
+                      borderTop: `1px solid ${themeColors.border}`,
+                    }}>
+                      {actualWinLossData.map((entry: any, index: number) => (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Box sx={{
+                            width: 10, height: 10, borderRadius: '50%',
+                            backgroundColor: entry.color
+                          }} />
+                          <Typography sx={{ fontSize: 10, color: themeColors.textDim }}>
+                            {entry.name} {entry.value}%
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </GlassCard>
+                </Grid>
+              </Grid>
+
+              {/* IMPACT Section */}
+              <GlassCard sx={{ mb: 3, background: '#232427' }}>
+                {/* Orange Header */}
+                <Box sx={{
+                  // background: themeColors.primary, 
+                  px: 2,
+                  py: 1,
+
+                  borderRadius: '8px 8px 0 0'
+                }}>
                   <Typography sx={{
-                    fontSize: 13,
+                    fontSize: { xs: 14, md: 16 },
                     fontWeight: 'bold',
-                    textAlign: 'center',
-                    lineHeight: 1.45,
-                    color: toughestRivalLine === 'No toughest opponent identified yet' ? themeColors.textDim : themeColors.text
+                    color: themeColors.text,
+                    pl: { xs: 1.5, md: 5 },
+                    pt: 1,
+                    textTransform: 'uppercase'
                   }}>
-                    {toughestRivalLine}
+                    {getCms('page_player_career_impact_title', 'IMPACT')}
                   </Typography>
                 </Box>
+
+                <Box sx={{ p: 2 }}>
+                  <Grid container spacing={2} alignItems="flex-start">
+                    {/* Tables Container */}
+                    <Grid item xs={12} md={12} sx={{ px: { xs: 1, md: 0 } }}>
+                      {/* First Table - Expected Per Match */}
+                      <Table
+                        size="small"
+                        sx={{
+                          mb: 2,
+                          width: '100%',
+                          tableLayout: 'fixed',
+                          '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: '#202124' }}>
+                            <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {(() => {
+                            const current = yourStats;
+                            const totalMatches = current.n;
+                            const expectedGoalsPerMatch = totalMatches > 0 ? current.goals / totalMatches : 0;
+                            const expectedAssistsPerMatch = totalMatches > 0 ? current.assists / totalMatches : 0;
+                            const expectedCleanSheetsPerMatch = totalMatches > 0 ? current.cleanSheets / totalMatches : 0;
+                            const winRate = current.winRate;
+
+                            const impactRowsFromApi = careerDashboardData?.impactRows as Array<any> | undefined;
+                            const xgApi = impactRowsFromApi?.find((r) => r.metric?.includes('xG') || r.metric?.includes('goal'));
+                            const xaApi = impactRowsFromApi?.find((r) => r.metric?.includes('xA') || r.metric?.includes('assist'));
+                            const xcsApi = impactRowsFromApi?.find((r) => r.metric?.includes('xCS') || r.metric?.includes('Clean Sheet'));
+                            const wrApi = impactRowsFromApi?.find((r) => r.metric?.includes('Win rate') || r.metric?.includes('win'));
+
+                            const leagueAverage = currentImpactLeagueAvg || createEmptyLeagueMetrics();
+
+                            const displayXg = xgApi?.leagueAverage !== undefined ? xgApi.leagueAverage : formatStatDecimal(leagueAverage.expectedGoals !== undefined ? leagueAverage.expectedGoals : leagueAverage.goals);
+                            const displayXa = xaApi?.leagueAverage !== undefined ? xaApi.leagueAverage : formatStatDecimal(leagueAverage.expectedAssists !== undefined ? leagueAverage.expectedAssists : leagueAverage.assists);
+                            const displayXcs = xcsApi?.leagueAverage !== undefined ? xcsApi.leagueAverage : formatStatDecimal(leagueAverage.expectedCleanSheets !== undefined ? leagueAverage.expectedCleanSheets : leagueAverage.cleanSheets);
+                            const displayWinRate = wrApi?.leagueAverage !== undefined ? wrApi.leagueAverage : (leagueAverage.winRate !== undefined ? `${leagueAverage.winRate.toFixed(0)}%` : '-');
+
+                            return (
+                              <>
+                                <TableRow>
+                                  <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xg_label', 'Expected to score a goal (xG)')}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedGoalsPerMatch)}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXg}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xa_label', 'Expected to assist a goal (xA)')}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedAssistsPerMatch)}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXa}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                  <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getCms('page_player_career_xcs_label', 'Expected to keep Clean Sheet (xCS)')}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{formatStatDecimal(expectedCleanSheetsPerMatch)}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{displayXcs}</TableCell>
+                                </TableRow>
+                                <TableRow sx={{ bgcolor: '#383a3e' }}>
+                                  <TableCell sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{getCms('page_player_career_winrate_label', 'Win rate')}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>{winRate.toFixed(0)}%</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: 11, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, bgcolor: '#383a3e' }}>
+                                    {displayWinRate}
+                                  </TableCell>
+                                </TableRow>
+                              </>
+                            );
+                          })()}
+                        </TableBody>
+                      </Table>
+
+                      {/* Second Table - Actual Stats */}
+                      <Table
+                        size="small"
+                        sx={{
+                          width: '100%',
+                          tableLayout: 'fixed',
+                          '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: '#202124' }}>
+                            <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {(() => {
+                            return leagueComparisonRows.map((row) => {
+                              const isContribution = row.metric === 'Game Contribution Index';
+                              return (
+                                <TableRow key={row.metric} sx={isContribution ? { bgcolor: '#383a3e' } : undefined}>
+                                  <TableCell
+                                    sx={{
+                                      fontSize: 11,
+                                      py: 0.8,
+                                      color: themeColors.text,
+                                      borderBottom: `1px solid ${themeColors.border}`,
+                                      ...(isContribution ? { bgcolor: '#383a3e' } : {})
+                                    }}
+                                  >
+                                    {getMetricCmsLabel(row.metric)}
+                                  </TableCell>
+                                  <TableCell
+                                    align="center"
+                                    sx={{
+                                      fontSize: 11,
+                                      py: 0.8,
+                                      color: themeColors.text,
+                                      borderBottom: `1px solid ${themeColors.border}`,
+                                      ...(isContribution ? { bgcolor: '#383a3e' } : {})
+                                    }}
+                                  >
+                                    {row.yourDisplay}
+                                  </TableCell>
+                                  <TableCell
+                                    align="center"
+                                    sx={{
+                                      fontSize: 11,
+                                      py: 0.8,
+                                      color: row.leagueAverage > 0 ? themeColors.text : themeColors.textDim,
+                                      borderBottom: `1px solid ${themeColors.border}`,
+                                      ...(isContribution ? { bgcolor: '#383a3e' } : {})
+                                    }}
+                                  >
+                                    {row.leagueDisplay}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            });
+                          })()}
+                        </TableBody>
+                      </Table>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </GlassCard>
+
+              {/* YOUR TOP STRENGTHS Section */}
+              <GlassCard sx={{ mb: 3, background: '#27292d' }}>
+                {/* Orange Header */}
+                <Box sx={{
+                  // background: '#202124', 
+                  px: 2,
+                  py: 1,
+                  borderRadius: '8px 8px 0 0'
+                }}>
+                  <Typography sx={{
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    color: themeColors.text,
+                    pl: { xs: 1.5, md: 5 },
+                    pt: 1,
+                    textTransform: 'uppercase'
+                  }}>
+                    {getCms('page_player_career_strengths_title', 'YOUR TOP STRENGTHS')}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ p: 2 }}>
+                  <Grid container spacing={2} alignItems="flex-start">
+                    <Grid item xs={12} md={12} sx={{ px: { xs: 1, md: 0 } }}>
+                      <Table
+                        size="small"
+                        sx={{
+                          width: '100%',
+                          tableLayout: 'fixed',
+                          '& .MuiTableCell-root:first-of-type': { pl: { xs: 1.2, md: 5 } },
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow sx={{ backgroundColor: '#202124' }}>
+                            <TableCell sx={{ width: { xs: '48%', md: '55%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_metric', 'Metric')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '22%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_your_stats', 'Your Stats')}</TableCell>
+                            <TableCell align="center" sx={{ width: { xs: '30%', md: '22.5%' }, fontSize: { xs: 10, md: 11 }, fontWeight: 'bold', py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}`, lineHeight: 1.2 }}>{getCms('page_player_career_table_header_league_avg', 'League Average')}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {topStrengthRows.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={3} align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 2, color: themeColors.textDim, borderBottom: `1px solid ${themeColors.border}` }}>
+                                {getCms('page_player_career_strengths_empty', 'No strengths identified yet. Play more matches to unlock your strengths.')}
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            topStrengthRows.map((row) => {
+                              return (
+                                <TableRow key={row.metric}>
+                                  <TableCell sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{getMetricCmsLabel(row.metric)}</TableCell>
+                                  <TableCell align="center" sx={{ fontSize: { xs: 10, md: 11 }, py: 0.8, color: themeColors.text, borderBottom: `1px solid ${themeColors.border}` }}>{row.yourDisplay}</TableCell>
+                                  <TableCell align="center" sx={{ py: 0.8, borderBottom: `1px solid ${themeColors.border}` }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                      <Typography sx={{ fontSize: { xs: 10, md: 11 }, color: row.leagueAverage > 0 ? themeColors.text : themeColors.textDim }}>
+                                        {row.leagueDisplay}
+                                      </Typography>
+                                    </Box>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })
+                          )}
+                        </TableBody>
+                      </Table>
+                      {topStrengthNote && (
+                        <Typography sx={{ fontSize: 11, mt: 1.5, pl: { xs: 1.5, md: 5 }, color: themeColors.textDim }}>
+                          {topStrengthNote}
+                        </Typography>
+                      )}
+                      {strongestNarrative && (
+                        <Box
+                          sx={{
+                            mt: 2,
+                            mx: { xs: 1.2, md: 5 },
+                            p: 2,
+                            borderRadius: 1,
+                            background: 'linear-gradient(135deg, rgba(76,175,80,0.12) 0%, rgba(76,175,80,0.06) 100%)',
+                            border: '1px solid rgba(76,175,80,0.3)',
+                            borderLeft: '4px solid #4CAF50',
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              fontSize: 10,
+                              fontWeight: 'bold',
+                              color: '#4CAF50',
+                              textTransform: 'uppercase',
+                              letterSpacing: 0.5,
+                              mb: 0.5,
+                            }}
+                          >
+                            {getCms('page_player_career_key_insight_title', 'Key Insight / Top Strength')}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: '#fff',
+                              lineHeight: 1.4,
+                            }}
+                          >
+                            {strongestNarrative.message}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              </GlassCard>
+
+              {/* FOCUS AREA Section (private: only when viewing your own dashboard) */}
+              {canViewPersonalSections && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    mx: { xs: 1.2, md: 5 },
+                    p: 2,
+                    borderRadius: 1,
+                    background: 'linear-gradient(135deg, rgba(229,106,22,0.12) 0%, rgba(207,35,38,0.12) 100%)',
+                    border: '1px solid rgba(229,106,22,0.3)',
+                    borderLeft: `4px solid ${themeColors.primary}`,
+                    mb: 3,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: 10,
+                      fontWeight: 'bold',
+                      color: themeColors.primary,
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      mb: 0.5,
+                    }}
+                  >
+                    {getCms('page_player_career_focus_title', 'FOCUS AREA')}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: '#fff',
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    {focusSuggestion}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Play Best With + Rivalries */}
+              <Box sx={{ mb: 2 }}>
+                <Typography sx={{
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  mb: 1,
+                  textAlign: 'center',
+                  lineHeight: 1.45,
+                  color: themeColors.text
+                }}>
+                  {topTeammateLine}
+                </Typography>
+
+                <Typography sx={{
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  lineHeight: 1.45,
+                  color: toughestRivalLine === 'No toughest opponent identified yet' ? themeColors.textDim : themeColors.text
+                }}>
+                  {toughestRivalLine}
+                </Typography>
               </Box>
             </Box>
           </Box>
-        </Container>
-      </Box>
-    );
+        </Box>
+      </Container>
+    </Box>
+  );
 }
