@@ -6628,15 +6628,24 @@ export default function LeagueDetailPage() {
                                                     };
 
                                                     const mappedPlayers: Array<{ player: any; slot: { left: any; top: any }; key: string }> = [];
+                                                    const usedPlayerIds = new Set<string>();
+
+                                                    const addPlayerToPitch = (player: any, slot: { left: any; top: any }, key: string) => {
+                                                        if (!player || !player.id) return;
+                                                        const pId = String(player.id);
+                                                        if (usedPlayerIds.has(pId)) return;
+                                                        usedPlayerIds.add(pId);
+                                                        mappedPlayers.push({ player, slot, key });
+                                                    };
 
                                                     // 1. Goalkeeper (1 player)
                                                     const gks = (dreamTeam?.goalkeeper || []).filter(isValidPositionPlayer).sort(sortByXP);
                                                     if (gks[0]) {
-                                                        mappedPlayers.push({
-                                                            player: gks[0],
-                                                            slot: { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } },
-                                                            key: `gk-${gks[0].id}`
-                                                        });
+                                                        addPlayerToPitch(
+                                                            gks[0],
+                                                            { left: { xs: '30%', sm: '30%', md: '33%' }, top: { xs: '65%', sm: '65%', md: '64%' } },
+                                                            `gk-${gks[0].id}`
+                                                        );
                                                     }
 
                                                     // 2. Defenders (up to 2 players - Strict Left / Right XP Slotting)
@@ -6646,6 +6655,7 @@ export default function LeagueDetailPage() {
 
                                                     // Pass 1: Assign explicit side players to their matching slot (highest XP wins)
                                                     defs.forEach((p) => {
+                                                        if (usedPlayerIds.has(String(p.id))) return;
                                                         if (isLeftSide(p)) {
                                                             if (!leftDef) leftDef = p;
                                                         } else if (isRightSide(p)) {
@@ -6654,25 +6664,25 @@ export default function LeagueDetailPage() {
                                                     });
                                                     // Pass 2: Neutral players fill open slots
                                                     defs.forEach((p) => {
+                                                        if (usedPlayerIds.has(String(p.id))) return;
                                                         if (p === leftDef || p === rightDef) return;
-                                                        if (isLeftSide(p) || isRightSide(p)) return; // Exclude side player if higher XP player won that side
                                                         if (!leftDef) leftDef = p;
                                                         else if (!rightDef) rightDef = p;
                                                     });
 
                                                     if (leftDef) {
-                                                        mappedPlayers.push({
-                                                            player: leftDef,
-                                                            slot: { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } },
-                                                            key: `def-left-${leftDef.id}`
-                                                        });
+                                                        addPlayerToPitch(
+                                                            leftDef,
+                                                            { left: { xs: '17%', sm: '17%', md: '35%' }, top: { xs: '70%', sm: '70%', md: '70%' } },
+                                                            `def-left-${leftDef.id}`
+                                                        );
                                                     }
                                                     if (rightDef) {
-                                                        mappedPlayers.push({
-                                                            player: rightDef,
-                                                            slot: { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } },
-                                                            key: `def-right-${rightDef.id}`
-                                                        });
+                                                        addPlayerToPitch(
+                                                            rightDef,
+                                                            { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } },
+                                                            `def-right-${rightDef.id}`
+                                                        );
                                                     }
 
                                                     // 3. Midfielders (up to 2 players - Strict Left / Right XP Slotting)
@@ -6682,6 +6692,7 @@ export default function LeagueDetailPage() {
 
                                                     // Pass 1: Assign explicit side players to their matching slot (highest XP wins)
                                                     mids.forEach((p) => {
+                                                        if (usedPlayerIds.has(String(p.id))) return;
                                                         if (isLeftSide(p)) {
                                                             if (!leftMid) leftMid = p;
                                                         } else if (isRightSide(p)) {
@@ -6690,35 +6701,36 @@ export default function LeagueDetailPage() {
                                                     });
                                                     // Pass 2: Neutral players fill open slots
                                                     mids.forEach((p) => {
+                                                        if (usedPlayerIds.has(String(p.id))) return;
                                                         if (p === leftMid || p === rightMid) return;
-                                                        if (isLeftSide(p) || isRightSide(p)) return; // Exclude side player if higher XP player won that side
                                                         if (!leftMid) leftMid = p;
                                                         else if (!rightMid) rightMid = p;
                                                     });
 
                                                     if (leftMid) {
-                                                        mappedPlayers.push({
-                                                            player: leftMid,
-                                                            slot: { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } },
-                                                            key: `mid-left-${leftMid.id}`
-                                                        });
+                                                        addPlayerToPitch(
+                                                            leftMid,
+                                                            { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } },
+                                                            `mid-left-${leftMid.id}`
+                                                        );
                                                     }
                                                     if (rightMid) {
-                                                        mappedPlayers.push({
-                                                            player: rightMid,
-                                                            slot: { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } },
-                                                            key: `mid-right-${rightMid.id}`
-                                                        });
+                                                        addPlayerToPitch(
+                                                            rightMid,
+                                                            { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } },
+                                                            `mid-right-${rightMid.id}`
+                                                        );
                                                     }
 
                                                     // 4. Forwards (1 player)
                                                     const fwds = (dreamTeam?.forwards || []).filter(isValidPositionPlayer).sort(sortByXP);
-                                                    if (fwds[0]) {
-                                                        mappedPlayers.push({
-                                                            player: fwds[0],
-                                                            slot: { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } },
-                                                            key: `fwd-${fwds[0].id}`
-                                                        });
+                                                    const unusedFwd = fwds.find(p => !usedPlayerIds.has(String(p.id)));
+                                                    if (unusedFwd) {
+                                                        addPlayerToPitch(
+                                                            unusedFwd,
+                                                            { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } },
+                                                            `fwd-${unusedFwd.id}`
+                                                        );
                                                     }
 
                                                     if (mappedPlayers.length === 0) {

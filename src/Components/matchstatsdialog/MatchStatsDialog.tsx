@@ -1555,9 +1555,25 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     const playerOnHomeTeamSafe = !!(match && currentUserId && (match.homeTeamUsers ?? []).some(p => String(p.id) === currentUserId));
     const playerOnAwayTeamSafe = !!(match && currentUserId && (match.awayTeamUsers ?? []).some(p => String(p.id) === currentUserId));
     const isUserAssignedToTeam = playerOnHomeTeamSafe || playerOnAwayTeamSafe;
-    const teamGoalsSafe = (match && currentUserId)
-        ? (playerOnHomeTeamSafe ? (match.homeTeamGoals || 20) : (playerOnAwayTeamSafe ? (match.awayTeamGoals || 20) : 20))
-        : 20;
+    const teamGoalsSafe = React.useMemo(() => {
+        if (!match || !currentUserId) return 20;
+        if (playerOnHomeTeamSafe) {
+            if (match.homeTeamGoals !== null && match.homeTeamGoals !== undefined && typeof match.homeTeamGoals === 'number') {
+                return Math.max(0, match.homeTeamGoals);
+            }
+        } else if (playerOnAwayTeamSafe) {
+            if (match.awayTeamGoals !== null && match.awayTeamGoals !== undefined && typeof match.awayTeamGoals === 'number') {
+                return Math.max(0, match.awayTeamGoals);
+            }
+        } else {
+            const homeG = typeof match.homeTeamGoals === 'number' ? match.homeTeamGoals : null;
+            const awayG = typeof match.awayTeamGoals === 'number' ? match.awayTeamGoals : null;
+            if (homeG !== null || awayG !== null) {
+                return Math.max(0, (homeG || 0) + (awayG || 0));
+            }
+        }
+        return 20;
+    }, [match, currentUserId, playerOnHomeTeamSafe, playerOnAwayTeamSafe]);
     const matchTotalGoalsSafe = Math.max(
         0,
         Number(match?.homeTeamGoals || 0) + Number(match?.awayTeamGoals || 0)

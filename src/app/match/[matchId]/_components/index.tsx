@@ -1540,8 +1540,9 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                       if (!/^\d+$/.test(val)) return;
                       const numVal = parseInt(val, 10);
                       if (!isNaN(numVal)) {
-                        const teamGoalsSafe = (match?.homeTeamUsers?.some(p => p.id === editingPlayer?.id)
-                          ? (match?.homeTeamGoals ?? 20) : (match?.awayTeamGoals ?? 20)) || 20;
+                        const isHome = match?.homeTeamUsers?.some(p => p.id === editingPlayer?.id);
+                        const rawGoals = isHome ? match?.homeTeamGoals : match?.awayTeamGoals;
+                        const teamGoalsSafe = (rawGoals !== null && rawGoals !== undefined && typeof rawGoals === 'number') ? Math.max(0, rawGoals) : 20;
                         setEditStats(prev => ({ ...prev, goals: Math.max(0, Math.min(teamGoalsSafe, numVal)) }));
                       }
                     }}
@@ -1573,8 +1574,9 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                       if (!/^\d+$/.test(val)) return;
                       const numVal = parseInt(val, 10);
                       if (!isNaN(numVal)) {
-                        const teamGoalsSafe = (match?.homeTeamUsers?.some(p => p.id === editingPlayer?.id)
-                          ? (match?.homeTeamGoals ?? 20) : (match?.awayTeamGoals ?? 20)) || 20;
+                        const isHome = match?.homeTeamUsers?.some(p => p.id === editingPlayer?.id);
+                        const rawGoals = isHome ? match?.homeTeamGoals : match?.awayTeamGoals;
+                        const teamGoalsSafe = (rawGoals !== null && rawGoals !== undefined && typeof rawGoals === 'number') ? Math.max(0, rawGoals) : 20;
                         setEditStats(prev => ({ ...prev, assists: Math.max(0, Math.min(teamGoalsSafe, numVal)) }));
                       }
                     }}
