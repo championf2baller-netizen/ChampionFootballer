@@ -1748,7 +1748,7 @@ export default function LeagueDetailPage() {
                         id: leagueId,
                         name: l.name || '',
                         inviteCode: '',
-                        createdAt: '',
+                        createdAt: typeof l.createdAt === 'string' ? l.createdAt : (l.createdAt ? String(l.createdAt) : ''),
                         members: [],
                         administrators: [],
                         matches: l.matches || [],
@@ -1768,8 +1768,33 @@ export default function LeagueDetailPage() {
                     (l) => l.archived !== true
                 );
 
-                // Sort alphabetically by name
+                // Sort newest to oldest by createdAt timestamp or Mongo ObjectId
                 visibleLeagues.sort((a, b) => {
+                    const getCreatedTs = (l: any): number => {
+                        if (!l) return 0;
+                        const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+                        if (rawDate) {
+                            const t = new Date(rawDate).getTime();
+                            if (Number.isFinite(t) && t > 0) return t;
+                        }
+                        const idStr = String(l.id || l._id || '').trim();
+                        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+                            const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+                            if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+                        }
+                        if (Array.isArray(l.matches) && l.matches.length > 0) {
+                            const matchDates = l.matches
+                                .map((m: any) => new Date(m?.date || m?.createdAt || 0).getTime())
+                                .filter((t: number) => Number.isFinite(t) && t > 0);
+                            if (matchDates.length > 0) {
+                                return Math.max(...matchDates);
+                            }
+                        }
+                        return 0;
+                    };
+                    const tsA = getCreatedTs(a);
+                    const tsB = getCreatedTs(b);
+                    if (tsA !== tsB) return tsB - tsA;
                     const an = (a?.name ?? '').toString().trim().toLowerCase();
                     const bn = (b?.name ?? '').toString().trim().toLowerCase();
                     if (an < bn) return -1;
@@ -4543,13 +4568,7 @@ export default function LeagueDetailPage() {
                                             }
                                         }}
                                     >
-                                        {[...allLeagues].sort((a, b) => {
-                                            const an = (a?.name ?? '').toString().trim().toLowerCase();
-                                            const bn = (b?.name ?? '').toString().trim().toLowerCase();
-                                            if (an < bn) return -1;
-                                            if (an > bn) return 1;
-                                            return String(a.id).localeCompare(String(b.id));
-                                        }).map((leagueItem) => (
+                                        {allLeagues.map((leagueItem) => (
                                             <MenuItem
                                                 key={leagueItem.id}
                                                 onClick={() => handleLeagueSelect(leagueItem.id)}

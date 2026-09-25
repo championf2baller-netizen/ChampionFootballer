@@ -314,6 +314,15 @@ const getLeagueCreatedYear = (l: {
     }
   }
 
+  const idStr = String((l as any).id || (l as any)._id || '').trim();
+  if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+    const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+    const y = dayjs(timestamp).year();
+    if (Number.isFinite(y) && y >= 1900 && y <= 3000) {
+      if (earliest === null || y < earliest) earliest = y;
+    }
+  }
+
   return earliest !== null ? String(earliest) : null;
 };
 
@@ -354,9 +363,26 @@ const getLeagueYears = (l: {
 };
 
 const getLeagueCreatedTimestamp = (l: any): number => {
-  if (!l || !l.createdAt) return 0;
-  const t = dayjs(l.createdAt).valueOf();
-  return Number.isFinite(t) ? t : 0;
+  if (!l) return 0;
+  const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+  if (rawDate) {
+    const t = new Date(rawDate).getTime();
+    if (Number.isFinite(t) && t > 0) return t;
+  }
+  const idStr = String(l.id || l._id || '').trim();
+  if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+    const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+    if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+  }
+  if (Array.isArray(l.matches) && l.matches.length > 0) {
+    const matchDates = l.matches
+      .map((m: any) => new Date(m?.date || m?.createdAt || 0).getTime())
+      .filter((t: number) => Number.isFinite(t) && t > 0);
+    if (matchDates.length > 0) {
+      return Math.max(...matchDates);
+    }
+  }
+  return 0;
 };
 
 const isLeagueInYear = (l: LeagueWithMatches, yearStr: string): boolean => {
@@ -1056,12 +1082,38 @@ export default function CareerPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only once on mount
 
-  // Extract available leagues from Redux state or data
+  // Extract available leagues from Redux state, data, or user leagues
   useEffect(() => {
-    const sourceLeagues = ((leaguesFromRedux && leaguesFromRedux.length > 0
-      ? leaguesFromRedux
-      : (data?.leagues || careerData?.leagues || [])) as LeagueWithMatches[])
-      .filter(isLeagueValidForPerformance);
+    let userLeaguesFromStorage: any[] = [];
+    try {
+      if (typeof window !== 'undefined') {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const u = JSON.parse(userStr);
+          userLeaguesFromStorage = [
+            ...(u.leagues || []),
+            ...(u.adminLeagues || u.administeredLeagues || u.admin_leagues || [])
+          ];
+        }
+      }
+    } catch {}
+
+    const rawList = [
+      ...(leaguesFromRedux || []),
+      ...(data?.leagues || []),
+      ...(careerData?.leagues || []),
+      ...userLeaguesFromStorage
+    ];
+
+    const uniqueMap = new Map();
+    rawList.forEach((l) => {
+      const id = String(l?.id || (l as any)?._id || '');
+      if (id && !uniqueMap.has(id)) {
+        uniqueMap.set(id, l);
+      }
+    });
+
+    const sourceLeagues = Array.from(uniqueMap.values()).filter(isLeagueValidForPerformance);
 
     const sortedLeagues = [...sourceLeagues].sort((a, b) => {
       const tsA = getLeagueCreatedTimestamp(a);

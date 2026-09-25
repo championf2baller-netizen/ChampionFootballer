@@ -1013,7 +1013,7 @@ export default function PlayerStatsPage() {
                 if (userLeaguesRes && userLeaguesRes.ok) {
                     const d = await userLeaguesRes.json().catch(() => null);
                     if (d?.success && Array.isArray(d?.leagues) && d.leagues.length > 0) {
-                        leaguesData = d.leagues;
+                        leaguesData = [...leaguesData, ...d.leagues];
                     }
                 }
 
@@ -1022,7 +1022,7 @@ export default function PlayerStatsPage() {
                 // Remove duplicates by id
                 const uniqueMap = new Map<string, any>();
                 leaguesData.forEach((l) => {
-                    const id = String(l?.id || '');
+                    const id = String(l?.id || l?._id || '');
                     if (id && !uniqueMap.has(id)) {
                         uniqueMap.set(id, l);
                     }
@@ -1056,9 +1056,18 @@ export default function PlayerStatsPage() {
 
                 visibleLeagues.sort((a: any, b: any) => {
                     const getCreatedTs = (l: any): number => {
-                        if (!l || !l.createdAt) return 0;
-                        const t = new Date(l.createdAt).getTime();
-                        return Number.isFinite(t) ? t : 0;
+                        if (!l) return 0;
+                        const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+                        if (rawDate) {
+                            const t = new Date(rawDate).getTime();
+                            if (Number.isFinite(t) && t > 0) return t;
+                        }
+                        const idStr = String(l.id || l._id || '').trim();
+                        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+                            const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+                            if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+                        }
+                        return 0;
                     };
                     const tsA = getCreatedTs(a);
                     const tsB = getCreatedTs(b);
@@ -1095,10 +1104,20 @@ export default function PlayerStatsPage() {
         if (year === 'all') return cleanLeagues;
         return cleanLeagues.filter((l) => {
             const dateStr = (l.createdAt || l.updatedAt || '').trim();
-            if (!dateStr) return false;
-            const t = Date.parse(dateStr);
-            if (!Number.isFinite(t)) return false;
-            return String(new Date(t).getFullYear()) === year;
+            if (dateStr) {
+                const t = Date.parse(dateStr);
+                if (Number.isFinite(t)) {
+                    return String(new Date(t).getFullYear()) === year;
+                }
+            }
+            const idStr = String(l.id || (l as any)._id || '').trim();
+            if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+                const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+                if (Number.isFinite(timestamp) && timestamp > 0) {
+                    return String(new Date(timestamp).getFullYear()) === year;
+                }
+            }
+            return true;
         });
     }, [leagues, year]);
 
@@ -2708,6 +2727,23 @@ export default function PlayerStatsPage() {
                                         />
                                     </MenuItem>
                                     {[...dropdownLeagues].sort((a, b) => {
+                                        const getCreatedTs = (l: any): number => {
+                                            if (!l) return 0;
+                                            const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+                                            if (rawDate) {
+                                                const t = new Date(rawDate).getTime();
+                                                if (Number.isFinite(t) && t > 0) return t;
+                                            }
+                                            const idStr = String(l.id || l._id || '').trim();
+                                            if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+                                                const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+                                                if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+                                            }
+                                            return 0;
+                                        };
+                                        const tsA = getCreatedTs(a);
+                                        const tsB = getCreatedTs(b);
+                                        if (tsA !== tsB) return tsB - tsA;
                                         const an = (a?.name ?? '').toString().trim().toLowerCase();
                                         const bn = (b?.name ?? '').toString().trim().toLowerCase();
                                         if (an < bn) return -1;

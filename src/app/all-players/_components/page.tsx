@@ -660,8 +660,25 @@ const AllPlayersPage = () => {
           (l) => l.archived !== true
         );
 
-        // Sort alphabetically
+        // Sort newest to oldest by createdAt timestamp
         activeLeagues.sort((a, b) => {
+          const getCreatedTs = (l: any): number => {
+            if (!l) return 0;
+            const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+            if (rawDate) {
+              const t = new Date(rawDate).getTime();
+              if (Number.isFinite(t) && t > 0) return t;
+            }
+            const idStr = String(l.id || l._id || '').trim();
+            if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+              const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+              if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+            }
+            return 0;
+          };
+          const tsA = getCreatedTs(a);
+          const tsB = getCreatedTs(b);
+          if (tsA !== tsB) return tsB - tsA;
           const an = (a?.name ?? '').toString().trim().toLowerCase();
           const bn = (b?.name ?? '').toString().trim().toLowerCase();
           if (an < bn) return -1;
@@ -1437,13 +1454,7 @@ const AllPlayersPage = () => {
                       }}
                     />
                   </MenuItem>
-                  {[...filteredLeagues].sort((a, b) => {
-                    const an = (a?.name ?? '').toString().trim().toLowerCase();
-                    const bn = (b?.name ?? '').toString().trim().toLowerCase();
-                    if (an < bn) return -1;
-                    if (an > bn) return 1;
-                    return String(a.id).localeCompare(String(b.id));
-                  }).map((leagueOption) => {
+                  {filteredLeagues.map((leagueOption) => {
                     const isActive = selectedLeague === leagueOption.id;
                     return (
                       <MenuItem

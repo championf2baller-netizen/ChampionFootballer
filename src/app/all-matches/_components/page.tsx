@@ -491,30 +491,47 @@ export default function AllMatches() {
             .map(String);
     }, [leagues]);
 
+    const getMatchLeagueCreatedTs = (l: any): number => {
+        if (!l) return 0;
+        const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+        if (rawDate) {
+            const t = new Date(rawDate).getTime();
+            if (Number.isFinite(t) && t > 0) return t;
+        }
+        const idStr = String(l.id || l._id || '').trim();
+        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+            const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+            if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+        }
+        return 0;
+    };
+
     const filteredLeagues = React.useMemo(() => {
         if (!leagues?.length) return [];
         return leagues.filter((league) => {
             if (selectedYear === 'all') return true;
-            const dateStr = (league.createdAt || league.updatedAt || '').trim();
-            if (!dateStr) return false;
-            const t = Date.parse(dateStr);
-            if (!Number.isFinite(t)) return false;
+            const t = getMatchLeagueCreatedTs(league);
+            if (!t) return true;
             const year = new Date(t).getFullYear();
             return String(year) === selectedYear;
         });
     }, [leagues, selectedYear]);
 
-    // Keep the selected league at the top of the dropdown
+    // Keep leagues ordered from newest to oldest by createdAt / Mongo ObjectId timestamp
     const sortedLeagues = React.useMemo(() => {
         if (!filteredLeagues?.length) return [];
-        const arr = [...filteredLeagues];
-        const idx = arr.findIndex(l => l.id === selectedLeague);
-        if (idx > 0) {
-            const [sel] = arr.splice(idx, 1);
-            arr.unshift(sel);
-        }
+        const arr = [...filteredLeagues].sort((a, b) => {
+            const tsA = getMatchLeagueCreatedTs(a);
+            const tsB = getMatchLeagueCreatedTs(b);
+            if (tsA !== tsB) return tsB - tsA;
+            const an = (a?.name ?? '').toString().trim().toLowerCase();
+            const bn = (b?.name ?? '').toString().trim().toLowerCase();
+            if (an < bn) return -1;
+            if (an > bn) return 1;
+            return String(a.id).localeCompare(String(b.id));
+        });
         return arr;
-    }, [filteredLeagues, selectedLeague]);
+    }, [filteredLeagues]);
     
     // Persist selection key - same as home page
     const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
@@ -676,8 +693,25 @@ export default function AllMatches() {
                     (l) => l.archived !== true
                 );
 
-                // Sort alphabetically by name
+                // Sort newest to oldest by createdAt timestamp
                 visibleLeagues.sort((a, b) => {
+                    const getCreatedTs = (l: any): number => {
+                        if (!l) return 0;
+                        const rawDate = l.createdAt || l.created_at || l.createdDate || l.date || l.updatedAt;
+                        if (rawDate) {
+                            const t = new Date(rawDate).getTime();
+                            if (Number.isFinite(t) && t > 0) return t;
+                        }
+                        const idStr = String(l.id || l._id || '').trim();
+                        if (/^[0-9a-fA-F]{24}$/.test(idStr)) {
+                            const timestamp = parseInt(idStr.substring(0, 8), 16) * 1000;
+                            if (Number.isFinite(timestamp) && timestamp > 0) return timestamp;
+                        }
+                        return 0;
+                    };
+                    const tsA = getCreatedTs(a);
+                    const tsB = getCreatedTs(b);
+                    if (tsA !== tsB) return tsB - tsA;
                     const an = (a?.name ?? '').toString().trim().toLowerCase();
                     const bn = (b?.name ?? '').toString().trim().toLowerCase();
                     if (an < bn) return -1;
@@ -2473,13 +2507,7 @@ export default function AllMatches() {
                                             {getCms('page_all_matches_league_placeholder', 'Select League')}
                                         </MenuItem>
                                     )}
-                                    {[...sortedLeagues].sort((a, b) => {
-                                        const an = (a?.name ?? '').toString().trim().toLowerCase();
-                                        const bn = (b?.name ?? '').toString().trim().toLowerCase();
-                                        if (an < bn) return -1;
-                                        if (an > bn) return 1;
-                                        return String(a.id).localeCompare(String(b.id));
-                                    }).map((leagueItem) => {
+                                    {sortedLeagues.map((leagueItem) => {
                                         const isActive = selectedLeague === leagueItem.id;
                                         return (
                                             <MenuItem
