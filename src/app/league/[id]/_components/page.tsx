@@ -3307,16 +3307,6 @@ export default function LeagueDetailPage() {
                 }}
             >
                 <Container maxWidth="lg">
-                    <Button
-                        startIcon={<ArrowLeft />}
-                        onClick={handleBackToAllLeagues}
-                        sx={{
-                            mb: 2, color: 'white', backgroundColor: '#388e3c',
-                            '&:hover': { backgroundColor: '#388e3c' },
-                        }}
-                    >
-                        Back to All Leagues
-                    </Button>
                     <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
                         {error}
                     </Typography>
@@ -3360,17 +3350,6 @@ export default function LeagueDetailPage() {
             >
                 <Container maxWidth="lg">
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
-                        <Button
-                            startIcon={<ArrowLeft />}
-                            onClick={handleBackToAllLeagues}
-                            sx={{
-                                color: 'white',
-                                backgroundColor: '#388e3c',
-                                '&:hover': { backgroundColor: '#2e7d32' },
-                            }}
-                        >
-                            Back to All Leagues
-                        </Button>
                         <Button
                             startIcon={<RefreshCw size={16} />}
                             onClick={() => {
