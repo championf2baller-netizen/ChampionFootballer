@@ -1502,7 +1502,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to save match details';
             toast.error(errorMessage);
-            setError(errorMessage);
         } finally {
             setSavingMatchDetails(false);
         }
