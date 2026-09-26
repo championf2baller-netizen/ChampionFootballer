@@ -1018,15 +1018,16 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     } catch { }
   }, [matchId, token]);
 
-  useEffect(() => {
-    if (matchId && token) { void fetchMatchXPBreakdown(); }
-  }, [matchId, token, fetchMatchXPBreakdown]);
+  const predictionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (matchId && token && (homeTeamUsers.length > 0 || awayTeamUsers.length > 0)) {
-      fetchPrediction();
+  const debouncedFetchPrediction = useCallback(() => {
+    if (predictionTimeoutRef.current) {
+      clearTimeout(predictionTimeoutRef.current);
     }
-  }, [matchId, token, homeTeamUsers.length, awayTeamUsers.length, fetchPrediction]);
+    predictionTimeoutRef.current = setTimeout(() => {
+      fetchPrediction();
+    }, 400);
+  }, [fetchPrediction]);
 
   // Minimal skill display helper for UI only
   const calcSkill = (p?: PlayerOption | null) => {
@@ -1648,13 +1649,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     return [...members, ...awayGuests.map(guestToPlayer)];
   }, [latestSeasonMembers, homeTeamUsers, awayGuests, compareByAcceptanceThenName]);
 
-  // When teams change (by content, not only count), re-fetch prediction
+  // When teams change (by content), debounced re-fetch prediction
   const homeIdsKey = React.useMemo(() => homeTeamUsers.map(u => u.id).join('|'), [homeTeamUsers]);
   const awayIdsKey = React.useMemo(() => awayTeamUsers.map(u => u.id).join('|'), [awayTeamUsers]);
   useEffect(() => {
-    fetchPrediction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [homeIdsKey, awayIdsKey]);
+    if (matchId && token && (homeTeamUsers.length > 0 || awayTeamUsers.length > 0)) {
+      debouncedFetchPrediction();
+    }
+    return () => {
+      if (predictionTimeoutRef.current) {
+        clearTimeout(predictionTimeoutRef.current);
+      }
+    };
+  }, [homeIdsKey, awayIdsKey, matchId, token, debouncedFetchPrediction, homeTeamUsers.length, awayTeamUsers.length]);
 
   // Minimum players required
   // const totalSelectedPlayers = homeTeamUsers.length + awayTeamUsers.length;
@@ -2041,10 +2048,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       multiple
                       options={homePlayerOptions}
                       disableCloseOnSelect
+                      blurOnSelect={false}
                       getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
-                      // List all players: do not disable by availability
                       getOptionDisabled={() => false}
-                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      isOptionEqualToValue={(o, v) => {
+                        if (!o || !v) return false;
+                        if (o.isGuest || v.isGuest) {
+                          if (o.guestTempId && v.guestTempId) return o.guestTempId === v.guestTempId;
+                          if (o.existingGuestId && v.existingGuestId) return o.existingGuestId === v.existingGuestId;
+                        }
+                        return String(o.id || '').trim() === String(v.id || '').trim();
+                      }}
                       PaperComponent={BlackPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
@@ -2060,7 +2074,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
-                        // const number = option.shirtNumber || (option.isGuest ? 'G' : '—');
                         return (
                           <Box
                             key={key}
@@ -2072,10 +2085,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               alignItems: 'center',
                               p: 1,
                               position: 'relative',
-                              bgcolor: '#000', // set background to black
+                              bgcolor: '#000',
                               border: '1px solid',
                               borderColor: selected ? (isAvailable ? '#43a047' : '#fff') : 'rgba(255,255,255,0.15)',
                               borderRadius: 1,
+                              userSelect: 'none',
+                              cursor: 'pointer',
                               transition: 'background-color .15s ease, border-color .15s ease',
                               '&:hover': {
                                 bgcolor: 'rgba(255,255,255,0.08)',
@@ -2083,55 +2098,45 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }
                             }}
                           >
-                            <Box
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                mb: 0.5,
-                                borderRadius: '50%',
-                                overflow: 'hidden',
-                                border: '3px solid',
-                                borderColor: isAvailable ? '#43a047' : '#fff',
-                                bgcolor: '#000',
-                                flexShrink: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              <img
-                                src={option.profilePicture || defaultTeamImagee}
-                                alt=""
-                                loading="eager"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
-                              />
-                            </Box>
-                            <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
-                              {option.firstName}
-                            </Typography>
-                            {isAvailable && Number.isFinite(availabilityOrder) && (
-                              <Typography sx={{ fontSize: '0.55rem', lineHeight: 1, color: '#43a047' }}>
-                                ({availabilityOrder})
-                              </Typography>
-                            )}
-                            {selected && (
-                              <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
-                                <Check size={12} />
+                            <Box sx={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  mb: 0.5,
+                                  borderRadius: '50%',
+                                  overflow: 'hidden',
+                                  border: '3px solid',
+                                  borderColor: isAvailable ? '#43a047' : '#fff',
+                                  bgcolor: '#000',
+                                  flexShrink: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <img
+                                  src={option.profilePicture || defaultTeamImagee}
+                                  alt=""
+                                  loading="eager"
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
+                                />
                               </Box>
-                            )}
-                            {/* Show shirt number: green if available, black otherwise */}
-                            {/* <Box sx={{
-                                    mt: 0.4,
-                                    px: 0.6,
-                                    py: 0.25,
-                                    borderRadius: 1,
-                                    fontSize: '0.65rem',
-                                    fontWeight: 800,
-                                    color: isAvailable ? '#43a047' : '#111'
-                                  }}>
-                                    {number}
-                                  </Box> */}
+                              <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
+                                {option.firstName}
+                              </Typography>
+                              {isAvailable && Number.isFinite(availabilityOrder) && (
+                                <Typography sx={{ fontSize: '0.55rem', lineHeight: 1, color: '#43a047' }}>
+                                  ({availabilityOrder})
+                                </Typography>
+                              )}
+                              {selected && (
+                                <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
+                                  <Check size={12} />
+                                </Box>
+                              )}
+                            </Box>
                           </Box>
                         );
                       }}
@@ -2219,10 +2224,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       multiple
                       options={awayPlayerOptions}
                       disableCloseOnSelect
+                      blurOnSelect={false}
                       getOptionLabel={(option) => `${option.firstName} ${option.lastName}`}
                       // List all players: do not disable by availability
                       getOptionDisabled={() => false}
-                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      isOptionEqualToValue={(o, v) => {
+                        if (!o || !v) return false;
+                        if (o.isGuest || v.isGuest) {
+                          if (o.guestTempId && v.guestTempId) return o.guestTempId === v.guestTempId;
+                          if (o.existingGuestId && v.existingGuestId) return o.existingGuestId === v.existingGuestId;
+                        }
+                        return String(o.id || '').trim() === String(v.id || '').trim();
+                      }}
                       PaperComponent={BlackPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
@@ -2238,7 +2251,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
-                        // const number = option.shirtNumber || (option.isGuest ? 'G' : '—');
                         return (
                           <Box
                             key={key}
@@ -2249,11 +2261,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               flexDirection: 'column',
                               alignItems: 'center',
                               p: 1,
-                              position: 'relative'
-                              , bgcolor: '#000', // set background to black
+                              position: 'relative',
+                              bgcolor: '#000',
                               border: '1px solid',
                               borderColor: selected ? (isAvailable ? '#43a047' : '#fff') : 'rgba(255,255,255,0.15)',
                               borderRadius: 1,
+                              userSelect: 'none',
+                              cursor: 'pointer',
                               transition: 'background-color .15s ease, border-color .15s ease',
                               '&:hover': {
                                 bgcolor: 'rgba(255,255,255,0.08)',
@@ -2261,43 +2275,45 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }
                             }}
                           >
-                            <Avatar
-                              src={option.profilePicture || defaultTeamImagee}
-                              sx={{
-                                width: 40,
-                                height: 40,
-                                mb: 0.5,
-                                border: '3px solid',
-                                borderColor: isAvailable ? '#43a047' : '#fff',
-                                bgcolor: '#000',
-                                '& .MuiAvatar-img': { backgroundColor: '#000', objectFit: 'cover' }
-                              }}
-                            />
-                            <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
-                              {option.firstName}
-                            </Typography>
-                            {isAvailable && Number.isFinite(availabilityOrder) && (
-                              <Typography sx={{ fontSize: '0.55rem', lineHeight: 1, color: '#43a047' }}>
-                                ({availabilityOrder})
-                              </Typography>
-                            )}
-                            {selected && (
-                              <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
-                                <Check size={12} />
+                            <Box sx={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                              <Box
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  mb: 0.5,
+                                  borderRadius: '50%',
+                                  overflow: 'hidden',
+                                  border: '3px solid',
+                                  borderColor: isAvailable ? '#43a047' : '#fff',
+                                  bgcolor: '#000',
+                                  flexShrink: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <img
+                                  src={option.profilePicture || defaultTeamImagee}
+                                  alt=""
+                                  loading="eager"
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
+                                />
                               </Box>
-                            )}
-                            {/* Shirt number: green if available, black otherwise */}
-                            {/* <Box sx={{
-                                    mt: 0.4,
-                                    px: 0.6,
-                                    py: 0.25,
-                                    borderRadius: 1,
-                                    fontSize: '0.65rem',
-                                    fontWeight: 800,
-                                    color: isAvailable ? '#43a047' : '#111'
-                                  }}>
-                                    {number}
-                                  </Box> */}
+                              <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
+                                {option.firstName}
+                              </Typography>
+                              {isAvailable && Number.isFinite(availabilityOrder) && (
+                                <Typography sx={{ fontSize: '0.55rem', lineHeight: 1, color: '#43a047' }}>
+                                  ({availabilityOrder})
+                                </Typography>
+                              )}
+                              {selected && (
+                                <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
+                                  <Check size={12} />
+                                </Box>
+                              )}
+                            </Box>
                           </Box>
                         );
                       }}
