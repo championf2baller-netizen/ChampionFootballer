@@ -17,6 +17,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     <>
       <main
         id="main-content"
+        className="mobile-hide-bg-img"
         role="main"
         style={{
           backgroundImage: (isMainPage || isAdminPage) ? 'none' : `url(${Mainbg.src})`,
@@ -28,7 +29,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           width: '100%',
           maxWidth: '100%',
           overflowX: 'hidden',
-          backgroundColor: 'black',
+          backgroundColor: '#0E0E0E',
         }}
       >
         {!isMainPage && !isAdminPage && <Navbar />}

@@ -2414,6 +2414,7 @@ export default function PlayerDashboard() {
         elevation={0}
         sx={{
           backgroundImage: `url(${dash.src})`,
+          // backgroundColor: '#0E0E0E',
           backgroundSize: { xs: 'cover', md: '100% 100%' },
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -3092,6 +3093,7 @@ export default function PlayerDashboard() {
         elevation={0}
         sx={{
           backgroundImage: `url(${Dashbg.src})`,
+          // backgroundColor: '#0E0E0E',
           backgroundSize: '100% 100%',
           backgroundPosition: 'center',
           borderRadius: 0,

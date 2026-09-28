@@ -60,7 +60,7 @@ const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
 });
 
 // Colors & Gradients
-const DARK_BG = '#383838';
+const DARK_BG = { xs: 'transparent', md: '#383838' };
 const CARD_BG = '#272727';
 const TEAL_PRIMARY = '#00a77f';
 const ORANGE_ACCENT = '#ff6b35';

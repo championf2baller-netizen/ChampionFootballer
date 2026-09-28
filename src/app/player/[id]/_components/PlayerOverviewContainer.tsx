@@ -106,7 +106,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
     getCms,
 }) => {
     return (
-        <Container maxWidth={false} sx={{ bgcolor: '#383838', py: { xs: 2.2, md: 3 }, px: { xs: 1.3, sm: 2, md: 3.5 }, maxWidth: 1165, mx: 'auto', borderRadius: 2, mb: 5, position: 'relative', zIndex: 1 }}>
+        <Container maxWidth={false} sx={{ bgcolor: { xs: 'transparent', md: '#383838' }, py: { xs: 2.2, md: 3 }, px: { xs: 1.3, sm: 2, md: 3.5 }, maxWidth: 1165, mx: 'auto', borderRadius: 2, mb: 5, position: 'relative', zIndex: 1 }}>
             {loading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
                     <CircularProgress size={40} sx={{ color: '#00ff88' }} />
