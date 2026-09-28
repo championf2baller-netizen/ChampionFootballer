@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Country } from 'country-state-city';
 import { useAuth } from '@/lib/hooks';
 import WorldRankingLoadingSkeleton from '@/Components/loading/WorldRankingLoadingSkeleton';
+import PageHeader from '@/Components/PageHeader';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
 
@@ -370,55 +371,17 @@ export default function WorldRankingTable() {
       `}</style>
 
       {/* ────────── HEADER ────────── */}
-      <Box sx={{
-        mb: 0,
-        bgcolor: '#0E0E0E',
-        p: { xs: 2, md: 3 },
-        minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        transform: 'translateX(-50%)',
-      }}>
-        <Typography sx={{
-          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-          fontWeight: 700,
-          fontSize: { xs: '32px', sm: '42px', md: '55px' },
-          textAlign: 'center',
-          textTransform: 'uppercase',
-          color: '#fff',
-          letterSpacing: '0px',
-          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-          pt: { xs: 2, md: 3 },
-          pb: { xs: 3, md: 6 },
-          lineHeight: 1,
-        }}>
-          WORLD RANKING
-        </Typography>
-
-        {/* Divider line below heading */}
-        <Box sx={{
+      <PageHeader
+        title="WORLD RANKING"
+        fullBleed={false}
+        sx={{ mb: { xs: 1.2, md: 4 } }}
+        dividerSx={{
           width: '100vw',
           position: 'relative',
           left: '50%',
           transform: 'translateX(-50%)',
-          height: 'var(--header-divider-height)',
-          background: 'var(--header-divider-color)',
-          mb: { xs: 0.25, md: -1 },
-        }} />
-      </Box>
-
-      {/* ────────── FILTERS ────────── */}
-      <Box sx={{
-        bgcolor: '#0e0e0e',
-        px: { xs: 2, md: 4 },
-        mt: 0,
-        pt: 0,
-        mb: { xs: 2, md: 2 },
-        mx: 0,
-        position: 'relative',
-        zIndex: 1,
-      }}>
+        }}
+      >
         <Box sx={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -427,6 +390,7 @@ export default function WorldRankingTable() {
           gap: { xs: 1, md: 1.2 },
           maxWidth: 1150,
           mx: 'auto',
+          px: { xs: 2, md: 4 },
         }}>
           {/* Left side - Mode toggle and Search */}
           <Box sx={{
@@ -447,6 +411,7 @@ export default function WorldRankingTable() {
                     cursor: 'pointer',
                     fontSize: 15,
                     fontWeight: 600,
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                     bgcolor: filters.mode === mode ? '#e56a16' : 'transparent',
                     color: '#fff',
                     userSelect: 'none',
@@ -485,6 +450,7 @@ export default function WorldRankingTable() {
                   outline: 'none',
                   color: '#fff',
                   fontSize: 15,
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                 }}
               />
             </Box>
@@ -510,9 +476,9 @@ export default function WorldRankingTable() {
                 MenuProps={filterMenuProps}
                 sx={filterSelectSx}
               >
-                <MenuItem value="">All Years</MenuItem>
+                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Years</MenuItem>
                 {years.map((y) => (
-                  <MenuItem key={y} value={y}>{y}</MenuItem>
+                  <MenuItem key={y} value={y} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{y}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -527,9 +493,9 @@ export default function WorldRankingTable() {
                 MenuProps={countryFilterMenuProps}
                 sx={filterSelectSx}
               >
-                <MenuItem value="">All Country</MenuItem>
+                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Country</MenuItem>
                 {countries.map((c) => (
-                  <MenuItem key={c} value={c}>{c}</MenuItem>
+                  <MenuItem key={c} value={c} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{c}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -543,15 +509,13 @@ export default function WorldRankingTable() {
                 MenuProps={filterMenuProps}
                 sx={filterSelectSx}
               >
-                <MenuItem value="">All Position</MenuItem>
-                <MenuItem value="Defender">Defender</MenuItem>
-                <MenuItem value="Midfielder">Midfielder</MenuItem>
-                <MenuItem value="Forward">Forward</MenuItem>
-                <MenuItem value="Goalkeeper">Goalkeeper</MenuItem>
+                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Position</MenuItem>
+                <MenuItem value="Defender" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Defender</MenuItem>
+                <MenuItem value="Midfielder" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Midfielder</MenuItem>
+                <MenuItem value="Forward" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Forward</MenuItem>
+                <MenuItem value="Goalkeeper" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Goalkeeper</MenuItem>
               </Select>
             </FormControl>
-
-
 
             {/* Clear */}
             <Box
@@ -567,6 +531,7 @@ export default function WorldRankingTable() {
                 cursor: 'pointer',
                 fontSize: 15,
                 fontWeight: 600,
+                fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                 color: '#fff',
                 userSelect: 'none',
                 '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.05)' },
@@ -577,7 +542,7 @@ export default function WorldRankingTable() {
             </Box>
           </Box>
         </Box>
-      </Box>
+      </PageHeader>
 
       {/* ────────── INFO ROW ────────── */}
       <Box sx={{ textAlign: 'center', py: 1, color: '#aaa', fontSize: 15 }}>
@@ -637,8 +602,8 @@ export default function WorldRankingTable() {
                 }
               }}
             >
-              <TableHead sx={{ bgcolor: '#dddddd !important' }}>
-                <TableRow sx={{ bgcolor: '#dddddd !important' }}>
+              <TableHead className="league-header-row" sx={{ bgcolor: '#dddddd !important' }}>
+                <TableRow className="league-header-row" sx={{ bgcolor: '#dddddd !important' }}>
                   {(() => {
                     const showAvg = filters.mode === 'avg';
                     const cols: Column[] = [
@@ -669,23 +634,19 @@ export default function WorldRankingTable() {
                       return (
                         <TableCell
                           key={col.label}
+                          className={`league-table-heading ${isPrimaryInfoCol ? 'league-table-heading-left' : ''}`}
                           onClick={() => isSortableKey(col.key) && toggleSort(col.key)}
                           sx={{
                             cursor: isSortableKey(col.key) ? 'pointer' : 'default',
                             userSelect: 'none',
                             bgcolor: '#dddddd !important',
                             color: '#000000 !important',
-                            fontWeight: 600,
-                            fontSize: 15,
-                            letterSpacing: 0,
-                            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                            textTransform: 'uppercase',
-                            py: 1.5,
+                            py: { xs: 2.2, md: 2.8 },
+                            height: { xs: 40, md: 44 },
                             minWidth: colWidths[i],
                             width: colWidths[i],
                             maxWidth: colWidths[i],
-                            textAlign: isPrimaryInfoCol ? 'left' : 'center',
-                            // borderBottom: '2px solid #e56a16 !important',
+                            textAlign: isPrimaryInfoCol ? 'left !important' : 'center !important',
                             pl: i === 0 ? 3 : 1.5,
                             ...(i === 1 ? {
                               position: 'sticky',
