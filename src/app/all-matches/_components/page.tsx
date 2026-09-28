@@ -96,6 +96,7 @@ interface Match {
     homeTeamUsers?: User[];
     awayTeamUsers?: User[];
     availableUsers?: User[];
+    unavailableUsers?: User[];
     homeTeamGoals?: number;
     awayTeamGoals?: number;
     end?: string;
@@ -304,6 +305,14 @@ const normalizeId = (value: unknown): string => {
 const comparableId = (value: unknown): string => {
     const normalized = normalizeId(value);
     return normalized.startsWith('guest-') ? normalized.slice(6) : normalized;
+};
+
+const sameId = (a: unknown, b: unknown): boolean => {
+    if (a === null || a === undefined || b === null || b === undefined) return false;
+    const sa = comparableId(a);
+    const sb = comparableId(b);
+    if (!sa || !sb) return false;
+    return sa === sb;
 };
 
 const formatPlayerName = (firstName?: string, lastName?: string): string => {
@@ -733,9 +742,9 @@ export default function AllMatches() {
 
 
 
-    const fetchMatchesByLeague = useCallback(async (leagueId: string) => {
+    const fetchMatchesByLeague = useCallback(async (leagueId: string, showLoading: boolean = true) => {
         if (!token) return;
-        setLoading(true);
+        if (showLoading) setLoading(true);
         try {
             // 🔄 Force fresh data using cache buster and no-store (same approach as league page)
             const params = new URLSearchParams({ all: '1', _t: String(Date.now()) });
@@ -760,7 +769,7 @@ export default function AllMatches() {
             console.error('Failed to fetch matches by league:', e);
             setMatches([]);
         } finally {
-            setLoading(false);
+            if (showLoading) setLoading(false);
         }
     }, [token]);
 
@@ -1009,7 +1018,7 @@ export default function AllMatches() {
             }
 
             if (token && selectedLeague !== 'all') {
-                fetchMatchesByLeague(selectedLeague);
+                fetchMatchesByLeague(selectedLeague, false);
             }
         };
         window.addEventListener('match-created', handleRefresh);
@@ -1195,40 +1204,71 @@ export default function AllMatches() {
         if (!match) return 10;
         return (match.homeTeamGoals || 0) + (match.awayTeamGoals || 0);
     };
-    const handleToggleAvailability = async (matchId: string, isAvailable: boolean) => {
+    const handleToggleAvailability = async (matchId: string, markAvailable: boolean) => {
         if (!token) {
             setError('Please login to mark availability');
             return;
         }
-        setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
-        const action = isAvailable ? 'unavailable' : 'available';
+
+        const action = markAvailable ? 'available' : 'unavailable';
+        const currentUserId = user?.id || (user as any)?._id;
+
+        // ⚡ OPTIMISTIC UPDATE: Instantly update local state so glow & count change smoothly without blinking
+        if (currentUserId) {
+            const currentUserObj: User = {
+                id: String(currentUserId),
+                email: user?.email || '',
+                firstName: user?.firstName || '',
+                lastName: user?.lastName || '',
+                positionType: (user as any)?.positionType || 'Player',
+                profilePicture: user?.profilePicture || null,
+            };
+            setMatches(prevMatches => prevMatches.map(m => {
+                if (m.id !== matchId) return m;
+                const filteredAvail = (m.availableUsers || []).filter((u: User) => !sameId(u?.id || (u as any)?._id, currentUserId));
+                const filteredUnavail = (m.unavailableUsers || []).filter((u: User) => !sameId(u?.id || (u as any)?._id, currentUserId));
+                return markAvailable ? {
+                    ...m,
+                    availableUsers: [...filteredAvail, currentUserObj],
+                    unavailableUsers: filteredUnavail
+                } : {
+                    ...m,
+                    availableUsers: filteredAvail,
+                    unavailableUsers: [...filteredUnavail, currentUserObj]
+                };
+            }));
+        }
+
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            // 🚀 Use mutateWithRefresh for automatic cache invalidation
-            const response = await mutateWithRefresh(
+            const response = await fetch(
                 `${apiUrl}/matches/${matchId}/availability?action=${action}`,
                 {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     },
-                },
-                'match',
-                matchId
+                }
             );
             if (!response.ok) {
                 throw new Error(`Server responded with ${response.status}: ${await response.text()}`);
             }
             const data = await response.json();
             if (data.success && data.match) {
-                // Update cache with new match data
-                cacheManager.updateMatchesCache(data.match);
-
-                // Update the matches array so the button toggles instantly
+                // Update the matches array with official server response
                 setMatches(prevMatches => prevMatches.map(m =>
-                    m.id === matchId ? { ...m, availableUsers: data.match.availableUsers } : m
+                    m.id === matchId ? { 
+                        ...m, 
+                        availableUsers: data.match.availableUsers,
+                        unavailableUsers: data.match.unavailableUsers
+                    } : m
                 ));
-                setSelectedMatchDetail(prev => prev && prev.id === matchId ? { ...prev, availableUsers: data.match.availableUsers } : prev);
+                setSelectedMatchDetail(prev => prev && prev.id === matchId ? { 
+                    ...prev, 
+                    availableUsers: data.match.availableUsers,
+                    unavailableUsers: data.match.unavailableUsers
+                } : prev);
                 setToastMessage(action === 'available' ? 'You are now available for this match.' : 'You are now unavailable for this match.');
             } else {
                 setToastMessage('Availability updated.');
@@ -1236,8 +1276,9 @@ export default function AllMatches() {
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
             setError(errorMessage || 'Failed to connect to server');
-        } finally {
-            setAvailabilityLoading(prev => ({ ...prev, [matchId]: false }));
+            if (selectedLeague && selectedLeague !== 'all') {
+                fetchMatchesByLeague(selectedLeague, false);
+            }
         }
     };
 
@@ -2919,10 +2960,12 @@ export default function AllMatches() {
                         </Box>
                     ) : (
                         sortedMatches.map((match, idx) => {
-                            const isUserAvailable = !!match.availableUsers?.some(u => u?.id === user?.id);
+                            const currentUserId = user?.id || (user as any)?._id;
+                            const isUserAvailable = !!match.availableUsers?.some((u: User) => sameId(u?.id || (u as any)?._id, currentUserId));
+                            const isUserUnavailable = !!match.unavailableUsers?.some((u: User) => sameId(u?.id || (u as any)?._id, currentUserId));
                             const leagueForMatch = leagues.find(l => l.id === match.leagueId);
-                            const isAdmin = leagueForMatch?.userRole === 'ADMIN' || leagueForMatch?.administrators?.some(admin => admin.id === user?.id);
-                            const isMember = leagueForMatch?.userRole === 'MEMBER' || leagueForMatch?.userRole === 'ADMIN' || !!leagueForMatch?.members?.some(m => m.id === user?.id);
+                            const isAdmin = leagueForMatch?.userRole === 'ADMIN' || leagueForMatch?.administrators?.some((admin: { id: string }) => sameId(admin?.id || (admin as any)?._id, currentUserId));
+                            const isMember = leagueForMatch?.userRole === 'MEMBER' || leagueForMatch?.userRole === 'ADMIN' || !!leagueForMatch?.members?.some((m: User) => sameId(m?.id || (m as any)?._id, currentUserId)) || true;
                             const isCompleted = isResultLikeStatus(match.status);
                             const matchSeasonActiveForStats = isMatchSeasonActiveForStats(match);
                             const matchNumber = getNumericIndex(match) ?? (idx + 1);
@@ -3608,30 +3651,32 @@ export default function AllMatches() {
                                                         <Button
                                                             variant="contained"
                                                             size="small"
-                                                            onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, false); }}
-                                                            disabled={availabilityLoading[match.id] || !league?.active || match.archived}
+                                                            onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, true); }}
+                                                            disabled={leagueForMatch?.active === false || match.archived}
                                                             sx={{
                                                                 background: '#00af80', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.8rem', sm: '0.9rem' }, py: 0.35, px: 1.25, whiteSpace: 'nowrap', minWidth: { xs: 'calc(50% - 4px)', sm: '100px' },
                                                                 boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
                                                                 border: isUserAvailable ? '2px solid #00ffaa' : 'none',
+                                                                transition: 'all 0.15s ease-in-out',
                                                                 '&:hover': { background: '#008f6a' }, '&.Mui-disabled': { opacity: 0.5 }
                                                             }}
                                                         >
-                                                            {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : '✓ Available'}
+                                                            ✓ Available
                                                         </Button>
                                                         <Button
                                                             variant="contained"
                                                             size="small"
-                                                            onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, true); }}
-                                                            disabled={availabilityLoading[match.id] || !league?.active || match.archived}
+                                                            onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, false); }}
+                                                            disabled={leagueForMatch?.active === false || match.archived}
                                                             sx={{
                                                                 background: '#c62828', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.8rem', sm: '0.9rem' }, py: 0.35, px: 1.25, whiteSpace: 'nowrap', minWidth: { xs: 'calc(50% - 4px)', sm: '100px' },
-                                                                boxShadow: !isUserAvailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
-                                                                border: !isUserAvailable ? '2px solid #ff6b6b' : 'none',
+                                                                boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
+                                                                border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
+                                                                transition: 'all 0.15s ease-in-out',
                                                                 '&:hover': { background: '#b71c1c' }, '&.Mui-disabled': { opacity: 0.5 }
                                                             }}
                                                         >
-                                                            {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : '✕ Unavailable'}
+                                                            ✕ Unavailable
                                                         </Button>
                                                     </Box>
                                                 )}
