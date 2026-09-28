@@ -176,8 +176,13 @@ export default function MatchDetailModal({
     const homeLogoSrc = getHomeTeamImageSrc(match);
     const awayLogoSrc = getAwayTeamImageSrc(match);
 
+    const homeUsers = match.homeTeamUsers || match.homeTeam || [];
+    const awayUsers = match.awayTeamUsers || match.awayTeam || [];
+    const squadPlayersCount = homeUsers.length + awayUsers.length;
+
     const availableCount = match.availableUsers?.length || 0;
-    const pendingCount = Math.max(0, leagueMembersCount - availableCount);
+    const totalTargetCount = squadPlayersCount > 0 ? squadPlayersCount : (leagueMembersCount || 0);
+    const pendingCount = Math.max(0, totalTargetCount - availableCount);
 
     return (
         <Dialog

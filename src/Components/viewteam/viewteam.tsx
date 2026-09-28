@@ -338,6 +338,8 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
   const [matchStatus, setMatchStatus] = React.useState<string | undefined>(undefined);
   const [homeTeamGoals, setHomeTeamGoals] = React.useState<number | null>(null);
   const [awayTeamGoals, setAwayTeamGoals] = React.useState<number | null>(null);
+  const [homeTeamImage, setHomeTeamImage] = React.useState<string | null>(null);
+  const [awayTeamImage, setAwayTeamImage] = React.useState<string | null>(null);
   const [matchTiming, setMatchTiming] = React.useState<{
     durationMinutes: number | null;
     startIso: string | null;
@@ -559,6 +561,12 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
         setMatchStatus(m.status);
         setHomeTeamGoals(m.homeTeamGoals ?? null);
         setAwayTeamGoals(m.awayTeamGoals ?? null);
+
+        const rawHomeImg = (m as any).homeTeamImage || (m as any).homeImage || (m as any).homeTeamLogo || (m as any).homeLogo || null;
+        const rawAwayImg = (m as any).awayTeamImage || (m as any).awayImage || (m as any).awayTeamLogo || (m as any).awayLogo || null;
+        setHomeTeamImage(typeof rawHomeImg === 'string' && rawHomeImg.trim() && rawHomeImg !== 'null' && rawHomeImg !== 'undefined' ? rawHomeImg.trim() : null);
+        setAwayTeamImage(typeof rawAwayImg === 'string' && rawAwayImg.trim() && rawAwayImg !== 'null' && rawAwayImg !== 'undefined' ? rawAwayImg.trim() : null);
+
         setHomeCaptainId(m.homeCaptainId ? String(m.homeCaptainId) : undefined);
         setAwayCaptainId(m.awayCaptainId ? String(m.awayCaptainId) : undefined);
         syncMatchTimingFromMatch(m);
@@ -1702,7 +1710,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
               <Typography sx={{ textAlign: 'center', fontWeight: 700, fontSize: { xs: '0.85rem', sm: '1rem' }, color: '#fff', textTransform: 'uppercase', letterSpacing: 1, mb: 0 }}>Team Balance</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
                 {/* Home shirt */}
-                <img src={Homeimgcf.src} alt="Home" width={70} height={70} style={{ objectFit: 'contain', flexShrink: 0, marginTop: '-24px' }} />
+                <img src={homeTeamImage || Homeimgcf.src} alt="Home" width={70} height={70} style={{ objectFit: 'contain', flexShrink: 0, marginTop: '-24px', borderRadius: homeTeamImage ? '50%' : '0' }} />
                 {/* Center: % + bar + VS */}
                 <Box sx={{ flex: 1, mx: { xs: 0.5, sm: 1.5 }, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                   {/* % labels at corners of bar */}
@@ -1748,7 +1756,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                   <Typography sx={{ color: '#fff', fontSize: { xs: '0.72rem', sm: '0.82rem' }, textAlign: 'center', fontWeight: 600, mt: { xs: -0.4, sm: -1 } }}>{matchDurationLabel}</Typography>
                 </Box>
                 {/* Away shirt */}
-                <img src={Awayimgcf.src} alt="Away" width={70} height={70} style={{ objectFit: 'contain', flexShrink: 0, marginTop: '-24px' }} />
+                <img src={awayTeamImage || Awayimgcf.src} alt="Away" width={70} height={70} style={{ objectFit: 'contain', flexShrink: 0, marginTop: '-24px', borderRadius: awayTeamImage ? '50%' : '0' }} />
               </Box>
             </Box>
 

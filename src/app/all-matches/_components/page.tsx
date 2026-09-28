@@ -1078,14 +1078,20 @@ export default function AllMatches() {
     };
 
     const getAvailabilityCounts = (match: Match) => {
-        // Find the league for this match
+        const homeUsers = match.homeTeamUsers || (match as any).homeTeam || [];
+        const awayUsers = match.awayTeamUsers || (match as any).awayTeam || [];
+        const squadPlayersCount = homeUsers.length + awayUsers.length;
+
+        const availableCount = match.availableUsers?.length || 0;
+
+        if (squadPlayersCount > 0) {
+            const pendingCount = Math.max(0, squadPlayersCount - availableCount);
+            return { availableCount, pendingCount };
+        }
+
         const leagueForMatch = leagues.find(l => l.id === match.leagueId);
         const leagueMembers = leagueForMatch?.members || [];
-        // Count how many league members are in availableUsers
-        const availableCount = leagueMembers.filter(member =>
-            match.availableUsers?.some((u: User) => u.id === member.id)
-        ).length;
-        const pendingCount = leagueMembers.length - availableCount;
+        const pendingCount = Math.max(0, leagueMembers.length - availableCount);
         return { availableCount, pendingCount };
     };
     const [, setError] = useState<string | null>(null);
@@ -3712,24 +3718,26 @@ export default function AllMatches() {
                                             </Box>
 
                                             {/* Right Admin Column */}
-                                            <Box sx={{ width: '95px', borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 2, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2 }}>
+                                            <Box sx={{ width: '95px', borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 2, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2 , mr:1 }}>
                                                 {isAdmin ? (
                                                     <>
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left' }}> Admin Only</Typography>
                                                         <Button
                                                             onClick={(e) => { e.stopPropagation(); setEditMatchLeagueId(String(match.leagueId)); setEditMatchId(match.id); setEditMatchOpen(true); }}
                                                             disabled={!league?.active || match.archived}
-                                                            startIcon={<Edit size={16} />}
+                                                            startIcon={<Edit size={16} color="#00a77f" />}
                                                             sx={{
                                                                 color: '#fff',
                                                                 justifyContent: 'flex-start',
                                                                 textTransform: 'none',
                                                                 p: 0,
-                                                                fontSize: '0.65rem',
+                                                                fontSize: '0.7rem',
                                                                 whiteSpace: 'nowrap',
-                                                                '&:hover': { textDecoration: 'underline' },
+                                                                fontWeight: '600',
+                                                                '&:hover': { textDecoration: 'none' },
                                                                 '& .MuiButton-startIcon': { mr: 0.5 },
                                                                 '&.Mui-disabled': { color: 'rgba(255,255,255,0.68)' },
+                                                                textDecoration: 'underline'
                                                             }}
                                                         >
                                                             Edit Match
@@ -3745,7 +3753,7 @@ export default function AllMatches() {
                                                                 }
                                                             }}
                                                             startIcon={match.archived ? <Undo2 size={16} /> : <Trash2 size={16} />}
-                                                            sx={{ color: '#fff', justifyContent: 'flex-start', textTransform: 'none', p: 0, fontSize: '0.65rem', whiteSpace: 'nowrap', '&:hover': { textDecoration: 'underline' }, '& .MuiButton-startIcon': { mr: 0.5 } }}
+                                                            sx={{ color: '#fff', justifyContent: 'flex-start', textTransform: 'none', p: 0, fontSize: '0.7rem', whiteSpace: 'nowrap', '&:hover': { textDecoration: 'none' }, fontWeight: 600, '& .MuiButton-startIcon': { mr: 0.5 } , textDecoration: 'underline' }}
                                                         >
                                                             {match.archived ? 'Restore' : 'Delete Match'}
                                                         </Button>

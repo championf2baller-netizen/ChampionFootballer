@@ -3105,14 +3105,20 @@ export default function LeagueDetailPage() {
     }, [leagueId, token, selectedSeasonId, leaderboardRefreshKey]);
 
     const getAvailabilityCounts = (match: Match) => {
-        // Find the league for this match
-        const leagueForMatch = league; // Assuming 'league' is available in this scope
+        const homeUsers = match.homeTeamUsers || (match as any).homeTeam || [];
+        const awayUsers = match.awayTeamUsers || (match as any).awayTeam || [];
+        const squadPlayersCount = homeUsers.length + awayUsers.length;
+
+        const availableCount = match.availableUsers?.length || 0;
+
+        if (squadPlayersCount > 0) {
+            const pendingCount = Math.max(0, squadPlayersCount - availableCount);
+            return { availableCount, pendingCount };
+        }
+
+        const leagueForMatch = league;
         const leagueMembers = leagueForMatch?.members || [];
-        // Count how many league members are in availableUsers
-        const availableCount = leagueMembers.filter(member =>
-            match.availableUsers?.some((u: User) => u.id === member.id)
-        ).length;
-        const pendingCount = leagueMembers.length - availableCount;
+        const pendingCount = Math.max(0, leagueMembers.length - availableCount);
         return { availableCount, pendingCount };
     };
 
@@ -5333,7 +5339,8 @@ export default function LeagueDetailPage() {
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         justifyContent: 'flex-start',
-                                                                        gap: 2
+                                                                        gap: 2,
+                                                                        mr: 1
                                                                     }}>
                                                                         {isAdmin ? (
                                                                             <>
@@ -5347,16 +5354,18 @@ export default function LeagueDetailPage() {
                                                                                         setEditMatchDialogOpen(true);
                                                                                     }}
                                                                                     disabled={!league?.active}
-                                                                                    startIcon={<Edit size={16} />}
+                                                                                    startIcon={<Edit color="#00a77f" size={16} />}
                                                                                     sx={{
                                                                                         color: '#fff',
                                                                                         justifyContent: 'flex-start',
                                                                                         textTransform: 'none',
                                                                                         p: 0,
-                                                                                        fontSize: '0.65rem',
+                                                                                        fontSize: '0.7rem',
                                                                                         whiteSpace: 'nowrap',
-                                                                                        '&:hover': { textDecoration: 'underline' },
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 }
+                                                                                        '&:hover': { textDecoration: 'none' },
+                                                                                        '& .MuiButton-startIcon': { mr: 0.5 },
+                                                                                        textDecoration: 'underline',
+                                                                                        fontWeight: 600,
                                                                                     }}
                                                                                 >
                                                                                     Edit Match
@@ -5372,10 +5381,12 @@ export default function LeagueDetailPage() {
                                                                                         justifyContent: 'flex-start',
                                                                                         textTransform: 'none',
                                                                                         p: 0,
-                                                                                        fontSize: '0.65rem',
+                                                                                        fontSize: '0.7rem',
                                                                                         whiteSpace: 'nowrap',
-                                                                                        '&:hover': { textDecoration: 'underline' },
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 }
+                                                                                        '&:hover': { textDecoration: 'none' },
+                                                                                        '& .MuiButton-startIcon': { mr: 0.5 },
+                                                                                        textDecoration: 'underline',
+                                                                                        fontWeight: 600,
                                                                                     }}
                                                                                 >
                                                                                     Delete Match
