@@ -2866,35 +2866,68 @@ export default function LeagueDetailPage() {
         };
     }, [section, tableData.length, filteredLeague?.showPoints, syncTableHorizontalScroll]);
 
-    // Type for MOTM votes map: voterId -> votedForId
-    type ManOfTheMatchVotes = Record<string, string | number>;
-    const hasMotmVotes = (m: unknown): m is { manOfTheMatchVotes?: ManOfTheMatchVotes } =>
-        typeof m === 'object' && m !== null && 'manOfTheMatchVotes' in m;
-
-    // Aggregate MOTM votes locally from league.matches so every player's votes show
-    useEffect(() => {
-        if (!league?.members?.length || !league?.id) return;
+    // Robustly compute MOTM counts locally from match data
+    const computeMotmCountsFromMatches = useCallback((members: User[], matches: Match[]): Record<string, number> => {
         const counts: Record<string, number> = {};
+        if (!members?.length) return counts;
 
-        // Use filteredLeague matches when season is selected, otherwise use all league matches
-        const matchesToCount = selectedSeasonId && filteredLeague ? filteredLeague.matches : (league.matches || []);
+        const memberIdSet = new Set(members.map(m => normalizeEntityId(m.id)));
+        members.forEach(m => { counts[normalizeEntityId(m.id)] = 0; });
 
-        // Initialize all members with 0 to ensure everyone shows up
-        league.members.forEach(m => { counts[m.id] = 0; });
-        matchesToCount.forEach((match) => {
-            const votes: ManOfTheMatchVotes = hasMotmVotes(match) && match.manOfTheMatchVotes
-                ? match.manOfTheMatchVotes
-                : {};
+        (matches || []).forEach((match) => {
+            if (match.archived) return;
+            const matchRecord = match as unknown as Record<string, unknown>;
 
-            const matchVoteCounts: Record<string, number> = {};
-            Object.values(votes).forEach((votedForId) => {
-                const pid = String(votedForId);
-                matchVoteCounts[pid] = (matchVoteCounts[pid] || 0) + 1;
-            });
+            const voteCounts: Record<string, number> = {};
 
+            // 1) Handle match.votes array
+            if (Array.isArray(matchRecord.votes) && matchRecord.votes.length > 0) {
+                matchRecord.votes.forEach((v: unknown) => {
+                    if (v && typeof v === 'object') {
+                        const rec = v as Record<string, unknown>;
+                        const cat = String(rec.category || '').toLowerCase().trim();
+                        // Only count MOTM category votes (ignore 'defence', 'influence', etc.)
+                        if (cat && cat !== 'motm' && cat !== 'man_of_the_match') return;
+
+                        const votedFor = normalizeEntityId(rec.votedForId ?? rec.voted_for_id ?? rec.targetId ?? rec.playerId);
+                        if (votedFor) {
+                            voteCounts[votedFor] = (voteCounts[votedFor] || 0) + 1;
+                        }
+                    }
+                });
+            } else {
+                // 2) Handle match.manOfTheMatchVotes map
+                const rawVotes = matchRecord.manOfTheMatchVotes ?? matchRecord.manOfMatchVotes;
+                if (rawVotes && typeof rawVotes === 'object') {
+                    const entries = Object.entries(rawVotes as Record<string, unknown>);
+                    if (entries.length > 0) {
+                        const valuesAreCounts = entries.every(([, val]) => typeof val === 'number');
+                        if (valuesAreCounts) {
+                            // { [playerId]: voteCount }
+                            entries.forEach(([pid, count]) => {
+                                const normPid = normalizeEntityId(pid);
+                                const cnt = Number(count) || 0;
+                                if (normPid && cnt > 0) {
+                                    voteCounts[normPid] = (voteCounts[normPid] || 0) + cnt;
+                                }
+                            });
+                        } else {
+                            // { [voterId]: votedForId }
+                            entries.forEach(([, votedFor]) => {
+                                const normPid = normalizeEntityId(votedFor);
+                                if (normPid) {
+                                    voteCounts[normPid] = (voteCounts[normPid] || 0) + 1;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Find MOTM winner(s) for this match (strictly max votes > 0)
             let maxVotes = 0;
             const winners = new Set<string>();
-            Object.entries(matchVoteCounts).forEach(([pid, count]) => {
+            Object.entries(voteCounts).forEach(([pid, count]) => {
                 if (count > maxVotes) {
                     maxVotes = count;
                     winners.clear();
@@ -2905,16 +2938,29 @@ export default function LeagueDetailPage() {
             });
 
             winners.forEach((pid) => {
-                if (pid in counts) counts[pid] += 1;
+                const compPid = pid.startsWith('guest-') ? pid.slice(6) : pid;
+                if (memberIdSet.has(pid)) {
+                    counts[pid] = (counts[pid] || 0) + 1;
+                } else if (memberIdSet.has(compPid)) {
+                    counts[compPid] = (counts[compPid] || 0) + 1;
+                }
             });
         });
-        setMotmCounts(counts);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [league?.id, selectedSeasonId, filteredLeague?.matches]);
 
-    // Fetch MOTM votes per player via quick-view endpoint when league or season changes
+        return counts;
+    }, []);
+
+    // Aggregate MOTM votes locally from league.matches synchronously so values render instantly with 0ms delay
     useEffect(() => {
-        if (!league?.id || !token || !league.members?.length) return;
+        if (!league?.members?.length || !league?.id) return;
+        const matchesToCount = selectedSeasonId && filteredLeague ? filteredLeague.matches : (league.matches || []);
+        const localCounts = computeMotmCountsFromMatches(league.members, matchesToCount);
+        setMotmCounts(localCounts);
+    }, [league?.id, league?.members, selectedSeasonId, filteredLeague?.matches, league?.matches, computeMotmCountsFromMatches]);
+
+    // Fetch MOTM votes per player via quick-view endpoint as an asynchronous background sync
+    useEffect(() => {
+        if (!league?.id || !token || !league?.members?.length) return;
         let ignore = false;
         const controller = new AbortController();
         (async () => {
@@ -2936,7 +2982,14 @@ export default function LeagueDetailPage() {
                         }
                     })
                 );
-                if (!ignore) setMotmCounts(Object.fromEntries(entries));
+                if (!ignore) {
+                    const serverCounts = Object.fromEntries(entries);
+                    setMotmCounts(prev => {
+                        // Only fallback to serverCounts if local calculation is empty
+                        const hasLocalData = Object.values(prev).some(v => v > 0);
+                        return hasLocalData ? prev : serverCounts;
+                    });
+                }
             } catch {
                 // ignore errors
             }
@@ -2945,8 +2998,7 @@ export default function LeagueDetailPage() {
             ignore = true;
             controller.abort();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [league?.id, token, selectedSeasonId]);
+    }, [league?.id, token, selectedSeasonId, league?.members]);
 
     const [leagueStats, setLeagueStats] = useState<LeagueStatistics | null>(null);
     // ...existing code...
