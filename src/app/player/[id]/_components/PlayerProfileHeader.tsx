@@ -214,7 +214,7 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             <BarChart sx={{ color: '#fff', fontSize: { xs: 20, md: 26 } }} />
                         </Box>
                         <Box className="text-box" sx={{
-                            bgcolor: '#2b2b2b',
+                            bgcolor: '#00a77f',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: { xs: 'center', md: 'flex-start' },
@@ -278,7 +278,7 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             <SpaceDashboard sx={{ color: '#fff', fontSize: { xs: 24, md: 26 } }} />
                         </Box>
                         <Box className="perf-text-box" sx={{
-                            bgcolor: '#2b2b2b',
+                            bgcolor: '#d32f2f',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: { xs: 'center', md: 'flex-start' },

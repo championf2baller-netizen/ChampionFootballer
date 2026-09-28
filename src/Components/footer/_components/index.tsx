@@ -113,13 +113,13 @@ export default function Footer() {
     facebook: 'https://www.facebook.com/share/19R7iFrmfe/',
     youtube: 'https://www.youtube.com/@championf2tballer',
     tiktok: 'https://www.tiktok.com/@championf2tballer?_r=1&_t=ZS-98gdWDxrdZI',
+    linkedin: 'https://www.linkedin.com',
     pinterest: '',
     snapchat: '',
     threads: '',
     twitch: '',
     telegram: '',
     reddit: '',
-    linkedin: '',
     discord: '',
     whatsapp: '',
     website: ''
@@ -151,18 +151,18 @@ export default function Footer() {
   };
 
   const activePlatforms = [
-    { key: 'x', name: 'X (formerly Twitter)', icon: <XTwitterIcon size={18} />, href: socialLinks.x },
     { key: 'instagram', name: 'Instagram', icon: <InstagramIcon size={20} />, href: socialLinks.instagram },
-    { key: 'facebook', name: 'Facebook', icon: <FacebookIcon size={20} />, href: socialLinks.facebook },
-    { key: 'youtube', name: 'YouTube', icon: <YouTubeIcon size={20} />, href: socialLinks.youtube },
     { key: 'tiktok', name: 'TikTok', icon: <TikTokIcon size={18} />, href: socialLinks.tiktok },
+    { key: 'youtube', name: 'YouTube', icon: <YouTubeIcon size={20} />, href: socialLinks.youtube },
+    { key: 'facebook', name: 'Facebook', icon: <FacebookIcon size={20} />, href: socialLinks.facebook },
+    { key: 'x', name: 'X (formerly Twitter)', icon: <XTwitterIcon size={18} />, href: socialLinks.x },
+    { key: 'linkedin', name: 'LinkedIn', icon: <LinkedInIcon size={18} />, href: socialLinks.linkedin },
     { key: 'pinterest', name: 'Pinterest', icon: <PinterestIcon size={18} />, href: socialLinks.pinterest },
     { key: 'snapchat', name: 'Snapchat', icon: <SnapchatIcon size={18} />, href: socialLinks.snapchat },
     { key: 'threads', name: 'Threads', icon: <ThreadsIcon size={18} />, href: socialLinks.threads },
     { key: 'twitch', name: 'Twitch', icon: <TwitchIcon size={18} />, href: socialLinks.twitch },
     { key: 'telegram', name: 'Telegram', icon: <TelegramIcon size={18} />, href: socialLinks.telegram },
     { key: 'reddit', name: 'Reddit', icon: <RedditIcon size={18} />, href: socialLinks.reddit },
-    { key: 'linkedin', name: 'LinkedIn', icon: <LinkedInIcon size={18} />, href: socialLinks.linkedin },
     { key: 'discord', name: 'Discord', icon: <DiscordIcon size={18} />, href: socialLinks.discord },
     { key: 'whatsapp', name: 'WhatsApp', icon: <WhatsAppIcon size={18} />, href: socialLinks.whatsapp },
     { key: 'website', name: 'Website', icon: <WebsiteIcon size={18} />, href: socialLinks.website },
@@ -180,7 +180,14 @@ export default function Footer() {
         <Stack spacing={3} alignItems="center" justifyContent="center">
           {/* Dynamic Social Icons */}
           {activePlatforms.length > 0 && (
-            <Stack direction="row" spacing={{ xs: 2, sm: 3 }} flexWrap="wrap" justifyContent="center">
+            <Stack
+              direction="row"
+              spacing={{ xs: 1.5, sm: 2.5, md: 3 }}
+              flexWrap="nowrap"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ overflowX: 'auto', maxWidth: '100%', py: 0.5 }}
+            >
               {activePlatforms.map((item) => (
                 <IconButton
                   key={item.key}
@@ -195,6 +202,7 @@ export default function Footer() {
                     bgcolor: '#00A77F',
                     width: 36,
                     height: 36,
+                    flexShrink: 0,
                     transition: 'all 0.2s',
                     '&:hover': { bgcolor: '#008f6d', color: '#fff', transform: 'scale(1.1)' },
                   }}
