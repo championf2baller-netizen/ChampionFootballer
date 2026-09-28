@@ -2256,10 +2256,20 @@ export default function PlayerDashboard() {
   }, []);
 
   const handleCreateLeague = async () => {
-    if (!leagueName.trim()) {
+    const trimmedName = leagueName.trim();
+    if (!trimmedName) {
       toast.error('Please enter a league name');
       return;
     }
+
+    const normalizedNewName = trimmedName.toLowerCase();
+    const existingLeagues = leagueAPI.getAllInstant() || [];
+    const isDuplicate = existingLeagues.some((l: any) => (l.name || '').trim().toLowerCase() === normalizedNewName);
+    if (isDuplicate) {
+      toast.error('A league with this name already exists. Please choose a different name.');
+      return;
+    }
+
     const gamesNum = Number(maxGames);
     if (!maxGames || isNaN(gamesNum) || gamesNum < 1 || gamesNum > 100) {
       toast.error('Number of games must be between 1 and 100');

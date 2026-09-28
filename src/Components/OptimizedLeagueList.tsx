@@ -147,6 +147,13 @@ export default function OptimizedLeagueList() {
     name: string;
     description: string;
   }) => {
+    const normalizedNewName = leagueData.name.trim().toLowerCase();
+    const isDuplicate = leagues.some((l: any) => (l.name || '').trim().toLowerCase() === normalizedNewName);
+    if (isDuplicate) {
+      toast.error('A league with this name already exists. Please choose a different name.', { id: 'create-league' });
+      return;
+    }
+
     try {
       toast.loading('Creating league...', { id: 'create-league' });
 
