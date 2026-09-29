@@ -208,6 +208,25 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
   const lockedRaw = raw['locked'];
   const archivedRaw = raw['archived'];
 
+  const isCompleteVal = isCompleteRaw === true || isCompletedRaw === true || computedStatus?.isComplete === true || computedStatus?.isCompleted === true;
+  const isCompletedVal = isCompletedRaw === true || isCompleteRaw === true || computedStatus?.isCompleted === true || computedStatus?.isComplete === true;
+  const isArchivedVal = archivedRaw === true || raw['isArchived'] === true;
+
+  const rawActive = raw['active'];
+  let activeVal = true;
+  if (typeof rawActive === 'boolean') {
+    activeVal = rawActive;
+  } else if (typeof rawActive === 'number') {
+    activeVal = rawActive === 1;
+  } else if (typeof rawActive === 'string') {
+    activeVal = rawActive.toLowerCase() !== 'false';
+  }
+
+  const rawStatusStr = typeof raw['status'] === 'string' ? raw['status'].toLowerCase().trim() : '';
+  if (isCompleteVal || isCompletedVal || rawStatusStr === 'completed' || rawStatusStr === 'inactive') {
+    activeVal = false;
+  }
+
   const normalized: LeagueWithStatus & {
     isComplete?: boolean;
     isCompleted?: boolean;
@@ -223,7 +242,7 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
     members: arr('members') as unknown as User[],
     administrators: arr('administrators') as unknown as User[],
     matches: normalizeMatches(raw['matches']),
-    active: bool('active', true),
+    active: activeVal,
     maxGames: num('maxGames', 0) as number,
     showPoints: bool('showPoints', true),
     adminId: str('adminId', '') || (arr('administrators')?.[0] as any)?.id || '',
@@ -232,7 +251,7 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
     location: str('location', undefined as unknown as string),
     maxTeams: num('maxTeams'),
     currentTeams: num('currentTeams'),
-    status: normalizeLeagueStatus(raw['status']),
+    status: normalizeLeagueStatus(raw['status']) || (activeVal ? 'active' : 'completed'),
     computedStatus,
     memberCount: num('memberCount'),
     totalMatchCount: typeof raw['totalMatchCount'] === 'number' ? raw['totalMatchCount']
@@ -268,9 +287,9 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
       (typeof isLockedRaw === 'boolean' && isLockedRaw)
       || (typeof lockedRaw === 'boolean' && lockedRaw)
       || computedStatus?.locked === true,
-    ...(typeof isCompleteRaw === 'boolean' ? { isComplete: isCompleteRaw } : {}),
-    ...(typeof isCompletedRaw === 'boolean' ? { isCompleted: isCompletedRaw } : {}),
-    ...(typeof archivedRaw === 'boolean' ? { archived: archivedRaw } : {}),
+    isComplete: isCompleteVal,
+    isCompleted: isCompletedVal,
+    archived: isArchivedVal,
   };
 
 
