@@ -1082,6 +1082,8 @@ export default function LeagueDetailPage() {
                 toast.success('stats update');
 
                 console.log('✨ Match updated and refreshed!');
+            } else {
+                toast.error(data.message || 'Failed to save stats.');
             }
         } catch (err: unknown) {
             console.error('❌ Error saving stats:', err instanceof Error ? err.message : String(err));

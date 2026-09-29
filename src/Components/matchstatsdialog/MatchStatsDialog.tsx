@@ -52,6 +52,10 @@ import Image from 'next/image'
 import MatchStatsPopupLoadingSkeleton from '@/Components/loading/MatchStatsPopupLoadingSkeleton';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 
+const MAX_GOALS_EXCEEDED_MESSAGE = `The maximum number of goals has already been recorded by the players. You cannot add more goals than the total match goals.
+
+If you believe the score is incorrect, please contact the League Admin.`;
+
 type StatKey = 'goals' | 'assists' | 'cleanSheets' | 'penalties' | 'freeKicks' | 'defence' | 'impact';
 type HandleStatChange = (stat: StatKey, increment: number, max: number) => void;
 
@@ -1758,6 +1762,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     }, []);
 
     const handleStatChange = (stat: keyof typeof stats, increment: number, max: number) => {
+        if (stat === 'goals' && increment > 0 && stats.goals + increment > teamGoalsSafe) {
+            toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
+            return;
+        }
         setStats(prev => {
             const newValue = prev[stat] + increment;
             if (newValue < 0 || newValue > max) return prev;
@@ -1768,6 +1776,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     const handleSaveStats = async () => {
         if (!isUserAssignedToTeam) {
             toast.error('You must be assigned to a team to save your stats.');
+            return;
+        }
+        if (stats.goals > teamGoalsSafe) {
+            toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
             return;
         }
         setIsSubmittingStats(true);
@@ -2001,6 +2013,17 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     };
 
     const handleAdminStatChange = (stat: keyof typeof adminStats, increment: number, max: number) => {
+        if (stat === 'goals' && increment > 0 && selectedPlayerForAdmin) {
+            const isHome = !!(match && (match.homeTeamUsers ?? []).some(p => String(p.id) === String(selectedPlayerForAdmin.id)));
+            const targetCap = isHome
+                ? (match?.homeTeamGoals !== undefined && match?.homeTeamGoals !== null ? match.homeTeamGoals : null)
+                : (match?.awayTeamGoals !== undefined && match?.awayTeamGoals !== null ? match.awayTeamGoals : null);
+            const effectiveCap = targetCap !== null ? Math.max(0, targetCap) : Math.max(0, (match?.homeTeamGoals || 0) + (match?.awayTeamGoals || 0));
+            if (adminStats.goals + increment > effectiveCap) {
+                toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
+                return;
+            }
+        }
         setAdminStats(prev => ({
             ...prev,
             [stat]: Math.max(0, Math.min(max, prev[stat] + increment))
@@ -2374,6 +2397,18 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
     const handleSaveAdminStats = async () => {
         if (!selectedPlayerForAdmin) return;
+
+        if (selectedPlayerForAdmin) {
+            const isHome = !!(match && (match.homeTeamUsers ?? []).some(p => String(p.id) === String(selectedPlayerForAdmin.id)));
+            const targetCap = isHome
+                ? (match?.homeTeamGoals !== undefined && match?.homeTeamGoals !== null ? match.homeTeamGoals : null)
+                : (match?.awayTeamGoals !== undefined && match?.awayTeamGoals !== null ? match.awayTeamGoals : null);
+            const effectiveCap = targetCap !== null ? Math.max(0, targetCap) : Math.max(0, (match?.homeTeamGoals || 0) + (match?.awayTeamGoals || 0));
+            if (effectiveCap > 0 && adminStats.goals > effectiveCap) {
+                toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
+                return;
+            }
+        }
 
         setIsSubmittingAdminStats(true);
         try {
@@ -2781,6 +2816,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
                                         const numVal = parseInt(val, 10);
                                         if (!isNaN(numVal)) {
+                                            if (numVal > teamGoalsSafe) {
+                                                toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
+                                            }
                                             const newVal = Math.max(0, Math.min(teamGoalsSafe, numVal));
                                             setStats(prev => ({ ...prev, goals: newVal }));
                                         }
@@ -2805,7 +2843,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 <IconButton
-                                                    onClick={() => setStats(prev => ({ ...prev, goals: Math.min(teamGoalsSafe, (prev.goals || 0) + 1) }))}
+                                                    onClick={() => {
+                                                        if ((stats.goals || 0) >= teamGoalsSafe) {
+                                                            toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
+                                                            return;
+                                                        }
+                                                        setStats(prev => ({ ...prev, goals: Math.min(teamGoalsSafe, (prev.goals || 0) + 1) }));
+                                                    }}
                                                     sx={{ color: '#fff', p: 0.5 }}
                                                     size="small"
                                                 >

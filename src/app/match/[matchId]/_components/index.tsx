@@ -690,6 +690,8 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
         setEditingPlayer(null);
         // Refresh match data
         fetchMatchData(true);
+      } else {
+        toast.error(data.message || 'Failed to save stats');
       }
     } catch {
       // silent
