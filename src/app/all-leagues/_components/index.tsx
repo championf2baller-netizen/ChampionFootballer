@@ -308,11 +308,29 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
 //   return timeOf(b) - timeOf(a);
 // };
 
-// Sort leagues alphabetically by name (A-Z)
-const sortLeaguesByRecency = <T extends Pick<League, 'updatedAt' | 'createdAt'> & Pick<League, 'name'>>(arr: T[]): T[] => {
-  return [...arr].sort((a, b) => {
-    const nameA = (a.name || '').toLowerCase();
-    const nameB = (b.name || '').toLowerCase();
+const getLeagueTimestamp = (l: any): number => {
+  if (!l) return 0;
+  const src = String(l.createdAt || l.created_at || l.updatedAt || l.updated_at || '').trim();
+  if (!src) return 0;
+  const t = Date.parse(src);
+  return Number.isFinite(t) ? t : 0;
+};
+
+// Sort leagues newest to oldest (by createdAt / updatedAt timestamp)
+const sortLeaguesByRecency = <T extends any>(arr: T[]): T[] => {
+  return [...arr].sort((a: any, b: any) => {
+    const timeA = getLeagueTimestamp(a);
+    const timeB = getLeagueTimestamp(b);
+    if (timeB !== timeA) {
+      return timeB - timeA; // Newest first
+    }
+    const idA = String(a.id || '');
+    const idB = String(b.id || '');
+    if (idA && idB && idA !== idB) {
+      return idB.localeCompare(idA);
+    }
+    const nameA = String(a.name || '').toLowerCase();
+    const nameB = String(b.name || '').toLowerCase();
     return nameA.localeCompare(nameB);
   });
 };
@@ -1461,7 +1479,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
             break
           }
           if (payload.message) lastMessage = payload.message
-        } catch {}
+        } catch { }
       }
 
       if (!deleted) {
@@ -3664,7 +3682,7 @@ function AllLeagues() {
           .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
           .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
 
-        const sortedLeagues = sortLeaguesByRecency(normalizedLeagues as LeagueWithStatus[]);
+        const sortedLeagues = sortLeaguesByRecency(normalizedLeagues);
         const finalLeagues = locallyDeletedLeagueIds.length > 0
           ? sortedLeagues.filter((leagueItem) => !locallyDeletedLeagueIds.map(String).includes(String(leagueItem.id)))
           : sortedLeagues;
@@ -3911,8 +3929,8 @@ function AllLeagues() {
       });
 
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return byYear;
-    return byYear.filter(l => (l.name || '').toLowerCase().includes(term));
+    const resultList = !term ? byYear : byYear.filter(l => (l.name || '').toLowerCase().includes(term));
+    return sortLeaguesByRecency(resultList);
   }, [leagues, selectedYear, searchTerm, completionTab, isLeagueCompleted, isLeagueLive, isArchivedLeague, leagueLiveUpdatingId]);
 
   // Show all filtered leagues, or only user-selected league
@@ -5098,7 +5116,7 @@ function AllLeagues() {
       const payloadUnknown: unknown = await res.json().catch(() => ({}));
       const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string; archived?: boolean } : {};
       if (!res.ok || payload.success === false) throw new Error(payload.message || 'Failed to delete league');
-      
+
       const deletedLeagueId = String(selectedLeague.id);
       const isArchived = Boolean(payload.archived || (payload.message && payload.message.toLowerCase().includes('archive')));
 
@@ -5393,7 +5411,7 @@ function AllLeagues() {
       const payloadUnknown: unknown = await res.json().catch(() => ({}));
       const payload = isRecord(payloadUnknown) ? payloadUnknown as { success?: boolean; message?: string; archived?: boolean } : {};
       if (!res.ok || payload.success === false) throw new Error(payload.message || 'Failed to delete league');
-      
+
       const deletedLeagueId = String(adminSettingsLeague.id);
       const isArchived = Boolean(payload.archived || (payload.message && payload.message.toLowerCase().includes('archive')));
 
@@ -5888,6 +5906,10 @@ function AllLeagues() {
                 >
                   {[{ id: 'all', name: getCms('page_all_leagues_select_placeholder', 'All Leagues') }, ...filteredLeagues].map((leagueItem) => {
                     const isActive = String(selectedLeagueId) === String(leagueItem.id);
+                    const isAllOption = String(leagueItem.id) === 'all';
+                    const isAdmin = !isAllOption && isLeagueAdminForCurrentUser(leagueItem as unknown as League);
+                    const roleLabel = isAllOption ? null : (isAdmin ? 'ADMIN' : 'MEMBER');
+
                     return (
                       <MenuItem
                         key={leagueItem.id}
@@ -5903,7 +5925,8 @@ function AllLeagues() {
                           px: 1.5,
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 1,
+                          justifyContent: 'space-between',
+                          gap: 1.5,
                           color: '#E5E7EB',
                           transition: 'all 0.2s ease',
                           background: isActive ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
@@ -5914,20 +5937,45 @@ function AllLeagues() {
                           },
                         }}
                       >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Trophy size={16} color={isActive ? '#FFFFFF' : '#9CA3AF'} />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={leagueItem.name}
-                          sx={{
-                            '& .MuiListItemText-primary': {
-                              fontSize: '0.95rem',
-                              fontWeight: isActive ? 700 : 500,
-                              letterSpacing: 0.2,
-                              color: isActive ? '#FFFFFF' : '#E5E7EB'
-                            }
-                          }}
-                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0, flex: 1 }}>
+                          <ListItemIcon sx={{ minWidth: 28 }}>
+                            <Trophy size={16} color={isActive ? '#FFFFFF' : '#9CA3AF'} />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={leagueItem.name}
+                            sx={{
+                              m: 0,
+                              '& .MuiListItemText-primary': {
+                                fontSize: '0.95rem',
+                                fontWeight: isActive ? 700 : 500,
+                                letterSpacing: 0.2,
+                                color: isActive ? '#FFFFFF' : '#E5E7EB',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }
+                            }}
+                          />
+                        </Box>
+                        {roleLabel && (
+                          <Box
+                            sx={{
+                              px: 1,
+                              py: 0.25,
+                              bgcolor: isAdmin ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.15)',
+                              color: isAdmin ? '#1F2937' : '#FFFFFF',
+                              borderRadius: '9999px',
+                              fontSize: 10,
+                              fontWeight: 700,
+                              letterSpacing: 0.3,
+                              textTransform: 'uppercase',
+                              flexShrink: 0,
+                              ml: 1,
+                            }}
+                          >
+                            {roleLabel}
+                          </Box>
+                        )}
                       </MenuItem>
                     );
                   })}
