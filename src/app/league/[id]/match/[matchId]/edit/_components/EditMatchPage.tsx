@@ -309,6 +309,21 @@ const ScrollPreservingListbox = React.forwardRef<HTMLUListElement, React.HTMLAtt
 });
 ScrollPreservingListbox.displayName = 'ScrollPreservingListbox';
 
+const failedPlayerImageUrls = new Set<string>();
+
+function getValidUploadedPlayerImage(profilePicture?: string | null): string {
+  const defaultImg = '/assets/imgicon.png';
+  if (!profilePicture || typeof profilePicture !== 'string') return defaultImg;
+  const trimmed = profilePicture.trim();
+  if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || trimmed === '[object Object]') {
+    return defaultImg;
+  }
+  if (failedPlayerImageUrls.has(trimmed)) {
+    return defaultImg;
+  }
+  return trimmed;
+}
+
 export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onClose }: EditMatchPageProps) {
   // Fallback team image (used in responsive preview)
   const defaultTeamImage = '/assets/cflogo2.png';
@@ -2074,9 +2089,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
+                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
+                        const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={key}
+                            key={playerKey}
                             component="li"
                             {...optionProps}
                             sx={{
@@ -2116,11 +2133,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 }}
                               >
                                 <img
-                                  src={option.profilePicture || defaultTeamImagee}
+                                  src={imgSrc}
                                   alt=""
                                   loading="eager"
                                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
+                                  onError={(e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (option.profilePicture) {
+                                      failedPlayerImageUrls.add(option.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
+                                  }}
                                 />
                               </Box>
                               <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
@@ -2147,9 +2171,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           delete (safeTagProps as { onDelete?: unknown }).onDelete;
                           const isAvailable = availabilityMap[opt.id] === 'available';
                           const availabilityOrder = availableOrderMap[opt.id];
+                          const playerKey = `home-tag-${opt.id || opt.guestTempId || opt.existingGuestId || tagKey}`;
+                          const imgSrc = getValidUploadedPlayerImage(opt.profilePicture);
                           return (
                             <Box
-                              key={tagKey ?? opt.id}
+                              key={playerKey}
                               {...safeTagProps}
                               sx={{
                                 display: 'flex',
@@ -2165,7 +2191,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }}
                             >
                               <Avatar
-                                src={opt.profilePicture || defaultTeamImagee}
+                                src={imgSrc}
+                                imgProps={{
+                                  loading: 'eager',
+                                  onError: (e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (opt.profilePicture) {
+                                      failedPlayerImageUrls.add(opt.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
+                                  }
+                                }}
                                 sx={{
                                   width: 32,
                                   height: 32,
@@ -2251,9 +2288,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
+                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
+                        const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={key}
+                            key={playerKey}
                             component="li"
                             {...optionProps}
                             sx={{
@@ -2293,11 +2332,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 }}
                               >
                                 <img
-                                  src={option.profilePicture || defaultTeamImagee}
+                                  src={imgSrc}
                                   alt=""
                                   loading="eager"
                                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultTeamImagee; }}
+                                  onError={(e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (option.profilePicture) {
+                                      failedPlayerImageUrls.add(option.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
+                                  }}
                                 />
                               </Box>
                               <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
@@ -2324,16 +2370,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           delete (safeTagProps as { onDelete?: unknown }).onDelete;
                           const isAvailable = availabilityMap[opt.id] === 'available';
                           const availabilityOrder = availableOrderMap[opt.id];
-                          // const number = opt.shirtNumber || (opt.isGuest ? 'G' : '—');
+                          const playerKey = `away-tag-${opt.id || opt.guestTempId || opt.existingGuestId || tagKey}`;
+                          const imgSrc = getValidUploadedPlayerImage(opt.profilePicture);
                           return (
                             <Box
-                              key={tagKey ?? opt.id}
+                              key={playerKey}
                               {...safeTagProps}
                               sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 mr: 1,
+                                position: 'relative',
                                 cursor: 'pointer'
                               }}
                               onClick={(e) => {
@@ -2342,7 +2390,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }}
                             >
                               <Avatar
-                                src={opt.profilePicture || defaultTeamImagee}
+                                src={imgSrc}
+                                imgProps={{
+                                  loading: 'eager',
+                                  onError: (e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (opt.profilePicture) {
+                                      failedPlayerImageUrls.add(opt.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
+                                  }
+                                }}
                                 sx={{
                                   width: 32,
                                   height: 32,
@@ -2361,18 +2420,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                   ({availabilityOrder})
                                 </Typography>
                               )}
-                              {/* Shirt number instead of availability text */}
-                              {/* <Box sx={{
-                                      mt: 0.2,
-                                      px: 0.4,
-                                      py: 0.15,
-                                      borderRadius: 1,
-                                      fontSize: '0.55rem',
-                                      fontWeight: 800,
-                                      color: isAvailable ? '#43a047' : '#fff'
-                                    }}>
-                                      {number}
-                                    </Box> */}
                             </Box>
                           );
                         })
@@ -2388,7 +2435,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         <TextField
                           {...params}
                           placeholder="Select players"
-                          // helperText="Green number = available; white = unavailable"
                           FormHelperTextProps={{ sx: { color: '#9CA3AF' } }}
                           sx={{
                             ...autocompleteStyles,
@@ -2453,9 +2499,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       )}
                       renderOption={(props, option, { selected }) => {
                         const { key, ...optionProps } = props;
+                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
+                        const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={key}
+                            key={playerKey}
                             component="li"
                             {...optionProps}
                             sx={{
@@ -2482,7 +2530,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             }}
                           >
                             <Avatar
-                              src={option.profilePicture || defaultTeamImagee}
+                              src={imgSrc}
+                              imgProps={{
+                                loading: 'eager',
+                                onError: (e) => {
+                                  const img = e.currentTarget as HTMLImageElement;
+                                  if (option.profilePicture) {
+                                    failedPlayerImageUrls.add(option.profilePicture);
+                                  }
+                                  img.onerror = null;
+                                  img.src = defaultTeamImagee;
+                                }
+                              }}
                               sx={{ width: 30, height: 30 }}
                             />
                             <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
@@ -2548,9 +2607,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       )}
                       renderOption={(props, option, { selected }) => {
                         const { key, ...optionProps } = props;
+                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
+                        const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={key}
+                            key={playerKey}
                             component="li"
                             {...optionProps}
                             sx={{
@@ -2577,7 +2638,18 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             }}
                           >
                             <Avatar
-                              src={option.profilePicture || defaultTeamImagee}
+                              src={imgSrc}
+                              imgProps={{
+                                loading: 'eager',
+                                onError: (e) => {
+                                  const img = e.currentTarget as HTMLImageElement;
+                                  if (option.profilePicture) {
+                                    failedPlayerImageUrls.add(option.profilePicture);
+                                  }
+                                  img.onerror = null;
+                                  img.src = defaultTeamImagee;
+                                }
+                              }}
                               sx={{ width: 30, height: 30 }}
                             />
                             <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
