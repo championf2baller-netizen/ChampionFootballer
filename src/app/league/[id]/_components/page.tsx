@@ -4683,19 +4683,6 @@ export default function LeagueDetailPage() {
 
                                                 {/* Right columns container with clean gap between headings */}
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
-                                                    {/* Playing Style Header */}
-                                                    <Box sx={{
-                                                        width: { xs: 100, sm: 130, md: 150 },
-                                                        minWidth: { xs: 100, sm: 130, md: 150 },
-                                                        flexShrink: 0,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                    }}>
-                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
-                                                            STYLE
-                                                        </Typography>
-                                                    </Box>
-
                                                     {/* XP Status Header */}
                                                     <Box sx={{
                                                         width: { xs: 90, sm: 120, md: 135 },
@@ -4706,6 +4693,19 @@ export default function LeagueDetailPage() {
                                                     }}>
                                                         <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
                                                             XP STATUS
+                                                        </Typography>
+                                                    </Box>
+
+                                                    {/* Playing Style Header */}
+                                                    <Box sx={{
+                                                        width: { xs: 100, sm: 130, md: 150 },
+                                                        minWidth: { xs: 100, sm: 130, md: 150 },
+                                                        flexShrink: 0,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                    }}>
+                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                            STYLE
                                                         </Typography>
                                                     </Box>
 
@@ -4855,20 +4855,6 @@ export default function LeagueDetailPage() {
 
                                                                 {/* Right columns container with matching clean gap */}
                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
-                                                                    {/* Playing Style column */}
-                                                                    <Box sx={{
-                                                                        width: { xs: 100, sm: 130, md: 150 },
-                                                                        minWidth: { xs: 100, sm: 130, md: 150 },
-                                                                        flexShrink: 0,
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'flex-start',
-                                                                    }}>
-                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                                                            {member.style}
-                                                                        </Typography>
-                                                                    </Box>
-
                                                                     {/* XP Status column */}
                                                                     <Box sx={{
                                                                         width: { xs: 90, sm: 120, md: 135 },
@@ -4880,6 +4866,20 @@ export default function LeagueDetailPage() {
                                                                     }}>
                                                                         <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
                                                                             {xpStatusTitle}
+                                                                        </Typography>
+                                                                    </Box>
+
+                                                                    {/* Playing Style column */}
+                                                                    <Box sx={{
+                                                                        width: { xs: 100, sm: 130, md: 150 },
+                                                                        minWidth: { xs: 100, sm: 130, md: 150 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'flex-start',
+                                                                    }}>
+                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                                                            {member.style}
                                                                         </Typography>
                                                                     </Box>
 
