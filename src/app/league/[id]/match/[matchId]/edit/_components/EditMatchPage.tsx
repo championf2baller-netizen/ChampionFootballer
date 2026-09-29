@@ -2096,6 +2096,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={playerKey}
                             component="li"
                             {...optionProps}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              if (optionProps.onMouseDown) {
+                                optionProps.onMouseDown(e);
+                              }
+                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
@@ -2295,6 +2301,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={playerKey}
                             component="li"
                             {...optionProps}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              if (optionProps.onMouseDown) {
+                                optionProps.onMouseDown(e);
+                              }
+                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
@@ -2506,6 +2518,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={playerKey}
                             component="li"
                             {...optionProps}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              if (optionProps.onMouseDown) {
+                                optionProps.onMouseDown(e);
+                              }
+                            }}
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
@@ -2529,34 +2547,36 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }
                             }}
                           >
-                            <Avatar
-                              src={imgSrc}
-                              imgProps={{
-                                loading: 'eager',
-                                onError: (e) => {
-                                  const img = e.currentTarget as HTMLImageElement;
-                                  if (option.profilePicture) {
-                                    failedPlayerImageUrls.add(option.profilePicture);
+                            <Box sx={{ pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                              <Avatar
+                                src={imgSrc}
+                                imgProps={{
+                                  loading: 'eager',
+                                  onError: (e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (option.profilePicture) {
+                                      failedPlayerImageUrls.add(option.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
                                   }
-                                  img.onerror = null;
-                                  img.src = defaultTeamImagee;
-                                }
-                              }}
-                              sx={{ width: 30, height: 30 }}
-                            />
-                            <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
-                              {formatGuestAwarePlayerName(option)}
-                            </Typography>
-                            {!option.isGuest && (
-                              <Chip
-                                size="small"
-                                label={`Skill ${calcSkill(option)}`}
-                                sx={{ height: 20, fontSize: '0.65rem' }}
+                                }}
+                                sx={{ width: 30, height: 30 }}
                               />
-                            )}
-                            {option.isGuest && !isGuestLastName(option.lastName) && (
-                              <Chip size="small" color="warning" label="Guest" sx={{ height: 20, fontSize: '0.65rem' }} />
-                            )}
+                              <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
+                                {formatGuestAwarePlayerName(option)}
+                              </Typography>
+                              {!option.isGuest && (
+                                <Chip
+                                  size="small"
+                                  label={`Skill ${calcSkill(option)}`}
+                                  sx={{ height: 20, fontSize: '0.65rem' }}
+                                />
+                              )}
+                              {option.isGuest && !isGuestLastName(option.lastName) && (
+                                <Chip size="small" color="warning" label="Guest" sx={{ height: 20, fontSize: '0.65rem' }} />
+                              )}
+                            </Box>
                           </Box>
                         )
                       }}
@@ -2614,6 +2634,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             key={playerKey}
                             component="li"
                             {...optionProps}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              if (optionProps.onMouseDown) {
+                                optionProps.onMouseDown(e);
+                              }
+                            }}
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
@@ -2637,34 +2663,36 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               }
                             }}
                           >
-                            <Avatar
-                              src={imgSrc}
-                              imgProps={{
-                                loading: 'eager',
-                                onError: (e) => {
-                                  const img = e.currentTarget as HTMLImageElement;
-                                  if (option.profilePicture) {
-                                    failedPlayerImageUrls.add(option.profilePicture);
+                            <Box sx={{ pointerEvents: 'none', display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                              <Avatar
+                                src={imgSrc}
+                                imgProps={{
+                                  loading: 'eager',
+                                  onError: (e) => {
+                                    const img = e.currentTarget as HTMLImageElement;
+                                    if (option.profilePicture) {
+                                      failedPlayerImageUrls.add(option.profilePicture);
+                                    }
+                                    img.onerror = null;
+                                    img.src = defaultTeamImagee;
                                   }
-                                  img.onerror = null;
-                                  img.src = defaultTeamImagee;
-                                }
-                              }}
-                              sx={{ width: 30, height: 30 }}
-                            />
-                            <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
-                              {formatGuestAwarePlayerName(option)}
-                            </Typography>
-                            {!option.isGuest && (
-                              <Chip
-                                size="small"
-                                label={`Skill ${calcSkill(option)}`}
-                                sx={{ height: 20, fontSize: '0.65rem' }}
+                                }}
+                                sx={{ width: 30, height: 30 }}
                               />
-                            )}
-                            {option.isGuest && !isGuestLastName(option.lastName) && (
-                              <Chip size="small" color="warning" label="Guest" sx={{ height: 20, fontSize: '0.65rem' }} />
-                            )}
+                              <Typography variant="body2" sx={{ flex: 1, color: '#fff' }}>
+                                {formatGuestAwarePlayerName(option)}
+                              </Typography>
+                              {!option.isGuest && (
+                                <Chip
+                                  size="small"
+                                  label={`Skill ${calcSkill(option)}`}
+                                  sx={{ height: 20, fontSize: '0.65rem' }}
+                                />
+                              )}
+                              {option.isGuest && !isGuestLastName(option.lastName) && (
+                                <Chip size="small" color="warning" label="Guest" sx={{ height: 20, fontSize: '0.65rem' }} />
+                              )}
+                            </Box>
                           </Box>
                         )
                       }}
