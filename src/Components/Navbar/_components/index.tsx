@@ -3203,6 +3203,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         open={openNotifications}
         anchorEl={notificationAnchor}
         onClose={handleNotificationClose}
+        disableScrollLock={false}
         sx={{ zIndex: 9999 }}
         anchorOrigin={{
           vertical: 'bottom',
@@ -3223,6 +3224,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             borderRadius: 2,
             border: '1px solid rgba(0,0,0,0.08)',
             mt: 1,
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y',
           }
         }}
       >
@@ -3394,7 +3397,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           </Box>
         </Box>
 
-        <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+        <Box sx={{ maxHeight: 300, overflow: 'auto', overscrollBehavior: 'contain', touchAction: 'pan-y' }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
               <CircularProgress size={28} sx={{ color: '#00ff88' }} />

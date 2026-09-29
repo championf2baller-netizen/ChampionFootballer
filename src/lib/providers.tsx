@@ -26,12 +26,12 @@ const theme = createTheme({
     },
     MuiModal: {
       defaultProps: {
-        disableScrollLock: true,
+        disableScrollLock: false,
       },
     },
     MuiDialog: {
       defaultProps: {
-        disableScrollLock: true,
+        disableScrollLock: false,
       },
     },
   },

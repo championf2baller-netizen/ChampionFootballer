@@ -194,11 +194,14 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                                 boxShadow: '0 10px 22px rgba(0,0,0,0.45)',
                                 borderColor: 'rgba(255,255,255,0.65)',
                             },
-                            '&:hover .icon-box': { bgcolor: '#008c6b' },
-                            '&:hover .text-box': { bgcolor: '#2f2f2f' },
+                            '&:hover .icon-box': { bgcolor: '#007b5eff' },
+                            '&:hover .text-box': { bgcolor: '#007b5eff' },
                             width: '100%',
                             minWidth: 0,
                             justifyContent: 'center',
+                            // '&:hover': {
+                            // bgcolor: '#007b5eff'
+                            // }
                         }}
                         onClick={onOpenStatsModal}
                     >
@@ -209,7 +212,8 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             justifyContent: 'center',
                             width: { xs: 38, sm: 40, md: 44 },
                             borderRight: '1px solid rgba(255,255,255,0.25)',
-                            py: { xs: 0.55, md: 0.7 }
+                            py: { xs: 0.55, md: 0.7 },
+
                         }}>
                             <BarChart sx={{ color: '#fff', fontSize: { xs: 20, md: 26 } }} />
                         </Box>
@@ -221,6 +225,7 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             px: { xs: 0.6, md: 0.9 },
                             py: { xs: 0.55, md: 0.7 },
                             width: '100%',
+
                         }}>
                             <Typography sx={{
                                 color: '#fff',
@@ -231,6 +236,7 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                                 whiteSpace: { xs: 'normal', sm: 'nowrap' },
                                 lineHeight: 1.1,
                                 textAlign: 'center',
+
                             }}>
                                 Stats Over Season
                             </Typography>
@@ -254,8 +260,8 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                                 boxShadow: playerId ? '0 10px 22px rgba(0,0,0,0.45)' : '0 6px 16px rgba(0,0,0,0.35)',
                                 borderColor: playerId ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.4)',
                             },
-                            '&:hover .perf-icon-box': { bgcolor: '#b71c1c' },
-                            '&:hover .perf-text-box': { bgcolor: playerId ? '#2f2f2f' : '#2b2b2b' },
+                            '&:hover .perf-icon-box': { bgcolor: '#941e1eff' },
+                            '&:hover .perf-text-box': { bgcolor: playerId ? '#941e1eff' : '#941e1eff' },
                             width: '100%',
                             minWidth: 0,
                             justifyContent: 'center',
