@@ -2937,6 +2937,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   anchorEl={profileMenuAnchor}
                   open={openProfileMenu}
                   onClose={handleProfileMenuClose}
+                  disableScrollLock={true}
                   TransitionComponent={SlideFade}
                   sx={{ zIndex: 999999 }}
                   // PopoverProps={{
@@ -3207,7 +3208,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         open={openNotifications}
         anchorEl={notificationAnchor}
         onClose={handleNotificationClose}
-        disableScrollLock={false}
+        disableScrollLock={true}
         sx={{ zIndex: 9999 }}
         anchorOrigin={{
           vertical: 'bottom',
@@ -3409,7 +3410,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           ) : notifications.length === 0 ? (
             <Box sx={{ p: 4, textAlign: 'center', color: '#666' }}>
               <NotificationsIcon sx={{ fontSize: 48, color: '#ccc', mb: 1 }} />
-              <Typography className="empty-state-message">No notifications yet</Typography>
+              <Typography className="empty-state-message" sx={{ color: '#fff' }}>No notifications yet</Typography>
               <Typography variant="caption" sx={{ color: '#999', mt: 1, display: 'block' }}>
                 Create a match to test notifications
               </Typography>
@@ -4036,6 +4037,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        disableScrollLock={true}
         sx={{ 
           '& .MuiDrawer-paper': {
             width: { xs: 248, sm: 280 },
