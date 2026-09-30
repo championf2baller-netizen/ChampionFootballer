@@ -4239,40 +4239,105 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         </Box>
       </Drawer>
 
-      {/* YOUR EXISTING DIALOGS - keeping them as they were */}
-      <Dialog open={howToPlayOpen} onClose={() => setHowToPlayOpen(false)} maxWidth="md" fullWidth>
+      {/* YOUR EXISTING DIALOGS - standardized height, width & UI */}
+      <Dialog
+        open={howToPlayOpen}
+        onClose={() => setHowToPlayOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#1a1a1a',
+            color: '#ffffff',
+            borderRadius: { xs: '12px', md: '16px' },
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+            width: '100%',
+            maxWidth: { xs: '95vw', sm: '640px', md: '900px', lg: '1000px' },
+            height: { xs: '88vh', sm: '85vh' },
+            maxHeight: '850px',
+            margin: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }
+        }}
+      >
         <DialogTitle sx={{
-          // background: '#2b2b2b',
-          // color: 'white',
-          // fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
-          // fontWeight: 600,
-          // fontSize: { xs: '24px', md: '32px' }
-           background: '#0e0e0e',
+          background: '#0e0e0e',
           color: 'white',
           fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
           fontWeight: 600,
-          fontSize: { xs: '24px', md: '32px' },
+          fontSize: { xs: '20px', sm: '24px', md: '28px' },
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderBottom: '3px solid #E56A16'
+          px: { xs: 2.5, md: 3.5 },
+          py: { xs: 1.75, md: 2 },
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
         }}>
           How to Play
           <IconButton
             aria-label="close"
             onClick={() => setHowToPlayOpen(false)}
-            sx={{ position: 'absolute', right: 8, top: 8, color: 'white' }}
+            sx={{
+              color: 'white',
+              p: 1,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+                color: '#E56A16',
+                transform: 'rotate(90deg)'
+              }
+            }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ color: '#222', mt: 2 }}>
+        <DialogContent sx={{
+          bgcolor: '#1a1a1a',
+          p: { xs: 2, sm: 3, md: 4 },
+          color: '#fff',
+          flexGrow: 1,
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#141414',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#333',
+            borderRadius: '4px',
+            '&:hover': {
+              background: '#E56A16',
+            },
+          },
+        }}>
+          <Box sx={{ mb: 4, textAlign: 'center' }}>
+            <Typography sx={{
+              fontFamily: 'var(--font-woodford-bourne-pro)',
+              fontWeight: 800,
+              fontSize: { xs: '20px', md: '28px' },
+              color: '#fff',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              mb: 1
+            }}>
+              How To Play Champion Footballer
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', maxWidth: '650px', mx: 'auto' }}>
+              Follow these simple steps to set up your player card, join leagues, track statistics, and compete for trophies.
+            </Typography>
+          </Box>
+
           <Typography variant="h6" sx={{
             fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827'
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
           }}>
             1. Complete Your Player Card
           </Typography>
@@ -4280,20 +4345,22 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             mb: 2,
             fontFamily: 'Arial, Helvetica, sans-serif',
             fontWeight: 400,
-            fontSize: { xs: '16px', md: '18px' }
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
           }}>
             Set up your player profile with your player card and profile picture to start tracking your football journey
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step1 || playercardupdate.src} alt='Player Card Example' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step1 || playercardupdate.src} alt='Player Card Example' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
           <Typography variant="h6" sx={{
             fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827'
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
           }}>
             2. Join or Create a League
           </Typography>
@@ -4301,157 +4368,327 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             mb: 2,
             fontFamily: 'Arial, Helvetica, sans-serif',
             fontWeight: 400,
-            fontSize: { xs: '16px', md: '18px' }
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
           }}>
-            Join an existing league using an <b>invite code</b> or create your own league and invite friends to compete throughout the league
+            Join an existing league using an <b style={{ color: '#E56A16' }}>invite code</b> or create your own league and invite friends to compete throughout the league
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step2 || leagueimg.src} alt='League Example' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step2 || leagueimg.src} alt='League Example' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             3. Create a New Match
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-           League Admins can schedule match fixtures by selecting the date, time, venue and match format. All players will be notified
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            League Admins can schedule match fixtures by selecting the date, time, venue and match format. All players will be notified
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step3 || matchdetails.src} alt='League Progress' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step3 || matchdetails.src} alt='League Progress' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             4. Confirm Your Availability
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-          Lock in your spot by marking yourself Available. Players are ranked by response time, so the earlier you confirm, the higher you'll appear during team selection
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            Lock in your spot by marking yourself Available. Players are ranked by response time, so the earlier you confirm, the higher you'll appear during team selection
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step4 || availability.src} alt='Match Management' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step4 || availability.src} alt='Match Management' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
-           5. Team Selection
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
+            5. Team Selection
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
             Once enough players have confirmed their availability, teams are generated. Teams can be automatically balanced by the app, randomly generated, or selected manually by the League Admin. Balanced teams create fair, competitive matches every time
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step5 || teamsection.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step5 || teamsection.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             6. Play the Match
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-          Take to the pitch, enjoy the game and compete with your teammates. Every match contributes to your season statistics and league standings
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            Take to the pitch, enjoy the game and compete with your teammates. Every match contributes to your season statistics and league standings
           </Typography>
-           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step6 || playmatch.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step6 || playmatch.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             7. Submit the Match Result
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
             After the match, the League Admin submits the final score to update the league table
           </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step7 || submitresult.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step7 || submitresult.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             8. Add Your Individual Stats
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-           Add your goals, assists, clean sheets and match stats after every game. League Admins can edit player statistics to keep records accurate
-          </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step8 || individualstats.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
-          </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
-            fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
+          <Typography variant="body1" sx={{
             mb: 2,
-            color: '#111827' }}>
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            Add your goals, assists, clean sheets and match stats after every game. League Admins can edit player statistics to keep records accurate
+          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step8 || individualstats.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
+          </Box>
+
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 600,
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             9. Track Your Performance
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
             View your stats, performance trends, achievements and career history as you progress through the league
           </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step9 || trackperformance.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step9 || trackperformance.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom sx={{  fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
             fontWeight: 600,
-            fontSize: { xs: '24px', md: '32px' },
-            mb: 2,
-            color: '#111827' }}>
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#00a896'
+          }}>
             10. Trophy Room and Awards
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-Compete for individual awards and seasonal honours. Every achievement is stored in your Trophy Room
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            Compete for individual awards and seasonal honours. Every achievement is stored in your Trophy Room
           </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-            <img src={howToPlayCmsData?.metadata?.stepImages?.step10 || trophyroomandrewards.src} alt='Player Stats' style={{ width: '100%', height: 'auto', borderRadius: 8, objectFit: 'contain', display: 'block' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3.5, borderRadius: 2, overflow: 'hidden', border: '1px solid #2a2a2a', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+            <img src={howToPlayCmsData?.metadata?.stepImages?.step10 || trophyroomandrewards.src} alt='Player Stats' style={{ width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }} />
           </Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
-         Build Your Legacy!
+
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 700,
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#E56A16'
+          }}>
+            Build Your Legacy!
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-Every match stats and trophy becomes part of your permanent football record as you build your legacy within your leagues          </Typography>
-            <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: '#111827' }}>
-Important Management Controls:          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-<b>League Player Admins </b> can create leagues, manage players, schedule fixtures, generate teams, add scores, approve player stats and manage league settings          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-<b>League Players </b> can confirm availability, view fixtures, submit their match statistics, track their performance and follow league standings and achievements          </Typography>
+          <Typography variant="body1" sx={{
+            mb: 3,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            Every match stats and trophy becomes part of your permanent football record as you build your legacy within your leagues
+          </Typography>
+
+          <Typography variant="h6" sx={{
+            fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
+            fontWeight: 700,
+            fontSize: { xs: '20px', md: '24px' },
+            mb: 1.5,
+            color: '#E56A16'
+          }}>
+            Important Management Controls:
+          </Typography>
+          <Typography variant="body1" sx={{
+            mb: 1.5,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            <b style={{ color: '#00a896' }}>League Player Admins: </b> can create leagues, manage players, schedule fixtures, generate teams, add scores, approve player stats and manage league settings
+          </Typography>
+          <Typography variant="body1" sx={{
+            mb: 2,
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 400,
+            fontSize: { xs: '14px', md: '16px' },
+            color: 'rgba(255,255,255,0.85)',
+            lineHeight: 1.6
+          }}>
+            <b style={{ color: '#00a896' }}>League Players: </b> can confirm availability, view fixtures, submit their match statistics, track their performance and follow league standings and achievements
+          </Typography>
         </DialogContent>
       </Dialog>
-      <Dialog open={gameRulesOpen} onClose={() => setGameRulesOpen(false)} maxWidth="lg" fullWidth>
+
+      <Dialog
+        open={gameRulesOpen}
+        onClose={() => setGameRulesOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#1a1a1a',
+            color: '#ffffff',
+            borderRadius: { xs: '12px', md: '16px' },
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+            width: '100%',
+            maxWidth: { xs: '95vw', sm: '640px', md: '900px', lg: '1000px' },
+            height: { xs: '88vh', sm: '85vh' },
+            maxHeight: '850px',
+            margin: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }
+        }}
+      >
         <DialogTitle sx={{
           background: '#0e0e0e',
           color: 'white',
           fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
           fontWeight: 600,
-          fontSize: { xs: '24px', md: '32px' },
+          fontSize: { xs: '20px', sm: '24px', md: '28px' },
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderBottom: '3px solid #E56A16'
+          px: { xs: 2.5, md: 3.5 },
+          py: { xs: 1.75, md: 2 },
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
         }}>
           Game Rules
           <IconButton
             aria-label="close"
             onClick={() => setGameRulesOpen(false)}
-            sx={{ color: 'white' }}
+            sx={{
+              color: 'white',
+              p: 1,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+                color: '#E56A16',
+                transform: 'rotate(90deg)'
+              }
+            }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ bgcolor: '#1a1a1a', p: { xs: 2, md: 4 }, color: '#fff' }}>
+        <DialogContent sx={{
+          bgcolor: '#1a1a1a',
+          p: { xs: 2, sm: 3, md: 4 },
+          color: '#fff',
+          flexGrow: 1,
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#141414',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#333',
+            borderRadius: '4px',
+            '&:hover': {
+              background: '#E56A16',
+            },
+          },
+        }}>
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <Typography sx={{
               fontFamily: 'var(--font-woodford-bourne-pro)',
@@ -4657,7 +4894,7 @@ Important Management Controls:          </Typography>
                             minWidth: { xs: '120px', md: '160px' },
                             maxWidth: { xs: '120px', md: '160px' },
                             whiteSpace: 'normal',
-                            wordBreak: 'break-word',
+                            wordBreak: 'word-break',
                             '.MuiTableRow-root:hover &': {
                               bgcolor: '#2c2c2c',
                               boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
@@ -4686,52 +4923,134 @@ Important Management Controls:          </Typography>
           })()}
         </DialogContent>
       </Dialog>
-      <Dialog open={xpStatusOpen} onClose={() => setXpStatusOpen(false)} maxWidth="lg" fullWidth>
+
+      <Dialog
+        open={xpStatusOpen}
+        onClose={() => setXpStatusOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#1a1a1a',
+            color: '#ffffff',
+            borderRadius: { xs: '12px', md: '16px' },
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+            width: '100%',
+            maxWidth: { xs: '95vw', sm: '640px', md: '900px', lg: '1000px' },
+            height: { xs: '88vh', sm: '85vh' },
+            maxHeight: '850px',
+            margin: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }
+        }}
+      >
         <DialogTitle sx={{
           background: '#0e0e0e',
           color: 'white',
           fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
           fontWeight: 600,
-          fontSize: { xs: '24px', md: '32px' },
+          fontSize: { xs: '20px', sm: '24px', md: '28px' },
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          px: { xs: 2.5, md: 3.5 },
+          py: { xs: 1.75, md: 2 },
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
         }}>
           XP Status
           <IconButton
             aria-label="close"
             onClick={() => setXpStatusOpen(false)}
-            sx={{ color: 'white' }}
+            sx={{
+              color: 'white',
+              p: 1,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.1)',
+                color: '#E56A16',
+                transform: 'rotate(90deg)'
+              }
+            }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ bgcolor: '#1a1a1a', p: 0 }}>
-          <TableContainer component={Box} sx={{ maxHeight: '70vh', overflow: 'auto' }}>
-            <Table stickyHeader aria-label="xp milestones table">
+        <DialogContent sx={{
+          bgcolor: '#1a1a1a',
+          p: { xs: 2, sm: 3, md: 4 },
+          color: '#fff',
+          flexGrow: 1,
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#141414',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#333',
+            borderRadius: '4px',
+            '&:hover': {
+              background: '#E56A16',
+            },
+          },
+        }}>
+          <Box sx={{ mb: 4, textAlign: 'center' }}>
+            <Typography sx={{
+              fontFamily: 'var(--font-woodford-bourne-pro)',
+              fontWeight: 800,
+              fontSize: { xs: '20px', md: '28px' },
+              color: '#fff',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              mb: 1
+            }}>
+              XP Status & Milestone Reference
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', maxWidth: '600px', mx: 'auto' }}>
+              Track your experience points and tier progression from Rookie all the way to GOAT status as you play matches and earn awards.
+            </Typography>
+          </Box>
+
+          <TableContainer component={Box} sx={{
+            maxHeight: '70vh',
+            overflow: 'auto',
+            borderRadius: 2,
+            border: '1px solid #2a2a2a',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+            bgcolor: '#242424'
+          }}>
+            <Table stickyHeader aria-label="xp milestones table" sx={{ borderCollapse: 'separate', '& .MuiTableCell-root': { borderBottom: '1px solid #333' } }}>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ bgcolor: '#2b2b2b', color: '#00a896', fontWeight: 800, borderBottom: '1px solid #333', whiteSpace: 'nowrap' }}>
+                  <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>
                     Level
                   </TableCell>
                   <TableCell
                     sx={{
-                      bgcolor: '#2b2b2b',
-                      color: '#00a896',
+                      bgcolor: '#2b2b2b !important',
+                      color: '#00a896 !important',
                       fontWeight: 800,
-                      borderBottom: '1px solid #333',
+                      fontFamily: 'var(--font-woodford-bourne-pro)',
+                      fontSize: { xs: '0.85rem', md: '0.95rem' },
+                      py: 2,
                       whiteSpace: 'nowrap',
                       position: 'sticky',
                       left: 0,
                       zIndex: 4,
                       boxShadow: '8px 0 12px -12px rgba(0,0,0,0.45)',
+                      borderRight: '1.5px solid rgba(255,255,255,0.15)',
                     }}
                   >
                     Milestone Title
                   </TableCell>
-                  <TableCell sx={{ bgcolor: '#2b2b2b', color: '#00a896', fontWeight: 800, borderBottom: '1px solid #333', whiteSpace: 'nowrap' }}>XP Range</TableCell>
-                  <TableCell sx={{ bgcolor: '#2b2b2b', color: '#00a896', fontWeight: 800, borderBottom: '1px solid #333', whiteSpace: 'nowrap' }}>Description</TableCell>
-                  <TableCell sx={{ bgcolor: '#2b2b2b', color: '#00a896', fontWeight: 800, borderBottom: '1px solid #333', whiteSpace: 'nowrap' }}>Star Color</TableCell>
+                  <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>XP Range</TableCell>
+                  <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Description</TableCell>
+                  <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Star Color</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -4753,45 +5072,54 @@ Important Management Controls:          </Typography>
                       console.warn('XP Status CMS parse failed, using fallback:', e);
                     }
                   }
-                  return milestones.map((row: any) => (
-                    <TableRow key={row.level} sx={{ '&:hover': { bgcolor: '#252525' } }}>
-                      <TableCell
-                        sx={{
-                          color: 'white',
-                          borderBottom: '1px solid #333',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {row.level}
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          color: 'white',
-                          borderBottom: '1px solid #333',
-                          fontWeight: 600,
-                          position: 'sticky',
-                          left: 0,
-                          zIndex: 2,
-                          bgcolor: '#1a1a1a',
-                          boxShadow: '8px 0 12px -12px rgba(0,0,0,0.62)',
-                          '.MuiTableRow-root:hover &': {
-                            bgcolor: '#252525',
-                            boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
-                          },
-                        }}
-                      >
-                        {row.title}
-                      </TableCell>
-                      <TableCell sx={{ color: 'white', borderBottom: '1px solid #333' }}>{row.range}</TableCell>
-                      <TableCell sx={{ color: 'rgba(255,255,255,0.7)', borderBottom: '1px solid #333', fontSize: '0.9rem' }}>{row.desc}</TableCell>
-                      <TableCell sx={{ borderBottom: '1px solid #333' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: row.color, border: '1px solid rgba(255,255,255,0.2)' }} />
-                          <Typography sx={{ color: 'white', fontSize: '0.85rem' }}>{row.label}</Typography>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ));
+                  return milestones.map((row: any, idx: number) => {
+                    const rowBg = idx % 2 === 0 ? '#242424' : '#1e1e1e';
+                    return (
+                      <TableRow key={row.level} sx={{ bgcolor: rowBg, '&:hover': { bgcolor: '#2c2c2c' }, transition: 'background-color 0.15s' }}>
+                        <TableCell
+                          sx={{
+                            color: '#00a896',
+                            borderBottom: '1px solid #333',
+                            fontWeight: 800,
+                            fontSize: '0.95rem',
+                            py: 1.5
+                          }}
+                        >
+                          {row.level}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            color: 'white',
+                            borderBottom: '1px solid #333',
+                            fontWeight: 700,
+                            fontFamily: 'var(--font-woodford-bourne-pro)',
+                            fontSize: '0.9rem',
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 2,
+                            bgcolor: rowBg,
+                            boxShadow: '8px 0 12px -12px rgba(0,0,0,0.62)',
+                            borderRight: '1.5px solid rgba(255,255,255,0.15)',
+                            transition: 'background-color 0.15s',
+                            '.MuiTableRow-root:hover &': {
+                              bgcolor: '#2c2c2c',
+                              boxShadow: '8px 0 12px -12px rgba(0,0,0,0.72)',
+                            },
+                          }}
+                        >
+                          {row.title}
+                        </TableCell>
+                        <TableCell sx={{ color: '#F1C40F', fontWeight: 700, fontSize: '0.9rem', borderBottom: '1px solid #333', py: 1.5 }}>{row.range}</TableCell>
+                        <TableCell sx={{ color: 'rgba(255,255,255,0.85)', borderBottom: '1px solid #333', fontSize: '0.85rem', py: 1.5 }}>{row.desc}</TableCell>
+                        <TableCell align="center" sx={{ borderBottom: '1px solid #333', py: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                            <Box sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: row.color, border: '1px solid rgba(255,255,255,0.3)', boxShadow: `0 0 8px ${row.color}66` }} />
+                            <Typography sx={{ color: 'white', fontSize: '0.85rem', fontWeight: 600 }}>{row.label}</Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  });
                 })()}
               </TableBody>
             </Table>
