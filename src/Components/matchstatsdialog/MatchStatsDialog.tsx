@@ -1550,8 +1550,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     }, [resolvedMatchId, token]);
 
     useEffect(() => {
-        if (resolvedMatchId && token) fetchVotes();
-    }, [resolvedMatchId, token, fetchVotes]);
+        if (resolvedMatchId && token && (open === undefined || open)) fetchVotes();
+    }, [resolvedMatchId, token, open, fetchVotes]);
 
     // Hooks for computed Impact must be unconditionally called (before any early returns)
     // Compute safe team goals context for the current user
@@ -2109,7 +2109,17 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     const fetchUserStats = useCallback(async () => {
         if (!token || !resolvedMatchId || !currentUserId) return;
 
-        console.log('ًں“ٹ Fetching existing stats for user:', currentUserId);
+        console.log('📊 Fetching existing stats for user:', currentUserId);
+
+        const defaultStatsState = {
+            goals: 0,
+            assists: 0,
+            cleanSheets: 0,
+            penalties: 0,
+            freeKicks: 0,
+            defence: 0,
+            impact: 0,
+        };
 
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/stats?playerId=${encodeURIComponent(currentUserId)}&_t=${Date.now()}`, {
@@ -2117,16 +2127,17 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             });
 
             if (!res.ok) {
-                console.warn('âڑ ï¸ڈ Failed to fetch stats:', res.status);
+                console.warn('⚠️ Failed to fetch stats:', res.status);
+                setStats(defaultStatsState);
                 return;
             }
 
             const data = await res.json();
-            console.log('ًں“ٹ Stats response:', data);
+            console.log('📊 Stats response:', data);
 
             const userStat = data?.success ? data?.stats : null;
             if (userStat) {
-                console.log('âœ… Found existing stats for user:', userStat);
+                console.log('✅ Found existing stats for user:', userStat);
                 setStats({
                     goals: userStat.goals || 0,
                     assists: userStat.assists || 0,
@@ -2140,19 +2151,31 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     toast.success('Your previous stats have been loaded!');
                 }
             } else {
-                console.log('â„¹ï¸ڈ No existing stats found for user');
+                console.log('ℹ️ No existing stats found for user - resetting stats state');
+                setStats(defaultStatsState);
             }
         } catch (err) {
-            console.error('â‌Œ Failed to fetch user stats:', err);
+            console.error('❌ Failed to fetch user stats:', err);
+            setStats(defaultStatsState);
         }
     }, [token, resolvedMatchId, currentUserId]);
 
-    // Call fetchUserStats when match or user changes
+    // Call fetchUserStats when match, user, or dialog open state changes
     useEffect(() => {
-        if (resolvedMatchId && token && currentUserId) {
+        if (resolvedMatchId && token && currentUserId && (open === undefined || open)) {
             fetchUserStats();
+        } else if (open === false) {
+            setStats({
+                goals: 0,
+                assists: 0,
+                cleanSheets: 0,
+                penalties: 0,
+                freeKicks: 0,
+                defence: 0,
+                impact: 0,
+            });
         }
-    }, [resolvedMatchId, token, currentUserId, fetchUserStats]);
+    }, [resolvedMatchId, token, currentUserId, open, fetchUserStats]);
 
     useEffect(() => {
         const loadPicks = async () => {
@@ -2239,8 +2262,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 setCaptainApiAvailable(false);
             }
         };
-        loadPicks();
-    }, [token, resolvedMatchId, userPickTeamKey, currentUserId, playerOnAwayTeamSafe, isCaptainUser]);
+        if (open === undefined || open) {
+            loadPicks();
+        }
+    }, [token, resolvedMatchId, userPickTeamKey, currentUserId, playerOnAwayTeamSafe, isCaptainUser, open]);
 
     // --- NEW: open pick dialog handler ---
     const openPickDialog = (category: CaptainPickCategory) => {
