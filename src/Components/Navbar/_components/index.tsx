@@ -2032,7 +2032,11 @@ const [matchMetaCache, setMatchMetaCache] = useState<Record<string, {
   };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileMenuAnchor(event.currentTarget);
+    if (profileMenuAnchor) {
+      setProfileMenuAnchor(null);
+    } else {
+      setProfileMenuAnchor(event.currentTarget);
+    }
   };
   const handleProfileMenuClose = () => {
     setProfileMenuAnchor(null);
@@ -2915,7 +2919,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                     edge="end"
                     color="inherit"
                     aria-label="menu"
-                    onClick={() => setDrawerOpen(true)}
+                    onClick={() => setDrawerOpen(prev => !prev)}
                     sx={{ 
                       color: '#fff',
                       mt: { xs: '5px', lg: 0 },
