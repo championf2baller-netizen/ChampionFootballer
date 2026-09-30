@@ -1239,9 +1239,11 @@ const PlayerProfileCard = () => {
                   sx={{
                     background: themeColors.primaryGradient,
                     fontWeight: 700,
-                    px: 3,
+                    px: { xs: 1.5, sm: 3 },
                     width: { xs: '48%', sm: 220 },
                     height: 44,
+                    whiteSpace: 'nowrap',
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     borderRadius: 1,
                     boxShadow: "0 6px 16px -4px rgba(0,0,0,0.6)",
                     '&:hover': { opacity: .9 }
@@ -1256,9 +1258,11 @@ const PlayerProfileCard = () => {
                   sx={{
                     background: themeColors.primaryGradient,
                     fontWeight: 700,
-                    px: 3,
+                    px: { xs: 1.5, sm: 3 },
                     width: { xs: '48%', sm: 220 },
                     height: 44,
+                    whiteSpace: 'nowrap',
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
                     borderRadius: 1,
                     boxShadow: "0 6px 16px -4px rgba(0,0,0,0.6)",
                     '&:hover': { opacity: .9 }
