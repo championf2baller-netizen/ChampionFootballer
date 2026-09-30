@@ -2992,6 +2992,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   <MenuItem
                     onClick={() => {
                       handleProfileMenuClose();
+                      setDrawerOpen(false);
                       setHowToPlayOpen(true);
                     }}
                     sx={{
@@ -3018,6 +3019,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   <MenuItem
                     onClick={() => {
                       handleProfileMenuClose();
+                      setDrawerOpen(false);
                       setGameRulesOpen(true);
                     }}
                     sx={{
@@ -3044,6 +3046,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   <MenuItem
                     onClick={() => {
                       handleProfileMenuClose();
+                      setDrawerOpen(false);
                       setXpStatusOpen(true);
                     }}
                     sx={{
@@ -4097,6 +4100,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 <ListItem disablePadding>
                   <Button
                     onClick={() => {
+                      handleProfileMenuClose();
                       setDrawerOpen(false);
                       setHowToPlayOpen(true);
                     }}
@@ -4132,6 +4136,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 <ListItem disablePadding>
                   <Button
                     onClick={() => {
+                      handleProfileMenuClose();
                       setDrawerOpen(false);
                       setGameRulesOpen(true);
                     }}
@@ -4168,6 +4173,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   <Button
                    onClick={() => {
                       handleProfileMenuClose();
+                      setDrawerOpen(false);
                       setXpStatusOpen(true);
                     }}
                     startIcon={<BarChartOutlinedIcon sx={{ fontSize: 20, color: '#fff' }} />}
