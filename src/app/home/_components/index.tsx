@@ -2733,7 +2733,8 @@ export default function PlayerDashboard() {
                   <TextField
                     placeholder="Enter invite code"
                     value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+                    inputProps={{ maxLength: 6 }}
                     size="small"
                     variant="outlined"
                     sx={{
@@ -2972,7 +2973,8 @@ export default function PlayerDashboard() {
               <TextField
                 placeholder="Enter invite code"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+                inputProps={{ maxLength: 6 }}
                 size="small"
                 variant="outlined"
                 sx={{
@@ -3052,7 +3054,8 @@ export default function PlayerDashboard() {
               <TextField
                 placeholder="Enter invite code"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+                inputProps={{ maxLength: 6 }}
                 size="small"
                 variant="outlined"
                 sx={{
@@ -3148,7 +3151,8 @@ export default function PlayerDashboard() {
           <TextField
             placeholder="Enter invite code"
             value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+            onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+            inputProps={{ maxLength: 6 }}
             size="small"
             variant="outlined"
             sx={{
