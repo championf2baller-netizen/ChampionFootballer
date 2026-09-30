@@ -1613,8 +1613,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       return;
     }
     const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      toast.error(DURATION_ERROR_MESSAGE);
+    if (!Number.isFinite(parsed) || parsed < 5) {
+      toast.error('Please select match duration (minimum 5 minutes)');
       return;
     }
     setDuration(parsed);
@@ -1759,6 +1759,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
   const handleUpdateMatch = async (e: React.FormEvent) => {
     e.preventDefault(); setIsSubmitting(true); setError(null);
+
+    const currentDur = typeof duration === 'number' ? duration : 0;
+    if (currentDur < 5) {
+      toast.error('Please select match duration (minimum 5 minutes)');
+      setIsSubmitting(false);
+      return;
+    }
 
     const registered = (arr: PlayerOption[]) => arr.filter(u => !u.isGuest).map(u => u.id);
     const newHomeIds = registered(homeTeamUsers);

@@ -9,12 +9,12 @@ import {
   CircularProgress,
   Grid,
   MenuItem,
-  Select,
   Tooltip,
   IconButton,
   Dialog,
   DialogContent
 } from '@mui/material';
+import AnchoredSelect from '../../../../../Components/AnchoredSelect';
 import { SelectChangeEvent } from '@mui/material/Select';
 import dayjs, { Dayjs } from 'dayjs';
 import { useAuth } from '@/lib/hooks';
@@ -714,6 +714,11 @@ export default function ScheduleMatchPage() {
   }, [fetchLeague]);
 
   const handleCreate = async () => {
+    const totalDurationMinutes = (durHours * 60) + durMinutes;
+    if (totalDurationMinutes < 5) {
+      toast.error('Please select match duration (minimum 5 minutes)');
+      return;
+    }
     if (!location.trim()) {
       toast.error('Location required');
       return;
@@ -1113,7 +1118,7 @@ export default function ScheduleMatchPage() {
                   color: '#fff'
                 }}
               >
-                Match Date
+                Match Date <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
               </Typography>
               <Box
                 sx={{
@@ -1221,7 +1226,7 @@ export default function ScheduleMatchPage() {
                   color: '#fff'
                 }}
               >
-                Start Time
+                Start Time <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
               </Typography>
               <Box
                 sx={{
@@ -1236,9 +1241,9 @@ export default function ScheduleMatchPage() {
               >
                 <Box sx={{ flex: '1 1 140px', minWidth: 140 }}>
                   <Typography sx={{ fontSize: 14, mb: 0.5, color: '#fff' }}>
-                    Hour
+                    Hour <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                   </Typography>
-                  <Select
+                  <AnchoredSelect
                     fullWidth
                     size="small"
                     value={`${hour}-${isPM ? 'PM' : 'AM'}`}
@@ -1266,13 +1271,13 @@ export default function ScheduleMatchPage() {
                         {h} PM
                       </MenuItem>
                     ))}
-                  </Select>
+                  </AnchoredSelect>
                 </Box>
                 <Box sx={{ flex: '1 1 110px', minWidth: 100 }}>
                   <Typography sx={{ fontSize: 14, mb: 0.5, color: '#fff' }}>
-                    Minute
+                    Minute <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                   </Typography>
-                  <Select
+                  <AnchoredSelect
                     fullWidth
                     size="small"
                     value={minute}
@@ -1287,7 +1292,7 @@ export default function ScheduleMatchPage() {
                         {String(m).padStart(2, '0')}
                       </MenuItem>
                     ))}
-                  </Select>
+                  </AnchoredSelect>
                 </Box>
                 {/* AM/PM buttons removed; AM/PM integrated into Hour select */}
               </Box>
@@ -1302,7 +1307,7 @@ export default function ScheduleMatchPage() {
                     color: '#fff'
                   }}
                 >
-                  Match Duration
+                  Match Duration <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                 </Typography>
                 <Box
                   sx={{
@@ -1317,9 +1322,9 @@ export default function ScheduleMatchPage() {
                 >
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography sx={{ fontSize: 14, mb: 0.5, color: '#fff' }}>
-                      Hours
+                      Hours <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                     </Typography>
-                    <Select
+                    <AnchoredSelect
                       fullWidth
                       size="small"
                       value={durHours}
@@ -1334,13 +1339,13 @@ export default function ScheduleMatchPage() {
                           {h}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </AnchoredSelect>
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography sx={{ fontSize: 14, mb: 0.5, color: '#fff' }}>
-                      Minutes
+                      Minutes <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                     </Typography>
-                    <Select
+                    <AnchoredSelect
                       fullWidth
                       size="small"
                       value={durMinutes}
@@ -1355,7 +1360,7 @@ export default function ScheduleMatchPage() {
                           {String(m).padStart(2, '0')}
                         </MenuItem>
                       ))}
-                    </Select>
+                    </AnchoredSelect>
                   </Box>
                 </Box>
               </Box>
@@ -1371,7 +1376,7 @@ export default function ScheduleMatchPage() {
                     mt: 1.5
                   }}
                 >
-                  Location
+                  Location <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box>
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'nowrap' }}>
                   <TextField
