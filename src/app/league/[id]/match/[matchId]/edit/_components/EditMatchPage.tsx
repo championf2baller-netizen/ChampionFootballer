@@ -3708,7 +3708,21 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
             <FormControlLabel value='home' control={<Radio sx={{ color: '#43a047' }} />} label='Home Team' />
             <FormControlLabel value='away' control={<Radio sx={{ color: '#ef5350' }} />} label='Away Team' />
           </RadioGroup>
-          <TextField autoFocus label='Guest Full Name' value={guestName} onChange={e => setGuestName(e.target.value)} fullWidth placeholder='e.g. John Doe' sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#9CA3AF' } }} />
+          <TextField
+            autoFocus
+            label='Guest Full Name'
+            value={guestName}
+            onChange={e => setGuestName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddGuest();
+              }
+            }}
+            fullWidth
+            placeholder='e.g. John Doe'
+            sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#9CA3AF' } }}
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, bgcolor: 'rgba(15,15,15,0.95)' }}>
           <Button onClick={() => setGuestDialogOpen(false)} sx={{ color: '#9CA3AF' }}>Cancel</Button>
