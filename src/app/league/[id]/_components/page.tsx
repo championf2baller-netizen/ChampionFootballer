@@ -6354,7 +6354,7 @@ export default function LeagueDetailPage() {
                                                     if (gks[0]) {
                                                         addPlayerToPitch(
                                                             gks[0],
-                                                            { left: { xs: '30%', sm: '30%', md: '40%' }, top: { xs: '65%', sm: '65%', md: '70%' } },
+                                                            { left: { xs: '23%', sm: '30%', md: '40%' }, top: { xs: '72%', sm: '65%', md: '72%' } },
                                                             `gk-${gks[0].id}`
                                                         );
                                                     }
@@ -6384,7 +6384,7 @@ export default function LeagueDetailPage() {
                                                     if (leftDef) {
                                                         addPlayerToPitch(
                                                             leftDef,
-                                                            { left: { xs: '17%', sm: '17%', md: '30%' }, top: { xs: '70%', sm: '70%', md: '67%' } },
+                                                            { left: { xs: '8%', sm: '17%', md: '30%' }, top: { xs: '70%', sm: '70%', md: '67%' } },
                                                             `def-left-${leftDef.id}`
                                                         );
                                                     }
