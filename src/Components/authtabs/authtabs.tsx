@@ -300,6 +300,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
   const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false)
   const [passwordError, setPasswordError] = useState("")
   const [confirmError, setConfirmError] = useState("")
+  const [ageError, setAgeError] = useState("")
   const [socialProviders, setSocialProviders] = useState<SocialProviders>({
     google: true,
     facebook: true,
@@ -591,6 +592,21 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
     const next = { ...registerData, [name]: nextValue }
     setRegisterData(next)
 
+    if (name === "age") {
+      if (!nextValue) {
+        setAgeError("")
+      } else {
+        const ageNum = parseInt(nextValue, 10)
+        if (isNaN(ageNum) || ageNum < 18) {
+          setAgeError("Age must be at least 18 years old")
+        } else if (ageNum > 65) {
+          setAgeError("Age must be 65 or younger")
+        } else {
+          setAgeError("")
+        }
+      }
+    }
+
     if (name === "password") {
       setPasswordError(getPasswordError(nextValue))
       // also re-validate confirm when password changes
@@ -842,7 +858,10 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       msg = phoneValidationError
       setPhoneError(msg)
     }
-    else if (isNaN(age) || age < 18 || age > 65) msg = "Age must be between 18 and 65"
+    else if (isNaN(age) || age < 18 || age > 65) {
+      msg = age < 18 ? "Age must be at least 18 years old" : "Age must be between 18 and 65"
+      setAgeError(msg)
+    }
     else if (!acceptTerms) msg = "Please accept the terms"
     if (msg) {
       setRegisterError(msg)
@@ -1529,8 +1548,24 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 sx={registerInputSx}
                 inputProps={{ minLength: 7, maxLength: PASSWORD_MAX_LENGTH }}
                 error={Boolean(confirmError)}
-                helperText={confirmError || 'Re-type your password'}
-                FormHelperTextProps={{ sx: { color: confirmError ? '#d32f2f' : '#555', fontSize: '0.75rem' } }}
+                helperText={
+                  confirmError
+                    ? confirmError
+                    : registerData.confirmPassword && registerData.confirmPassword === registerData.password
+                    ? '✓ Passwords match'
+                    : 'Re-type your password'
+                }
+                FormHelperTextProps={{
+                  sx: {
+                    color: confirmError
+                      ? '#d32f2f'
+                      : registerData.confirmPassword && registerData.confirmPassword === registerData.password
+                      ? '#2e7d32'
+                      : '#555',
+                    fontSize: '0.75rem',
+                    fontWeight: registerData.confirmPassword && registerData.confirmPassword === registerData.password ? 600 : 400
+                  }
+                }}
                 InputProps={{
                   endAdornment: (
                     <IconButton
@@ -1560,6 +1595,25 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 onChange={handleRegisterChange}
                 required
                 sx={registerInputSx}
+                error={Boolean(ageError)}
+                helperText={
+                  ageError
+                    ? ageError
+                    : registerData.age && Number(registerData.age) >= 18 && Number(registerData.age) <= 65
+                    ? '✓ Age requirement met (18+)'
+                    : 'Must be at least 18 years old'
+                }
+                FormHelperTextProps={{
+                  sx: {
+                    color: ageError
+                      ? '#d32f2f'
+                      : registerData.age && Number(registerData.age) >= 18 && Number(registerData.age) <= 65
+                      ? '#2e7d32'
+                      : '#555',
+                    fontSize: '0.75rem',
+                    fontWeight: registerData.age && Number(registerData.age) >= 18 && Number(registerData.age) <= 65 ? 600 : 400
+                  }
+                }}
               />
             </Box>
 
