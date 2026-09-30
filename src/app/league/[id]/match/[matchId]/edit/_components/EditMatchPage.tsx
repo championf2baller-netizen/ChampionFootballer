@@ -2582,12 +2582,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Home Captain</Typography>
                     <Autocomplete<PlayerOption, false, false>
-                      options={homeTeamUsers}
-                      value={homeCaptain}
+                      options={homeTeamUsers.filter(u => !u.isGuest)}
+                      value={homeCaptain && !homeCaptain.isGuest ? homeCaptain : null}
                       onChange={(_, val) => setHomeCaptain(val)}
                       isOptionEqualToValue={(o, v) => o.id === v.id}
                       getOptionLabel={(o) => formatGuestAwarePlayerName(o)}
-                      disabled={!homeTeamUsers.length}
+                      disabled={!homeTeamUsers.filter(u => !u.isGuest).length}
                       PaperComponent={BlackPaper}
 
                       renderInput={params => (
@@ -2618,8 +2618,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiAutocomplete-popupIndicator': { color: 'white' },
                             '& .MuiAutocomplete-popupIndicator.Mui-disabled': { color: '#717274 !important' }
                           }}
-                          FormHelperTextProps={{ sx: { color: '#ffb300' } }}
-                          helperText={homeCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                         />
                       )}
                       renderOption={(props, option, { selected }) => {
@@ -2691,12 +2689,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Away Captain</Typography>
                     <Autocomplete<PlayerOption, false, false>
-                      options={awayTeamUsers}
-                      value={awayCaptain}
+                      options={awayTeamUsers.filter(u => !u.isGuest)}
+                      value={awayCaptain && !awayCaptain.isGuest ? awayCaptain : null}
                       onChange={(_, val) => setAwayCaptain(val)}
                       isOptionEqualToValue={(o, v) => o.id === v.id}
                       getOptionLabel={(o) => formatGuestAwarePlayerName(o)}
-                      disabled={!awayTeamUsers.length}
+                      disabled={!awayTeamUsers.filter(u => !u.isGuest).length}
                       PaperComponent={BlackPaper}
 
                       renderInput={params => (
@@ -2727,8 +2725,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiAutocomplete-popupIndicator': { color: 'white' },
                             '& .MuiAutocomplete-popupIndicator.Mui-disabled': { color: '#717274 !important' }
                           }}
-                          FormHelperTextProps={{ sx: { color: '#ffb300' } }}
-                          helperText={awayCaptain?.isGuest ? 'Guest captain will not be saved on server' : ''}
                         />
                       )}
                       renderOption={(props, option, { selected }) => {
