@@ -183,10 +183,15 @@ export default function Footer() {
             <Stack
               direction="row"
               spacing={{ xs: 1.5, sm: 2.5, md: 3 }}
-              flexWrap="nowrap"
+              flexWrap="wrap"
               justifyContent="center"
               alignItems="center"
-              sx={{ overflowX: 'auto', maxWidth: '100%', py: 0.5 }}
+              sx={{
+                overflow: 'visible',
+                maxWidth: '100%',
+                px: 1,
+                py: 1,
+              }}
             >
               {activePlatforms.map((item) => (
                 <IconButton
@@ -203,6 +208,9 @@ export default function Footer() {
                     width: 36,
                     height: 36,
                     flexShrink: 0,
+                    outline: 'none',
+                    '&:focus': { outline: 'none' },
+                    '&:focus-visible': { outline: 'none' },
                     transition: 'all 0.2s',
                     '&:hover': { bgcolor: '#008f6d', color: '#fff', transform: 'scale(1.1)' },
                   }}
