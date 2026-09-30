@@ -433,6 +433,12 @@ input:-webkit-autofill:active {
   box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6);
 }
 
+@media (min-width: 640px) {
+  .league-table-sticky-name {
+    left: 32px;
+  }
+}
+
 /* Ensure header sticky-name gets a lighter shadow */
 .league-header-row .league-table-sticky-rank,
 .league-header-row .league-table-sticky-name {
@@ -521,12 +527,12 @@ input:-webkit-autofill:active {
 
   .league-row-inset,
   .league-header-inset {
-    margin-left: 4px;
-    margin-right: 4px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .league-header-inset {
-    box-shadow: -4px 0 0 var(--league-table-header-bg), 4px 0 0 var(--league-table-header-bg);
+    box-shadow: none !important;
   }
 
   .league-table {
@@ -2915,6 +2921,12 @@ input:-webkit-autofill:active {
   z-index: 9 !important;
   background-color: inherit !important;
   transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+@media (min-width: 640px) {
+  .league-table-sticky-name {
+    left: 32px !important;
+  }
 }
 
 /* Mobile View: Hide background images across the entire web app and use #0E0E0E background color */
