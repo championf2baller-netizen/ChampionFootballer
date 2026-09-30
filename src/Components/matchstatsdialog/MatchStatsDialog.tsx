@@ -1692,8 +1692,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         return undefined;
     }, [match, league?.matches]);
 
-    // Prevent self-vote in UI too
-    const handleVote = async (playerId: string) => {
+    // Update MOTM vote in local state only (will be saved when clicking Submit)
+    const handleVote = (playerId: string) => {
         if (!user) return;
         if (!isUserAssignedToTeam) {
             toast.error('You must be assigned to a team to vote for Man of the Match.');
@@ -1704,43 +1704,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             toast.error('You cannot vote for yourself as Man of the Match.');
             return;
         }
-        setLoadingVote(true);
-        try {
-            // If user selected 'none' or already voted for this player, unvote them
-            const voteData = (isNone || votedForId === playerId) ? { votedForId: null } : { votedForId: playerId };
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/votes`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(voteData),
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                setVotedForId(voteData.votedForId);
-                toast.success(voteData.votedForId !== null ? 'MOTM player voted' : 'MOTM vote cleared');
-                // Update leaderboard cache for MOTM votes
-                if (data.updatedStats) {
-                    Object.entries(data.updatedStats).forEach(([metric, value]) => {
-                        if (typeof value === 'number') {
-                            cacheManager.updateLeaderboardCache(playerId, value, metric as keyof LeaderboardPlayer, `leaderboard_motm_${resolvedMatchId}`);
-                        }
-                    });
-                }
-
-                // Trigger notification refresh for all players
-                if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('refresh-notifications'));
-                    console.log('Vote successful - notification refresh triggered');
-                }
-            }
-
-        } catch {
-            setError('An error occurred while voting.');
-        } finally {
-            await fetchVotes();
-            setLoadingVote(false);
-        }
+        const newVoteId = (isNone || votedForId === playerId) ? null : playerId;
+        setVotedForId(newVoteId);
     };
 
     const handleCloseStatsModal = () => setIsStatsModalOpen(false);
@@ -1846,13 +1811,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 }
             }
 
-            // 2. Save MOTM Vote (if user has voted)
-            if (votedForId && String(votedForId) !== String(currentUserId)) {
+            // 2. Save MOTM Vote (if user has selected or cleared a vote)
+            if (votedForId !== undefined && String(votedForId) !== String(currentUserId)) {
                 try {
                     const voteResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/votes`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ votedForId }),
+                        body: JSON.stringify({ votedForId: votedForId || null }),
                     });
                     const voteData = await parseJsonSafely(voteResponse);
                     const voteApiSuccess = voteData?.success;
@@ -1873,14 +1838,14 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             }
 
             // 3. Save Defensive Impact / Mentality picks
-            if (captainApiAvailable && (captainPicks.defence || captainPicks.influence)) {
+            if (captainApiAvailable && (captainPicks.defence !== undefined || captainPicks.influence !== undefined)) {
                 try {
                     // Save Defensive Impact pick
-                    if (captainPicks.defence) {
+                    if (captainPicks.defence !== undefined) {
                         const defResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ category: 'defence', playerId: captainPicks.defence }),
+                            body: JSON.stringify({ category: 'defence', playerId: captainPicks.defence || null }),
                         });
                         if (defResponse.status === 404 || defResponse.status === 405) {
                             setCaptainApiAvailable(false);
@@ -1895,11 +1860,11 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     }
 
                     // Save Mentality pick
-                    if (captainPicks.influence) {
+                    if (captainPicks.influence !== undefined) {
                         const menResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
                             method: 'POST',
                             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ category: 'influence', playerId: captainPicks.influence }),
+                            body: JSON.stringify({ category: 'influence', playerId: captainPicks.influence || null }),
                         });
                         if (menResponse.status === 404 || menResponse.status === 405) {
                             setCaptainApiAvailable(false);
@@ -2285,8 +2250,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         setIsPickDialogOpen(true);
     };
 
-    // --- NEW: save selected player for a category ---
-    const handleSelectPick = async (rawPlayerId: string, categoryOverride?: CaptainPickCategory) => {
+    // Update selected player for a category in local state (saved when clicking Submit)
+    const handleSelectPick = (rawPlayerId: string, categoryOverride?: CaptainPickCategory) => {
         const category = categoryOverride ?? pickCategory;
         if (!category) return;
 
@@ -2304,70 +2269,24 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             }
         }
 
-        console.log('Saving captain pick:', { category, playerId, resolvedMatchId });
+        const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
+        setCaptainPicks(prev => ({
+            ...prev,
+            [category]: (playerId && playerId !== 'none') ? playerId : undefined
+        }));
 
-        // Local state update (synced with DB)
-        const applyLocal = () => {
-            const teamKey = userPickTeamKey || (playerOnAwayTeamSafe ? 'away' : 'home');
-            setCaptainPicks(prev => {
-                const updated = { ...prev, [category]: (playerId && playerId !== 'none') ? playerId : undefined };
-                return updated;
-            });
+        if (teamKey) {
+            setMatchCaptainPicks((prev) => ({
+                ...prev,
+                [teamKey]: {
+                    ...(prev[teamKey] || {}),
+                    [category]: (playerId && playerId !== 'none') ? playerId : undefined,
+                }
+            }));
+        }
 
-            if (teamKey) {
-                setMatchCaptainPicks((prev) => ({
-                    ...prev,
-                    [teamKey]: {
-                        ...(prev[teamKey] || {}),
-                        [category]: (playerId && playerId !== 'none') ? playerId : undefined,
-                    }
-                }));
-            }
-        };
-
-
-        applyLocal();
         setIsPickDialogOpen(false);
         setPickCategory(null);
-
-        if (!captainApiAvailable) {
-            toast.success(isNone ? 'Selection cleared' : (category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted'));
-            return;
-        }
-
-        setSavingPick(true);
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ category, playerId: playerId || null })
-            });
-
-            if (res.status === 404 || res.status === 405) {
-                setCaptainApiAvailable(false);
-                toast.success(isNone ? 'Selection cleared' : (category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted'));
-                return;
-            }
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                toast.error(errorData.message || 'Captain pick selected locally, backend sync failed.');
-                return;
-            }
-
-            toast.success(category === 'defence' ? 'Defensive impact player voted' : '+mentality player voted');
-        } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message :
-                    typeof err === 'string' ? err :
-                        'Captain pick selected locally, backend sync failed.';
-            toast.error(message);
-        } finally {
-            setSavingPick(false);
-        }
     };
 
     const canPlayerSubmitStats = baseCanSubmit && (editWindow?.canPlayerSubmit ?? false);
