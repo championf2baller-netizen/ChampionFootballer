@@ -429,8 +429,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     const [homeGoals, setHomeGoals] = useState<number>(0);
     const [awayGoals, setAwayGoals] = useState<number>(0);
     // String inputs to allow clearing and prevent negative typing
-    const [homeGoalsInput, setHomeGoalsInput] = useState<string>('0');
-    const [awayGoalsInput, setAwayGoalsInput] = useState<string>('0');
+    const [homeGoalsInput, setHomeGoalsInput] = useState<string>('');
+    const [awayGoalsInput, setAwayGoalsInput] = useState<string>('');
     const [note, setNote] = useState<string>('');
     const [votedForId, setVotedForId] = useState<string | null>(null);
     const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
@@ -897,8 +897,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             console.log('âœ… Match goals fetched:', { homeTeamGoals: hg, awayTeamGoals: ag });
             setHomeGoals(hg);
             setAwayGoals(ag);
-            setHomeGoalsInput(String(hg));
-            setAwayGoalsInput(String(ag));
+            setHomeGoalsInput(hg > 0 ? String(hg) : '');
+            setAwayGoalsInput(ag > 0 ? String(ag) : '');
 
             // 2) Fetch league using a reliable id (prefer id from match if present)
             const effectiveLeagueId = m.leagueId || targetLeagueId;
@@ -961,8 +961,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             console.log('ًں”„ Updating goals from match state:', { homeTeamGoals: hg, awayTeamGoals: ag });
             setHomeGoals(hg);
             setAwayGoals(ag);
-            setHomeGoalsInput(String(hg));
-            setAwayGoalsInput(String(ag));
+            setHomeGoalsInput(hg > 0 ? String(hg) : '');
+            setAwayGoalsInput(ag > 0 ? String(ag) : '');
             if (match.notes) {
                 setNote(match.notes);
             }
@@ -4261,6 +4261,14 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             <TextField
                                 type="number"
                                 value={homeGoalsInput}
+                                placeholder="0"
+                                onFocus={e => {
+                                    if (e.target.value === '0') {
+                                        setHomeGoalsInput('');
+                                    } else {
+                                        e.target.select();
+                                    }
+                                }}
                                 onChange={e => {
                                     const raw = e.target.value;
                                     if (raw === '') {
@@ -4268,10 +4276,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         setHomeGoals(0);
                                         return;
                                     }
-                                    const n = Math.max(0, Number(raw));
-                                    const str = String(Number.isFinite(n) ? n : 0);
+                                    const n = Math.max(0, parseInt(raw, 10));
+                                    const str = Number.isFinite(n) ? String(n) : '';
                                     setHomeGoalsInput(str);
-                                    setHomeGoals(Number(str));
+                                    setHomeGoals(Number.isFinite(n) ? n : 0);
                                 }}
                                 variant="outlined"
                                 sx={{
@@ -4285,6 +4293,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         '& fieldset': { borderColor: '#444' },
                                         '&:hover fieldset': { borderColor: '#777' },
                                         '&.Mui-focused fieldset': { borderColor: '#fff' },
+                                        '& .MuiInputBase-input::placeholder': {
+                                            color: 'rgba(255, 255, 255, 0.45)',
+                                            opacity: 1,
+                                        },
                                     },
                                     input: {
                                         textAlign: 'center',
@@ -4365,6 +4377,14 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             <TextField
                                 type="number"
                                 value={awayGoalsInput}
+                                placeholder="0"
+                                onFocus={e => {
+                                    if (e.target.value === '0') {
+                                        setAwayGoalsInput('');
+                                    } else {
+                                        e.target.select();
+                                    }
+                                }}
                                 onChange={e => {
                                     const raw = e.target.value;
                                     if (raw === '') {
@@ -4372,10 +4392,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         setAwayGoals(0);
                                         return;
                                     }
-                                    const n = Math.max(0, Number(raw));
-                                    const str = String(Number.isFinite(n) ? n : 0);
+                                    const n = Math.max(0, parseInt(raw, 10));
+                                    const str = Number.isFinite(n) ? String(n) : '';
                                     setAwayGoalsInput(str);
-                                    setAwayGoals(Number(str));
+                                    setAwayGoals(Number.isFinite(n) ? n : 0);
                                 }}
                                 variant="outlined"
                                 sx={{
@@ -4389,6 +4409,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         '& fieldset': { borderColor: '#444' },
                                         '&:hover fieldset': { borderColor: '#777' },
                                         '&.Mui-focused fieldset': { borderColor: '#fff' },
+                                        '& .MuiInputBase-input::placeholder': {
+                                            color: 'rgba(255, 255, 255, 0.45)',
+                                            opacity: 1,
+                                        },
                                     },
                                     input: {
                                         textAlign: 'center',
