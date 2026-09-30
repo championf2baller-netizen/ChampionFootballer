@@ -4570,7 +4570,7 @@ function AllLeagues() {
 
     const gamesNum = Number(maxGames);
     if (!maxGames || isNaN(gamesNum) || gamesNum < 1 || gamesNum > 100) {
-      toast.error('Number of games must be between 1 and 100');
+      toast.error('Number of games cannot be 0. Minimum 1 game required.');
       return;
     }
     setIsCreating(true);
@@ -7736,10 +7736,20 @@ function AllLeagues() {
               variant="outlined"
               value={maxGames}
               onChange={(e) => {
-                const v = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+                const raw = e.target.value;
+                if (raw === '0' || raw.startsWith('0')) {
+                  toast.error('Number of games cannot be 0. Minimum 1 game required.');
+                  return;
+                }
+                const v = raw.replace(/[^0-9]/g, '').slice(0, 3);
                 setMaxGames(v);
               }}
               onKeyPress={(e) => {
+                if (e.key === '0' && (!maxGames || maxGames.length === 0)) {
+                  e.preventDefault();
+                  toast.error('Number of games cannot be 0. Minimum 1 game required.');
+                  return;
+                }
                 if (!/[0-9]/.test(e.key) && e.key !== 'Enter') {
                   e.preventDefault();
                 }
