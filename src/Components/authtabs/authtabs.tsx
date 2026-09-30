@@ -1332,7 +1332,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
           >
             {/* NAME */}
             <Box sx={{ gridColumn: { xs: '1 / -1', md: 'span 1' } }}>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Name</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>First Name <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="First Name"
@@ -1346,7 +1346,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
             </Box>
 
             <Box sx={{ gridColumn: { xs: '1 / -1', md: 'span 1' } }}>
-              <Typography sx={{ mb: 0.75, color: 'transparent', fontSize: '0.9rem', display: { xs: 'none', md: 'block' }, userSelect: 'none' }}>Name</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Last Name <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Last Name"
@@ -1361,7 +1361,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
             {/* EMAIL */}
             <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' } }}>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Email</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Email <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Email Address"
@@ -1377,7 +1377,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
             {/* PHONE */}
             <Box sx={{ gridColumn: { xs: '1 / -1', md: '1 / -1' } }}>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Enter Your Phone Number</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Enter Your Phone Number <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Enter Number"
@@ -1486,7 +1486,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
             {/* PASSWORD */}
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Password</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Password <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Password"
@@ -1517,7 +1517,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
             </Box>
 
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Re-Type Password</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Re-Type Password <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Confirm Password"
@@ -1549,7 +1549,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
             {/* AGE + GENDER */}
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Enter Age</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Enter Age <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <TextField
                 fullWidth
                 placeholder="Age"
@@ -1564,7 +1564,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
             </Box>
 
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select Gender</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select Gender <span style={{ color: '#d32f2f' }}>*</span></Typography>
               {isDesktop ? (
                 <FormControl fullWidth>
                   <Select
@@ -1621,7 +1621,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
 
             {/* COUNTRY + CITY/STATE */}
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select Country/Region</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select Country/Region <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <Autocomplete
                 id="country-select"
                 options={countries}
@@ -1715,7 +1715,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
             </Box>
 
             <Box>
-              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select City/State</Typography>
+              <Typography sx={{ mb: 0.75, color: '#000', fontSize: '0.9rem' }}>Select City/State <span style={{ color: '#d32f2f' }}>*</span></Typography>
               <FormControl fullWidth>
                 <Select
                   id="state-select"

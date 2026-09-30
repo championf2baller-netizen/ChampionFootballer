@@ -2057,7 +2057,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
                 <Grid container spacing={1}>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Home Players</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Home Players <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <Autocomplete
                       key="home-players-autocomplete"
                       multiple
@@ -2261,7 +2261,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Away Players</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1 }}>Select Away Players <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <Autocomplete
                       key="away-players-autocomplete"
                       multiple
@@ -2828,7 +2828,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                 <Typography variant='h6' sx={{ mb: 0.1, fontWeight: 700, textTransform: 'uppercase', fontSize: { xs: '1rem', sm: '1.2rem' }, color: 'white' }}>Match Detail</Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Match Date</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Match Date <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <DatePicker
                       format="DD-MMM-YYYY"
                       value={matchDate}
@@ -2849,7 +2849,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Start Time</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Start Time <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <TimePicker
                       value={startTime}
                       onChange={(nv: Dayjs | null) => setStartTime(nv)}
@@ -2869,7 +2869,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Duration (Min)</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Duration (Min) <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <TextField
                       type='number'
                       value={duration}
@@ -2887,7 +2887,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Location</Typography>
+                    <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Location <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <TextField
                       value={location}
                       onChange={(e) => {
