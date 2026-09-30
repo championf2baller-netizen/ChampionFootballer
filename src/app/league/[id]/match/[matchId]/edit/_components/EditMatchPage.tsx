@@ -364,6 +364,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const [awayTeamName, setAwayTeamName] = useState('');
   const [matchDate, setMatchDate] = useState<Dayjs | null>(dayjs());
   const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
+  const [openDatePicker, setOpenDatePicker] = useState(false);
+  const [openTimePicker, setOpenTimePicker] = useState(false);
   const [duration, setDuration] = useState<number | ''>(90);
   const [location, setLocation] = useState('');
   const [isMapOpen, setIsMapOpen] = useState(false);
@@ -1935,6 +1937,128 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   if (error || !league) return <Box sx={{ p: 4, color: 'white' }}><Button startIcon={<ArrowLeft />} onClick={() => { if (isDialog && onClose) onClose(); else router.push(`/league/${leagueId}`); }} sx={{ mb: 2, color: 'white', background: '#388e3c', '&:hover': { background: '#388e3c' } }}>Back</Button><Typography color="error">{error || 'Load failed'}</Typography></Box>;
 
   const inputStyles = { '& .MuiOutlinedInput-root': { color: '#E5E7EB', background: 'rgba(255,255,255,0.02)', borderRadius: 1, '& fieldset': { borderColor: 'rgba(255,255,255,0.15)', borderWidth: '1px' }, '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.25)' }, '&.Mui-focused fieldset': { borderColor: '#e56a16', borderWidth: '2px', boxShadow: '0 0 0 3px rgba(229,106,22,0.1)' }, '& input': { color: '#E5E7EB', padding: '10px 14px' } }, '& .MuiInputLabel-root': { color: '#9CA3AF', fontWeight: 500, '&.Mui-focused': { color: '#e56a16' } }, '& .MuiSvgIcon-root': { color: '#E5E7EB' }, '& .MuiOutlinedInput-input': { padding: '10px 14px' } };
+
+  const darkPickerPopperSx = {
+    '& .MuiPaper-root': {
+      backgroundColor: '#141414',
+      color: '#ffffff',
+      border: '1px solid rgba(255, 255, 255, 0.15)',
+      borderRadius: '12px',
+      boxShadow: '0px 12px 36px rgba(0, 0, 0, 0.95)',
+      backgroundImage: 'none',
+      overscrollBehavior: 'contain',
+    },
+    '& .MuiPickersLayout-root': {
+      backgroundColor: '#141414',
+      color: '#ffffff',
+      overscrollBehavior: 'contain',
+    },
+    '& .MuiPickersLayout-contentWrapper': {
+      backgroundColor: '#141414',
+    },
+    '& .MuiMultiSectionDigitalClock-root': {
+      backgroundColor: '#141414',
+      color: '#ffffff',
+      maxHeight: '220px',
+      overscrollBehavior: 'contain',
+      '& .MuiMenuItem-root': {
+        color: '#e5e7eb',
+        fontSize: '0.95rem',
+        borderRadius: '6px',
+        margin: '2px 4px',
+        padding: '6px 12px',
+        '&:hover': {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        },
+        '&.Mui-selected': {
+          backgroundColor: '#e56a16 !important',
+          color: '#ffffff',
+          fontWeight: 'bold',
+        },
+      },
+    },
+    '& .MuiMultiSectionDigitalClockSection-root': {
+      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+      paddingTop: '0px !important',
+      paddingBottom: '0px !important',
+      padding: '0px !important',
+      maxHeight: '220px',
+      overscrollBehavior: 'contain',
+      '&::before': {
+        display: 'none !important',
+        height: '0px !important',
+      },
+      '&::after': {
+        display: 'none !important',
+        height: '0px !important',
+      },
+      '&::-webkit-scrollbar': {
+        width: '5px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: '3px',
+      },
+    },
+    '& .MuiPickersDay-root': {
+      color: '#ffffff',
+      backgroundColor: 'transparent',
+      '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      },
+      '&.Mui-selected': {
+        backgroundColor: '#e56a16 !important',
+        color: '#ffffff',
+        fontWeight: 'bold',
+      },
+      '&.MuiPickersDay-today': {
+        borderColor: '#e56a16',
+      },
+    },
+    '& .MuiDayCalendar-weekDayLabel': {
+      color: '#9ca3af',
+    },
+    '& .MuiPickersCalendarHeader-root': {
+      color: '#ffffff',
+    },
+    '& .MuiPickersCalendarHeader-label': {
+      color: '#ffffff',
+      fontWeight: 'bold',
+    },
+    '& .MuiPickersArrowSwitcher-button': {
+      color: '#ffffff',
+      '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      },
+    },
+    '& .MuiPickersLayout-actionBar button': {
+      color: '#e56a16',
+      fontWeight: '700',
+      fontSize: '0.9rem',
+    },
+    '& .MuiClock-pin': {
+      backgroundColor: '#e56a16',
+    },
+    '& .MuiClockPointer-root': {
+      backgroundColor: '#e56a16',
+    },
+    '& .MuiClockPointer-thumb': {
+      backgroundColor: '#e56a16',
+      borderColor: '#e56a16',
+    },
+    '& .MuiClock-clock': {
+      backgroundColor: '#1e1e1e',
+    },
+    '& .MuiClockNumber-root': {
+      color: '#ffffff',
+    },
+    '& .MuiTypography-root': {
+      color: '#ffffff',
+    },
+    '& .MuiSvgIcon-root': {
+      color: '#e56a16',
+    },
+  };
   const autocompleteStyles = { '& .MuiOutlinedInput-root': { color: '#E5E7EB', background: 'rgba(255,255,255,0.02)', borderRadius: 2, paddingTop: '6px', paddingBottom: '6px', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)', borderWidth: '1px' }, '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.25)' }, '&.Mui-focused fieldset': { borderColor: '#e56a16', borderWidth: '2px', boxShadow: '0 0 0 3px rgba(229,106,22,0.1)' }, '& .MuiChip-root': { background: 'rgba(229,106,22,0.15)', color: '#E5E7EB', border: '1px solid rgba(229,106,22,0.3)', height: '24px', margin: '2px' } }, '& .MuiInputLabel-root': { color: '#9CA3AF', fontWeight: 500, '&.Mui-focused': { color: '#e56a16' } }, '& .MuiOutlinedInput-input': { padding: '6px 14px' }, '& .MuiAutocomplete-input': { padding: '6px 4px 6px 6px !important' } };
   // Enhanced ShirtAvatar supporting responsive size objects
   const ShirtAvatar = ({ team }: { number?: string | number; size?: number | { xs: number; sm: number; md?: number }; team?: 'home' | 'away'; }) => {
@@ -2837,16 +2961,30 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Match Date <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <DatePicker
+                      open={openDatePicker}
+                      onOpen={() => setOpenDatePicker(true)}
+                      onClose={() => setOpenDatePicker(false)}
                       format="DD-MMM-YYYY"
                       value={matchDate}
                       onChange={(nv: Dayjs | null) => setMatchDate(nv)}
                       slotProps={{
+                        popper: {
+                          sx: darkPickerPopperSx,
+                        },
                         textField: {
                           fullWidth: true,
-                          sx: inputStyles,
+                          onClick: () => setOpenDatePicker(true),
+                          sx: { ...inputStyles, cursor: 'pointer' },
                           InputProps: {
                             endAdornment: (
-                              <InputAdornment position="end">
+                              <InputAdornment
+                                position="end"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenDatePicker((prev) => !prev);
+                                }}
+                                sx={{ cursor: 'pointer' }}
+                              >
                                 <Image src={CalendarIcon} alt="Calendar" width={24} height={24} style={{ opacity: 0.7 }} />
                               </InputAdornment>
                             )
@@ -2858,15 +2996,31 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Start Time <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
                     <TimePicker
+                      open={openTimePicker}
+                      onOpen={() => setOpenTimePicker(true)}
+                      onClose={() => setOpenTimePicker(false)}
+                      ampm={true}
+                      minutesStep={5}
                       value={startTime}
                       onChange={(nv: Dayjs | null) => setStartTime(nv)}
                       slotProps={{
+                        popper: {
+                          sx: darkPickerPopperSx,
+                        },
                         textField: {
                           fullWidth: true,
-                          sx: inputStyles,
+                          onClick: () => setOpenTimePicker(true),
+                          sx: { ...inputStyles, cursor: 'pointer' },
                           InputProps: {
                             endAdornment: (
-                              <InputAdornment position="end">
+                              <InputAdornment
+                                position="end"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenTimePicker((prev) => !prev);
+                                }}
+                                sx={{ cursor: 'pointer' }}
+                              >
                                 <Image src={ClockIcon} alt="Clock" width={24} height={24} style={{ opacity: 0.7 }} />
                               </InputAdornment>
                             )
