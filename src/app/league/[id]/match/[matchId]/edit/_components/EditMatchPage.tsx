@@ -297,7 +297,7 @@ const ScrollPreservingListbox = React.forwardRef<HTMLUListElement, React.HTMLAtt
     if (listboxRef.current && typeof savedScroll === 'number' && savedScroll > 0) {
       listboxRef.current.scrollTop = savedScroll;
     }
-  });
+  }, [props.id]);
 
   return (
     <ul
@@ -323,6 +323,15 @@ function getValidUploadedPlayerImage(profilePicture?: string | null): string {
   }
   return trimmed;
 }
+
+const ShirtAvatar = ({ team }: { number?: string | number; size?: number | { xs: number; sm: number; md?: number }; team?: 'home' | 'away'; }) => {
+  const shirtImage = team === 'away' ? RightShirt : LeftShirt;
+  return (
+    <Box sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, overflow: 'hidden', flexShrink: 0 }}>
+      <img src={shirtImage.src} alt='Shirt' style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+    </Box>
+  );
+};
 
 export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onClose }: EditMatchPageProps) {
   // Fallback team image (used in responsive preview)
@@ -2060,20 +2069,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     },
   };
   const autocompleteStyles = { '& .MuiOutlinedInput-root': { color: '#E5E7EB', background: 'rgba(255,255,255,0.02)', borderRadius: 2, paddingTop: '6px', paddingBottom: '6px', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)', borderWidth: '1px' }, '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.25)' }, '&.Mui-focused fieldset': { borderColor: '#e56a16', borderWidth: '2px', boxShadow: '0 0 0 3px rgba(229,106,22,0.1)' }, '& .MuiChip-root': { background: 'rgba(229,106,22,0.15)', color: '#E5E7EB', border: '1px solid rgba(229,106,22,0.3)', height: '24px', margin: '2px' } }, '& .MuiInputLabel-root': { color: '#9CA3AF', fontWeight: 500, '&.Mui-focused': { color: '#e56a16' } }, '& .MuiOutlinedInput-input': { padding: '6px 14px' }, '& .MuiAutocomplete-input': { padding: '6px 4px 6px 6px !important' } };
-  // Enhanced ShirtAvatar supporting responsive size objects
-  const ShirtAvatar = ({ team }: { number?: string | number; size?: number | { xs: number; sm: number; md?: number }; team?: 'home' | 'away'; }) => {
-    // const baseSize = typeof size === 'number' ? size : (size.sm || size.xs);
-    // const fontSize = baseSize >= 56 ? 16 : baseSize >= 48 ? 14 : baseSize >= 40 ? 12 : baseSize >= 32 ? 10 : 8;
-    const shirtImage = team === 'away' ? RightShirt : LeftShirt;
-    return (
-      <Box sx={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, overflow: 'hidden', flexShrink: 0 }}>
-        <img src={shirtImage.src} alt='Shirt' style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-        {/* <Typography component='span' sx={{ position: 'relative', zIndex: 1, fontWeight: 800, fontSize, color: '#111', textShadow: '0 1px 1px rgba(255,255,255,0.6)', lineHeight: 1 }}>
-            {number || '0'}
-          </Typography> */}
-      </Box>
-    );
-  };
+
 
   const handleShareMatchPreview = async () => {
     const home = homeTeamName || 'Home';
@@ -2220,19 +2216,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
-                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
                         const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={playerKey}
+                            key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) {
-                                optionProps.onMouseDown(e);
-                              }
-                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
@@ -2425,19 +2414,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         const { key, ...optionProps } = props;
                         const isAvailable = availabilityMap[option.id] === 'available';
                         const availabilityOrder = availableOrderMap[option.id];
-                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
                         const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={playerKey}
+                            key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) {
-                                optionProps.onMouseDown(e);
-                              }
-                            }}
                             sx={{
                               display: 'flex',
                               flexDirection: 'column',
@@ -2642,19 +2624,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       )}
                       renderOption={(props, option, { selected }) => {
                         const { key, ...optionProps } = props;
-                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
                         const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={playerKey}
+                            key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) {
-                                optionProps.onMouseDown(e);
-                              }
-                            }}
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
@@ -2758,19 +2733,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       )}
                       renderOption={(props, option, { selected }) => {
                         const { key, ...optionProps } = props;
-                        const playerKey = option.id || option.guestTempId || option.existingGuestId || key;
                         const imgSrc = getValidUploadedPlayerImage(option.profilePicture);
                         return (
                           <Box
-                            key={playerKey}
+                            key={key}
                             component="li"
                             {...optionProps}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              if (optionProps.onMouseDown) {
-                                optionProps.onMouseDown(e);
-                              }
-                            }}
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
