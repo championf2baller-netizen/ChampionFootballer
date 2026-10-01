@@ -1486,7 +1486,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
           <IconButton
             onClick={() => setViewTeamOpen(false)}
             size="small"
-            sx={{ color: 'inherit', position: 'absolute', right: 0, top: 0, bottom: 0, width: 56, borderRadius: 0, bgcolor: '#e6e6e6', '&:hover': { bgcolor: '#e6e6e6' } }}
+            sx={{ color: '#000', position: 'absolute', right: 0, top: 0, bottom: 0, width: 56, borderRadius: 0, bgcolor: '#e6e6e6', transition: 'background-color 0.2s ease', '&:hover': { bgcolor: '#d0d0d0', color: '#000' } }}
           >
             <Close />
           </IconButton>
@@ -1515,12 +1515,41 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
             }
           }}
         >
-          <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-            <Typography fontWeight={700} fontSize={{ xs: 16, sm: 18 }}>
-              Edit Stats — {formatPlayerDisplayName(editingPlayer)}
-            </Typography>
-            <IconButton onClick={() => setEditingPlayer(null)} size="small" sx={{ color: '#fff' }}>
-              <Close />
+          <DialogTitle sx={{
+            background: '#0e0e0e',
+            color: '#fff',
+            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+            fontWeight: 700,
+            fontSize: { xs: '16px', sm: '20px' },
+            textTransform: 'uppercase',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: { xs: 2.5, md: 3.5 },
+            py: 0,
+            height: { xs: 52, sm: 58 },
+            position: 'relative',
+            borderBottom: '3px solid #E56A16',
+            flexShrink: 0
+          }}>
+            Edit Stats — {formatPlayerDisplayName(editingPlayer)}
+            <IconButton onClick={() => setEditingPlayer(null)} aria-label="close" sx={{
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
+              '&:hover': {
+                bgcolor: '#d0d0d0',
+                color: '#000',
+              }
+            }}>
+              <Close sx={{ fontSize: { xs: 24, sm: 28 } }} />
             </IconButton>
           </DialogTitle>
           <DialogContent sx={{ pt: 2 }}>

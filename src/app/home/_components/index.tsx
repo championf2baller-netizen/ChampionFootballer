@@ -3254,13 +3254,18 @@ export default function PlayerDashboard() {
           </DialogTitle>
           <IconButton
             onClick={() => setIsDialogOpen(false)}
+            aria-label="close"
             sx={{
-              color: '#E5E7EB',
-              bgcolor: 'rgba(255,255,255,0.08)',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' },
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              width: 36,
+              height: 36,
+              borderRadius: 1,
+              transition: 'background-color 0.2s ease',
+              '&:hover': { bgcolor: '#d0d0d0', color: '#000' },
             }}
           >
-            <X />
+            <X size={20} />
           </IconButton>
         </Box>
         <DialogContent sx={{ pt: 2.2, px: { xs: 1.2, sm: 3 }, pb: { xs: 1.5, sm: 2 } }}>

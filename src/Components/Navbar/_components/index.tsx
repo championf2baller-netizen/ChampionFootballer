@@ -4272,14 +4272,17 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         <DialogTitle sx={{
           background: '#0e0e0e',
           color: 'white',
-          fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
-          fontWeight: 600,
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
           fontSize: { xs: '20px', sm: '24px', md: '28px' },
+          textTransform: 'uppercase',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           px: { xs: 2.5, md: 3.5 },
-          py: { xs: 1.75, md: 2 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
           borderBottom: '3px solid #E56A16',
           flexShrink: 0
         }}>
@@ -4288,17 +4291,23 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             aria-label="close"
             onClick={() => setHowToPlayOpen(false)}
             sx={{
-              color: 'white',
-              p: 1,
-              transition: 'all 0.2s ease',
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)',
-                color: '#E56A16',
-                transform: 'rotate(90deg)'
+                bgcolor: '#d0d0d0',
+                color: '#000',
               }
             }}
           >
-            <CloseIcon />
+            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{
@@ -4646,14 +4655,17 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         <DialogTitle sx={{
           background: '#0e0e0e',
           color: 'white',
-          fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
-          fontWeight: 600,
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
           fontSize: { xs: '20px', sm: '24px', md: '28px' },
+          textTransform: 'uppercase',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           px: { xs: 2.5, md: 3.5 },
-          py: { xs: 1.75, md: 2 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
           borderBottom: '3px solid #E56A16',
           flexShrink: 0
         }}>
@@ -4662,17 +4674,23 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             aria-label="close"
             onClick={() => setGameRulesOpen(false)}
             sx={{
-              color: 'white',
-              p: 1,
-              transition: 'all 0.2s ease',
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)',
-                color: '#E56A16',
-                transform: 'rotate(90deg)'
+                bgcolor: '#d0d0d0',
+                color: '#000',
               }
             }}
           >
-            <CloseIcon />
+            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{
@@ -4956,14 +4974,17 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         <DialogTitle sx={{
           background: '#0e0e0e',
           color: 'white',
-          fontFamily: 'Franklin Gothic Demi, Franklin Gothic Medium, Arial, sans-serif',
-          fontWeight: 600,
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
           fontSize: { xs: '20px', sm: '24px', md: '28px' },
+          textTransform: 'uppercase',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           px: { xs: 2.5, md: 3.5 },
-          py: { xs: 1.75, md: 2 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
           borderBottom: '3px solid #E56A16',
           flexShrink: 0
         }}>
@@ -4972,17 +4993,23 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             aria-label="close"
             onClick={() => setXpStatusOpen(false)}
             sx={{
-              color: 'white',
-              p: 1,
-              transition: 'all 0.2s ease',
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.1)',
-                color: '#E56A16',
-                transform: 'rotate(90deg)'
+                bgcolor: '#d0d0d0',
+                color: '#000',
               }
             }}
           >
-            <CloseIcon />
+            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{

@@ -1110,19 +1110,40 @@ export default function RewardsPage() {
           }}
         >
           <DialogTitle sx={{
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
+            background: '#0e0e0e',
             color: '#fff',
-            fontFamily: 'var(--font-woodford-bourne-pro)',
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
-            borderBottom: '1px solid #444',
-            pb: 2,
+            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+            fontWeight: 700,
+            fontSize: { xs: '20px', sm: '24px', md: '28px' },
+            textTransform: 'uppercase',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: { xs: 2.5, md: 3.5 },
+            py: 0,
+            height: { xs: 52, sm: 58 },
+            position: 'relative',
+            borderBottom: '3px solid #E56A16',
+            flexShrink: 0
           }}>
             {selectedBadge?.title}
-            <Box sx={{ flexGrow: 1 }} />
-            <IconButton onClick={closeBadgeDetail} sx={{ color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}>
-              <CloseIcon />
+            <IconButton onClick={closeBadgeDetail} aria-label="close" sx={{
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
+              '&:hover': {
+                bgcolor: '#d0d0d0',
+                color: '#000',
+              }
+            }}>
+              <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
             </IconButton>
           </DialogTitle>
           <DialogContent sx={{ py: 3 }}>

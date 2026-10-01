@@ -15,6 +15,8 @@ import CleanSheet from '@/Components/images/cleansheet.png'
 // import FreeKick from '@/Components/images/freekick.png'
 // import penalty from '@/Components/images/penalty.png'
 
+import CloseIcon from '@mui/icons-material/Close';
+
 // You may need to import your StatCounter and stat icons here
 // import StatCounter from './StatCounter';
 // import Goals from '@/Components/images/goal.png';
@@ -77,7 +79,43 @@ const PlayerStatsDialog: React.FC<PlayerStatsDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Your Stats for the Match</DialogTitle>
+      <DialogTitle sx={{
+        background: '#0e0e0e',
+        color: '#fff',
+        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+        fontWeight: 700,
+        fontSize: { xs: '18px', sm: '22px' },
+        textTransform: 'uppercase',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        px: { xs: 2.5, md: 3.5 },
+        py: 0,
+        height: { xs: 52, sm: 58 },
+        position: 'relative',
+        borderBottom: '3px solid #E56A16',
+        flexShrink: 0
+      }}>
+        Your Stats for the Match
+        <IconButton onClick={onClose} aria-label="close" sx={{
+          bgcolor: '#e6e6e6',
+          color: '#000',
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: { xs: 48, sm: 56 },
+          borderRadius: 0,
+          borderTopRightRadius: 'inherit',
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            bgcolor: '#d0d0d0',
+            color: '#000',
+          }
+        }}>
+          <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+        </IconButton>
+      </DialogTitle>
       <DialogContent>
                     <StatCounter icon={<img src={Goals.src} alt="Goals Scored" style={{ width: 24, height: 24 }} />} label="Goals Scored" value={stats.goals} onIncrement={() => handleStatChange('goals', 1, teamGoals)} onDecrement={() => handleStatChange('goals', -1, teamGoals)} />
                     <StatCounter icon={<img src={Assist.src} alt="Assists" style={{ width: 24, height: 24 }} />} label="Assists" value={stats.assists} onIncrement={() => handleStatChange('assists', 1, teamGoals)} onDecrement={() => handleStatChange('assists', -1, teamGoals)} />

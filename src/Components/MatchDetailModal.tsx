@@ -209,13 +209,21 @@ export default function MatchDetailModal({
         >
             <DialogTitle
                 sx={{
-                    fontWeight: 'bold',
+                    background: '#0e0e0e',
+                    color: '#fff',
+                    fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+                    fontWeight: 700,
+                    fontSize: { xs: '20px', sm: '24px', md: '28px' },
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    px: { xs: 2.5, md: 3.5 },
+                    py: 0,
+                    height: { xs: 52, sm: 58 },
                     position: 'relative',
-                    color: '#E5E7EB',
-                    background: 'linear-gradient(90deg, #767676 0%, #000000 100%)',
-                    borderBottom: '1px solid rgba(255,255,255,0.1)',
-                    py: { xs: 2, sm: 2.5 },
-                    pr: { xs: 6, sm: 8 }
+                    borderBottom: '3px solid #E56A16',
+                    flexShrink: 0
                 }}
             >
                 Match Details
@@ -223,29 +231,23 @@ export default function MatchDetailModal({
                     aria-label="close"
                     onClick={onClose}
                     sx={{
+                        bgcolor: '#e6e6e6',
+                        color: '#000',
                         position: 'absolute',
-                        right: 12,
-                        top: 12,
-                        color: '#fff',
-                        bgcolor: 'rgba(255, 255, 255, 0.12)',
-                        border: '1.5px solid rgba(255, 255, 255, 0.35)',
-                        borderRadius: '50%',
-                        width: 32,
-                        height: 32,
-                        p: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease',
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: { xs: 48, sm: 56 },
+                        borderRadius: 0,
+                        borderTopRightRadius: 'inherit',
+                        transition: 'background-color 0.2s ease',
                         '&:hover': {
-                            bgcolor: '#e56a16',
-                            borderColor: '#e56a16',
-                            color: '#fff',
-                            transform: 'scale(1.08)',
+                            bgcolor: '#d0d0d0',
+                            color: '#000',
                         }
                     }}
                 >
-                    <CloseIcon sx={{ fontSize: 18 }} />
+                    <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
                 </IconButton>
             </DialogTitle>
 

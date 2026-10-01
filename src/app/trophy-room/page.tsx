@@ -3678,11 +3678,43 @@ export default function GlobalTrophyRoom() {
           })()}
 
           {/* Badge detail modal (tap card) */}
-          <Dialog open={openBadgeDlg} onClose={closeBadgeDetail} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 2 } }}>
-            <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center' }}>
+          <Dialog open={openBadgeDlg} onClose={closeBadgeDetail} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden' } }}>
+            <DialogTitle sx={{
+              background: '#0e0e0e',
+              color: '#fff',
+              fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+              fontWeight: 700,
+              fontSize: { xs: '20px', sm: '24px', md: '28px' },
+              textTransform: 'uppercase',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              px: { xs: 2.5, md: 3.5 },
+              py: 0,
+              height: { xs: 52, sm: 58 },
+              position: 'relative',
+              borderBottom: '3px solid #E56A16',
+              flexShrink: 0
+            }}>
               {selectedBadge?.title}
-              <Box sx={{ flexGrow: 1 }} />
-              <IconButton onClick={closeBadgeDetail}><CloseIcon /></IconButton>
+              <IconButton onClick={closeBadgeDetail} aria-label="close" sx={{
+                bgcolor: '#e6e6e6',
+                color: '#000',
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: { xs: 48, sm: 56 },
+                borderRadius: 0,
+                borderTopRightRadius: 'inherit',
+                transition: 'background-color 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#d0d0d0',
+                  color: '#000',
+                }
+              }}>
+                <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+              </IconButton>
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ py: 2 }}>
@@ -3900,12 +3932,41 @@ export default function GlobalTrophyRoom() {
           }
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', py: { xs: 1, sm: 1.5 }, px: { xs: 1.5, sm: 3 }, bgcolor: '#000', position: 'relative' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-            <Image src={cflogo} alt="CF Logo" width={isMobile ? 200 : 300} height={isMobile ? 200 : 300} style={{ objectFit: 'contain', maxWidth: '85%' }} />
+        <DialogTitle sx={{
+          background: '#0e0e0e',
+          color: '#fff',
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: { xs: 2.5, md: 3.5 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', pr: 4 }}>
+            <Image src={cflogo} alt="CF Logo" width={isMobile ? 180 : 240} height={isMobile ? 180 : 240} style={{ objectFit: 'contain', maxHeight: 40 }} />
           </Box>
-          <IconButton onClick={() => setOpenQuickView(false)} sx={{ color: '#fff', position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-            <CloseIcon />
+          <IconButton onClick={() => setOpenQuickView(false)} aria-label="close" sx={{
+            bgcolor: '#e6e6e6',
+            color: '#000',
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: { xs: 48, sm: 56 },
+            borderRadius: 0,
+            borderTopRightRadius: 'inherit',
+            transition: 'background-color 0.2s ease',
+            '&:hover': {
+              bgcolor: '#d0d0d0',
+              color: '#000',
+            }
+          }}>
+            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
 

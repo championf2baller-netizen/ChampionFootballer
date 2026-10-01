@@ -426,11 +426,41 @@ export default function TrophyRoom({ leagueId }: { leagueId: string }) {
         maxWidth="xs"
         PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden' } }}
       >
-        <DialogTitle sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 0, py: { xs: 1, sm: 2 }, px: { xs: 2, sm: 3 } }}>
+        <DialogTitle sx={{
+          background: '#0e0e0e',
+          color: '#fff',
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
+          fontSize: { xs: '18px', sm: '22px', md: '26px' },
+          textTransform: 'uppercase',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: { xs: 2.5, md: 3.5 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
+        }}>
           {quickView.trophyTitle ? `${quickView.trophyTitle} • ` : ''} Player
-          <Box sx={{ flexGrow: 1 }} />
-          <IconButton onClick={() => setOpenQuickView(false)} edge="end" size="small">
-            <CloseIcon />
+          <IconButton onClick={() => setOpenQuickView(false)} aria-label="close" sx={{
+            bgcolor: '#e6e6e6',
+            color: '#000',
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: { xs: 48, sm: 56 },
+            borderRadius: 0,
+            borderTopRightRadius: 'inherit',
+            transition: 'background-color 0.2s ease',
+            '&:hover': {
+              bgcolor: '#d0d0d0',
+              color: '#000',
+            }
+          }}>
+            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
         <Divider />

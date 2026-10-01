@@ -3147,7 +3147,7 @@ export default function PlayerStatsPage() {
                     )}
                     <IconButton
                         onClick={() => setStatsModalOpen(false)}
-                        sx={{ color: '#555', bgcolor: '#e6e6e6', borderRadius: '3px', '&:hover': { color: '#000', bgcolor: '#e6e6e6' }, position: 'absolute', right: { xs: 6, md: 10 }, top: { xs: 6, md: 7 } }}
+                        sx={{ color: '#000', bgcolor: '#e6e6e6', borderRadius: 0, width: { xs: 44, md: 52 }, top: 0, right: 0, bottom: 0, position: 'absolute', transition: 'background-color 0.2s ease', '&:hover': { color: '#000', bgcolor: '#d0d0d0' } }}
                     >
                         <CloseIcon sx={{ fontSize: { xs: 20, md: 24 } }} />
                     </IconButton>

@@ -600,7 +600,39 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         backdropFilter: 'blur(20px)',
         boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05)'
     } as const;
-    const dialogTitleSx = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#fff', bgcolor: 'transparent' } as const;
+    const dialogTitleSx = {
+        background: '#0e0e0e',
+        color: '#fff',
+        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+        fontWeight: 700,
+        fontSize: { xs: '18px', sm: '22px', md: '26px' },
+        textTransform: 'uppercase',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        px: { xs: 2.5, md: 3.5 },
+        py: 0,
+        height: { xs: 52, sm: 58 },
+        position: 'relative',
+        borderBottom: '3px solid #E56A16',
+        flexShrink: 0
+    } as const;
+    const dialogCloseBtnSx = {
+        bgcolor: '#e6e6e6',
+        color: '#000',
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: { xs: 48, sm: 56 },
+        borderRadius: 0,
+        borderTopRightRadius: 'inherit',
+        transition: 'background-color 0.2s ease',
+        '&:hover': {
+            bgcolor: '#d0d0d0',
+            color: '#000',
+        }
+    } as const;
     const dialogContentSx = { color: '#E5E7EB', bgcolor: '#262626' } as const;
 
     // --- NEW: handlers to fetch leagues and matches ---
@@ -2412,8 +2444,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 >
                     <DialogTitle sx={dialogTitleSx}>
                         ADD MATCH SCORES
-                        <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}>
-                            <CloseIcon />
+                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
                         </IconButton>
                     </DialogTitle>
                     <DialogContent sx={{ ...dialogContentSx, minHeight: '200px' }}>
@@ -2435,7 +2467,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg" scroll="paper" keepMounted PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         Match Stats
-                        <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={dialogContentSx}>
                         {inner}
@@ -2453,7 +2485,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         ADD MATCH SCORES
-                        <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={{ ...dialogContentSx }}>
                         {error ? (
@@ -2477,7 +2509,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         Match Stats
-                        <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={dialogContentSx}>
                         <Box sx={{ display: 'grid', gap: 2 }}>
@@ -2527,7 +2559,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         Match Stats
-                        <IconButton onClick={onClose} size="small" sx={{ color: '#fff' }}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={dialogContentSx}>
                         {inner}
@@ -3622,8 +3654,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={isPickDialogOpen} onClose={() => setIsPickDialogOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     {pickCategory === 'defence' ? 'Select player for Defensive Impact' : 'Select player for + Mentality'}
-                    <IconButton onClick={() => setIsPickDialogOpen(false)} size="small" sx={{ color: '#fff' }}>
-                        <CloseIcon />
+                    <IconButton onClick={() => setIsPickDialogOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -3658,8 +3690,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={leagueSelectOpen} onClose={() => setLeagueSelectOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     Select a League
-                    <IconButton onClick={() => setLeagueSelectOpen(false)} size="small" sx={{ color: '#fff' }}>
-                        <CloseIcon />
+                    <IconButton onClick={() => setLeagueSelectOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -3726,7 +3758,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
             {!selectedLeagueHasNoMatches && (
                 <Dialog open={isStatsModalOpen} onClose={handleCloseStatsModal} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
-                    <DialogTitle sx={dialogTitleSx}>Your Stats for the Match</DialogTitle>
+                    <DialogTitle sx={dialogTitleSx}>
+                        Your Stats for the Match
+                        <IconButton onClick={handleCloseStatsModal} aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                        </IconButton>
+                    </DialogTitle>
                     <DialogContent sx={dialogContentSx}>
                         <StatCounter icon={<img src={Goals.src} alt="Goals" style={{ width: 24, height: 24 }} />} label="Goals Scored" value={stats.goals} onIncrement={() => handleStatChange('goals', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('goals', -1, teamGoalsSafe)} />
                         <StatCounter icon={<img src={Assist.src} alt="Assists" style={{ width: 24, height: 24 }} />} label="Assists" value={stats.assists} onIncrement={() => handleStatChange('assists', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('assists', -1, teamGoalsSafe)} />
@@ -3765,8 +3802,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={matchesDialogOpen} onClose={() => setMatchesDialogOpen(false)} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     Select a Match
-                    <IconButton onClick={() => setMatchesDialogOpen(false)} size="small" sx={{ color: '#fff' }}>
-                        <CloseIcon />
+                    <IconButton onClick={() => setMatchesDialogOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -3854,7 +3891,12 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             {/* Admin Stats Modal */}
             {!selectedLeagueHasNoMatches && (
                 <Dialog open={isAdminStatsModalOpen} onClose={handleCloseAdminStatsModal} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
-                    <DialogTitle sx={dialogTitleSx}>Admin Add Stats for {formatGuestAwarePlayerName(selectedPlayerForAdmin)}</DialogTitle>
+                    <DialogTitle sx={dialogTitleSx}>
+                        Admin Add Stats for {formatGuestAwarePlayerName(selectedPlayerForAdmin)}
+                        <IconButton onClick={handleCloseAdminStatsModal} aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                        </IconButton>
+                    </DialogTitle>
                     <DialogContent sx={dialogContentSx}>
                         <StatCounter
                             icon={<img src={Goals.src} alt="Goals" style={{ width: 24, height: 24 }} />}
@@ -4114,7 +4156,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     width: 63.5,
                                     height: 63.5,
                                     '&:hover': {
-                                        bgcolor: '#e6e6e6'
+                                        bgcolor: '#d0d0d0',
+                                        color: '#000'
                                     }
                                 }}
                             >
@@ -4553,7 +4596,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     borderRadius: 0,
                                     width: 56,
                                     height: 56,
-                                    '&:hover': { backgroundColor: '#e6e6e6' },
+                                    '&:hover': { backgroundColor: '#d0d0d0', color: '#000' },
                                 }}
                             >
                                 <CloseIcon />
