@@ -1127,7 +1127,7 @@ const PlayerProfileCard = () => {
               </Stepper>
               <Box sx={{ width: '100%', height: 3, background: '#fff', mx: 0, mb: 3, opacity: 0.4 }} />
 
-              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', gap: 1.5, width: '100%', height: { xs: 'auto', sm: 180 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 2, width: '100%', mb: 1 }}>
                 <Avatar
                   src={imgSrc || undefined}
                   alt="Profile"
@@ -1137,16 +1137,17 @@ const PlayerProfileCard = () => {
                     crossOrigin: 'anonymous'
                   }}
                   sx={{
-                    width: { xs: 112, sm: 115 },
-                    height: { xs: 152, sm: 160 },
-                    border: `3px solid ${themeColors.primary}`,
-                    borderRadius: 3,
+                    width: { xs: 120, sm: 140 , md:160 },
+                    height: { xs: 120, sm: 140 , md:160 },
+                    // border: `3px solid ${themeColors.primary}`,
+                    borderRadius: '50%',
                     background: imgSrc ? "#2f3033" : avatarFallbackBg,
                     color: '#fff',
                     fontSize: 44,
                     fontWeight: 800,
                     textTransform: 'uppercase',
-                    boxShadow: "0 4px 18px -4px rgba(0,0,0,0.6)"
+                    boxShadow: "0 4px 18px -4px rgba(0,0,0,0.6)",
+                    flexShrink: 0
                   }}
                 >
                   {!imgSrc ? avatarInitials : <Person sx={{ fontSize: 62, color: themeColors.textFaint }} />}
