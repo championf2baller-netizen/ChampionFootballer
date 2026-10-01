@@ -1619,13 +1619,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       setDuration('');
       return;
     }
-    if (!/^\d+$/.test(value) || value.length > 3) {
+    if (!/^\d+$/.test(value)) {
       toast.error(DURATION_ERROR_MESSAGE);
       return;
     }
     const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed < 5) {
-      toast.error('Please select match duration (minimum 5 minutes)');
+    if (parsed > 235) {
+      toast.error('You cannot add more than 235 minutes');
+      return;
+    }
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      toast.error('Please select match duration (minimum 1 minute)');
       return;
     }
     setDuration(parsed);
@@ -1772,8 +1776,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     e.preventDefault(); setIsSubmitting(true); setError(null);
 
     const currentDur = typeof duration === 'number' ? duration : 0;
-    if (currentDur < 5) {
-      toast.error('Please select match duration (minimum 5 minutes)');
+    if (currentDur < 1) {
+      toast.error('Please select match duration (minimum 1 minute)');
+      setIsSubmitting(false);
+      return;
+    }
+    if (currentDur > 235) {
+      toast.error('You cannot add more than 235 minutes');
       setIsSubmitting(false);
       return;
     }
@@ -3001,7 +3010,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       onChange={e => handleDurationChange(e.target.value)}
                       fullWidth
                       sx={{ ...inputStyles }}
-                      inputProps={{ min: 1, max: 999 }}
+                      inputProps={{ min: 1, max: 235 }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
