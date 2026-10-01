@@ -728,17 +728,21 @@ function LeagueMembersDialog({
 
         <IconButton
           onClick={onClose}
+          aria-label="close"
           sx={{
-            color: "#E5E7EB",
-            bgcolor: "rgba(255,255,255,0.08)",
-            "&:hover": {
-              bgcolor: "rgba(255,255,255,0.12)",
-              color: "#fff",
+            bgcolor: '#e6e6e6',
+            color: '#000',
+            width: 36,
+            height: 36,
+            borderRadius: 1,
+            transition: 'background-color 0.2s ease',
+            '&:hover': {
+              bgcolor: '#d0d0d0',
+              color: '#000',
             },
-            transition: "all 0.2s ease",
           }}
         >
-          <Close />
+          <Close sx={{ fontSize: 20 }} />
         </IconButton>
       </DialogTitle>
 
@@ -2135,35 +2139,45 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 'bold', position: 'relative', color: '#E5E7EB' }}>
+      <DialogTitle sx={{
+        background: '#0e0e0e',
+        color: '#fff',
+        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+        fontWeight: 700,
+        fontSize: { xs: '20px', sm: '24px', md: '28px' },
+        textTransform: 'uppercase',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        px: { xs: 2.5, md: 3.5 },
+        py: 0,
+        height: { xs: 52, sm: 58 },
+        position: 'relative',
+        borderBottom: '3px solid #E56A16',
+        flexShrink: 0
+      }}>
         Manage League Settings
         <IconButton
           aria-label="close"
           onClick={onClose}
           sx={{
+            bgcolor: '#e6e6e6',
+            color: '#000',
             position: 'absolute',
-            right: 12,
-            top: 12,
-            color: '#fff',
-            bgcolor: 'rgba(255, 255, 255, 0.12)',
-            border: '1.5px solid rgba(255, 255, 255, 0.35)',
-            borderRadius: '50%',
-            width: 32,
-            height: 32,
-            p: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: { xs: 48, sm: 56 },
+            borderRadius: 0,
+            borderTopRightRadius: 'inherit',
+            transition: 'background-color 0.2s ease',
             '&:hover': {
-              bgcolor: '#e56a16',
-              borderColor: '#e56a16',
-              color: '#fff',
-              transform: 'scale(1.08)',
+              bgcolor: '#d0d0d0',
+              color: '#000',
             }
           }}
         >
-          <Close sx={{ fontSize: 18 }} />
+          <Close sx={{ fontSize: { xs: 24, sm: 28 } }} />
         </IconButton>
       </DialogTitle>
 
@@ -2975,35 +2989,45 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: '#E5E7EB', position: 'relative' }}>
+        <DialogTitle sx={{
+          background: '#0e0e0e',
+          color: '#fff',
+          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+          fontWeight: 700,
+          fontSize: { xs: '20px', sm: '24px', md: '28px' },
+          textTransform: 'uppercase',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          px: { xs: 2.5, md: 3.5 },
+          py: 0,
+          height: { xs: 52, sm: 58 },
+          position: 'relative',
+          borderBottom: '3px solid #E56A16',
+          flexShrink: 0
+        }}>
           Archived Seasons
           <IconButton
             aria-label="close"
             onClick={() => setArchivedSeasonsOpen(false)}
             sx={{
+              bgcolor: '#e6e6e6',
+              color: '#000',
               position: 'absolute',
-              right: 12,
-              top: 12,
-              color: '#fff',
-              bgcolor: 'rgba(255, 255, 255, 0.12)',
-              border: '1.5px solid rgba(255, 255, 255, 0.35)',
-              borderRadius: '50%',
-              width: 32,
-              height: 32,
-              p: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s ease',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
               '&:hover': {
-                bgcolor: '#e56a16',
-                borderColor: '#e56a16',
-                color: '#fff',
-                transform: 'scale(1.08)',
+                bgcolor: '#d0d0d0',
+                color: '#000',
               }
             }}
           >
-            <Close sx={{ fontSize: 18 }} />
+            <Close sx={{ fontSize: { xs: 24, sm: 28 } }} />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ borderColor: 'rgba(255,255,255,0.08)' }}>
@@ -7645,16 +7669,21 @@ function AllLeagues() {
             </DialogTitle>
             <IconButton
               onClick={() => setIsDialogOpen(false)}
+              aria-label="close"
               sx={{
                 position: 'absolute',
                 top: 8,
                 right: 8,
-                color: '#E5E7EB',
-                bgcolor: 'rgba(255,255,255,0.08)',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.14)' },
+                bgcolor: '#e6e6e6',
+                color: '#000',
+                width: 36,
+                height: 36,
+                borderRadius: 1,
+                transition: 'background-color 0.2s ease',
+                '&:hover': { bgcolor: '#d0d0d0', color: '#000' },
               }}
             >
-              <X />
+              <X size={20} />
             </IconButton>
           </Box>
           <DialogContent sx={{ pt: 2.2, px: { xs: 1.2, sm: 3 }, pb: { xs: 1.5, sm: 2 } }}>
