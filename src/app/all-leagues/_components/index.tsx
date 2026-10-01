@@ -6659,7 +6659,6 @@ function AllLeagues() {
                               <Button
                                 size="small"
                                 disabled={isCreatingSeason}
-                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: isCompleted ? '#111827' : '#0388E3' }} /> : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (isCompleted) {
@@ -6671,43 +6670,35 @@ function AllLeagues() {
                                 sx={{
                                   alignSelf: 'flex-start',
                                   mt: 0.4,
-                                  // px: 1.25,
-                                  // py: 0.2,
+                                  p: 0,
+                                  minWidth: 0,
                                   minHeight: 28,
-                                  borderRadius: 1,
+                                  borderRadius: 0,
                                   textTransform: 'none',
                                   color: isCompleted ? '#111827' : '#0388E3',
                                   fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                  fontWeight: 600,
-                                  fontSize: { xs: '12px', sm: '16px' },
-                                  textDecoration: 'underline',
-                                  textUnderlineOffset: '3px',
-                                  '& .MuiButton-startIcon .MuiSvgIcon-root': {
+                                  fontWeight: 700,
+                                  fontSize: { xs: '13px', sm: '17px' },
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                  backgroundColor: 'transparent',
+                                  '&:hover': {
+                                    backgroundColor: 'transparent',
+                                    opacity: 0.85,
+                                  },
+                                  '&.Mui-disabled': {
                                     color: isCompleted ? '#111827' : '#0388E3',
+                                    opacity: 0.6,
                                   },
-                                  ...(isCompleted && {
-                                    opacity: 0.75,
-                                    '&:hover': {
-                                      backgroundColor: 'transparent',
-                                      color: '#111827',
-                                      textDecoration: 'underline',
-                                      opacity: 0.75,
-                                    },
-                                  }),
-                                  ...(!isCompleted && {
-                                    '&.Mui-disabled': {
-                                      color: 'rgba(255,255,255,0.9)',
-                                      WebkitTextFillColor: 'rgba(255,255,255,0.9)',
-                                      opacity: 0.75,
-                                    },
-                                  }),
-                                  '&.Mui-disabled .MuiButton-startIcon .MuiSvgIcon-root': {
-                                    color: '#ffffff',
-                                  },
-
                                 }}
                               >
-                                {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
+                                <Box component="span" sx={{ fontSize: { xs: '16px', sm: '20px' }, fontWeight: 400, textDecoration: 'none', display: 'inline-block' }}>
+                                  +
+                                </Box>
+                                <Box component="span" sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+                                  {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
+                                </Box>
                               </Button>
                             )}
                           </Box>
