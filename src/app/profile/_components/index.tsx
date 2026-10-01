@@ -131,6 +131,7 @@ const StyledSlider = styled(Slider)(() => ({
   height: 8,
   padding: '4px 0',                 // reduce default vertical padding
   boxSizing: 'border-box',
+  touchAction: 'pan-y',
   '& .MuiSlider-track': {
     border: 'none',
     background: themeColors.sliderTrack
@@ -149,6 +150,119 @@ const StyledSlider = styled(Slider)(() => ({
     '&:focus-visible': { boxShadow: '0 0 0 8px rgba(0,167,127,0.30)' }
   }
 }))
+
+const HorizontalOnlySlider = ({
+  value,
+  onChange,
+  labelColor,
+  solidColor,
+}: {
+  value: number
+  onChange: (val: number) => void
+  labelColor: string
+  solidColor: string
+}) => {
+  const startPosRef = useRef<{ x: number; y: number } | null>(null)
+  const lockDirectionRef = useRef<'horizontal' | 'vertical' | null>(null)
+
+  const handleStart = (e: React.SyntheticEvent | Event) => {
+    const nativeEv: any = (e as any).nativeEvent || e
+    let x = 0
+    let y = 0
+    if (nativeEv.touches && nativeEv.touches.length > 0) {
+      x = nativeEv.touches[0].clientX
+      y = nativeEv.touches[0].clientY
+    } else if (typeof nativeEv.clientX === 'number') {
+      x = nativeEv.clientX
+      y = nativeEv.clientY
+    }
+    startPosRef.current = { x, y }
+    lockDirectionRef.current = null
+  }
+
+  const handleReset = () => {
+    startPosRef.current = null
+    lockDirectionRef.current = null
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+  }
+
+  const handleChange = (e: Event | React.SyntheticEvent, newValue: number | number[]) => {
+    const val = Array.isArray(newValue) ? newValue[0] : newValue
+
+    const nativeEv: any = (e as any).nativeEvent || e
+    let currentX: number | null = null
+    let currentY: number | null = null
+
+    if (nativeEv.touches && nativeEv.touches.length > 0) {
+      currentX = nativeEv.touches[0].clientX
+      currentY = nativeEv.touches[0].clientY
+    } else if (nativeEv.changedTouches && nativeEv.changedTouches.length > 0) {
+      currentX = nativeEv.changedTouches[0].clientX
+      currentY = nativeEv.changedTouches[0].clientY
+    } else if (typeof nativeEv.clientX === 'number') {
+      currentX = nativeEv.clientX
+      currentY = nativeEv.clientY
+    }
+
+    if (startPosRef.current && currentX !== null && currentY !== null) {
+      const dx = Math.abs(currentX - startPosRef.current.x)
+      const dy = Math.abs(currentY - startPosRef.current.y)
+
+      if (lockDirectionRef.current === null) {
+        if (dx > 3 || dy > 3) {
+          if (dy >= dx) {
+            lockDirectionRef.current = 'vertical'
+          } else {
+            lockDirectionRef.current = 'horizontal'
+          }
+        }
+      }
+
+      if (lockDirectionRef.current === 'vertical') {
+        return
+      }
+    }
+
+    onChange(val)
+  }
+
+  return (
+    <StyledSlider
+      value={value}
+      onChange={handleChange}
+      onChangeCommitted={handleReset}
+      onMouseDown={handleStart}
+      onTouchStart={handleStart}
+      onPointerDown={handleStart}
+      onWheel={(e) => {
+        (e.target as HTMLElement)?.blur()
+        if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur()
+        }
+      }}
+      min={50}
+      max={99}
+      step={1}
+      sx={{
+        touchAction: 'pan-y',
+        '& .MuiSlider-track': {
+          background: labelColor
+        },
+        '& .MuiSlider-thumb': {
+          border: `3px solid ${solidColor}`,
+          '&:hover': {
+            boxShadow: `0 0 0 6px ${solidColor}40`
+          },
+          '&:focus-visible': {
+            boxShadow: `0 0 0 8px ${solidColor}4D`
+          }
+        }
+      }}
+    />
+  )
+}
 
 const StyledTextField = styled(TextField)(() => ({
   maxWidth: "100%",
@@ -2069,26 +2183,11 @@ const PlayerProfileCard = () => {
                           </Box>
 
                           <Box mt="auto" sx={{ px: 1.5 /* add horizontal padding so thumb not stuck to edge */ }}>
-                            <StyledSlider
+                            <HorizontalOnlySlider
                               value={skill.value ?? 50}
-                              onChange={(e, v) => skill.setter(v as number)}
-                              min={50}
-                              max={99}
-                              step={1}
-                              sx={{
-                                '& .MuiSlider-track': {
-                                  background: labelInfo.color
-                                },
-                                '& .MuiSlider-thumb': {
-                                  border: `3px solid ${solidColor}`,
-                                  '&:hover': {
-                                    boxShadow: `0 0 0 6px ${solidColor}40`
-                                  },
-                                  '&:focus-visible': {
-                                    boxShadow: `0 0 0 8px ${solidColor}4D`
-                                  }
-                                }
-                              }}
+                              onChange={(v) => skill.setter(v)}
+                              labelColor={labelInfo.color}
+                              solidColor={solidColor}
                             />
                             <Box sx={{ textAlign: 'center', mt: 1 }}>
                               <Chip
