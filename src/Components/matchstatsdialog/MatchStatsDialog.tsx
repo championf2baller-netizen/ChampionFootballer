@@ -2782,6 +2782,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     placeholder="Add Goals"
                                     value={stats.goals === 0 ? '' : stats.goals}
                                     onChange={(e) => {
+                                        if (teamGoalsSafe === 0) return;
                                         const val = e.target.value;
                                         if (val === '') {
                                             setStats(prev => ({ ...prev, goals: 0 }));
@@ -2801,15 +2802,16 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }}
                                     onFocus={(e) => e.target.select()}
                                     inputProps={{
-                                        readOnly: isMobile,
-                                        style: { textAlign: 'center', pointerEvents: isMobile ? 'none' : 'auto' }
+                                        readOnly: true,
+                                        style: { textAlign: 'center', pointerEvents: 'none' }
                                     }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
                                                 <IconButton
+                                                    disabled={teamGoalsSafe === 0 || (stats.goals || 0) <= 0}
                                                     onClick={() => setStats(prev => ({ ...prev, goals: Math.max(0, (prev.goals || 0) - 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
                                                     size="small"
                                                 >
                                                     <Remove fontSize="small" />
@@ -2819,14 +2821,16 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 <IconButton
+                                                    disabled={teamGoalsSafe === 0 || (stats.goals || 0) >= teamGoalsSafe}
                                                     onClick={() => {
+                                                        if (teamGoalsSafe === 0) return;
                                                         if ((stats.goals || 0) >= teamGoalsSafe) {
                                                             toast.error(MAX_GOALS_EXCEEDED_MESSAGE);
                                                             return;
                                                         }
                                                         setStats(prev => ({ ...prev, goals: Math.min(teamGoalsSafe, (prev.goals || 0) + 1) }));
                                                     }}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
                                                     size="small"
                                                 >
                                                     <Add fontSize="small" />
@@ -2839,7 +2843,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             color: '#fff',
                                             '& fieldset': { borderColor: '#d9d9d9' },
                                             '&:hover fieldset': { borderColor: '#d9d9d9' },
-                                            '&.Mui-focused fieldset': { borderColor: '#00C48C' },
+                                            '&.Mui-focused fieldset': { borderColor: teamGoalsSafe === 0 ? '#d9d9d9' : '#00C48C' },
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: { xs: '1rem', md: '1.25rem' },
@@ -2853,8 +2857,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             textAlign: 'center'
                                         },
                                         '& .MuiInputBase-input:focus::placeholder': {
-                                            color: 'transparent',
-                                            opacity: 0,
+                                            color: '#fff',
+                                            opacity: 1,
                                         },
                                         '& input[type=number]': { MozAppearance: 'textfield' },
                                         '& input[type=number]::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
@@ -2869,6 +2873,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     placeholder="Add Assists"
                                     value={stats.assists === 0 ? '' : stats.assists}
                                     onChange={(e) => {
+                                        if (teamGoalsSafe === 0) return;
                                         const val = e.target.value;
                                         if (val === '') {
                                             setStats(prev => ({ ...prev, assists: 0 }));
@@ -2885,15 +2890,16 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }}
                                     onFocus={(e) => e.target.select()}
                                     inputProps={{
-                                        readOnly: isMobile,
-                                        style: { textAlign: 'center', pointerEvents: isMobile ? 'none' : 'auto' }
+                                        readOnly: true,
+                                        style: { textAlign: 'center', pointerEvents: 'none' }
                                     }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
                                                 <IconButton
+                                                    disabled={teamGoalsSafe === 0 || (stats.assists || 0) <= 0}
                                                     onClick={() => setStats(prev => ({ ...prev, assists: Math.max(0, (prev.assists || 0) - 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
                                                     size="small"
                                                 >
                                                     <Remove fontSize="small" />
@@ -2903,8 +2909,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 <IconButton
+                                                    disabled={teamGoalsSafe === 0 || (stats.assists || 0) >= teamGoalsSafe}
                                                     onClick={() => setStats(prev => ({ ...prev, assists: Math.min(teamGoalsSafe, (prev.assists || 0) + 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
                                                     size="small"
                                                 >
                                                     <Add fontSize="small" />
@@ -2917,7 +2924,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             color: '#fff',
                                             '& fieldset': { borderColor: '#d9d9d9' },
                                             '&:hover fieldset': { borderColor: '#d9d9d9' },
-                                            '&.Mui-focused fieldset': { borderColor: '#00C48C' },
+                                            '&.Mui-focused fieldset': { borderColor: teamGoalsSafe === 0 ? '#d9d9d9' : '#00C48C' },
                                         },
                                         '& .MuiInputBase-input': {
                                             fontSize: { xs: '1rem', md: '1.25rem' },
@@ -2931,8 +2938,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             textAlign: 'center'
                                         },
                                         '& .MuiInputBase-input:focus::placeholder': {
-                                            color: 'transparent',
-                                            opacity: 0,
+                                            color: '#fff',
+                                            opacity: 1,
                                         },
                                         '& input[type=number]': { MozAppearance: 'textfield' },
                                         '& input[type=number]::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
@@ -3765,8 +3772,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         </IconButton>
                     </DialogTitle>
                     <DialogContent sx={dialogContentSx}>
-                        <StatCounter icon={<img src={Goals.src} alt="Goals" style={{ width: 24, height: 24 }} />} label="Goals Scored" value={stats.goals} onIncrement={() => handleStatChange('goals', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('goals', -1, teamGoalsSafe)} />
-                        <StatCounter icon={<img src={Assist.src} alt="Assists" style={{ width: 24, height: 24 }} />} label="Assists" value={stats.assists} onIncrement={() => handleStatChange('assists', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('assists', -1, teamGoalsSafe)} />
+                        <StatCounter disabled={teamGoalsSafe === 0} icon={<img src={Goals.src} alt="Goals" style={{ width: 24, height: 24 }} />} label="Goals Scored" value={stats.goals} onIncrement={() => handleStatChange('goals', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('goals', -1, teamGoalsSafe)} />
+                        <StatCounter disabled={teamGoalsSafe === 0} icon={<img src={Assist.src} alt="Assists" style={{ width: 24, height: 24 }} />} label="Assists" value={stats.assists} onIncrement={() => handleStatChange('assists', 1, teamGoalsSafe)} onDecrement={() => handleStatChange('assists', -1, teamGoalsSafe)} />
                         <StatCounter icon={<img src={CleanSheet.src} alt="Clean Sheets" style={{ width: 24, height: 24 }} />} label="Clean Sheets" value={stats.cleanSheets} onIncrement={() => handleStatChange('cleanSheets', 1, 1)} onDecrement={() => handleStatChange('cleanSheets', -1, 1)} />
                     </DialogContent>
                     {/* FreeKick */}
@@ -4634,24 +4641,27 @@ type StatCounterProps = {
     onDecrement: () => void;
     icon: React.ReactNode;
     compact?: boolean;
+    disabled?: boolean;
 };
 
-const StatCounter = ({ label, value, onIncrement, onDecrement, icon, compact = false }: StatCounterProps) => (
+const StatCounter = ({ label, value, onIncrement, onDecrement, icon, compact = false, disabled = false }: StatCounterProps) => (
     <Box sx={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         my: compact ? 0.5 : 2,
         p: compact ? 0.5 : 1,
         borderRadius: 2,
-        background: compact ? 'transparent' : 'rgba(0,0,0,0.05)'
+        background: compact ? 'transparent' : 'rgba(0,0,0,0.05)',
+        opacity: disabled ? 0.4 : 1,
+        pointerEvents: disabled ? 'none' : 'auto',
     }}>
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             {icon}
             <Typography sx={{ ml: 1.5, fontWeight: 500, fontSize: compact ? '0.9rem' : '1rem', color: '#fff' }}>{label}</Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton onClick={onDecrement} size="small" sx={{ color: '#fff', stroke: '#fff' }}><Remove /></IconButton>
+            <IconButton disabled={disabled} onClick={onDecrement} size="small" sx={{ color: '#fff', stroke: '#fff', '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}><Remove /></IconButton>
             <Typography sx={{ mx: compact ? 1 : 2, fontWeight: 800, minWidth: '20px', textAlign: 'center', color: '#fff' }}>{value}</Typography>
-            <IconButton onClick={onIncrement} size="small" sx={{ color: '#fff', stroke: '#fff' }}><Add /></IconButton>
+            <IconButton disabled={disabled} onClick={onIncrement} size="small" sx={{ color: '#fff', stroke: '#fff', '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}><Add /></IconButton>
         </Box>
     </Box>
 );
