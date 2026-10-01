@@ -3585,12 +3585,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: 2,
             minWidth: 180,
-            mt: 1,
-            width: { xs: '92vw', sm: 'auto' },
-            maxWidth: { xs: '92vw', sm: 'none' },
-            left: { xs: '50% !important', sm: 'auto' },
-            right: { xs: 'auto', sm: 'auto' },
-            transform: { xs: 'translateX(-50%)', sm: 'none' },
+            mt: 0.5,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           }
         }}
       >
