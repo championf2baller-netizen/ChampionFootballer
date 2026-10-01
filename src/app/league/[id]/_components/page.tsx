@@ -6779,12 +6779,12 @@ export default function LeagueDetailPage() {
                                             borderRadius: 2,
                                             border: '1px solid rgba(0,0,0,0.15)',
                                             overflow: 'hidden',
+                                            px: { xs: 1.25, sm: 2 },
+                                            py: { xs: 1, sm: 1.25 },
                                         }}
                                     >
                                         <Box
                                             sx={{
-                                                px: { xs: 1.25, sm: 2 },
-                                                py: { xs: 1, sm: 1.25 },
                                                 display: 'flex',
                                                 flexDirection: { xs: 'column', sm: 'row' },
                                                 alignItems: { xs: 'stretch', sm: 'center' },
@@ -6792,48 +6792,88 @@ export default function LeagueDetailPage() {
                                                 gap: { xs: 1, sm: 1.5 },
                                             }}
                                         >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexWrap: 'wrap' }}>
-                                                <Typography sx={{ color: '#232323', fontSize: { xs: '0.74rem', sm: '0.82rem' }, fontWeight: 500 }}>
+                                            {/* Mobile top text + Mobile row container / Desktop left side */}
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    flexDirection: { xs: 'column', sm: 'row' },
+                                                    alignItems: { xs: 'flex-start', sm: 'center' },
+                                                    gap: { xs: 0.8, sm: 0.8 },
+                                                    flexWrap: 'wrap',
+                                                    flex: 1,
+                                                }}
+                                            >
+                                                <Typography sx={{ color: '#232323', fontSize: { xs: '0.74rem', sm: '0.82rem' }, fontWeight: 500, width: { xs: '100%', sm: 'auto' } }}>
                                                     {invitePlayersMessage}
                                                 </Typography>
-                                                <Typography sx={{ color: '#111', fontSize: { xs: '0.74rem', sm: '0.82rem' }, fontWeight: 700 }}>
-                                                    {inviteCodeDisplay}
-                                                </Typography>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={handleCopySeasonInviteCode}
-                                                    aria-label="Copy invite code"
-                                                    title="Copy invite code"
-                                                    sx={{ color: '#1f2937', p: 0.5 }}
-                                                >
-                                                    <Copy className="w-4 h-4" />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={handleShareSeasonInvite}
-                                                    aria-label="Share invite code"
-                                                    sx={{ color: '#1f2937', p: 0.5 }}
-                                                >
-                                                    <Share2 className="w-4 h-4" />
-                                                </IconButton>
+
+                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'space-between', sm: 'flex-start' }, width: { xs: '100%', sm: 'auto' }, gap: 0.8 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                                                        <Typography sx={{ color: '#111', fontSize: { xs: '0.82rem', sm: '0.82rem' }, fontWeight: 700 }}>
+                                                            {inviteCodeDisplay}
+                                                        </Typography>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={handleCopySeasonInviteCode}
+                                                            aria-label="Copy invite code"
+                                                            title="Copy invite code"
+                                                            sx={{ color: '#1f2937', p: 0.5 }}
+                                                        >
+                                                            <Copy className="w-4 h-4" />
+                                                        </IconButton>
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={handleShareSeasonInvite}
+                                                            aria-label="Share invite code"
+                                                            sx={{ color: '#1f2937', p: 0.5 }}
+                                                        >
+                                                            <Share2 className="w-4 h-4" />
+                                                        </IconButton>
+                                                    </Box>
+
+                                                    {/* Mobile-only position for button if screen is mobile */}
+                                                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                                                        {isAdmin && (
+                                                            isMatchCreationAllowed ? (
+                                                                <Link href={`/league/${leagueId}/match`} passHref>
+                                                                    <button className="bg-[#e16419] hover:bg-[#c95310] transition-colors text-white font-semibold px-3.5 py-1.5 rounded inline-flex items-center whitespace-nowrap justify-center text-xs shadow-sm">
+                                                                        + New Match
+                                                                    </button>
+                                                                </Link>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toast.error(inactiveLeagueMatchMessage)}
+                                                                    className="bg-black/10 text-black/40 font-semibold px-3.5 py-1.5 rounded inline-flex items-center whitespace-nowrap justify-center text-xs"
+                                                                >
+                                                                    + New Match
+                                                                </button>
+                                                            )
+                                                        )}
+                                                    </Box>
+                                                </Box>
                                             </Box>
-                                            {isAdmin && (
-                                                isMatchCreationAllowed ? (
-                                                    <Link href={`/league/${leagueId}/match`} passHref>
-                                                        <button className="bg-[#e16419] text-white font-semibold px-5 py-2 rounded inline-flex items-center whitespace-nowrap justify-center">
+
+                                            {/* Desktop-only position for button */}
+                                            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                                                {isAdmin && (
+                                                    isMatchCreationAllowed ? (
+                                                        <Link href={`/league/${leagueId}/match`} passHref>
+                                                            <button className="bg-[#e16419] hover:bg-[#c95310] transition-colors text-white font-semibold px-5 py-2 rounded inline-flex items-center whitespace-nowrap justify-center text-sm shadow-sm">
+                                                                + New Match
+                                                            </button>
+                                                        </Link>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toast.error(inactiveLeagueMatchMessage)}
+                                                            className="bg-white/60 text-black/40 font-semibold px-5 py-2 rounded inline-flex items-center whitespace-nowrap justify-center text-sm"
+                                                        >
                                                             + New Match
                                                         </button>
-                                                    </Link>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => toast.error(inactiveLeagueMatchMessage)}
-                                                        className="bg-white/60 text-black/40 font-semibold px-5 py-2 rounded inline-flex items-center whitespace-nowrap justify-center"
-                                                    >
-                                                        + New Match
-                                                    </button>
-                                                )
-                                            )}
+                                                    )
+                                                )}
+                                            </Box>
                                         </Box>
                                     </Paper>
                                     {/* // ...existing code... */}
