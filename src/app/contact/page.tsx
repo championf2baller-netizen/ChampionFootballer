@@ -129,6 +129,10 @@ export default function ContactForm() {
               control={control}
               rules={{
                 required: "Name is required",
+                minLength: {
+                  value: 3,
+                  message: "Name must be at least 3 characters",
+                },
                 maxLength: {
                   value: 41,
                   message: "Name must be 41 characters or less",
@@ -156,9 +160,9 @@ export default function ContactForm() {
                         '& fieldset': { borderColor: 'rgba(255,255,255,0.75)' },
                         '&:hover fieldset': { borderColor: '#ffffff' },
                         '&.Mui-focused fieldset': { borderColor: '#ffffff' },
-                        '&.Mui-error fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error:hover fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#00a77f' },
+                        '&.Mui-error fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error:hover fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#ef4444' },
                         '& input': { color: '#fff', background: 'transparent' },
                         '& input:-webkit-autofill': {
                           WebkitBoxShadow: '0 0 0 1000px #202225 inset',
@@ -167,7 +171,7 @@ export default function ContactForm() {
                           transition: 'background-color 5000s ease-in-out 0s',
                         },
                       },
-                      '& .MuiFormHelperText-root.Mui-error': { color: '#00a77f' },
+                      '& .MuiFormHelperText-root.Mui-error': { color: '#ef4444' },
                     }}
                   />
                 </Box>
@@ -212,9 +216,9 @@ export default function ContactForm() {
                         '& fieldset': { borderColor: 'rgba(255,255,255,0.75)' },
                         '&:hover fieldset': { borderColor: '#ffffff' },
                         '&.Mui-focused fieldset': { borderColor: '#ffffff' },
-                        '&.Mui-error fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error:hover fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#00a77f' },
+                        '&.Mui-error fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error:hover fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#ef4444' },
                         '& input': { color: '#fff', background: 'transparent' },
                         '& input:-webkit-autofill': {
                           WebkitBoxShadow: '0 0 0 1000px #202225 inset',
@@ -223,7 +227,7 @@ export default function ContactForm() {
                           transition: 'background-color 5000s ease-in-out 0s',
                         },
                       },
-                      '& .MuiFormHelperText-root.Mui-error': { color: '#00a77f' },
+                      '& .MuiFormHelperText-root.Mui-error': { color: '#ef4444' },
                     }}
                   />
                 </Box>
@@ -265,9 +269,9 @@ export default function ContactForm() {
                         '& fieldset': { borderColor: 'rgba(255,255,255,0.75)' },
                         '&:hover fieldset': { borderColor: '#ffffff' },
                         '&.Mui-focused fieldset': { borderColor: '#ffffff' },
-                        '&.Mui-error fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error:hover fieldset': { borderColor: '#00a77f' },
-                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#00a77f' },
+                        '&.Mui-error fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error:hover fieldset': { borderColor: '#ef4444' },
+                        '&.Mui-error.Mui-focused fieldset': { borderColor: '#ef4444' },
                         '& textarea': { color: '#fff', background: 'transparent' },
                         '& textarea:-webkit-autofill': {
                           WebkitBoxShadow: '0 0 0 1000px #202225 inset',
@@ -276,7 +280,7 @@ export default function ContactForm() {
                           transition: 'background-color 5000s ease-in-out 0s',
                         },
                       },
-                      '& .MuiFormHelperText-root.Mui-error': { color: '#00a77f' },
+                      '& .MuiFormHelperText-root.Mui-error': { color: '#ef4444' },
                     }}
                   />
                 </Box>
