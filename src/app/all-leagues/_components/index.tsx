@@ -4327,6 +4327,17 @@ function AllLeagues() {
       toast.error('Please login again and try.');
       return;
     }
+    const isCompleted = Boolean(
+      (league as any).isCompleted ||
+      (league as any).isComplete ||
+      league.computedStatus?.isCompleted ||
+      league.computedStatus?.isComplete ||
+      league.status === 'completed'
+    );
+    if (isCompleted) {
+      toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
+      return;
+    }
     if (!isLeagueAdminForCurrentUser(league)) {
       toast.error('Only league admin can create a new season.');
       return;
@@ -4562,6 +4573,17 @@ function AllLeagues() {
   }, [token, isLeagueAdminForCurrentUser, creatingSeasonLeagueId, fetchAllLeagues, router, dispatchLeagueMutationEvent]);
 
   const openCreateSeasonConfirm = useCallback((league: LeagueWithStatus) => {
+    const isCompleted = Boolean(
+      (league as any).isCompleted ||
+      (league as any).isComplete ||
+      league.computedStatus?.isCompleted ||
+      league.computedStatus?.isComplete ||
+      league.status === 'completed'
+    );
+    if (isCompleted) {
+      toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
+      return;
+    }
     setPendingSeasonLeague(league);
     setSeasonConfirmOpen(true);
   }, []);
@@ -6636,10 +6658,14 @@ function AllLeagues() {
                             {canCreateSeason && (
                               <Button
                                 size="small"
-                                disabled={isCreatingSeason || isCompleted}
-                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: '#0388E3' }} /> : undefined}
+                                disabled={isCreatingSeason}
+                                startIcon={!isCreatingSeason ? <AddIcon sx={{ fontSize: 22, color: isCompleted ? '#111827' : '#0388E3' }} /> : undefined}
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (isCompleted) {
+                                    toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
+                                    return;
+                                  }
                                   openCreateSeasonConfirm(league);
                                 }}
                                 sx={{
@@ -6657,19 +6683,15 @@ function AllLeagues() {
                                   textDecoration: 'underline',
                                   textUnderlineOffset: '3px',
                                   '& .MuiButton-startIcon .MuiSvgIcon-root': {
-                                    color: '#0388E3',
+                                    color: isCompleted ? '#111827' : '#0388E3',
                                   },
-                                  // color: isCompleted ? '#ffffff' : '#d1fae5',
-                                  // border: isCompleted ? '1px solid #111827' : '1px solid rgba(39,171,131,0.85)',
-                                  // backgroundColor: isCompleted ? '#111827' : 'rgba(39,171,131,0.2)',
-                                  // '&:hover': {
-                                  //   backgroundColor: isCompleted ? '#1f2937' : 'rgba(39,171,131,0.32)',
-                                  // },
                                   ...(isCompleted && {
-                                    '&.Mui-disabled': {
+                                    opacity: 0.75,
+                                    '&:hover': {
+                                      backgroundColor: 'transparent',
                                       color: '#111827',
-                                      WebkitTextFillColor: '#111827',
-                                      opacity: 1,
+                                      textDecoration: 'underline',
+                                      opacity: 0.75,
                                     },
                                   }),
                                   ...(!isCompleted && {

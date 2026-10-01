@@ -718,6 +718,17 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
 
   const openCreateSeasonConfirm = () => {
     if (!selectedLeague || isCreatingSeason || isFetching) return;
+    const isCompleted = Boolean(
+      selectedLeague.isCompleted ||
+      selectedLeague.isComplete ||
+      (selectedLeague as any).computedStatus?.isCompleted ||
+      (selectedLeague as any).computedStatus?.isComplete ||
+      selectedLeague.status === 'completed'
+    );
+    if (isCompleted) {
+      toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
+      return;
+    }
     setSeasonConfirmOpen(true);
   };
 
