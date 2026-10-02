@@ -845,7 +845,13 @@ const PlayerProfileCard = () => {
 
       if (!isBlank(age)) {
         const parsedAge = Number(String(age).trim())
-        if (!Number.isNaN(parsedAge) && parsedAge !== Number(user?.age)) {
+        if (Number.isNaN(parsedAge) || parsedAge < 14 || parsedAge > 65) {
+          const msg = parsedAge < 14 ? "Age must be at least 14 years old" : "Age must be between 14 and 65"
+          toast.error(msg)
+          setIsUpdating(false)
+          return
+        }
+        if (parsedAge !== Number(user?.age)) {
           updateData.age = parsedAge
         }
       }
@@ -1718,7 +1724,50 @@ const PlayerProfileCard = () => {
                           </Grid>
                           <Grid item xs={4} sm={4} md={6}>
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_age_input', 'Age')}</Typography>
-                            <StyledTextField size="small" type="number" value={age} onChange={e => setAge(e.target.value)} fullWidth placeholder="00" sx={{ mb: 1 }} />
+                            {(() => {
+                              const parsedAgeNum = age !== "" && age !== null && age !== undefined ? Number(age) : NaN
+                              const isAgeEntered = age !== "" && age !== null && age !== undefined
+                              const isAgeTooYoung = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum < 14
+                              const isAgeTooOld = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum > 65
+                              const isAgeInvalid = isAgeTooYoung || isAgeTooOld || (isAgeEntered && !Number.isInteger(parsedAgeNum))
+                              const isAgeValid = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum >= 14 && parsedAgeNum <= 65
+
+                              const ageHelperText = isAgeTooYoung
+                                ? "Age must be at least 14 years old"
+                                : isAgeTooOld
+                                ? "Age must be between 14 and 65"
+                                : isAgeValid
+                                ? "✓ Age requirement met (14+)"
+                                : "Must be at least 14 years old"
+
+                              const ageHelperTextColor = isAgeInvalid
+                                ? "#ff6b6b !important"
+                                : isAgeValid
+                                ? "#4caf50 !important"
+                                : `${themeColors.textDim} !important`
+
+                              return (
+                                <StyledTextField
+                                  size="small"
+                                  type="number"
+                                  value={age}
+                                  onChange={e => setAge(e.target.value)}
+                                  fullWidth
+                                  placeholder="00"
+                                  inputProps={{ min: 14, max: 65 }}
+                                  error={isAgeInvalid}
+                                  helperText={ageHelperText}
+                                  FormHelperTextProps={{
+                                    sx: {
+                                      color: ageHelperTextColor,
+                                      fontSize: "0.72rem",
+                                      fontWeight: isAgeValid ? 600 : 400,
+                                    }
+                                  }}
+                                  sx={{ mb: 1 }}
+                                />
+                              )
+                            })()}
                           </Grid>
                           <Grid item xs={12} sm={6}>
                             <Typography sx={{ mb: 0.5, fontSize: { xs: 15, sm: 20 }, fontWeight: 400, color: themeColors.text }}>{getCms('page_profile_label_gender', 'Gender')}</Typography>
