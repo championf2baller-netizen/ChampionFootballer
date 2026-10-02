@@ -1794,6 +1794,13 @@ export default function NavigationBar() {
   ) => {
     if (!token || !user?.id) return;
     const mid = sanitizeMatchId(matchId)!;
+
+    // 🛡️ GUARD: If availability selection already matches current value, do NOT re-send request
+    if (availabilitySelections[mid] === value) {
+      console.log(`[Navbar Availability] Selection for match ${mid} is already ${value}. Skipping API call.`);
+      return;
+    }
+
     debugId('POST set availability mid', mid);
     setAvailabilitySelections(prev => ({ ...prev, [mid]: value }));
     setSavingAvailability(prev => ({ ...prev, [mid]: true }));
@@ -1811,7 +1818,7 @@ export default function NavigationBar() {
         console.error('Availability update failed', res.status);
       } else {
         await dismissActionedNotification(notificationId);
-        toast.success(value === 'YES' ? '👍 Availability confirmed' : 'Marked unavailable');
+        toast.success(value === 'YES' ? '👍 Availability confirmed' : 'Marked unavailable', { position: 'top-center' });
         try { window.dispatchEvent(new Event('refresh-notifications')); } catch {}
       }
     } catch (e) {

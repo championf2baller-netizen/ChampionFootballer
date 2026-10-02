@@ -754,8 +754,21 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
 
   const handleToggleAvailability = async (matchId: string, isAvailable: boolean) => {
     if (!user) return;
-    setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
     const action = isAvailable ? 'unavailable' : 'available';
+    const currentUserId = user?.id || (user as any)?._id;
+
+    // 🛡️ GUARD: If user is ALREADY in the target status, do NOT send request to backend
+    if (match && currentUserId) {
+      const isAlreadyAvailable = (match.availableUsers || []).some((u: any) => (u?.id || u?._id) && String(u?.id || u?._id) === String(currentUserId));
+      const isAlreadyUnavailable = (match.unavailableUsers || []).some((u: any) => (u?.id || u?._id) && String(u?.id || u?._id) === String(currentUserId));
+
+      if ((action === 'available' && isAlreadyAvailable) || (action === 'unavailable' && isAlreadyUnavailable)) {
+        console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+        return;
+      }
+    }
+
+    setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/matches/${matchId}/availability?action=${action}`, {
@@ -768,8 +781,11 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
         // Update cache with new match data
         cacheManager.updateMatchesCache(data.match);
 
-        setMatch(prev => prev && prev.id === matchId ? { ...prev, availableUsers: data.match.availableUsers } : prev);
+        setMatch(prev => prev && prev.id === matchId ? { ...prev, availableUsers: data.match.availableUsers, unavailableUsers: data.match.unavailableUsers } : prev);
+        toast.success(action === 'available' ? 'You are now available for this match.' : 'You are now unavailable for this match.', { position: 'top-center' });
       }
+    } catch {
+      toast.error('Failed to update availability', { position: 'top-center' });
     } finally {
       setAvailabilityLoading(prev => ({ ...prev, [matchId]: false }));
     }

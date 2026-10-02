@@ -2163,12 +2163,28 @@ export default function LeagueDetailPage() {
 
     const handleToggleAvailability = async (matchId: string, markAvailable: boolean) => {
         if (!user) {
-            setError('Please login to mark availability');
+            const loginErr = 'Please login to mark availability';
+            setError(loginErr);
+            toast.error(loginErr, { position: 'top-center' });
             return;
         }
 
-        setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
         const action = markAvailable ? 'available' : 'unavailable';
+        const currentUserId = user?.id || (user as any)?._id;
+
+        // 🛡️ GUARD: If user is ALREADY in the target status, do NOT send request to backend
+        const targetMatch = (league?.matches || []).find((m: Match) => m.id === matchId) || (filteredLeague?.matches || []).find((m: Match) => m.id === matchId);
+        if (targetMatch && currentUserId) {
+            const isAlreadyAvailable = (targetMatch.availableUsers || []).some((u: any) => (u?.id || u?._id) && String(u?.id || u?._id) === String(currentUserId));
+            const isAlreadyUnavailable = (targetMatch.unavailableUsers || []).some((u: User) => (u?.id || (u as any)?._id) && String(u?.id || (u as any)?._id) === String(currentUserId));
+
+            if ((markAvailable && isAlreadyAvailable) || (!markAvailable && isAlreadyUnavailable)) {
+                console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+                return;
+            }
+        }
+
+        setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
 
         try {
             console.log('🔄 Toggling availability with action:', action);
@@ -2200,9 +2216,11 @@ export default function LeagueDetailPage() {
                 console.log('🔄 Fetching fresh league data...');
                 await fetchLeagueDetails();
 
-                setToastMessage(action === 'available'
+                const successMsg = action === 'available'
                     ? '✅ You are now available for this match.'
-                    : '❌ You are now unavailable for this match.');
+                    : '❌ You are now unavailable for this match.';
+                toast.success(successMsg, { position: 'top-center' });
+                setToastMessage(successMsg);
 
                 console.log('✅ Availability updated successfully!');
             } else {
@@ -2212,7 +2230,7 @@ export default function LeagueDetailPage() {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
             console.error('❌ Error updating availability:', err);
             setError(errorMessage || 'Failed to connect to server');
-            toast.error('Failed to update availability');
+            toast.error(errorMessage || 'Failed to update availability', { position: 'top-center' });
         } finally {
             setAvailabilityLoading(prev => ({ ...prev, [matchId]: false }));
         }
@@ -7386,7 +7404,7 @@ export default function LeagueDetailPage() {
                             autoHideDuration={3000}
                             onClose={() => setToastMessage(null)}
                             message={toastMessage}
-                            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                         />
 
                         {/* Points Disabled Alert */}

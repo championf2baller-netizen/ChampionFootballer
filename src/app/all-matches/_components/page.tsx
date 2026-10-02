@@ -1212,12 +1212,26 @@ export default function AllMatches() {
     };
     const handleToggleAvailability = async (matchId: string, markAvailable: boolean) => {
         if (!token) {
-            setError('Please login to mark availability');
+            const loginErr = 'Please login to mark availability';
+            setError(loginErr);
+            toast.error(loginErr, { position: 'top-center' });
             return;
         }
 
         const action = markAvailable ? 'available' : 'unavailable';
         const currentUserId = user?.id || (user as any)?._id;
+
+        // 🛡️ GUARD: If user is ALREADY in the target status, do NOT send request to backend
+        const targetMatch = matches.find(m => m.id === matchId) || (selectedMatchDetail?.id === matchId ? selectedMatchDetail : null);
+        if (targetMatch && currentUserId) {
+            const isAlreadyAvailable = (targetMatch.availableUsers || []).some((u: User) => sameId(u?.id || (u as any)?._id, currentUserId));
+            const isAlreadyUnavailable = (targetMatch.unavailableUsers || []).some((u: User) => sameId(u?.id || (u as any)?._id, currentUserId));
+
+            if ((markAvailable && isAlreadyAvailable) || (!markAvailable && isAlreadyUnavailable)) {
+                console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+                return;
+            }
+        }
 
         // ⚡ OPTIMISTIC UPDATE: Instantly update local state so glow & count change smoothly without blinking
         if (currentUserId) {
@@ -1275,13 +1289,17 @@ export default function AllMatches() {
                     availableUsers: data.match.availableUsers,
                     unavailableUsers: data.match.unavailableUsers
                 } : prev);
-                setToastMessage(action === 'available' ? 'You are now available for this match.' : 'You are now unavailable for this match.');
+                const successMsg = action === 'available' ? 'You are now available for this match.' : 'You are now unavailable for this match.';
+                toast.success(successMsg, { position: 'top-center' });
+                setToastMessage(successMsg);
             } else {
+                toast.success('Availability updated.', { position: 'top-center' });
                 setToastMessage('Availability updated.');
             }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
             setError(errorMessage || 'Failed to connect to server');
+            toast.error(errorMessage || 'Failed to update availability', { position: 'top-center' });
             if (selectedLeague && selectedLeague !== 'all') {
                 fetchMatchesByLeague(selectedLeague, false);
             }
