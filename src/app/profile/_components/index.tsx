@@ -661,6 +661,29 @@ const PlayerProfileCard = () => {
   useEffect(() => { setImgSrc(safeSrc(user?.profilePicture)) }, [user?.profilePicture])
 
   useEffect(() => {
+    if (user) {
+      const uPhone = String(
+        user.phone || (user as any).phoneNumber || (user as any).mobile || ""
+      ).trim()
+      if (uPhone) {
+        const sanitized = sanitizePhoneDigits(uPhone)
+        setPhone((prev) => (prev === sanitized ? prev : (prev || sanitized)))
+      }
+      if (user.firstName) setFirstName((prev) => (prev || user.firstName || ""))
+      if (user.lastName) setLastName((prev) => (prev || user.lastName || ""))
+      if (user.email) setEmail((prev) => (prev || user.email || ""))
+      if (user.country) setCountry((prev) => (prev || user.country || ""))
+      if (user.city) setCity((prev) => (prev || user.city || ""))
+      if (user.state) setStateProvince((prev) => (prev || user.state || ""))
+      if (user.age !== undefined && user.age !== null) {
+        const uAge = user.age
+        setAge((prev) => (prev ? prev : uAge))
+      }
+      if (user.gender) setGender((prev) => (prev || user.gender || ""))
+    }
+  }, [user])
+
+  useEffect(() => {
     const fromUser = String((user as { phoneCountryCode?: string | null } | null)?.phoneCountryCode || "").trim().toUpperCase()
     if (/^[A-Z]{2}$/.test(fromUser)) {
       setPhoneCountryCode((prev) => (prev === fromUser ? prev : fromUser))

@@ -106,8 +106,18 @@ const clearClientAuthArtifacts = (): void => {
 // Helper to normalize User to UserProfile
 const normalizeUserForStorage = (user: User): UserProfile => {
   // Type assertion to access potentially missing properties
-  const userWithImage = user as User & { image?: string };
+  const userWithAny = user as User & {
+    image?: string;
+    phone?: string | null;
+    phoneNumber?: string | null;
+    mobile?: string | null;
+    phoneCountryCode?: string | null;
+    countryCode?: string | null;
+    phone_country_code?: string | null;
+  };
   const userIdValue = user.id || (user as any).userId || (user as any).user_id || (user as any)._id;
+  const phoneVal = userWithAny.phone ?? userWithAny.phoneNumber ?? userWithAny.mobile ?? null;
+  const phoneCountryCodeVal = userWithAny.phoneCountryCode ?? userWithAny.countryCode ?? userWithAny.phone_country_code ?? null;
   
   return {
     id: userIdValue,
@@ -120,17 +130,17 @@ const normalizeUserForStorage = (user: User): UserProfile => {
     age: typeof user.age === "string" ? Number(user.age) || undefined : user.age,
     gender: user.gender,
     country: user.country ?? null,
-    phoneCountryCode: (user as User & { phoneCountryCode?: string | null }).phoneCountryCode ?? null,
+    phoneCountryCode: phoneCountryCodeVal,
     state: user.state ?? null,
     city: user.city ?? null,
-    phone: (user as User & { phone?: string | null }).phone ?? null,
+    phone: phoneVal,
     position: user.position,
     positionType: user.positionType,
     style: user.style,
     preferredFoot: user.preferredFoot,
     shirtNumber: typeof user.shirtNumber === "string" ? Number(user.shirtNumber) || undefined : user.shirtNumber,
     profilePicture: user.profilePicture || null,
-    image: userWithImage.image || user.profilePicture || null,
+    image: userWithAny.image || user.profilePicture || null,
     skills: user.skills,
     xp: user.xp,
   }
