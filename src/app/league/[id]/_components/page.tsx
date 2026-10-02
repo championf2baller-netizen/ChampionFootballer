@@ -5260,14 +5260,14 @@ export default function LeagueDetailPage() {
                                                                         // pr: 2
                                                                     }}>
                                                                         {/* Date Row */}
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
                                                                                 <Image src={CalendarImg} alt="Date" width={16} height={16} />
                                                                                 <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                                                                                     {formatMatchDate(match.date)}
                                                                                 </Typography>
                                                                             </Box>
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
                                                                                 <Image src={ClockImg} alt="Time" width={16} height={16} />
                                                                                 <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
                                                                                     {formatMatchTime(match.date)}
@@ -5861,7 +5861,7 @@ export default function LeagueDetailPage() {
                                                                     }}>
                                                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                                                             {/* Date Row */}
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
                                                                                     <Image src={CalendarImg} alt="Date" width={16} height={16} />
                                                                                     <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>

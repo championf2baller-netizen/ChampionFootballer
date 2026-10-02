@@ -3634,12 +3634,12 @@ export default function AllMatches() {
                                         <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                                             {/* Left Info Column */}
                                             <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1.5 }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', overflow: 'hidden' }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
                                                         <Image src={CalendarImg} alt="Date" width={16} height={16} />
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>{formatMatchDate(match.date)}</Typography>
                                                     </Box>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
                                                         <Image src={ClockImg} alt="Time" width={16} height={16} />
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>{formatMatchTime(match.date)}</Typography>
                                                     </Box>
@@ -3656,8 +3656,9 @@ export default function AllMatches() {
                                                             minWidth: 'auto',
                                                             textDecoration: 'underline',
                                                             whiteSpace: 'nowrap',
+                                                            flexShrink: 0,
                                                             '&:hover': { color: '#ccc' },
-                                                            '& .MuiButton-startIcon': { mr: 1 },
+                                                            '& .MuiButton-startIcon': { mr: 0.5 },
                                                             '&.Mui-disabled': { color: 'rgba(255,255,255,0.68)' },
                                                         }}
                                                     >
