@@ -402,6 +402,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const [awayTeamImage, setAwayTeamImage] = useState<File | null>(null);
   const [homeTeamImagePreview, setHomeTeamImagePreview] = useState<string | null>(null);
   const [awayTeamImagePreview, setAwayTeamImagePreview] = useState<string | null>(null);
+  const [homeTeamImageRemoved, setHomeTeamImageRemoved] = useState(false);
+  const [awayTeamImageRemoved, setAwayTeamImageRemoved] = useState(false);
 
   // Guests (staged)
   const [homeGuests, setHomeGuests] = useState<StagedGuest[]>([]);
@@ -912,8 +914,20 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         const cap = awayUsers.find(u => u.id === m.awayCaptainId);
         if (cap) setAwayCaptain(cap as PlayerOption);
       }
-      if (m.homeTeamImage) setHomeTeamImagePreview(m.homeTeamImage.startsWith('http') ? m.homeTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.homeTeamImage}`);
-      if (m.awayTeamImage) setAwayTeamImagePreview(m.awayTeamImage.startsWith('http') ? m.awayTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.awayTeamImage}`);
+      setHomeTeamImageRemoved(false);
+      setAwayTeamImageRemoved(false);
+      setHomeTeamImage(null);
+      setAwayTeamImage(null);
+      if (m.homeTeamImage) {
+        setHomeTeamImagePreview(m.homeTeamImage.startsWith('http') ? m.homeTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.homeTeamImage}`);
+      } else {
+        setHomeTeamImagePreview(null);
+      }
+      if (m.awayTeamImage) {
+        setAwayTeamImagePreview(m.awayTeamImage.startsWith('http') ? m.awayTeamImage : `${process.env.NEXT_PUBLIC_API_URL}${m.awayTeamImage}`);
+      } else {
+        setAwayTeamImagePreview(null);
+      }
 
       // Auto-populate last saved notification message / notes
       const savedMessage = String(m.notes || m.notificationMessage || '').trim();
@@ -1699,10 +1713,10 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   // const hasMinPlayers = totalSelectedPlayers >= 6;
 
   // Images
-  const handleHomeTeamImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (!f) return; if (!f.type.startsWith('image/')) return toast.error('Image only'); if (f.size > 5 * 1024 * 1024) return toast.error('Max 5MB'); setHomeTeamImage(f); const r = new FileReader(); r.onload = ev => setHomeTeamImagePreview(ev.target?.result as string); r.readAsDataURL(f); };
-  const handleAwayTeamImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (!f) return; if (!f.type.startsWith('image/')) return toast.error('Image only'); if (f.size > 5 * 1024 * 1024) return toast.error('Max 5MB'); setAwayTeamImage(f); const r = new FileReader(); r.onload = ev => setAwayTeamImagePreview(ev.target?.result as string); r.readAsDataURL(f); };
-  const handleRemoveHomeTeamImage = () => { setHomeTeamImage(null); setHomeTeamImagePreview(null); };
-  const handleRemoveAwayTeamImage = () => { setAwayTeamImage(null); setAwayTeamImagePreview(null); };
+  const handleHomeTeamImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (!f) return; if (!f.type.startsWith('image/')) return toast.error('Image only'); if (f.size > 5 * 1024 * 1024) return toast.error('Max 5MB'); setHomeTeamImage(f); setHomeTeamImageRemoved(false); const r = new FileReader(); r.onload = ev => setHomeTeamImagePreview(ev.target?.result as string); r.readAsDataURL(f); };
+  const handleAwayTeamImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (!f) return; if (!f.type.startsWith('image/')) return toast.error('Image only'); if (f.size > 5 * 1024 * 1024) return toast.error('Max 5MB'); setAwayTeamImage(f); setAwayTeamImageRemoved(false); const r = new FileReader(); r.onload = ev => setAwayTeamImagePreview(ev.target?.result as string); r.readAsDataURL(f); };
+  const handleRemoveHomeTeamImage = () => { setHomeTeamImage(null); setHomeTeamImagePreview(null); setHomeTeamImageRemoved(true); };
+  const handleRemoveAwayTeamImage = () => { setAwayTeamImage(null); setAwayTeamImagePreview(null); setAwayTeamImageRemoved(true); };
 
   // Submit (PATCH)
   const sendLeagueWideNotification = async (message: string): Promise<boolean> => {
@@ -1885,8 +1899,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       formData.append('homeGuests', JSON.stringify(homeGuestsPayload));
       formData.append('awayGuests', JSON.stringify(awayGuestsPayload));
 
-      if (homeTeamImage) formData.append('homeTeamImage', homeTeamImage);
-      if (awayTeamImage) formData.append('awayTeamImage', awayTeamImage);
+      if (homeTeamImage) {
+        formData.append('homeTeamImage', homeTeamImage);
+      } else if (homeTeamImageRemoved) {
+        formData.append('removeHomeTeamImage', 'true');
+        formData.append('homeTeamImage', '');
+      }
+
+      if (awayTeamImage) {
+        formData.append('awayTeamImage', awayTeamImage);
+      } else if (awayTeamImageRemoved) {
+        formData.append('removeAwayTeamImage', 'true');
+        formData.append('awayTeamImage', '');
+      }
 
       // Match notification message to all players
       const notificationToSend = notificationMessage.trim().slice(0, 50);
