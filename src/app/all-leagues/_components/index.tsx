@@ -6,6 +6,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { shareContent } from '@/lib/utils/shareUtils';
 import { SettingsIcon, X, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import AllLeaguesLoadingSkeleton from '@/Components/loading/AllLeaguesLoadingSkeleton';
@@ -6595,16 +6596,12 @@ function AllLeagues() {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
-                                    const shareData = {
-                                      title: `Join ${league.name}`,
-                                      text: inviteShareText,
-                                    };
-                                    if (navigator.share) {
-                                      navigator.share(shareData).catch(() => { });
-                                    } else {
-                                      navigator.clipboard.writeText(inviteShareText);
-                                      toast.success('League info copied!');
-                                    }
+                                    const leagueUrl = typeof window !== 'undefined' ? `${window.location.origin}/league/${league.id}` : undefined;
+                                    shareContent({
+                                      title: `Join ${league.name} | Champion Footballer`,
+                                      text: `Join ${league.name} on Champion Footballer using invite code: ${activeSeasonInviteCode}!`,
+                                      url: leagueUrl,
+                                    });
                                   }}
                                 >
                                   <Image src={share} alt="Share" width={17} height={17} style={{ filter: 'brightness(0) invert(1)' }} />

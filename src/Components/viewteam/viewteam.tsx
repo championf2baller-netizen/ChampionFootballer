@@ -23,6 +23,7 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import FlagIcon from '@mui/icons-material/Flag';
 import Shirt from '@/Components/images/viewteamhome.png';
 import Shirtaway from '@/Components/images/viewteamaway.png';
+import { shareContent } from '@/lib/utils/shareUtils';
 import FootballIcon from '@/Components/images/football.png';
 import TableViewImg from '@/Components/images/table.png';
 import PitchViewImg from '@/Components/images/footblgrond.png';
@@ -886,15 +887,11 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
   };
 
   const shareTeam = async () => {
-    const text = `Check out the team lineup for today's match! ${homeTeamName} vs ${awayTeamName}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Team Lineup', text, url: window.location.href });
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-        alert('Share text copied to clipboard.');
-      }
-    } catch { /* ignore */ }
+    shareContent({
+      title: `Match Lineup: ${homeTeamName} vs ${awayTeamName}`,
+      text: `Check out the team lineup for today's match (${homeTeamName} vs ${awayTeamName}) on Champion Footballer!`,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
+    });
   };
 
   // Re-apply positions when players change

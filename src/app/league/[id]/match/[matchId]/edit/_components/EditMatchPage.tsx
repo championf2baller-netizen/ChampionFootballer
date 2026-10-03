@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/hooks';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X, Shuffle, UserPlus, Scale, UserMinus, ArrowLeftRight, Crown, Check } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import { shareContent } from '@/lib/utils/shareUtils';
 import { cacheManager } from '@/lib/cacheManager';
 import Image from 'next/image';
 import ShirtImg from '@/Components/images/shirtimg.png';
@@ -2108,31 +2109,11 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     }
 
     const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
-
-    try {
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({
-          title: `Match Preview: ${home} vs ${away}`,
-          text: text,
-          url: shareUrl,
-        });
-        return;
-      }
-    } catch (error) {
-      const err = error as { name?: string };
-      if (err?.name === 'AbortError') return;
-    }
-
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(`${text}\n\n${shareUrl}`);
-        toast.success('Match preview copied to clipboard!');
-      } else {
-        toast.error('Sharing is not supported on this browser.');
-      }
-    } catch {
-      toast.error('Unable to share match preview.');
-    }
+    shareContent({
+      title: `Match Preview: ${home} vs ${away} | Champion Footballer`,
+      text: text,
+      url: shareUrl,
+    });
   };
 
   return (

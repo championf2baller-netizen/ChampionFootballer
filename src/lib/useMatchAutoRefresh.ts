@@ -49,6 +49,10 @@ export function useCombinedMatchRefresh(
     window.addEventListener('match-deleted', handleMatchEvent);
     window.addEventListener('match-stats-updated', handleMatchEvent);
     window.addEventListener('vote-updated', handleMatchEvent);
+    window.addEventListener('league-updated', handleMatchEvent);
+    window.addEventListener('data-mutated', handleMatchEvent);
+    window.addEventListener('xp-updated', handleMatchEvent);
+    window.addEventListener('cache-cleared', handleMatchEvent);
 
     return () => {
       window.removeEventListener('match-created', handleMatchEvent);
@@ -56,6 +60,10 @@ export function useCombinedMatchRefresh(
       window.removeEventListener('match-deleted', handleMatchEvent);
       window.removeEventListener('match-stats-updated', handleMatchEvent);
       window.removeEventListener('vote-updated', handleMatchEvent);
+      window.removeEventListener('league-updated', handleMatchEvent);
+      window.removeEventListener('data-mutated', handleMatchEvent);
+      window.removeEventListener('xp-updated', handleMatchEvent);
+      window.removeEventListener('cache-cleared', handleMatchEvent);
     };
   }, [refreshCallback]);
 

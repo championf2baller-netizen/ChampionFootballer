@@ -36,6 +36,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ShareIcon from '@mui/icons-material/Share';
+import { shareContent } from '@/lib/utils/shareUtils';
 import Goals from "@/Components/images/goal.png"
 import Assist from "@/Components/images/Assist.png"
 import Cleansheet from "@/Components/images/cleansheet.png"
@@ -4250,16 +4251,13 @@ export default function GlobalTrophyRoom() {
                     .filter(Boolean)
                     .join(' ')
                     .trim() || 'Player';
-                  const shareText = `Check out ${playerName}'s stats! ${Number(quickView.xp ?? 0)} XP`;
-                  if (navigator.share) {
-                    navigator.share({
-                      title: `${playerName} - Champion Footballer`,
-                      text: shareText,
-                    }).catch(() => { });
-                  } else {
-                    navigator.clipboard?.writeText(shareText);
-                    import('react-hot-toast').then(({ default: toast }) => toast.success('Player stats copied!'));
-                  }
+                  const playerId = quickView.player?.id;
+                  const playerUrl = typeof window !== 'undefined' && playerId ? `${window.location.origin}/player/${playerId}` : undefined;
+                  shareContent({
+                    title: `${playerName} | Champion Footballer`,
+                    text: `Check out ${playerName}'s stats on Champion Footballer (${Number(quickView.xp ?? 0)} XP)!`,
+                    url: playerUrl,
+                  });
                 }}
               >
                 <ShareIcon sx={{ fontSize: 18 }} />

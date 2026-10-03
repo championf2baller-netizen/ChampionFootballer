@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/hooks';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { getPositionShortForm } from '@/lib/playerIdentity';
+import { shareContent } from '@/lib/utils/shareUtils';
 
 // const fallback = '/assets/cflogo2.png';
 
@@ -706,15 +707,11 @@ const PlayerCard = ({
               },
             }}
             onClick={() => {
-              // Share functionality here
-              if (navigator.share) {
-                navigator.share({
-                  title: `${name} - Champion Footballer`,
-                  text: `Check out ${name}'s stats! ${points} XP`,
-                }).catch(() => {});
-              } else {
-                toast.success('Share feature coming soon!');
-              }
+              shareContent({
+                title: `${name} | Champion Footballer`,
+                text: `Check out ${name}'s stats on Champion Footballer (${points} XP)!`,
+                url: typeof window !== 'undefined' ? window.location.href : undefined,
+              });
             }}
           >
             <ShareIcon sx={{ fontSize: 18 }} />

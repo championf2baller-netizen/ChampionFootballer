@@ -50,6 +50,7 @@ import { Tooltip, Slide } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { shareContent } from '@/lib/utils/shareUtils';
 import LeagueDetailLoadingSkeleton from '@/Components/loading/LeagueDetailLoadingSkeleton';
 import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLoadingSkeleton';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
@@ -649,12 +650,10 @@ export default function LeagueDetailPage() {
 
         return normalized;
     }, []);
-    const getLeagueXpForMember = useCallback((memberId: unknown, _fallbackXp?: unknown): number => {
-        void _fallbackXp;
+    const getLeagueXpForMember = useCallback((memberId: unknown, fallbackXp?: unknown): number => {
         const key = normalizeEntityId(memberId);
         const mapValue = key ? toNumericValue(userLeagueXP[key]) : null;
-        // League page must show league-specific XP only (from league XP map), not global profile XP.
-        return mapValue ?? 0;
+        return mapValue ?? toNumericValue(fallbackXp) ?? 0;
     }, [userLeagueXP]);
     const getMemberPositionLabel = useCallback((member: User): string => {
         if (!member) return '-';
@@ -1312,6 +1311,24 @@ export default function LeagueDetailPage() {
                     });
                 }
                 setLeague(fetchedLeague);
+
+                // 🔄 Fetch fresh league XP map for all members
+                try {
+                    const seasonParam = seasonIdForRequest ? `&seasonId=${encodeURIComponent(seasonIdForRequest)}` : '';
+                    const xpUrl = `${process.env.NEXT_PUBLIC_API_URL}/leagues/${encodedLeagueId}/xp?refresh=1&_t=${Date.now()}${seasonParam}`;
+                    const xpResponse = await fetch(xpUrl, {
+                        headers: { 'Authorization': `Bearer ${effectiveToken}` },
+                        cache: 'no-store',
+                    });
+                    if (xpResponse.ok) {
+                        const xpData = await xpResponse.json();
+                        const parsedXpMap = normalizeXPMapPayload(xpData);
+                        setUserLeagueXP(parsedXpMap);
+                    }
+                } catch (xpErr) {
+                    console.warn('⚠️ Could not fetch league XP map:', xpErr);
+                }
+
                 try {
                     const preferredId = String((fetchedLeague as unknown as Record<string, unknown>)?.id || leagueId || '').trim();
                     if (preferredId) {
@@ -1352,7 +1369,8 @@ export default function LeagueDetailPage() {
         isAuthenticated,
         hasLoadedAllLeagues,
         allLeaguesFetchFailed,
-        allLeagues.length
+        allLeagues.length,
+        normalizeXPMapPayload
     ]);
 
     useEffect(() => {
@@ -2499,25 +2517,11 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
-        const shareText = `Invites players to ${inviteSeasonLabel} using the code ${code}`;
-        try {
-            if (navigator.share) {
-                await navigator.share({
-                    title: `League invite - ${inviteSeasonLabel}`,
-                    text: shareText,
-                });
-                return;
-            }
-        } catch (error) {
-            const shareError = error as { name?: string };
-            if (shareError?.name === 'AbortError') return;
-        }
-        try {
-            await navigator.clipboard.writeText(shareText);
-            toast.success('Invite details copied.');
-        } catch {
-            toast.error('Unable to share invite details right now.');
-        }
+        shareContent({
+            title: `Join ${inviteSeasonLabel} | Champion Footballer`,
+            text: `Join ${inviteSeasonLabel} on Champion Footballer using invite code: ${code}!`,
+            url: typeof window !== 'undefined' ? window.location.href : undefined,
+        });
     }, [inviteCodeForSelectedSeason, inviteSeasonLabel]);
 
     // Check if selected season is active
@@ -8065,16 +8069,13 @@ export default function LeagueDetailPage() {
                                         .filter(Boolean)
                                         .join(' ')
                                         .trim() || 'Player';
-                                    const shareText = `Check out ${playerName}'s stats! ${Number(quickView.xp ?? 0)} XP`;
-                                    if (navigator.share) {
-                                        navigator.share({
-                                            title: `${playerName} - Champion Footballer`,
-                                            text: shareText,
-                                        }).catch(() => { });
-                                    } else {
-                                        navigator.clipboard?.writeText(shareText);
-                                        toast.success('Player stats copied!');
-                                    }
+                                    const playerId = quickView.player?.id;
+                                    const playerUrl = typeof window !== 'undefined' && playerId ? `${window.location.origin}/player/${playerId}` : undefined;
+                                    shareContent({
+                                        title: `${playerName} | Champion Footballer`,
+                                        text: `Check out ${playerName}'s stats on Champion Footballer (${Number(quickView.xp ?? 0)} XP)!`,
+                                        url: playerUrl,
+                                    });
                                 }}
                             >
                                 <Share2 size={18} />
