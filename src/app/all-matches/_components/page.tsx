@@ -2853,7 +2853,7 @@ export default function AllMatches() {
                                     transition: 'all 0.3s ease',
                                 }}
                             >
-                                {getCms('page_all_matches_results_tab', 'Match Results')}
+                                {getCms('page_all_matches_results_tab', 'Results')}
                             </Button>
                             <Button
                                 onClick={() => setMatchFilter('fixtures')}
