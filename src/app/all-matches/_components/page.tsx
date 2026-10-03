@@ -1941,7 +1941,7 @@ export default function AllMatches() {
                     {/* Match Header - Teams Side by Side */}
                     <Box sx={{
                         p: { xs: 2, sm: 3 },
-                        background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
+                        // background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
                         color: 'white'
                     }}>
                         {/* Teams in a row layout */}

@@ -263,7 +263,7 @@ export default function MatchDetailModal({
                 {/* Match Header - Teams Side by Side */}
                 <Box sx={{
                     p: { xs: 2, sm: 3 },
-                    background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
+                    // background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
                     color: 'white'
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 }, flexDirection: { xs: 'column', sm: 'row' } }}>
