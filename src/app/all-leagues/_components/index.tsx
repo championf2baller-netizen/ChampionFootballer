@@ -1808,11 +1808,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
       setArchivedSeasonIds((prev) => prev.filter((id) => id !== seasonId))
       setDeletedSeasonIds((prev) => prev.filter((id) => id !== seasonId))
       setRestoredSeasonIds((prev) => (prev.includes(seasonId) ? prev : [...prev, seasonId]))
-      toast.success('Season restored')
+      toast.success('Season restored successfully!', { position: 'top-center' })
       if (onMembersChanged) await Promise.resolve(onMembersChanged())
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to restore season'
-      toast.error(msg)
+      toast.error(msg, { position: 'top-center' })
     } finally {
       setArchivedSeasonActionId(null)
     }
@@ -3080,7 +3080,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                             size="small"
                             variant="contained"
                             disabled={actionLoading}
-                            onClick={() => { void handleRestoreArchivedSeason(season) }}
+                            onClick={(e) => { e.stopPropagation(); void handleRestoreArchivedSeason(season) }}
                             sx={{
                               bgcolor: '#27ab83',
                               '&:hover': { bgcolor: '#1e8463' },
@@ -3097,7 +3097,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                             size="small"
                             variant="contained"
                             disabled={actionLoading}
-                            onClick={() => { void handlePermanentDeleteArchivedSeason(season) }}
+                            onClick={(e) => { e.stopPropagation(); void handlePermanentDeleteArchivedSeason(season) }}
                             sx={{
                               bgcolor: '#dc2626',
                               '&:hover': { bgcolor: '#b91c1c' },
@@ -4170,11 +4170,11 @@ function AllLeagues() {
 
       if (!success) throw new Error(errorMessage);
 
-      toast.success('Season restored');
+      toast.success('Season restored successfully!', { position: 'top-center' });
       await fetchAllLeagues();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Failed to restore season';
-      toast.error(msg);
+      toast.error(msg, { position: 'top-center' });
     } finally {
       setArchivedSeasonActionId(null);
     }
@@ -7372,7 +7372,7 @@ function AllLeagues() {
                                   size="small"
                                   variant="contained"
                                   disabled={seasonActionLoading}
-                                  onClick={() => { void handleRestoreArchivedSeasonGlobal(league, season); }}
+                                  onClick={(e) => { e.stopPropagation(); void handleRestoreArchivedSeasonGlobal(league, season); }}
                                   sx={{
                                     bgcolor: '#27ab83',
                                     '&:hover': { bgcolor: '#1e8463' },
@@ -7389,7 +7389,7 @@ function AllLeagues() {
                                   size="small"
                                   variant="contained"
                                   disabled={seasonActionLoading}
-                                  onClick={() => { void handlePermanentDeleteArchivedSeasonGlobal(league, season); }}
+                                  onClick={(e) => { e.stopPropagation(); void handlePermanentDeleteArchivedSeasonGlobal(league, season); }}
                                   sx={{
                                     bgcolor: '#dc2626',
                                     '&:hover': { bgcolor: '#b91c1c' },
