@@ -50,6 +50,7 @@ const PlayerCard = dynamic(() => import('@/Components/playercard/playercard').th
   ssr: false
 });
 import XPStarMilestoneCard from '@/Components/XPStarMilestoneCard';
+import { formatPlayerDisplayName } from '@/lib/playerIdentity';
 
 // import { achievementsAPI } from '@/lib/api';
 
@@ -2258,7 +2259,7 @@ export default function GlobalTrophyRoom() {
               flatRawWinners.push({
                 title,
                 winnerId: String(user.id),
-                winner: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Player',
+                winner: formatPlayerDisplayName(user.firstName, user.lastName),
                 leagueId: it.leagueId,
                 leagueName: it.leagueName,
                 seasonId: it.seasonId,
@@ -2653,7 +2654,7 @@ export default function GlobalTrophyRoom() {
             }}
           >
             {filter === 'my' && user
-              ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+              ? formatPlayerDisplayName(user.firstName, user.lastName)
               : getCms('page_trophy_room_heading', 'TROPHY ROOM')}
           </Typography>
 
@@ -3465,7 +3466,7 @@ export default function GlobalTrophyRoom() {
                       fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
                       letterSpacing: '0.5px',
                     }}>
-                      {user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
+                      {user ? formatPlayerDisplayName(user.firstName, user.lastName) : ''}
                     </Typography>
                   </Box>
 
@@ -4125,11 +4126,7 @@ export default function GlobalTrophyRoom() {
               }}>
                 {(() => {
                   const p = quickView.player as User & PlayerProfileLike;
-                  const fullName = [p.firstName, p.lastName]
-                    .map((part) => (typeof part === 'string' ? part.trim() : ''))
-                    .filter(Boolean)
-                    .join(' ')
-                    .trim();
+                  const fullName = formatPlayerDisplayName(p.firstName, p.lastName);
                   const playerCardProps = {
                     name: fullName,
                     number: getShirtNumber(p),
@@ -4246,11 +4243,7 @@ export default function GlobalTrophyRoom() {
                   '&:hover': { bgcolor: '#059669' },
                 }}
                 onClick={() => {
-                  const playerName = [quickView.player?.firstName, quickView.player?.lastName]
-                    .map((part) => (typeof part === 'string' ? part.trim() : ''))
-                    .filter(Boolean)
-                    .join(' ')
-                    .trim() || 'Player';
+                  const playerName = formatPlayerDisplayName(quickView.player?.firstName, quickView.player?.lastName);
                   const playerId = quickView.player?.id;
                   const playerUrl = typeof window !== 'undefined' && playerId ? `${window.location.origin}/player/${playerId}` : undefined;
                   shareContent({

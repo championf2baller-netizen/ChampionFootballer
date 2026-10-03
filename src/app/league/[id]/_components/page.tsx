@@ -56,7 +56,7 @@ import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLo
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
 import MatchResultLoadingSkeleton from '@/Components/loading/MatchResultLoadingSkeleton';
 import PlayerCardLoadingSkeleton from '@/Components/loading/PlayerCardLoadingSkeleton';
-import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { TokenManager } from '@/lib/tokenManager';
 import PLAYERIMAGE from '@/Components/images/players.png'
@@ -319,8 +319,7 @@ const comparableId = (value: unknown): string => {
 };
 
 const formatPlayerName = (firstName?: string, lastName?: string): string => {
-    const fullName = `${firstName || ''} ${lastName || ''}`.trim();
-    return fullName;
+    return formatPlayerDisplayName(firstName, lastName);
 };
 
 // Match player-card naming format: FirstName + last initial in UPPERCASE (e.g., "RUHEL U.", "MUHIB")

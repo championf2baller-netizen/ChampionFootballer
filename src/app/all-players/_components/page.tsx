@@ -37,7 +37,7 @@ import Image from 'next/image';
 import SearchIcon from '@/Components/images/searchicon.png';
 import TableGraphIcon from '@/Components/images/tablegrapicon.png';
 import AllPlayersLoadingSkeleton from '@/Components/loading/AllPlayersLoadingSkeleton';
-import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import { useAuth } from '@/lib/hooks';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 
@@ -914,22 +914,12 @@ const AllPlayersPage = () => {
   const sourcePlayers = (selectedLeague === 'all' ? playedWithPlayers : leaguePlayers).filter(isRegisteredPlayerRecord);
 
   function getPlayerName(player: Player): string {
-    const full = (player.name || '').trim();
-    if (full) return full;
-    return `${player.firstName || ''} ${player.lastName || ''}`.trim() || 'Unknown Player';
+    return formatPlayerDisplayName(player.firstName, player.lastName, player.name);
   }
 
   // Match player-card naming format: FirstName + last initial (e.g., "Alex K.")
   function getPlayerCardStyleName(player: Player): string {
-    const first = (player.firstName || '').trim();
-    const last = (player.lastName || '').trim();
-    const fullName = `${first} ${last}`.trim() || getPlayerName(player);
-    if (!fullName) return 'Player Name';
-    const parts = fullName.split(/\s+/).filter(Boolean);
-    const firstNameOnly = parts[0] || '';
-    const lastInitial = parts.length > 1 ? parts[parts.length - 1].charAt(0).toUpperCase() : '';
-    if (!firstNameOnly) return 'Player Name';
-    return lastInitial ? `${firstNameOnly} ${lastInitial}.` : firstNameOnly;
+    return formatPlayerDisplayName(player.firstName, player.lastName, player.name);
   }
 
   function getPlayingStyle(player: Player): string {

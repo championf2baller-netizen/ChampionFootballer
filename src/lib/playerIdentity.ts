@@ -163,3 +163,46 @@ export const getPositionShortForm = (position: unknown): string => {
   return pos.toUpperCase().substring(0, 3);
 };
 
+/**
+ * Formats a player's name consistently across all pages:
+ * Full First Name + First letter of Last Name followed by a dot (e.g., "John D." or "Ruhel U.")
+ */
+export const formatPlayerDisplayName = (
+  firstName?: string | null,
+  lastName?: string | null,
+  fullNameInput?: string | null
+): string => {
+  let first = String(firstName || '').trim();
+  let last = String(lastName || '').trim();
+
+  // Filter out dummy 'user' or null/undefined strings
+  if (last.toLowerCase() === 'user' || last.toLowerCase() === 'null' || last.toLowerCase() === 'undefined') {
+    last = '';
+  }
+
+  // If first name is missing but fullNameInput exists
+  if (!first && fullNameInput) {
+    const parts = String(fullNameInput).trim().split(/\s+/).filter(Boolean);
+    if (parts.length > 0) {
+      first = parts[0];
+      if (parts.length > 1 && !last) {
+        last = parts.slice(1).join(' ');
+      }
+    }
+  }
+
+  // If first name has spaces (e.g. "John Doe"), split into first & last
+  if (first.includes(' ') && !last) {
+    const parts = first.split(/\s+/).filter(Boolean);
+    first = parts[0] || '';
+    last = parts.slice(1).join(' ');
+  }
+
+  if (!first && !last) return 'Player';
+  if (!last) return first;
+
+  const lastInitial = last.trim().charAt(0).toUpperCase();
+  return lastInitial ? `${first} ${lastInitial}.` : first;
+};
+
+

@@ -12,6 +12,7 @@ import CloseButton from '@/Components/CloseButton';
 import { optimizedFetch, invalidateCache } from '@/lib/utils/optimizedFetch';
 import PageHeader from '@/Components/PageHeader';
 import DreamTeamLoadingSkeleton from '@/Components/loading/DreamTeamLoadingSkeleton';
+import { formatPlayerDisplayName } from '@/lib/playerIdentity';
 
 
 interface Player {
@@ -137,7 +138,7 @@ const PlayerCard = memo<PlayerCardProps>(({ player, position }) => (
         textShadow: '0 1px 2px rgba(0,0,0,0.8)',
       }}
     >
-      {player.firstName} {player.lastName}
+      {formatPlayerDisplayName(player.firstName, player.lastName)}
     </Typography>
   </Box>
 ), (prevProps, nextProps) => {
@@ -750,7 +751,7 @@ const DreamTeamPage = () => {
                           }}
                         />
                         <Typography component="span" sx={{ fontWeight: 700, color: '#E5E7EB' }}>
-                          {p.firstName} {p.lastName}
+                          {formatPlayerDisplayName(p.firstName, p.lastName)}
                         </Typography>
                         <Typography component="span" sx={{ ml: 0.5, color: '#22C55E', fontWeight: 700 }}>
                           ({posAbbr(p.position)})

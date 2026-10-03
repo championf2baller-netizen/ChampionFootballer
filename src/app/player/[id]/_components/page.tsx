@@ -49,7 +49,7 @@ import SearchIcon from '@/Components/images/searchicon.png';
 import XPStarMilestoneCard, { XP_TIERS, getXPTier } from '@/Components/XPStarMilestoneCard';
 import PlayerProfileLoadingSkeleton from '@/Components/loading/PlayerProfileLoadingSkeleton';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
-import { getPositionShortForm } from '@/lib/playerIdentity';
+import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 
 import PlayerOverviewContainer from './PlayerOverviewContainer';
 
@@ -739,7 +739,7 @@ export default function PlayerStatsPage() {
         id: p.id || p._id || p.userId || '',
         firstName: p.firstName ?? p.fname,
         lastName: p.lastName ?? p.lname,
-        name: p.name ?? `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim(),
+        name: formatPlayerDisplayName(p.firstName ?? p.fname, p.lastName ?? p.lname, p.name),
         avatar: resolveProfileImageUrl(p.avatar ?? p.profilePicture ?? p.avatarUrl ?? p.image) ?? undefined,
         position: p.position ?? p.positionType,
     }), []);
@@ -2398,10 +2398,7 @@ export default function PlayerStatsPage() {
                                     ) : (
                                         <Grid container spacing={0.75}>
                                             {filteredTeammates.map((p) => {
-                                                const displayName =
-                                                    p.name ||
-                                                    `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() ||
-                                                    'Player';
+                                                const displayName = formatPlayerDisplayName(p.firstName, p.lastName, p.name);
                                                 const teammateAvatarSrc = resolveProfileImageUrl(p.avatar);
 
                                                 return (

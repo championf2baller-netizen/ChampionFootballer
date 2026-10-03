@@ -31,7 +31,7 @@ import BulbImg from '@/Components/images/bulb.png';
 import UndoImg from '@/Components/images/undo.png';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
 import { useAuth } from '@/lib/hooks';
-import { getPositionShortForm } from '@/lib/playerIdentity';
+import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import Awayimgcf from '@/Components/images/awayteamshirt.png'
 import Homeimgcf from '@/Components/images/hometeamshirt.png'
 
@@ -182,12 +182,7 @@ function normalizeGuestsForMatch(
 }
 
 function formatGuestDisplayName(guest: Pick<Guest, 'firstName' | 'lastName'>): string {
-  const first = String(guest?.firstName ?? '').trim();
-  const last = String(guest?.lastName ?? '').trim();
-  if (last.toLowerCase() === 'guest') {
-    return first ? `${first} (Guest)` : '(Guest)';
-  }
-  return `${first} ${last}`.trim() || 'Guest';
+  return formatPlayerDisplayName(guest.firstName, guest.lastName);
 }
 
 type BasicUser = { id: string; firstName: string; lastName?: string; shirtNumber?: string | null }; // added
@@ -279,7 +274,7 @@ function mapApiToPlayer(u: ApiPlayer, captainId?: string): Player {
   const isCaptain = cid !== '' && String(u.id) === cid;
   return {
     id: String(u.id),
-    name: `${u.firstName} ${u.lastName}`.trim(),
+    name: formatPlayerDisplayName(u.firstName, u.lastName),
     number: (u.shirtNumber || '00').toString().padStart(2, '0'),
     position: normalizeRole(u.role || u.positionType),
     isCaptain,

@@ -315,9 +315,10 @@ const sameId = (a: unknown, b: unknown): boolean => {
     return sa === sb;
 };
 
+import { formatPlayerDisplayName } from '@/lib/playerIdentity';
+
 const formatPlayerName = (firstName?: string, lastName?: string): string => {
-    const fullName = `${firstName || ''} ${lastName || ''}`.trim();
-    return fullName;
+    return formatPlayerDisplayName(firstName, lastName);
 };
 
 const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): string | null => {

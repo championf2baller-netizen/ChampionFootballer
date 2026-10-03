@@ -1,7 +1,7 @@
 "use client"
 import { Typography, Box, ListItem, ListItemAvatar, Avatar, ListItemText, Divider } from "@mui/material"
 import Link from "next/link"
-import { getPositionShortForm } from "@/lib/playerIdentity"
+import { getPositionShortForm, formatPlayerDisplayName } from "@/lib/playerIdentity"
 
 // import Group from '@/Components/images/group451.png'
 // import Image from "next/image"
@@ -127,7 +127,7 @@ export default function PlayerCard({ member }: PlayerCardProps) {
                       <ListItemAvatar>
                         <Avatar src={member?.profilePicture || '/assets/group.svg'} sx={{ width: { xs: 28, sm: 40 }, height: { xs: 28, sm: 40 } }} />
                       </ListItemAvatar>
-                      <ListItemText primary={member.firstName + ' ' + member.lastName} primaryTypographyProps={{ fontWeight: 'medium', fontSize: { xs: 13, sm: 16 } }} />
+                      <ListItemText primary={formatPlayerDisplayName(member.firstName, member.lastName)} primaryTypographyProps={{ fontWeight: 'medium', fontSize: { xs: 13, sm: 16 } }} />
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 8 }, ml: 'auto' }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: { xs: 24, sm: 40 } }}>
                           {/* <SignalCellularAltIcon sx={{ color: isSelected ? 'white' : '#00C853', fontSize: { xs: 16, sm: 24 } }} /> */}
