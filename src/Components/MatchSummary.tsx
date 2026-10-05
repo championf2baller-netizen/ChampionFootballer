@@ -36,6 +36,7 @@ interface MatchSummaryProps {
   matchId: string
   captainsConfirmed?: boolean
   isUserAvailable: boolean
+  isUserUnavailable?: boolean
   availabilityLoading: { [matchId: string]: boolean }
   handleToggleAvailability: (matchId: string, isAvailable: boolean) => void
   embeddedInDialog?: boolean
@@ -72,6 +73,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
   matchId,
   captainsConfirmed = false,
   isUserAvailable,
+  isUserUnavailable = false,
   availabilityLoading,
   handleToggleAvailability,
   embeddedInDialog = false,
@@ -176,7 +178,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
     })();
     return () => { cancelled = true; };
   }, [token, matchId, isCompleted]);
-  
+
   // Fallback to props if API not available
   const leftPct = pctLeft ?? winPercentLeft;
   const rightPct = pctRight ?? winPercentRight;
@@ -195,7 +197,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
     }
   }, [isLive, isCompleted, matchStartTime, matchEndTime])
 
-  const showPredictionBar = !isCompleted
+  const showPredictionBar = false
   const isDraw = isCompleted && homeGoals === awayGoals
 
   return (
@@ -222,15 +224,15 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
       >
         {/* Match Status - Top Left */}
         <Box sx={{
-          position: 'absolute', 
-          top: { xs: embeddedInDialog ? 8 : 13, sm: 13 }, 
-          left: { xs: embeddedInDialog ? 12 : 29, sm: 29 }, 
-          zIndex: 2 
+          position: 'absolute',
+          top: { xs: embeddedInDialog ? 8 : 13, sm: 13 },
+          left: { xs: embeddedInDialog ? 12 : 29, sm: 29 },
+          zIndex: 2
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: '#fff',
                 fontWeight: 'bold',
                 fontSize: { xs: '0.5rem', sm: '0.6rem', md: '0.7rem' }
@@ -238,9 +240,9 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
             >
               Match Status:
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
+            <Typography
+              variant="caption"
+              sx={{
                 color: 'white',
                 fontWeight: 'semi-bold',
                 backgroundColor: '#00a77f',
@@ -357,7 +359,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
               <Typography
                 variant="h4"
                 fontWeight={800}
-                sx={{ fontSize: { xs: 16, sm: 20, md: 28, lg: 34, xl: 40 },mt: 1,color: "#fff", lineHeight: 1 }}
+                sx={{ fontSize: { xs: 16, sm: 20, md: 28, lg: 34, xl: 40 }, mt: 1, color: "#fff", lineHeight: 1 }}
               >
                 {homeGoals}
               </Typography>
@@ -427,7 +429,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ fontSize: { xs: 10, sm: 11, md: 19 }, color: '#fff', lineHeight: 1,  letterSpacing: 1, mt: 1 }}
+                sx={{ fontSize: { xs: 10, sm: 11, md: 19 }, color: '#fff', lineHeight: 1, letterSpacing: 1, mt: 1 }}
               >
                 Away
               </Typography>
@@ -481,154 +483,58 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
               justifySelf: { md: "center" },
             }}
           >
-          
+
             {!isCompleted ? (
-              embeddedInDialog ? (
-                <>
-                  {isAdmin && (
-                    isUserInMatch ? (
-                      <Button
-                        variant="contained"
-                        onClick={() => handleToggleAvailability(matchId, isUserAvailable)}
-                        disabled={availabilityLoading[matchId]}
-                        sx={{
-                          backgroundColor: isUserAvailable ? "#4caf50" : "#f44336",
-                          "&:hover": {
-                            backgroundColor: isUserAvailable ? "#388e3c" : "#d32f2f",
-                          },
-                          "&.Mui-disabled": {
-                            backgroundColor: "rgba(255,255,255,0.3)",
-                            color: "rgba(255,255,255,0.5)",
-                          },
-                          fontSize: { xs: "0.6rem", sm: "0.7rem", md: "0.75rem", lg: "0.875rem" },
-                          px: { xs: 1, sm: 1.5, md: 2 },
-                          py: { xs: 0.3, sm: 0.5, md: 0.7, lg: 1 },
-                          minWidth: { xs: "auto", sm: 120, md: 140 },
-                        }}
-                      >
-                        {availabilityLoading[matchId] ? (
-                          <CircularProgress size={16} color="inherit" />
-                        ) : isUserAvailable ? (
-                          "Unavailable"
-                        ) : (
-                          "Available"
-                        )}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => {
-                          setShouldShowAdminGoals(true);
-                          setStatsDialogOpen(true);
-                        }}
-                        disabled={!seasonActive}
-                        sx={{
-                          position: "relative",
-                          bgcolor: "#2B2B2B",
-                          color: "white",
-                          fontWeight: "bold",
-                          border: '1px solid #e16419',
-                          "&:hover": { bgcolor: "#2B2B2B" },
-                          fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
-                          px: { xs: 1, sm: 1.5, md: 2 },
-                          py: { xs: 0.4, sm: 0.5, md: 0.6 },
-                          width: { xs: 125, sm: 145, md: 175 },
-                          minWidth: 0,
-                          whiteSpace: "nowrap",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
-                        }}
-                      >
-                        <Add
-                          sx={{
-                            position: "absolute",
-                            left: { xs: 8, sm: 10, md: 12 },
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            fontSize: { xs: 16, sm: 18, md: 20 },
-                          }}
-                        />
-                        <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
-                          ADD SCORE
-                        </Box>
-                      </Button>
-                    )
-                  )}
-                  {!isAdmin && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => {
-                        setShouldShowAdminGoals(false);
-                        setStatsDialogOpen(true);
-                      }}
-                      disabled={!seasonActive}
-                      sx={{
-                        position: "relative",
-                        bgcolor: "#2B2B2B",
-                        color: "white",
-                        fontWeight: "bold",
-                        border: '1px solid #e16419',
-                        "&:hover": { bgcolor: "#2B2B2B" },
-                        fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" },
-                        px: { xs: 1, sm: 1.5, md: 2 },
-                        py: { xs: 0.4, sm: 0.5, md: 0.6 },
-                        width: { xs: 125, sm: 145, md: 175 },
-                        minWidth: 0,
-                        whiteSpace: "nowrap",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        "&.Mui-disabled": { color: "rgba(255,255,255,0.65)", borderColor: "rgba(225,100,25,0.45)" },
-                      }}
-                    >
-                      <Add
-                        sx={{
-                          position: "absolute",
-                          left: { xs: 8, sm: 10, md: 12 },
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          fontSize: { xs: 16, sm: 18, md: 20 },
-                        }}
-                      />
-                      <Box component="span" sx={{ width: "100%", textAlign: "center", pl: { xs: 2, sm: 2.5, md: 3 } }}>
-                        ADD YOUR STATS
-                      </Box>
-                    </Button>
-                  )}
-                </>
-              ) : (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
                 <Button
                   variant="contained"
-                  onClick={() => handleToggleAvailability(matchId, isUserAvailable)}
+                  size="small"
+                  onClick={() => handleToggleAvailability(matchId, true)}
                   disabled={availabilityLoading[matchId]}
                   sx={{
-                    backgroundColor: isUserAvailable ? "#4caf50" : "#f44336",
-                    "&:hover": {
-                      backgroundColor: isUserAvailable ? "#388e3c" : "#d32f2f",
-                    },
-                    "&.Mui-disabled": {
-                      backgroundColor: "rgba(255,255,255,0.3)",
-                      color: "rgba(255,255,255,0.5)",
-                    },
-                    fontSize: { xs: "0.6rem", sm: "0.7rem", md: "0.75rem", lg: "0.875rem" },
-                    px: { xs: 1, sm: 1.5, md: 2 },
-                    py: { xs: 0.3, sm: 0.5, md: 0.7, lg: 1 },
-                    minWidth: { xs: "auto", sm: 120, md: 140 },
+                    backgroundColor: '#00af80',
+                    color: 'white',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    py: 0.5,
+                    px: 2,
+                    whiteSpace: 'nowrap',
+                    minWidth: { xs: 'calc(50% - 4px)', sm: '110px' },
+                    boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
+                    border: isUserAvailable ? '2px solid #00ffaa' : 'none',
+                    transition: 'all 0.15s ease-in-out',
+                    '&:hover': { background: '#008f6a' },
+                    '&.Mui-disabled': { opacity: 0.5 }
                   }}
                 >
-                  {availabilityLoading[matchId] ? (
-                    <CircularProgress size={16} color="inherit" />
-                  ) : isUserAvailable ? (
-                    "Unavailable"
-                  ) : (
-                    "Available"
-                  )}
+                  {availabilityLoading[matchId] ? <CircularProgress size={16} color="inherit" /> : '✓ Available'}
                 </Button>
-              )
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleToggleAvailability(matchId, false)}
+                  disabled={availabilityLoading[matchId]}
+                  sx={{
+                    background: '#c62828',
+                    color: 'white',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    py: 0.5,
+                    px: 2,
+                    whiteSpace: 'nowrap',
+                    minWidth: { xs: 'calc(50% - 4px)', sm: '110px' },
+                    boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
+                    border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
+                    transition: 'all 0.15s ease-in-out',
+                    '&:hover': { background: '#b71c1c' },
+                    '&.Mui-disabled': { opacity: 0.5 }
+                  }}
+                >
+                  {availabilityLoading[matchId] ? <CircularProgress size={16} color="inherit" /> : '✕ Unavailable'}
+                </Button>
+              </Box>
             ) : (
               <>
                 {/* Admin-only: ADD Score button */}
@@ -674,7 +580,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                     </Box>
                   </Button>
                 )}
-                
+
                 {/* All Members: Add Your Stats button */}
                 <Button
                   variant="contained"
@@ -862,7 +768,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
           open={statsDialogOpen}
           onClose={() => {
             console.log('🔄 MatchStatsDialog closing - clearing cache and refreshing');
-            
+
             // 🗑️ Clear localStorage caches
             const STORAGE_PREFIX = 'cf_cache_';
             Object.keys(localStorage).forEach(key => {
@@ -875,16 +781,16 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                 console.log('🗑️ Cleared cache:', key);
               }
             });
-            
+
             // 📢 Dispatch match-updated event
-            window.dispatchEvent(new CustomEvent('match-updated', { 
-              detail: { matchId } 
+            window.dispatchEvent(new CustomEvent('match-updated', {
+              detail: { matchId }
             }));
-            
+
             // Close both states together in batch
             setShouldShowAdminGoals(false);
             setStatsDialogOpen(false);
-            
+
             console.log('✅ Match dialog closed and update event dispatched');
           }}
           initialLeagueId={leagueId}

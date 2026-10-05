@@ -1229,7 +1229,10 @@ export default function AllMatches() {
             const isAlreadyUnavailable = (targetMatch.unavailableUsers || []).some((u: User) => sameId(u?.id || (u as any)?._id, currentUserId));
 
             if ((markAvailable && isAlreadyAvailable) || (!markAvailable && isAlreadyUnavailable)) {
-                console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+                const alreadyMsg = markAvailable
+                    ? 'You are already available for this match.'
+                    : 'You are already unavailable for this match.';
+                toast.success(alreadyMsg, { position: 'top-center' });
                 return;
             }
         }
@@ -1888,7 +1891,7 @@ export default function AllMatches() {
 
 
 
-    const MatchDetailModal = ({ open, onClose, match }: { open: boolean; onClose: () => void; match: Match | null }) => {
+    const MatchDetailModal = ({ open, onClose, match, onViewFullDetails }: { open: boolean; onClose: () => void; match: Match | null; onViewFullDetails?: (matchId: string) => void }) => {
         if (!match) return null;
 
         return (
@@ -2209,18 +2212,21 @@ export default function AllMatches() {
                     >
                         Close
                     </Button>
-                    <Link href={`/match/${match.id}`} passHref>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: '#0388E3',
-                                width: { xs: '100%', sm: 'auto' },
-                                '&:hover': { backgroundColor: '#0369a1' }
-                            }}
-                        >
-                            View Full Details
-                        </Button>
-                    </Link>
+                    <Button
+                        variant="contained"
+                        onClick={() => {
+                            onClose();
+                            setResultsMatchId(match.id);
+                            setResultsDialogOpen(true);
+                        }}
+                        sx={{
+                            backgroundColor: '#0388E3',
+                            width: { xs: '100%', sm: 'auto' },
+                            '&:hover': { backgroundColor: '#0369a1' }
+                        }}
+                    >
+                        View Full Details
+                    </Button>
                 </DialogActions>
             </Dialog>
         );
@@ -3852,6 +3858,10 @@ export default function AllMatches() {
                     open={matchDetailModalOpen}
                     onClose={() => setMatchDetailModalOpen(false)}
                     match={selectedMatchDetail}
+                    onViewFullDetails={(matchId) => {
+                        setResultsMatchId(matchId);
+                        setResultsDialogOpen(true);
+                    }}
                 />
 
                 {/* Team Modal */}

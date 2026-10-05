@@ -752,20 +752,55 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
   // const theme = useTheme();
   // const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
 
+  const checkSameId = (a: any, b: any) => {
+    if (!a || !b) return false;
+    const idA = typeof a === 'object' ? (a.id || a._id) : a;
+    const idB = typeof b === 'object' ? (b.id || b._id) : b;
+    return String(idA || '').trim() === String(idB || '').trim();
+  };
+
   const handleToggleAvailability = async (matchId: string, isAvailable: boolean) => {
     if (!user) return;
-    const action = isAvailable ? 'unavailable' : 'available';
+    const action = isAvailable ? 'available' : 'unavailable';
     const currentUserId = user?.id || (user as any)?._id;
 
     // 🛡️ GUARD: If user is ALREADY in the target status, do NOT send request to backend
     if (match && currentUserId) {
-      const isAlreadyAvailable = (match.availableUsers || []).some((u: any) => (u?.id || u?._id) && String(u?.id || u?._id) === String(currentUserId));
-      const isAlreadyUnavailable = (match.unavailableUsers || []).some((u: any) => (u?.id || u?._id) && String(u?.id || u?._id) === String(currentUserId));
+      const isAlreadyAvailable = (match.availableUsers || []).some((u: any) => checkSameId(u, currentUserId));
+      const isAlreadyUnavailable = (match.unavailableUsers || []).some((u: any) => checkSameId(u, currentUserId));
 
-      if ((action === 'available' && isAlreadyAvailable) || (action === 'unavailable' && isAlreadyUnavailable)) {
-        console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+      if ((isAvailable && isAlreadyAvailable) || (!isAvailable && isAlreadyUnavailable)) {
+        const alreadyMsg = isAvailable
+          ? 'You are already available for this match.'
+          : 'You are already unavailable for this match.';
+        toast.success(alreadyMsg, { position: 'top-center' });
         return;
       }
+    }
+
+    // ⚡ OPTIMISTIC UPDATE: Instantly update local state so glow & count change smoothly without blinking
+    if (currentUserId) {
+      const currentUserObj = {
+        id: String(currentUserId),
+        _id: String(currentUserId),
+        email: user?.email || '',
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+      };
+      setMatch(prev => {
+        if (!prev) return prev;
+        const filteredAvail = (prev.availableUsers || []).filter((u: any) => !checkSameId(u, currentUserId));
+        const filteredUnavail = (prev.unavailableUsers || []).filter((u: any) => !checkSameId(u, currentUserId));
+        return isAvailable ? {
+          ...prev,
+          availableUsers: [...filteredAvail, currentUserObj],
+          unavailableUsers: filteredUnavail
+        } : {
+          ...prev,
+          availableUsers: filteredAvail,
+          unavailableUsers: [...filteredUnavail, currentUserObj]
+        };
+      });
     }
 
     setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
@@ -890,34 +925,48 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
             Match Result
           </Typography>
 
-          {/* Improved Match Summary Bar */}
-          <MatchSummary
-            homeTeamName={match.homeTeamName}
-            awayTeamName={match.awayTeamName}
-            homeTeamImg={match.homeTeamImage || '/assets/matches.png'}
-            awayTeamImg={match.awayTeamImage || '/assets/matches.png'}
-            homeGoals={typeof match.homeTeamGoals === 'number' ? match.homeTeamGoals : 0}
-            awayGoals={typeof match.awayTeamGoals === 'number' ? match.awayTeamGoals : 0}
-            leagueName={league?.name || 'League'}
-            currentMatch={currentMatchNumber}
-            totalMatches={totalMatchSlots}
-            matchStartTime={match.start || match.date || new Date().toISOString()}
-            possessionLeft={47} // TODO: Replace with actual possession if available
-            possessionRight={53} // TODO: Replace with actual possession if available
-            winPercentLeft={winPercentLeft}
-            winPercentRight={winPercentRight}
-            matchStatus={match.status}
-            matchEndTime={match.end || undefined}
-            leagueId={match.leagueId || getNestedLeagueId(match) || ""}
-            matchId={match.id}
-            captainsConfirmed={captainsConfirmed}
-            isUserAvailable={!!match.availableUsers?.some(u => u?.id === user?.id)}
-            availabilityLoading={availabilityLoading}
-            handleToggleAvailability={handleToggleAvailability}
-            embeddedInDialog={isEmbeddedInDialog}
-            seasonActive={currentMatchSeasonActive}
-            isUserInMatch={match.homeTeamUsers?.some(u => u?.id === user?.id) || match.awayTeamUsers?.some(u => u?.id === user?.id) || match.availableUsers?.some(u => u?.id === user?.id) || match.unavailableUsers?.some((u: { id: string | undefined; }) => u?.id === user?.id)}
-          />
+          {(() => {
+            const currentUserId = user?.id || (user as any)?._id;
+            const isUserAvailable = !!currentUserId && !!match.availableUsers?.some((u: any) => checkSameId(u, currentUserId));
+            const isUserUnavailable = !!currentUserId && !!match.unavailableUsers?.some((u: any) => checkSameId(u, currentUserId));
+            const isUserInMatch = !!currentUserId && (
+              match.homeTeamUsers?.some((u: any) => checkSameId(u, currentUserId)) ||
+              match.awayTeamUsers?.some((u: any) => checkSameId(u, currentUserId)) ||
+              isUserAvailable ||
+              isUserUnavailable
+            );
+
+            return (
+              <MatchSummary
+                homeTeamName={match.homeTeamName}
+                awayTeamName={match.awayTeamName}
+                homeTeamImg={match.homeTeamImage || '/assets/matches.png'}
+                awayTeamImg={match.awayTeamImage || '/assets/matches.png'}
+                homeGoals={typeof match.homeTeamGoals === 'number' ? match.homeTeamGoals : 0}
+                awayGoals={typeof match.awayTeamGoals === 'number' ? match.awayTeamGoals : 0}
+                leagueName={league?.name || 'League'}
+                currentMatch={currentMatchNumber}
+                totalMatches={totalMatchSlots}
+                matchStartTime={match.start || match.date || new Date().toISOString()}
+                possessionLeft={47} // TODO: Replace with actual possession if available
+                possessionRight={53} // TODO: Replace with actual possession if available
+                winPercentLeft={winPercentLeft}
+                winPercentRight={winPercentRight}
+                matchStatus={match.status}
+                matchEndTime={match.end || undefined}
+                leagueId={match.leagueId || getNestedLeagueId(match) || ""}
+                matchId={match.id}
+                captainsConfirmed={captainsConfirmed}
+                isUserAvailable={isUserAvailable}
+                isUserUnavailable={isUserUnavailable}
+                availabilityLoading={availabilityLoading}
+                handleToggleAvailability={handleToggleAvailability}
+                embeddedInDialog={isEmbeddedInDialog}
+                seasonActive={currentMatchSeasonActive}
+                isUserInMatch={isUserInMatch}
+              />
+            );
+          })()}
           {!showGoals && (
             <Typography align="center" sx={{ mb: 3, color: 'gray' }}>
               Match starts at: {match.start ? new Date(match.start).toLocaleString() : new Date(match.date).toLocaleString()}

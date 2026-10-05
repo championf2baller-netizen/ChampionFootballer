@@ -148,6 +148,7 @@ interface MatchDetailModalProps {
     match: any | null;
     leagueMembersCount?: number;
     showViewFullDetailsLink?: boolean;
+    onViewFullDetails?: (matchId: string) => void;
 }
 
 export default function MatchDetailModal({
@@ -156,6 +157,7 @@ export default function MatchDetailModal({
     match,
     leagueMembersCount = 0,
     showViewFullDetailsLink = false,
+    onViewFullDetails,
 }: MatchDetailModalProps) {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -532,9 +534,13 @@ export default function MatchDetailModal({
                     Close
                 </Button>
                 {showViewFullDetailsLink && match.id && (
-                    <Link href={`/match/${match.id}`} passHref style={{ textDecoration: 'none', width: isMobile ? '100%' : 'auto' }}>
+                    onViewFullDetails ? (
                         <Button
                             variant="contained"
+                            onClick={() => {
+                                onClose();
+                                onViewFullDetails(match.id);
+                            }}
                             sx={{
                                 backgroundColor: '#0388E3',
                                 width: { xs: '100%', sm: 'auto' },
@@ -543,7 +549,20 @@ export default function MatchDetailModal({
                         >
                             View Full Details
                         </Button>
-                    </Link>
+                    ) : (
+                        <Link href={`/match/${match.id}`} passHref style={{ textDecoration: 'none', width: isMobile ? '100%' : 'auto' }}>
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    backgroundColor: '#0388E3',
+                                    width: { xs: '100%', sm: 'auto' },
+                                    '&:hover': { backgroundColor: '#0369a1' }
+                                }}
+                            >
+                                View Full Details
+                            </Button>
+                        </Link>
+                    )
                 )}
             </DialogActions>
         </Dialog>

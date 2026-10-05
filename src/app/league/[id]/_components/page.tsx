@@ -2196,7 +2196,10 @@ export default function LeagueDetailPage() {
             const isAlreadyUnavailable = (targetMatch.unavailableUsers || []).some((u: User) => (u?.id || (u as any)?._id) && String(u?.id || (u as any)?._id) === String(currentUserId));
 
             if ((markAvailable && isAlreadyAvailable) || (!markAvailable && isAlreadyUnavailable)) {
-                console.log(`[Availability] User ${currentUserId} is already ${action} for match ${matchId}. Skipping API call.`);
+                const alreadyMsg = markAvailable
+                    ? 'You are already available for this match.'
+                    : 'You are already unavailable for this match.';
+                toast.success(alreadyMsg, { position: 'top-center' });
                 return;
             }
         }

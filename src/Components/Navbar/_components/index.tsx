@@ -87,6 +87,7 @@ import React from 'react';
 import toast from 'react-hot-toast';
 import TextField from '@mui/material/TextField';
 import PlayMatchPagee from '@/Components/matchstatsdialog/MatchStatsDialog';
+import MatchDetailModal from '@/Components/MatchDetailModal';
 import { leagueAPI } from '@/lib/api-ultra-fast';
 import NotificationMenuLoadingSkeleton from '@/Components/loading/NotificationMenuLoadingSkeleton';
 // import PlayerStatsDialog from '@/Components/PlayerStatsDialog';
@@ -1004,18 +1005,18 @@ function buildNotificationDisplay(
           </Box>
         )}
 
-        {matchId && (
+        {seeHref && (
           <Box sx={{ mt: 1 }}>
-            <Button
-              component={Link}
-              href={(matchId ? `/match/${matchId}` : '#')}
-              size="small"
-              variant="contained"
-              startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
-              sx={{ textTransform: 'none', fontWeight: 700 }}
-            >
-              See Details
-            </Button>
+            <Link href={seeHref} style={{ textDecoration: 'none' }}>
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+                sx={{ textTransform: 'none', fontWeight: 700 }}
+              >
+                See Details
+              </Button>
+            </Link>
           </Box>
         )}
       </Box>
@@ -2673,6 +2674,27 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | null>(null);
   const [statsSourceNotificationId, setStatsSourceNotificationId] = useState<string | null>(null);
 
+  const [navMatchDetailModalOpen, setNavMatchDetailModalOpen] = useState(false);
+  const [navSelectedMatch, setNavSelectedMatch] = useState<any | null>(null);
+
+  const handleOpenMatchDetailModal = async (matchId: string) => {
+    if (!matchId) return;
+    try {
+      setNavMatchDetailModalOpen(true);
+      setNavSelectedMatch({ id: matchId, status: 'UPCOMING' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      const matchObj = data?.match || data?.data || data;
+      if (matchObj && matchObj.id) {
+        setNavSelectedMatch(matchObj);
+      }
+    } catch (err) {
+      console.error('Failed to load match detail for modal:', err);
+    }
+  };
+
   const handleStatChange = (stat: 'goals' | 'assists' | 'cleanSheets' | 'penalties' | 'freeKicks' | 'defence' | 'impact', increment: number, max: number) => {
     setMyStats(prev => {
       const next = Math.max(0, Math.min(max, prev[stat] + increment));
@@ -3212,6 +3234,14 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         initialMatchId={selectedMatchId || undefined}
         initialLeagueId={selectedLeagueId || undefined}
       />
+      <MatchDetailModal
+        open={navMatchDetailModalOpen}
+        onClose={() => {
+          setNavMatchDetailModalOpen(false);
+          setNavSelectedMatch(null);
+        }}
+        match={navSelectedMatch}
+      />
 
       {/* NOTIFICATION POPOVER - ENHANCED */}
       <Popover
@@ -3610,8 +3640,12 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                                         </Box>
                                       </Box>
                                       <Button
-                                        component={Link}
-                                        href={`/match/${matchId}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (!notification.read) markAsRead(notification.id);
+                                          handleOpenMatchDetailModal(matchId);
+                                          handleNotificationClose();
+                                        }}
                                         size="small"
                                         variant="text"
                                         startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 14 }} />}
@@ -3806,14 +3840,14 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             {/* Action Buttons */}
                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                               <Button
-                                component={Link}
-                                href={`/match/${matchId}`}
                                 size="small"
                                 variant="contained"
                                 startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 15 }} />}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (!notification.read) markAsRead(notification.id);
+                                  handleOpenMatchDetailModal(matchId);
+                                  handleNotificationClose();
                                 }}
                                 sx={{
                                   textTransform: 'none',
@@ -3883,14 +3917,14 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             {/* Action Button */}
                             <Box sx={{ display: 'flex', gap: 1 }}>
                               <Button
-                                component={Link}
-                                href={`/match/${matchId}`}
                                 size="small"
                                 variant="contained"
                                 startIcon={<EmojiEventsOutlinedIcon sx={{ fontSize: 15 }} />}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   if (!notification.read) markAsRead(notification.id);
+                                  handleOpenMatchDetailModal(matchId);
+                                  handleNotificationClose();
                                 }}
                                 sx={{
                                   textTransform: 'none',
