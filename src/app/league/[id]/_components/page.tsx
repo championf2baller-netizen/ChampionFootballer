@@ -5257,6 +5257,7 @@ export default function LeagueDetailPage() {
                                                                     {/* Left Info Column */}
                                                                     <Box sx={{
                                                                         flex: 1,
+                                                                        minWidth: 0,
                                                                         p: 1.5,
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
@@ -5315,9 +5316,9 @@ export default function LeagueDetailPage() {
 
                                                                         {/* Availability Buttons & See Who Is Playing Link */}
                                                                         {isMember && (
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 0.5 }}>
+                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 0.5, width: '100%' }}>
                                                                                 <Box sx={{
-                                                                                    display: 'flex', gap: 1, mb: 0, flexWrap: 'nowrap'
+                                                                                    display: 'flex', gap: 1, mb: 0, flexWrap: 'nowrap', width: '100%'
                                                                                 }}>
                                                                                     <Button
                                                                                         variant="contained"
@@ -5332,11 +5333,12 @@ export default function LeagueDetailPage() {
                                                                                             color: 'white',
                                                                                             textTransform: 'none',
                                                                                             fontWeight: 500,
-                                                                                            fontSize: '0.9rem',
+                                                                                            fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                                                                                             py: 0.35,
-                                                                                            px: 1.25,
+                                                                                            px: { xs: 0.5, sm: 1, md: 1.25 },
                                                                                             whiteSpace: 'nowrap',
-                                                                                            minWidth: '100px',
+                                                                                            flex: { xs: 1, sm: 'none' },
+                                                                                            minWidth: { xs: 0, sm: '100px' },
                                                                                             boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
                                                                                             border: isUserAvailable ? '2px solid #00ffaa' : 'none',
                                                                                             '&:hover': { background: '#008f6a' },
@@ -5358,11 +5360,12 @@ export default function LeagueDetailPage() {
                                                                                             color: 'white',
                                                                                             textTransform: 'none',
                                                                                             fontWeight: 500,
-                                                                                            fontSize: '0.9rem',
+                                                                                            fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                                                                                             py: 0.35,
-                                                                                            px: 1.25,
+                                                                                            px: { xs: 0.5, sm: 1, md: 1.25 },
                                                                                             whiteSpace: 'nowrap',
-                                                                                            minWidth: '100px',
+                                                                                            flex: { xs: 1, sm: 'none' },
+                                                                                            minWidth: { xs: 0, sm: '100px' },
                                                                                             boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
                                                                                             border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
                                                                                             '&:hover': { background: '#b71c1c' },
@@ -5408,7 +5411,8 @@ export default function LeagueDetailPage() {
 
                                                                     {/* Right Admin Column */}
                                                                     <Box sx={{
-                                                                        width: '95px',
+                                                                        width: { xs: '91px', sm: '95px' },
+                                                                        flexShrink: 0,
                                                                         borderLeft: '1px solid #fff',
                                                                         borderTop: 'none',
                                                                         pl: 1,

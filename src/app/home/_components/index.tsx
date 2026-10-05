@@ -1744,7 +1744,13 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
       </Box>
 
       {/* Add New Season Button */}
-      {selectedLeague && selectedLeague.userRole === 'ADMIN' && (
+      {selectedLeague && selectedLeague.userRole === 'ADMIN' && !(
+        selectedLeague.isCompleted ||
+        selectedLeague.isComplete ||
+        (selectedLeague as any).computedStatus?.isCompleted ||
+        (selectedLeague as any).computedStatus?.isComplete ||
+        selectedLeague.status === 'completed'
+      ) && (
         <Button
           disabled={isCreatingSeason || isFetching}
           onClick={openCreateSeasonConfirm}

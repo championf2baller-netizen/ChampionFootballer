@@ -485,7 +485,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
           >
 
             {!isCompleted ? (
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'nowrap', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
                 <Button
                   variant="contained"
                   size="small"
@@ -496,11 +496,12 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                     color: 'white',
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                     py: 0.5,
-                    px: 2,
+                    px: { xs: 0.5, sm: 1, md: 2 },
                     whiteSpace: 'nowrap',
-                    minWidth: { xs: 'calc(50% - 4px)', sm: '110px' },
+                    flex: { xs: 1, sm: 'none' },
+                    minWidth: { xs: 0, sm: '110px' },
                     boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
                     border: isUserAvailable ? '2px solid #00ffaa' : 'none',
                     transition: 'all 0.15s ease-in-out',
@@ -520,11 +521,12 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                     color: 'white',
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
                     py: 0.5,
-                    px: 2,
+                    px: { xs: 0.5, sm: 1, md: 2 },
                     whiteSpace: 'nowrap',
-                    minWidth: { xs: 'calc(50% - 4px)', sm: '110px' },
+                    flex: { xs: 1, sm: 'none' },
+                    minWidth: { xs: 0, sm: '110px' },
                     boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
                     border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
                     transition: 'all 0.15s ease-in-out',

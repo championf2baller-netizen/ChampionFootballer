@@ -3640,7 +3640,7 @@ export default function AllMatches() {
                                         {/* Bottom Info Panel */}
                                         <Box sx={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
                                             {/* Left Info Column */}
-                                            <Box sx={{ flex: 1, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1.5 }}>
+                                            <Box sx={{ flex: 1, minWidth: 0, p: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 1.5 }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
                                                         <Image src={CalendarImg} alt="Date" width={16} height={16} />
@@ -3679,14 +3679,14 @@ export default function AllMatches() {
                                                     </Box>
                                                 )}
                                                 {isMember && (
-                                                    <Box sx={{ display: 'flex', gap: 1, mb: 0, flexWrap: 'wrap' }}>
+                                                    <Box sx={{ display: 'flex', gap: 1, mb: 0, flexWrap: 'nowrap', width: '100%' }}>
                                                         <Button
                                                             variant="contained"
                                                             size="small"
                                                             onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, true); }}
                                                             disabled={leagueForMatch?.active === false || match.archived}
                                                             sx={{
-                                                                background: '#00af80', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.8rem', sm: '0.9rem' }, py: 0.35, px: 1.25, whiteSpace: 'nowrap', minWidth: { xs: 'calc(50% - 4px)', sm: '100px' },
+                                                                background: '#00af80', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' }, py: 0.35, px: { xs: 0.5, sm: 1, md: 1.25 }, whiteSpace: 'nowrap', flex: { xs: 1, sm: 'none' }, minWidth: { xs: 0, sm: '100px' },
                                                                 boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
                                                                 border: isUserAvailable ? '2px solid #00ffaa' : 'none',
                                                                 transition: 'all 0.15s ease-in-out',
@@ -3701,7 +3701,7 @@ export default function AllMatches() {
                                                             onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, false); }}
                                                             disabled={leagueForMatch?.active === false || match.archived}
                                                             sx={{
-                                                                background: '#c62828', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.8rem', sm: '0.9rem' }, py: 0.35, px: 1.25, whiteSpace: 'nowrap', minWidth: { xs: 'calc(50% - 4px)', sm: '100px' },
+                                                                background: '#c62828', color: 'white', textTransform: 'none', fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' }, py: 0.35, px: { xs: 0.5, sm: 1, md: 1.25 }, whiteSpace: 'nowrap', flex: { xs: 1, sm: 'none' }, minWidth: { xs: 0, sm: '100px' },
                                                                 boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
                                                                 border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
                                                                 transition: 'all 0.15s ease-in-out',
@@ -3744,7 +3744,7 @@ export default function AllMatches() {
                                             </Box>
 
                                             {/* Right Admin Column */}
-                                            <Box sx={{ width: '95px', borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 2, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2 , mr:1 }}>
+                                            <Box sx={{ width: { xs: '115px', sm: '120px' }, flexShrink: 0, borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 1, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2, mr: 0.5 }}>
                                                 {isAdmin ? (
                                                     <>
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left' }}> Admin Only</Typography>

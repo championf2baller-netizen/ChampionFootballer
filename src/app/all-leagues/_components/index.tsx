@@ -6143,7 +6143,7 @@ function AllLeagues() {
               const isCompleted = isLeagueCompleted(league);
               const isLive = isLeagueLive(league);
               const hasCustomLeagueImage = typeof league?.image === 'string' && league.image.trim().length > 0;
-              const canCreateSeason = isLeagueAdminForCurrentUser(league);
+              const canCreateSeason = isLeagueAdminForCurrentUser(league) && !isCompleted;
               const isCreatingSeason = creatingSeasonLeagueId === String(league.id);
               const canManageLiveStatus = isLeagueAdminForCurrentUser(league);
               const isUpdatingLiveStatus = leagueLiveUpdatingId === String(league.id);
