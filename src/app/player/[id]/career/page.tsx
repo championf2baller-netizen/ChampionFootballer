@@ -2737,7 +2737,7 @@ export default function CareerPage() {
                     ml: { xs: 0, md: 0.8 },
                     position: 'relative',
                     zIndex: 20,
-                    mt: { xs: -6, md: 0 }
+                    mt: { xs: -5, md: 0 }
                   }}
                 >
                   <TextField
