@@ -2221,7 +2221,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       ListboxProps={{
                         sx: {
                           display: 'grid',
-                          gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
+                          gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
                           bgcolor: '#000'
@@ -2241,7 +2241,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
-                              p: 1,
+                              p: 0.75,
                               position: 'relative',
                               bgcolor: '#000',
                               border: '1px solid',
@@ -2259,12 +2259,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             <Box sx={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                               <Box
                                 sx={{
-                                  width: 40,
-                                  height: 40,
+                                  width: { xs: 32, sm: 40 },
+                                  height: { xs: 32, sm: 40 },
                                   mb: 0.5,
                                   borderRadius: '50%',
                                   overflow: 'hidden',
-                                  border: '3px solid',
+                                  border: '2px solid',
                                   borderColor: isAvailable ? '#43a047' : '#fff',
                                   bgcolor: '#000',
                                   flexShrink: 0,
@@ -2288,7 +2288,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                   }}
                                 />
                               </Box>
-                              <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  textAlign: 'center',
+                                  lineHeight: 1.1,
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                                  color: isAvailable ? '#43a047' : '#fff',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  width: '100%'
+                                }}
+                              >
                                 {option.firstName}
                               </Typography>
                               {isAvailable && Number.isFinite(availabilityOrder) && (
@@ -2297,8 +2309,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 </Typography>
                               )}
                               {selected && (
-                                <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
-                                  <Check size={12} />
+                                <Box sx={{ position: 'absolute', top: 2, right: 2, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff', bgcolor: '#000' }}>
+                                  <Check size={10} />
                                 </Box>
                               )}
                             </Box>
@@ -2419,7 +2431,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       ListboxProps={{
                         sx: {
                           display: 'grid',
-                          gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
+                          gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
                           bgcolor: '#000'
@@ -2439,7 +2451,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
-                              p: 1,
+                              p: 0.75,
                               position: 'relative',
                               bgcolor: '#000',
                               border: '1px solid',
@@ -2457,12 +2469,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             <Box sx={{ pointerEvents: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                               <Box
                                 sx={{
-                                  width: 40,
-                                  height: 40,
+                                  width: { xs: 32, sm: 40 },
+                                  height: { xs: 32, sm: 40 },
                                   mb: 0.5,
                                   borderRadius: '50%',
                                   overflow: 'hidden',
-                                  border: '3px solid',
+                                  border: '2px solid',
                                   borderColor: isAvailable ? '#43a047' : '#fff',
                                   bgcolor: '#000',
                                   flexShrink: 0,
@@ -2486,7 +2498,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                   }}
                                 />
                               </Box>
-                              <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: isAvailable ? '#43a047' : '#fff' }}>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  textAlign: 'center',
+                                  lineHeight: 1.1,
+                                  fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                                  color: isAvailable ? '#43a047' : '#fff',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  width: '100%'
+                                }}
+                              >
                                 {option.firstName}
                               </Typography>
                               {isAvailable && Number.isFinite(availabilityOrder) && (
@@ -2495,8 +2519,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                                 </Typography>
                               )}
                               {selected && (
-                                <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff' }}>
-                                  <Check size={12} />
+                                <Box sx={{ position: 'absolute', top: 2, right: 2, width: 16, height: 16, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isAvailable ? '#43a047' : '#fff', border: '1px solid', borderColor: isAvailable ? '#43a047' : '#fff', bgcolor: '#000' }}>
+                                  <Check size={10} />
                                 </Box>
                               )}
                             </Box>
