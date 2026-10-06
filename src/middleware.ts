@@ -24,18 +24,22 @@ export function middleware(request: NextRequest) {
       : undefined;
 
   // Public routes
-  const publicAlwaysPaths = ['/about', '/terms', '/privacy', '/contact']; // always accessible (no redirect even if logged-in)
+  const publicAlwaysPaths = ['/about', '/terms', '/privacy', '/contact', '/join-league']; // always accessible (no redirect even if logged-in)
   const publicRedirectPaths = ['/', '/login', '/register']; // redirect to /home if logged-in
   const publicPaths = [...publicAlwaysPaths, ...publicRedirectPaths];
 
   // If user has token and tries to access auth landing pages, redirect to home
   if (publicRedirectPaths.includes(pathname) && token) {
-    return NextResponse.redirect(new URL('/home', request.url));
+    const redirectUrl = new URL('/home', request.url);
+    redirectUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // If user tries to access protected page without token, redirect to login
+  // If user tries to access protected page without token, redirect to landing page (preserving search params)
   if (!publicPaths.includes(pathname) && !token) {
-    return NextResponse.redirect(new URL('/', request.url));
+    const redirectUrl = new URL('/', request.url);
+    redirectUrl.search = request.nextUrl.search;
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();

@@ -88,6 +88,18 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
+  // Auto-detect inviteCode in URL for unauthenticated users
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = (urlParams.get('inviteCode') || urlParams.get('code') || '').trim().toUpperCase();
+    if (codeFromUrl) {
+      localStorage.setItem('pendingInviteCode', codeFromUrl);
+      sessionStorage.setItem('pendingInviteCode', codeFromUrl);
+      setIsJoinModalOpen(true);
+    }
+  }, []);
+
   const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
 
   const activeHeroTopBg = cmsMap['page_landing_images_hero_top_bg'] || cmsMap['hero_top_bg'] || heroTopBg;

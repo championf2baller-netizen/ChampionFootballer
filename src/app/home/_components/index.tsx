@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import {
   Box,
@@ -2109,9 +2110,97 @@ export default function PlayerDashboard() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const router = useRouter();
+
   useEffect(() => {
     dispatch(initializeFromStorage());
   }, [dispatch]);
+
+  // Auto-join league from inviteCode query parameter or pending invite code
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Read inviteCode or code from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const codeFromUrl = (urlParams.get('inviteCode') || urlParams.get('code') || '').trim().toUpperCase();
+
+    if (codeFromUrl) {
+      localStorage.setItem('pendingInviteCode', codeFromUrl);
+      sessionStorage.setItem('pendingInviteCode', codeFromUrl);
+    }
+
+    const pendingCode = codeFromUrl || localStorage.getItem('pendingInviteCode') || sessionStorage.getItem('pendingInviteCode');
+
+    if (!pendingCode) return;
+    if (!token || !user?.id) return;
+
+    const cleanCode = pendingCode.trim().toUpperCase();
+
+    // Pre-check: Check if user is ALREADY joined in a league with this inviteCode
+    const allInstant = leagueAPI.getAllInstant() || [];
+    const alreadyJoinedLeague = allInstant.find((l: any) => {
+      const mainMatch = String(l?.inviteCode || '').trim().toUpperCase() === cleanCode;
+      const seasonMatch = Array.isArray(l?.seasons) && l.seasons.some((s: any) => {
+        const sCode = String(s?.inviteCode || s?.seasonInviteCode || '').trim().toUpperCase();
+        return sCode === cleanCode;
+      });
+      return mainMatch || seasonMatch;
+    });
+
+    // Clear storage so we don't re-trigger infinitely
+    localStorage.removeItem('pendingInviteCode');
+    sessionStorage.removeItem('pendingInviteCode');
+
+    // Clean URL query parameters without page reload
+    if (codeFromUrl) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+
+    if (alreadyJoinedLeague && alreadyJoinedLeague.id) {
+      toast.error('You have already joined this league.');
+      router.push(`/league/${alreadyJoinedLeague.id}`);
+      return;
+    }
+
+    dispatch(joinLeague(cleanCode))
+      .unwrap()
+      .then((payload: unknown) => {
+        let joinedId: string | undefined;
+        let isAlready = false;
+
+        if (typeof payload === 'object' && payload !== null) {
+          const pObj = payload as Record<string, any>;
+          if (pObj.id) joinedId = String(pObj.id);
+          else if (pObj.league?.id) joinedId = String(pObj.league.id);
+
+          const msg = String(pObj.message || pObj.error || '');
+          if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('member') || msg.toLowerCase().includes('exist')) {
+            isAlready = true;
+          }
+        }
+
+        if (isAlready) {
+          toast.error('You have already joined this league.');
+        } else {
+          toast.success('Successfully joined league from invitation!');
+        }
+
+        if (joinedId) {
+          router.push(`/league/${joinedId}`);
+        }
+      })
+      .catch((err: unknown) => {
+        console.error('Auto join pending league error:', err);
+        const errStr = typeof err === 'string' ? err : String((err as any)?.message || '');
+        const isAlready = errStr.toLowerCase().includes('already') || errStr.toLowerCase().includes('member') || errStr.toLowerCase().includes('exist');
+        if (isAlready) {
+          toast.error('You have already joined this league.');
+        } else {
+          toast.error(errStr || 'Failed to join league with this invite code.');
+        }
+      });
+  }, [token, user?.id, dispatch, router]);
 
   const dispatchLeagueMutationEvent = useCallback(
     (eventName: 'league-created' | 'league-updated' | 'league-deleted', detail: Record<string, unknown>) => {
@@ -2263,7 +2352,9 @@ export default function PlayerDashboard() {
       toast.success('Successfully joined league!');
     } catch (error: unknown) {
       const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : 'Failed to join league';
-      toast.error(errorMessage);
+      const isAlready = errorMessage.toLowerCase().includes('already') || errorMessage.toLowerCase().includes('member') || errorMessage.toLowerCase().includes('exist');
+      const finalMsg = isAlready ? 'You have already joined this league.' : errorMessage;
+      toast.error(finalMsg);
     }
   };
 

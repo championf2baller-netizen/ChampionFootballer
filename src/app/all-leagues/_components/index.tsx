@@ -4058,7 +4058,9 @@ function AllLeagues() {
       setInviteCode('');
     } catch (error: unknown) {
       const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : 'Failed to join league';
-      toast.error(errorMessage);
+      const isAlready = errorMessage.toLowerCase().includes('already') || errorMessage.toLowerCase().includes('member') || errorMessage.toLowerCase().includes('exist');
+      const finalMsg = isAlready ? 'You have already joined this league.' : errorMessage;
+      toast.error(finalMsg);
     } finally {
       setIsJoining(false);
     }
@@ -6572,8 +6574,11 @@ function AllLeagues() {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
-                                    navigator.clipboard.writeText(activeSeasonInviteCode);
-                                    toast.success('Invite code copied!');
+                                    const inviteUrl = typeof window !== 'undefined'
+                                      ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`
+                                      : `/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    navigator.clipboard.writeText(inviteUrl);
+                                    toast.success('Invite link copied!');
                                   }}
                                 >
                                   <svg width="19" height="21" viewBox="0 0 24 24" fill="white">
@@ -6596,11 +6601,13 @@ function AllLeagues() {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
-                                    const leagueUrl = typeof window !== 'undefined' ? `${window.location.origin}/league/${league.id}` : undefined;
+                                    const inviteUrl = typeof window !== 'undefined'
+                                      ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`
+                                      : `/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`;
                                     shareContent({
                                       title: `Join ${league.name} | Champion Footballer`,
-                                      text: `Join ${league.name} on Champion Footballer using invite code: ${activeSeasonInviteCode}!`,
-                                      url: leagueUrl,
+                                      text: `Join ${league.name} on Champion Footballer using invite code: ${activeSeasonInviteCode}! Click to join: ${inviteUrl}`,
+                                      url: inviteUrl,
                                     });
                                   }}
                                 >

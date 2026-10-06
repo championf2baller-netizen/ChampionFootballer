@@ -2505,11 +2505,14 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
+        const inviteUrl = typeof window !== 'undefined'
+            ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(code)}`
+            : `/home?inviteCode=${encodeURIComponent(code)}`;
         try {
-            await navigator.clipboard.writeText(code);
-            toast.success('Invite code copied successfully.');
+            await navigator.clipboard.writeText(inviteUrl);
+            toast.success('Invite link copied successfully.');
         } catch {
-            toast.error('Unable to copy invite code right now.');
+            toast.error('Unable to copy invite link right now.');
         }
     }, [inviteCodeForSelectedSeason]);
 
@@ -2519,10 +2522,13 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
+        const inviteUrl = typeof window !== 'undefined'
+            ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(code)}`
+            : `/home?inviteCode=${encodeURIComponent(code)}`;
         shareContent({
             title: `Join ${inviteSeasonLabel} | Champion Footballer`,
-            text: `Join ${inviteSeasonLabel} on Champion Footballer using invite code: ${code}!`,
-            url: typeof window !== 'undefined' ? window.location.href : undefined,
+            text: `Join ${inviteSeasonLabel} on Champion Footballer using invite code: ${code}! Click to join: ${inviteUrl}`,
+            url: inviteUrl,
         });
     }, [inviteCodeForSelectedSeason, inviteSeasonLabel]);
 
