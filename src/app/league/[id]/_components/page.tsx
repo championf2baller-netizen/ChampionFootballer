@@ -5299,11 +5299,12 @@ export default function LeagueDetailPage() {
                                                                                     fontSize: '0.65rem',
                                                                                     textTransform: 'none',
                                                                                     p: 0,
-                                                                                    minWidth: 'auto',
+                                                                                    minWidth: 'max-content',
+                                                                                    flexShrink: 0,
                                                                                     textDecoration: 'underline',
                                                                                     whiteSpace: 'nowrap',
                                                                                     '&:hover': { color: '#ccc' },
-                                                                                    '& .MuiButton-startIcon': { mr: 1 },
+                                                                                    '& .MuiButton-startIcon': { mr: 0.5 },
                                                                                 }}
                                                                             >
                                                                                 View Teams
@@ -5343,9 +5344,11 @@ export default function LeagueDetailPage() {
                                                                                             py: 0.35,
                                                                                             px: { xs: 0.5, sm: 1, md: 1.25 },
                                                                                             whiteSpace: 'nowrap',
-                                                                                            flex: { xs: 1, sm: 'none' },
-                                                                                            minWidth: { xs: 0, sm: '100px' },
-                                                                                            boxShadow: isUserAvailable ? '0 0 12px 3px rgba(0, 175, 128, 0.7), 0 0 20px rgba(0, 255, 180, 0.4)' : 'none',
+                                                                                            flex: 1,
+                                                                                            minWidth: 0,
+                                                                                            position: 'relative',
+                                                                                            zIndex: isUserAvailable ? 2 : 1,
+                                                                                            boxShadow: isUserAvailable ? '0 0 14px 4px rgba(0, 255, 170, 0.8), 0 0 22px rgba(0, 255, 170, 0.5)' : 'none',
                                                                                             border: isUserAvailable ? '2px solid #00ffaa' : 'none',
                                                                                             '&:hover': { background: '#008f6a' },
                                                                                             '&.Mui-disabled': { opacity: 0.5 }
@@ -5370,9 +5373,11 @@ export default function LeagueDetailPage() {
                                                                                             py: 0.35,
                                                                                             px: { xs: 0.5, sm: 1, md: 1.25 },
                                                                                             whiteSpace: 'nowrap',
-                                                                                            flex: { xs: 1, sm: 'none' },
-                                                                                            minWidth: { xs: 0, sm: '100px' },
-                                                                                            boxShadow: isUserUnavailable ? '0 0 12px 3px rgba(198, 40, 40, 0.7), 0 0 20px rgba(255, 100, 100, 0.4)' : 'none',
+                                                                                            flex: 1,
+                                                                                            minWidth: 0,
+                                                                                            position: 'relative',
+                                                                                            zIndex: isUserUnavailable ? 2 : 1,
+                                                                                            boxShadow: isUserUnavailable ? '0 0 14px 4px rgba(255, 75, 75, 0.8), 0 0 22px rgba(255, 100, 100, 0.5)' : 'none',
                                                                                             border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
                                                                                             '&:hover': { background: '#b71c1c' },
                                                                                             '&.Mui-disabled': { opacity: 0.5 }
@@ -5877,7 +5882,7 @@ export default function LeagueDetailPage() {
                                                                     }}>
                                                                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                                                             {/* Date Row */}
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap', overflow: 'visible', whiteSpace: 'nowrap' }}>
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
                                                                                     <Image src={CalendarImg} alt="Date" width={16} height={16} />
                                                                                     <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>

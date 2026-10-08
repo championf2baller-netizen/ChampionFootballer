@@ -3744,7 +3744,7 @@ export default function AllMatches() {
                                             </Box>
 
                                             {/* Right Admin Column */}
-                                            <Box sx={{ width: { xs: '115px', sm: '120px' }, flexShrink: 0, borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 1, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2, mr: 0.5 }}>
+                                            <Box sx={{ width: { xs: '94px', sm: '95px' }, flexShrink: 0, borderLeft: '1px solid #fff', borderTop: 'none', pl: 1, pr: 1, py: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2, mr: 0.5 }}>
                                                 {isAdmin ? (
                                                     <>
                                                         <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left' }}> Admin Only</Typography>
