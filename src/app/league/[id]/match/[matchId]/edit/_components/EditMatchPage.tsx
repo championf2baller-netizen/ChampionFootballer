@@ -2172,7 +2172,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                 <X size={26} />
               </IconButton>
             </Box>
-            <form ref={formRef} onSubmit={handleUpdateMatch} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <form id="edit-match-form" ref={formRef} onSubmit={handleUpdateMatch} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
               <Paper sx={{ p: { xs: 2, sm: 3, md: 4 }, bgcolor: '#1a1a1a', color: '#E5E7EB', borderRadius: 0, border: '1px solid white', borderTop: 'none', mb: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {/* SELECT TEAM Section */}
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', fontSize: { xs: '0.95rem', sm: '1.3rem', md: '1.5rem' }, textTransform: 'uppercase', mb: 1 }}>
@@ -3085,12 +3085,35 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     </Typography>
                   </Grid>
                 </Grid>
-                {error && <Typography color='error' sx={{ my: 3, p: 2, bgcolor: 'rgba(244,67,54,0.1)', borderRadius: 2, border: '1px solid rgba(244,67,54,0.3)' }}>{error}</Typography>}
+                {error && (
+                  <Typography
+                    color='error'
+                    sx={{
+                      display: { xs: 'none', md: 'block' },
+                      my: 3,
+                      p: 2,
+                      bgcolor: 'rgba(244,67,54,0.1)',
+                      borderRadius: 2,
+                      border: '1px solid rgba(244,67,54,0.3)'
+                    }}
+                  >
+                    {error}
+                  </Typography>
+                )}
                 <Button
                   type='submit'
                   variant='contained'
                   fullWidth
-                  sx={{ mt: 3, py: { xs: 0.9, sm: 1 }, background: 'linear-gradient(135deg, #00a77f, #00a77f)', color: 'white', fontWeight: 'bold', borderRadius: 1, '&:hover': { background: 'linear-gradient(135deg, #157a62, #126b55)' } }}
+                  sx={{
+                    display: { xs: 'none', md: 'inline-flex' },
+                    mt: 3,
+                    py: { xs: 0.9, sm: 1 },
+                    background: 'linear-gradient(135deg, #00a77f, #00a77f)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    borderRadius: 1,
+                    '&:hover': { background: 'linear-gradient(135deg, #157a62, #126b55)' }
+                  }}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? <CircularProgress size={28} sx={{ color: 'white' }} /> : 'SAVE'}
@@ -3601,6 +3624,49 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
               </Box>
             </Paper>
           </Box>
+        </Box>
+
+        {/* Mobile View SAVE Button - shown only on mobile at the very bottom */}
+        <Box sx={{ display: { xs: 'block', md: 'none' }, mt: 2, mb: { xs: 3, sm: 2 }, pb: { xs: 3, sm: 2 }, px: isDialog ? { xs: 1.5, sm: 2 } : 0 }}>
+          {error && (
+            <Typography
+              color='error'
+              sx={{
+                mb: 2,
+                p: 2,
+                bgcolor: 'rgba(244,67,54,0.1)',
+                borderRadius: 2,
+                border: '1px solid rgba(244,67,54,0.3)',
+                fontSize: '0.85rem'
+              }}
+            >
+              {error}
+            </Typography>
+          )}
+          <Button
+            type='submit'
+            form='edit-match-form'
+            variant='contained'
+            fullWidth
+            onClick={(e) => {
+              if (formRef.current && typeof formRef.current.requestSubmit === 'function') {
+                e.preventDefault();
+                formRef.current.requestSubmit();
+              }
+            }}
+            sx={{
+              py: { xs: 1.1, sm: 1.2 },
+              background: 'linear-gradient(135deg, #00a77f, #00a77f)',
+              color: 'white',
+              fontWeight: 'bold',
+              borderRadius: 1,
+              fontSize: { xs: '0.95rem', sm: '1rem' },
+              '&:hover': { background: 'linear-gradient(135deg, #157a62, #126b55)' }
+            }}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? <CircularProgress size={28} sx={{ color: 'white' }} /> : 'SAVE'}
+          </Button>
         </Box>
       </Box>
 
