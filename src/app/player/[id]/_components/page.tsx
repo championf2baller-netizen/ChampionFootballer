@@ -207,19 +207,34 @@ const orderedTrophyKeys = [
 
 const TROPHY_ICON_FRAME_SIZE = 60;
 const TROPHY_ICON_SIZE_BY_LABEL: Record<string, number> = {
-    'League Champion': 50,
-    'Runner-Up': 50,
-    "Ballon d'Or": 50,
-    'Golden Boot': 50,
-    'King Playmaker': 50,
-    'Legendary Shield': 50,
-    'The Dark Horse': 50,
-    'Star Keeper': 35,
+    'League Champion': 48,
+    'Champion Footballer': 48,
+    'Runner-Up': 62,
+    'Runner Up': 62,
+    "Ballon d'Or": 45,
+    "Ballon D'or": 45,
+    'Golden Boot': 48,
+    'King Playmaker': 40,
+    'Legendary Shield': 44,
+    'The Dark Horse': 54,
+    'Dark Horse': 54,
+    'Star Keeper': 46,
 };
 
 const getTrophyIconSize = (label?: string): number => {
-    if (!label) return 54;
-    return TROPHY_ICON_SIZE_BY_LABEL[label] ?? 54;
+    if (!label) return 46;
+    const trimmed = label.trim();
+    if (TROPHY_ICON_SIZE_BY_LABEL[trimmed] !== undefined) {
+        return TROPHY_ICON_SIZE_BY_LABEL[trimmed];
+    }
+    const lower = trimmed.toLowerCase();
+    const foundKey = Object.keys(TROPHY_ICON_SIZE_BY_LABEL).find(
+        k => k.toLowerCase() === lower
+    );
+    if (foundKey && TROPHY_ICON_SIZE_BY_LABEL[foundKey] !== undefined) {
+        return TROPHY_ICON_SIZE_BY_LABEL[foundKey];
+    }
+    return 46;
 };
 
 type StatTotals = {
