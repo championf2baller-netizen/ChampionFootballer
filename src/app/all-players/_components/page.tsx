@@ -5,6 +5,7 @@ import PageHeader from '@/Components/PageHeader';
 import dynamic from 'next/dynamic';
 import {
   Container,
+  Card,
   Typography,
   Button,
   TextField,
@@ -1150,9 +1151,8 @@ const AllPlayersPage = () => {
             gap: { xs: 2, md: 3 },
             // Offset PageHeader internal padding so controls align with table edges.
             // mx: { xs: -2, md: -3 },
-            px: { xs: 2, sm: 3, md: 7.5 },
-            pt: { xs: 0.5, md: 0.5 },
-            pb: { xs: 1.5, md: 1.3 },
+            px: { xs: 1, sm: 2, md: 3 },
+            py: { xs: 1.5, md: 0 },
             maxWidth: '1280px',
             mx: 'auto',
           }}>
@@ -1695,381 +1695,469 @@ const AllPlayersPage = () => {
             mt: 0,
           }}
         >
-          <Box
+          <Card
             sx={{
-              width: '100%',
-              overflowX: 'auto',
-              overflowY: 'auto',
-              maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
-              WebkitOverflowScrolling: 'touch',
-              '&::-webkit-scrollbar': { height: 4, width: 6 },
-              '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.25)', borderRadius: 3 },
+              background: '#383838',
+              backdropFilter: 'blur(10px)',
+              borderRadius: { xs: 2, sm: 3 },
+              boxShadow: 'none',
+              mt: 1.2,
+              mb: 4,
+              overflow: 'hidden',
+              '&::-webkit-scrollbar': {
+                height: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#383838',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#383838',
+                borderRadius: '3px',
+              },
             }}
+            className="text-white"
           >
             <Box
               sx={{
-                width: 'max-content',
-                minWidth: '100%',
+                width: '100%',
+                overflowX: 'auto',
+                overflowY: 'auto',
+                maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'thin',
+                '&::-webkit-scrollbar': {
+                  height: '8px',
+                  width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'rgba(255,255,255,0.12)',
+                  borderRadius: '9999px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#F97316',
+                  borderRadius: '9999px',
+                },
               }}
             >
-              {/* Table Header */}
-              <Box className="league-header-row" sx={{
-                display: 'flex',
-                alignItems: 'center',
-                position: 'sticky',
-                top: 0,
-                zIndex: 12,
-                py: 1.5,
-                pl: 0,
-                pr: { xs: 2, sm: 3 },
-                backgroundColor: '#dddddd',
-                borderBottom: '1px solid rgba(0,0,0,0.12)',
-                borderTopLeftRadius: '8px',
-                borderTopRightRadius: '8px',
-              }}>
-                {/* All Positions */}
-                <Box
-                  onClick={handleAllPositionsMenuOpen}
-                  aria-haspopup="menu"
-                  aria-expanded={allPositionsMenuOpen ? 'true' : undefined}
-                  sx={{
-                    width: { xs: 170, sm: 230, md: 260 },
-                    minWidth: { xs: 170, sm: 230, md: 260 },
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    pl: { xs: 2, sm: 3 },
-                    pr: { xs: 1, sm: 1.5 },
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    position: 'sticky',
-                    left: 0,
-                    zIndex: 3,
-                    backgroundColor: '#dddddd',
-                    borderTopLeftRadius: '8px',
-                  }}>
-                  <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
-                    {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
-                  </Typography>
+              <Box
+                sx={{
+                  width: 'max-content',
+                  minWidth: '100%',
+                }}
+              >
+                {/* Table Header */}
+                <Box className="league-header-row" sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 12,
+                  py: 1.5,
+                  pl: 0,
+                  pr: { xs: 2, sm: 3 },
+                  backgroundColor: '#dddddd',
+                  borderBottom: '1px solid rgba(0,0,0,0.12)',
+                  borderTopLeftRadius: '8px',
+                  borderTopRightRadius: '8px',
+                }}>
+                  {/* Rank Header */}
                   <Box
                     sx={{
-                      ml: 1,
-                      width: 0,
-                      height: 0,
-                      borderLeft: '6px solid transparent',
-                      borderRight: '6px solid transparent',
-                      borderTop: '8px solid #000000',
-                      transform: allPositionsMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transformOrigin: 'center',
-                      transition: 'transform 0.3s ease',
+                      width: { xs: 32, sm: 40 },
+                      minWidth: { xs: 32, sm: 40 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'sticky',
+                      left: 0,
+                      zIndex: 4,
+                      backgroundColor: '#dddddd',
+                      borderTopLeftRadius: '8px',
+                      alignSelf: 'stretch',
                     }}
-                  />
-                </Box>
-                <Menu
-                  anchorEl={allPositionsMenuAnchor}
-                  open={allPositionsMenuOpen}
-                  onClose={handleAllPositionsMenuClose}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                  slotProps={{
-                    paper: {
-                      sx: {
-                        mt: 0.5,
-                        minWidth: { xs: 180, sm: 140 },
-                        backgroundColor: '#1f1f1f',
-                        border: '1px solid #e56a16',
-                        borderRadius: '8px',
-                        color: '#fff',
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem
-                    selected={selectedPosition === 'all'}
-                    onClick={() => handlePositionChange('all')}
-                    sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
                   >
-                    All Positions
-                  </MenuItem>
-                  {positionOptions.map((position) => (
+                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'center' }}>
+                      #
+                    </Typography>
+                  </Box>
+
+                  {/* All Positions */}
+                  <Box
+                    onClick={handleAllPositionsMenuOpen}
+                    aria-haspopup="menu"
+                    aria-expanded={allPositionsMenuOpen ? 'true' : undefined}
+                    sx={{
+                      width: { xs: 170, sm: 230, md: 260 },
+                      minWidth: { xs: 170, sm: 230, md: 260 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      pl: { xs: 2, sm: 3 },
+                      pr: { xs: 1, sm: 1.5 },
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      position: 'sticky',
+                      left: { xs: 32, sm: 40 },
+                      zIndex: 3,
+                      backgroundColor: '#dddddd',
+                    }}>
+                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                      {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
+                    </Typography>
+                    <Box
+                      sx={{
+                        ml: 1,
+                        width: 0,
+                        height: 0,
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderTop: '8px solid #000000',
+                        transform: allPositionsMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transformOrigin: 'center',
+                        transition: 'transform 0.3s ease',
+                      }}
+                    />
+                  </Box>
+                  <Menu
+                    anchorEl={allPositionsMenuAnchor}
+                    open={allPositionsMenuOpen}
+                    onClose={handleAllPositionsMenuClose}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          mt: 0.5,
+                          minWidth: { xs: 180, sm: 140 },
+                          backgroundColor: '#1f1f1f',
+                          border: '1px solid #e56a16',
+                          borderRadius: '8px',
+                          color: '#fff',
+                        },
+                      },
+                    }}
+                  >
                     <MenuItem
-                      key={position}
-                      selected={selectedPosition === position}
-                      onClick={() => handlePositionChange(position)}
-                      sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
+                      selected={selectedPosition === 'all'}
+                      onClick={() => handlePositionChange('all')}
+                      sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
                     >
-                      {position}
+                      All Positions
                     </MenuItem>
-                  ))}
-                </Menu>
+                    {positionOptions.map((position) => (
+                      <MenuItem
+                        key={position}
+                        selected={selectedPosition === position}
+                        onClick={() => handlePositionChange(position)}
+                        sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
+                      >
+                        {position}
+                      </MenuItem>
+                    ))}
+                  </Menu>
 
-                {/* Flexible Spacer pushing the 4 columns to the right side */}
-                <Box sx={{ flex: 1, minWidth: 10 }} />
+                  {/* Flexible Spacer pushing the 4 columns to the right side */}
+                  <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                {/* Right columns container with clean gap between headings */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
-                  {/* XP Status Header */}
-                  <Box sx={{
-                    width: { xs: 90, sm: 120, md: 135 },
-                    minWidth: { xs: 90, sm: 120, md: 135 },
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}>
-                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
-                      XP STATUS
-                    </Typography>
-                  </Box>
+                  {/* Right columns container with clean gap between headings */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                    {/* XP Status Header */}
+                    <Box sx={{
+                      width: { xs: 90, sm: 120, md: 135 },
+                      minWidth: { xs: 90, sm: 120, md: 135 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}>
+                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                        XP STATUS
+                      </Typography>
+                    </Box>
 
-                  {/* Playing Style Header */}
-                  <Box sx={{
-                    width: { xs: 100, sm: 130, md: 150 },
-                    minWidth: { xs: 100, sm: 130, md: 150 },
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}>
-                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
-                      STYLE
-                    </Typography>
-                  </Box>
+                    {/* Playing Style Header */}
+                    <Box sx={{
+                      width: { xs: 100, sm: 130, md: 150 },
+                      minWidth: { xs: 100, sm: 130, md: 150 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}>
+                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                        STYLE
+                      </Typography>
+                    </Box>
 
-                  {/* View Stats Header */}
-                  <Box sx={{
-                    width: { xs: 75, sm: 100, md: 115 },
-                    minWidth: { xs: 75, sm: 100, md: 115 },
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <Typography className="league-table-heading" sx={{ color: '#000000' }}>
-                      {isMobile ? 'STATS' : 'VIEW STATS'}
-                    </Typography>
-                  </Box>
+                    {/* View Stats Header */}
+                    <Box sx={{
+                      width: { xs: 75, sm: 100, md: 115 },
+                      minWidth: { xs: 75, sm: 100, md: 115 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                        {isMobile ? 'STATS' : 'VIEW STATS'}
+                      </Typography>
+                    </Box>
 
-                  {/* XP Points Header */}
-                  <Box sx={{
-                    width: { xs: 75, sm: 100, md: 115 },
-                    minWidth: { xs: 75, sm: 100, md: 115 },
-                    flexShrink: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
-                      CAREER xp
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              {/* Player List Content */}
-              {activeSearchTerm && filteredPlayers.length === 0 && (
-                <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', py: 4, textAlign: 'center' }}>
-                  <Typography className="empty-state-message" sx={{ color: 'white', fontWeight: 500 }}>
-                    User not found
-                  </Typography>
-                </Box>
-              )}
-              {loading ? (
-                <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', p: 1.5 }}>
-                  <AllPlayersLoadingSkeleton compact />
-                </Box>
-              ) : noLeagues ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>
-                  <Box sx={{ p: 3, textAlign: 'center', color: '#fff' }}>
-                    <Typography className="empty-state-message" variant="h6" sx={{ mb: 0.5 }}>No leagues found</Typography>
-                    <Typography className="empty-state-message" variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Create a new league or join an existing one to see players here.</Typography>
+                    {/* XP Points Header */}
+                    <Box sx={{
+                      width: { xs: 75, sm: 100, md: 115 },
+                      minWidth: { xs: 75, sm: 100, md: 115 },
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
+                        CAREER xp
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
-              ) : error ? (
-                <Typography color="error" align="center" sx={{ py: 4, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>{error}</Typography>
-              ) : (
-                <Box sx={{
-                  flex: 1,
-                  overflow: 'visible',
-                  backgroundColor: '#383838',
-                  borderRadius: '0 0 8px 8px',
-                  '&::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                  px: 0,
-                  pb: { xs: 0, sm: 1.5 },
-                  pt: 0.5,
-                }}>
-                  <List sx={{ p: 0 }}>
-                    {sortedPlayers.map((player: Player, idx: number) => {
-                      const isCurrentUser = String(player.id) === String(user?.id || '');
-                      const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
-                      const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
-                      const isLast = idx === sortedPlayers.length - 1;
-                      const playerXp = getCpPoints(player) ?? 0;
-                      const xpStatusTitle = getXPTier(playerXp).title;
 
-                      return (
-                        <ListItem
-                          key={player.id}
-                          className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
-                          onClick={() => {
-                            setSelectedPlayerId(player.id);
-                            router.push(`/player/${player.id}`);
-                          }}
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            pl: 0,
-                            pr: { xs: 2, sm: 3 },
-                            backgroundColor: rowBgColor,
-                            borderBottom: 'none',
-                            color: '#fff',
-                            cursor: 'pointer',
-                            transition: 'background-color 0.2s',
-                            '&:hover': { backgroundColor: rowBgColorHover },
-                            borderBottomLeftRadius: isLast ? '8px' : 0,
-                            borderBottomRightRadius: isLast ? '8px' : 0,
-                            minHeight: { xs: '58px', sm: '72px' },
-                          }}
-                        >
-                          {/* Avatar + Name column */}
-                          <Box sx={{
-                            width: { xs: 170, sm: 230, md: 260 },
-                            minWidth: { xs: 170, sm: 230, md: 260 },
-                            flexShrink: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            pl: { xs: 2, sm: 3 },
-                            pr: { xs: 1, sm: 1.5 },
-                            position: 'sticky',
-                            left: 0,
-                            zIndex: 2,
-                            backgroundColor: rowBgColor,
-                            boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
-                            transition: 'background-color 0.2s',
-                            alignSelf: 'stretch',
-                            '.MuiListItem-root:hover &': {
-                              backgroundColor: rowBgColorHover,
-                            },
-                            borderBottomLeftRadius: isLast ? '8px' : 0,
-                          }}>
-                            <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
-                              <Box sx={{
-                                position: 'relative',
-                                width: { xs: 38, sm: 42 },
-                                height: { xs: 38, sm: 42 },
-                                borderRadius: '50%',
-                                overflow: 'hidden',
-                                backgroundColor: 'rgba(255,255,255,0.1)'
-                              }}>
-                                {player.profilePicture ? (
-                                  <Box
-                                    component="img"
-                                    src={player.profilePicture}
-                                    alt={player.name}
-                                    sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                  />
-                                ) : (
-                                  <Box
-                                    sx={{
-                                      width: '100%',
-                                      height: '100%',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      backgroundColor: getAvatarBackgroundColor(getPlayerName(player)),
-                                      color: '#fff',
-                                      fontWeight: 800,
-                                      fontSize: { xs: 12, sm: 13 },
-                                      textTransform: 'uppercase',
-                                      letterSpacing: 0.4,
-                                    }}
-                                  >
-                                    {getAvatarInitials({
-                                      name: getPlayerName(player),
-                                      firstName: player.firstName,
-                                      lastName: player.lastName,
-                                    })}
-                                  </Box>
-                                )}
+                {/* Player List Content */}
+                {activeSearchTerm && filteredPlayers.length === 0 && (
+                  <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', py: 4, textAlign: 'center' }}>
+                    <Typography className="empty-state-message" sx={{ color: 'white', fontWeight: 500 }}>
+                      User not found
+                    </Typography>
+                  </Box>
+                )}
+                {loading ? (
+                  <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', p: 1.5 }}>
+                    <AllPlayersLoadingSkeleton compact />
+                  </Box>
+                ) : noLeagues ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>
+                    <Box sx={{ p: 3, textAlign: 'center', color: '#fff' }}>
+                      <Typography className="empty-state-message" variant="h6" sx={{ mb: 0.5 }}>No leagues found</Typography>
+                      <Typography className="empty-state-message" variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Create a new league or join an existing one to see players here.</Typography>
+                    </Box>
+                  </Box>
+                ) : error ? (
+                  <Typography color="error" align="center" sx={{ py: 4, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>{error}</Typography>
+                ) : (
+                  <Box sx={{
+                    flex: 1,
+                    overflow: 'visible',
+                    backgroundColor: '#383838',
+                    borderRadius: '0 0 8px 8px',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    px: 0,
+                    pb: { xs: 0, sm: 1.5 },
+                    pt: 0.5,
+                  }}>
+                    <List sx={{ p: 0 }}>
+                      {sortedPlayers.map((player: Player, idx: number) => {
+                        const isCurrentUser = String(player.id) === String(user?.id || '');
+                        const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
+                        const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
+                        const isLast = idx === sortedPlayers.length - 1;
+                        const playerXp = getCpPoints(player) ?? 0;
+                        const xpStatusTitle = getXPTier(playerXp).title;
+
+                        return (
+                          <ListItem
+                            key={player.id}
+                            className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
+                            onClick={() => {
+                              setSelectedPlayerId(player.id);
+                              router.push(`/player/${player.id}`);
+                            }}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              pl: 0,
+                              pr: { xs: 2, sm: 3 },
+                              backgroundColor: rowBgColor,
+                              borderBottom: 'none',
+                              color: '#fff',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.2s',
+                              '&:hover': { backgroundColor: rowBgColorHover },
+                              borderBottomLeftRadius: isLast ? '8px' : 0,
+                              borderBottomRightRadius: isLast ? '8px' : 0,
+                              minHeight: { xs: '58px', sm: '72px' },
+                            }}
+                          >
+                              {/* Rank Column */}
+                              <Box
+                                sx={{
+                                  width: { xs: 32, sm: 40 },
+                                  minWidth: { xs: 32, sm: 40 },
+                                  flexShrink: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  position: 'sticky',
+                                  left: 0,
+                                  zIndex: 3,
+                                  backgroundColor: rowBgColor,
+                                  transition: 'background-color 0.2s',
+                                  alignSelf: 'stretch',
+                                  '.MuiListItem-root:hover &': {
+                                    backgroundColor: rowBgColorHover,
+                                  },
+                                  borderBottomLeftRadius: isLast ? '8px' : 0,
+                                }}
+                              >
+                                <Typography
+                                  className="league-table-heading league-table-rank"
+                                  sx={{
+                                    color: '#ffffff',
+                                    textAlign: 'center',
+                                    fontWeight: 'bold',
+                                    fontSize: { xs: 12, sm: 14 },
+                                  }}
+                                >
+                                  {idx + 1}
+                                </Typography>
                               </Box>
-                            </ListItemAvatar>
-                            <Box sx={{ minWidth: 0, flex: 1 }}>
-                              <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {getPlayerCardStyleName(player)}
-                              </Typography>
-                              <Typography className="league-player-pos" sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
-                                {getPositionLabel(player)}
-                              </Typography>
-                            </Box>
-                          </Box>
 
-                          {/* Flexible Spacer pushing the 4 columns to the right side */}
-                          <Box sx={{ flex: 1, minWidth: 10 }} />
-
-                          {/* Right columns container with matching clean gap */}
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
-                            {/* XP Status column */}
-                            <Box sx={{
-                              width: { xs: 90, sm: 120, md: 135 },
-                              minWidth: { xs: 90, sm: 120, md: 135 },
-                              flexShrink: 0,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'flex-start',
-                            }}>
-                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                {xpStatusTitle}
-                              </Typography>
+                              {/* Avatar + Name column */}
+                              <Box sx={{
+                                width: { xs: 170, sm: 230, md: 260 },
+                                minWidth: { xs: 170, sm: 230, md: 260 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                pl: { xs: 2, sm: 3 },
+                                pr: { xs: 1, sm: 1.5 },
+                                position: 'sticky',
+                                left: { xs: 32, sm: 40 },
+                                zIndex: 2,
+                                backgroundColor: rowBgColor,
+                                boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
+                                transition: 'background-color 0.2s',
+                                alignSelf: 'stretch',
+                                '.MuiListItem-root:hover &': {
+                                  backgroundColor: rowBgColorHover,
+                                },
+                              }}>
+                              <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
+                                <Box sx={{
+                                  position: 'relative',
+                                  width: { xs: 38, sm: 42 },
+                                  height: { xs: 38, sm: 42 },
+                                  borderRadius: '50%',
+                                  overflow: 'hidden',
+                                  backgroundColor: 'rgba(255,255,255,0.1)'
+                                }}>
+                                  {player.profilePicture ? (
+                                    <Box
+                                      component="img"
+                                      src={player.profilePicture}
+                                      alt={player.name}
+                                      sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    />
+                                  ) : (
+                                    <Box
+                                      sx={{
+                                        width: '100%',
+                                        height: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: getAvatarBackgroundColor(getPlayerName(player)),
+                                        color: '#fff',
+                                        fontWeight: 800,
+                                        fontSize: { xs: 12, sm: 13 },
+                                        textTransform: 'uppercase',
+                                        letterSpacing: 0.4,
+                                      }}
+                                    >
+                                      {getAvatarInitials({
+                                        name: getPlayerName(player),
+                                        firstName: player.firstName,
+                                        lastName: player.lastName,
+                                      })}
+                                    </Box>
+                                  )}
+                                </Box>
+                              </ListItemAvatar>
+                              <Box sx={{ minWidth: 0, flex: 1 }}>
+                                <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {getPlayerCardStyleName(player)}
+                                </Typography>
+                                <Typography className="league-player-pos" sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                                  {getPositionLabel(player)}
+                                </Typography>
+                              </Box>
                             </Box>
 
-                            {/* Playing Style column */}
-                            <Box sx={{
-                              width: { xs: 100, sm: 130, md: 150 },
-                              minWidth: { xs: 100, sm: 130, md: 150 },
-                              flexShrink: 0,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'flex-start',
-                            }}>
-                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                {getPlayingStyle(player)}
-                              </Typography>
-                            </Box>
+                            {/* Flexible Spacer pushing the 4 columns to the right side */}
+                            <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                            {/* View Stats column */}
-                            <Box sx={{
-                              width: { xs: 75, sm: 100, md: 115 },
-                              minWidth: { xs: 75, sm: 100, md: 115 },
-                              flexShrink: 0,
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}>
-                              <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
-                            </Box>
+                            {/* Right columns container with matching clean gap */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
+                              {/* XP Status column */}
+                              <Box sx={{
+                                width: { xs: 90, sm: 120, md: 135 },
+                                minWidth: { xs: 90, sm: 120, md: 135 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                              }}>
+                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                  {xpStatusTitle}
+                                </Typography>
+                              </Box>
 
-                            {/* XP Points column */}
-                            <Box sx={{
-                              width: { xs: 75, sm: 100, md: 115 },
-                              minWidth: { xs: 75, sm: 100, md: 115 },
-                              flexShrink: 0,
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                            }}>
-                              <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
-                                {playerXp.toLocaleString()}
-                              </Typography>
+                              {/* Playing Style column */}
+                              <Box sx={{
+                                width: { xs: 100, sm: 130, md: 150 },
+                                minWidth: { xs: 100, sm: 130, md: 150 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                              }}>
+                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                  {getPlayingStyle(player)}
+                                </Typography>
+                              </Box>
+
+                              {/* View Stats column */}
+                              <Box sx={{
+                                width: { xs: 75, sm: 100, md: 115 },
+                                minWidth: { xs: 75, sm: 100, md: 115 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}>
+                                <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
+                              </Box>
+
+                              {/* XP Points column */}
+                              <Box sx={{
+                                width: { xs: 75, sm: 100, md: 115 },
+                                minWidth: { xs: 75, sm: 100, md: 115 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}>
+                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
+                                  {playerXp.toLocaleString()}
+                                </Typography>
+                              </Box>
                             </Box>
-                          </Box>
-                        </ListItem>
-                      );
-                    })}
-                  </List>
-                </Box>
-              )}
+                          </ListItem>
+                        );
+                      })}
+                    </List>
+                  </Box>
+                )}
+              </Box>
             </Box>
-          </Box>
+          </Card>
         </Container>
       </Box>
     </>

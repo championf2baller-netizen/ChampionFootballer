@@ -693,6 +693,7 @@ const BadgeCard = ({ id, title, description, image, color, count, unlocked, prog
           ? 'linear-gradient(360deg, #00A77F -0.04%, #004131 98.75%)'
           : '#747474',
         cursor: onOpen ? 'pointer' : 'default',
+        mt:{xs:2, md:0},
       }}
       onClick={onOpen}
       role="button"

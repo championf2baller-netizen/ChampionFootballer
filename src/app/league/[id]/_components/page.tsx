@@ -3853,13 +3853,13 @@ export default function LeagueDetailPage() {
                 minHeight: '100vh',
                 fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                 fontWeight: 700,
-                // py: { xs: 2, md: 4 },
-                // px: { xs: 1, md: 0 },
                 background: 'transparent',
                 backgroundAttachment: 'fixed',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 overflowX: 'hidden',
+                px: { xs: 1, sm: 2, md: 3 },
+                py: { xs: 1.5, md: 0 },
             }}
         >
             {/* <Box sx={{ ml:5}}> */}
@@ -4369,7 +4369,7 @@ export default function LeagueDetailPage() {
                                         overflowY: 'hidden',
                                         px: 1,
                                         // mx: 'aut90100o',
-                                        mt: 2,
+                                        mt: 3,
 
                                     }}
                                 >
@@ -4388,7 +4388,7 @@ export default function LeagueDetailPage() {
                                                 textTransform: 'none',
                                                 fontWeight: 600,
                                                 px: { xs: 1, sm: 2.5, md: 4.5 },
-                                                py: 0.5,
+                                                py: { xs: 1.5, md: 0.5 },
                                                 minWidth: { xs: '50%', sm: 'auto' },
                                                 whiteSpace: { xs: 'normal', sm: 'nowrap' },
                                                 textAlign: 'center',
@@ -4602,19 +4602,48 @@ export default function LeagueDetailPage() {
                             // backdropFilter: 'blur(10px)'
                         }}>
                             {section === 'members' && (
-                                <Box sx={{ width: '100%', mx: 'auto', mt: 1.2, mb: 4, }}>
-                                    <Box
-                                        sx={{
-                                            width: '100%',
-                                            overflowX: 'auto',
-                                            overflowY: 'auto',
-                                            maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
-                                            WebkitOverflowScrolling: 'touch',
-                                            '&::-webkit-scrollbar': { height: 6, width: 6 },
-                                            '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.05)', borderRadius: 3 },
-                                            '&::-webkit-scrollbar-thumb': { background: '#F97316', borderRadius: 3 },
-                                        }}
-                                    >
+                                <div className="w-full mx-auto">
+                                    <Card sx={{
+                                        background: '#383838',
+                                        backdropFilter: 'blur(10px)',
+                                        borderRadius: { xs: 2, sm: 3 },
+                                        boxShadow: 'none',
+                                        mt: 1.2,
+                                        mb: 4,
+                                        overflow: 'hidden',
+                                        '&::-webkit-scrollbar': {
+                                            height: '6px',
+                                        },
+                                        '&::-webkit-scrollbar-track': {
+                                            background: '#383838',
+                                        },
+                                        '&::-webkit-scrollbar-thumb': {
+                                            background: '#383838',
+                                            borderRadius: '3px',
+                                        },
+                                    }} className="text-white">
+                                        <Box
+                                            sx={{
+                                                width: '100%',
+                                                overflowX: 'auto',
+                                                overflowY: 'auto',
+                                                maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+                                                WebkitOverflowScrolling: 'touch',
+                                                scrollbarWidth: 'thin',
+                                                '&::-webkit-scrollbar': {
+                                                    height: '8px',
+                                                    width: '8px',
+                                                },
+                                                '&::-webkit-scrollbar-track': {
+                                                    background: 'rgba(255,255,255,0.12)',
+                                                    borderRadius: '9999px',
+                                                },
+                                                '&::-webkit-scrollbar-thumb': {
+                                                    background: '#F97316',
+                                                    borderRadius: '9999px',
+                                                },
+                                            }}
+                                        >
                                         <Box sx={{ width: 'max-content', minWidth: '100%', borderRadius: '8px', overflow: 'visible' }}>
                                             {/* Table Header */}
                                             <Box className="league-header-row" sx={{
@@ -4631,6 +4660,27 @@ export default function LeagueDetailPage() {
                                                 borderTopLeftRadius: '8px',
                                                 borderTopRightRadius: '8px',
                                             }}>
+                                                <Box
+                                                                    sx={{
+                                                                      width: { xs: 32, sm: 40 },
+                                                                      minWidth: { xs: 32, sm: 40 },
+                                                                      flexShrink: 0,
+                                                                      display: 'flex',
+                                                                      alignItems: 'center',
+                                                                      justifyContent: 'center',
+                                                                      position: 'sticky',
+                                                                      left: 0,
+                                                                      zIndex: 4,
+                                                                      backgroundColor: '#dddddd',
+                                                                      borderTopLeftRadius: '8px',
+                                                                      alignSelf: 'stretch',
+                                                                    }}
+                                                                  >
+                                                                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'center' }}>
+                                                                      #
+                                                                    </Typography>
+                                                                  </Box>
+                                                
                                                 {/* All Positions Dropdown */}
                                                 <Box
                                                     onClick={handleMemberPositionMenuOpen}
@@ -4647,10 +4697,9 @@ export default function LeagueDetailPage() {
                                                         cursor: 'pointer',
                                                         userSelect: 'none',
                                                         position: 'sticky',
-                                                        left: 0,
+                                                        left: { xs: 32, sm: 40 },
                                                         zIndex: 3,
                                                         backgroundColor: '#dddddd',
-                                                        borderTopLeftRadius: '8px',
                                                     }}>
                                                     <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
                                                         {selectedMemberPosition === 'all' ? 'ALL POSITIONS' : selectedMemberPosition.toUpperCase()}
@@ -4812,6 +4861,40 @@ export default function LeagueDetailPage() {
                                                                     minHeight: { xs: '58px', sm: '72px' },
                                                                 }}
                                                             >
+
+                                                                {/* Rank Column */}
+                                                                    <Box
+                                                                        sx={{
+                                                                            width: { xs: 32, sm: 40 },
+                                                                            minWidth: { xs: 32, sm: 40 },
+                                                                            flexShrink: 0,
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            position: 'sticky',
+                                                                            left: 0,
+                                                                            zIndex: 3,
+                                                                            backgroundColor: rowBgColor,
+                                                                            transition: 'background-color 0.2s',
+                                                                            alignSelf: 'stretch',
+                                                                            '.MuiListItem-root:hover &': {
+                                                                                backgroundColor: rowBgColorHover,
+                                                                            },
+                                                                            borderBottomLeftRadius: isLast ? '8px' : 0,
+                                                                        }}
+                                                                    >
+                                                                        <Typography
+                                                                            className="league-table-heading league-table-rank"
+                                                                            sx={{
+                                                                                color: '#ffffff',
+                                                                                textAlign: 'center',
+                                                                                fontWeight: 'bold',
+                                                                                fontSize: { xs: 12, sm: 14 },
+                                                                            }}
+                                                                        >
+                                                                            {idx + 1}
+                                                                        </Typography>
+                                                                    </Box>
                                                                 {/* Avatar + Name column */}
                                                                 <Box sx={{
                                                                     width: { xs: 170, sm: 230, md: 260 },
@@ -4822,7 +4905,7 @@ export default function LeagueDetailPage() {
                                                                     pl: { xs: 2, sm: 3 },
                                                                     pr: { xs: 1, sm: 1.5 },
                                                                     position: 'sticky',
-                                                                    left: 0,
+                                                                    left: { xs: 32, sm: 40 },
                                                                     zIndex: 2,
                                                                     backgroundColor: rowBgColor,
                                                                     boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
@@ -4831,7 +4914,6 @@ export default function LeagueDetailPage() {
                                                                     '.MuiListItem-root:hover &': {
                                                                         backgroundColor: rowBgColorHover,
                                                                     },
-                                                                    borderBottomLeftRadius: isLast ? '8px' : 0,
                                                                 }}>
                                                                     <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
                                                                         <Box sx={{
@@ -4946,9 +5028,10 @@ export default function LeagueDetailPage() {
                                             </Box>
                                         </Box>
                                     </Box>
-                                </Box>
+                                </Card>
+                            </div>
 
-                            )}
+                        )}
                             {section === 'matches' && (
                                 // Fixtures Section - Upcoming Matches
                                 <Box sx={{

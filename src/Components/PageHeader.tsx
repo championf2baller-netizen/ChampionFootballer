@@ -28,7 +28,7 @@ export type PageHeaderProps = {
 
 const baseOuterSx: SystemStyleObject<Theme> = {
   mt: 0,
-  mb: 4,
+  mb: { xs: 0.5, md: 4 },
   width: '100vw',
   position: 'relative',
   left: '50%',
@@ -38,7 +38,8 @@ const baseOuterSx: SystemStyleObject<Theme> = {
 
 const basePaperSx: SystemStyleObject<Theme> = {
   px: 0,
-  py: { xs: 0.5, md: 2 },
+  pt: { xs: 0, md: 3 },
+  pb: 0,
   bgcolor: '#0E0E0E',
   color: 'white',
   minHeight: 'auto',
@@ -53,12 +54,12 @@ const baseContainerSx: SystemStyleObject<Theme> = {
   justifyContent: 'center',
   width: '100%',
   position: 'relative',
-  mt: { xs: 1.5, sm: 2, md: 2 },
+  mt: 0,
 };
 
 const baseTitleBoxSx: SystemStyleObject<Theme> = {
   position: 'relative',
-  display: 'flex',
+  display: { xs: 'none', md: 'flex' },
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
@@ -66,7 +67,7 @@ const baseTitleBoxSx: SystemStyleObject<Theme> = {
   px: { xs: 1.5, sm: 2, md: 0 },
   gap: 0.5,
   mt: 0,
-  minHeight: { xs: '56px', sm: '72px', md: '72x' },
+  minHeight: { xs: 0, md: '84px' },
 };
 
 const baseTitleRowSx: SystemStyleObject<Theme> = {
@@ -86,19 +87,20 @@ const baseTitleSx: SystemStyleObject<Theme> = {
   textAlign: 'center',
   textTransform: 'uppercase',
   letterSpacing: '0px',
+  m: 0,
 };
 
 const baseDividerSx: SystemStyleObject<Theme> = {
   height: 'var(--header-divider-height, 3px)',
   minHeight: '3px',
   bgcolor: 'var(--header-divider-color, #e16419)',
-  mt: { xs: 2, sm: 3, md: 4 },
-  mb: { xs: 1.25, sm: 1.5, md: 1.5 },
+  mt: { xs: 0, md: 3 },
+  mb: { xs: 0, md: 2 },
   width: '100vw',
   position: 'relative',
   left: '50%',
   transform: 'translateX(-50%)',
-  display: 'block',
+  display: { xs: 'none', md: 'block' },
 };
 
 export default function PageHeader({
@@ -117,9 +119,18 @@ export default function PageHeader({
     ? baseOuterSx
     : {
         mt: 0,
-        mb: 4,
+        mb: { xs: 0.5, md: 4 },
         width: '100%',
         bgcolor: '#0E0E0E',
+      };
+
+  const dividerStyle: SystemStyleObject<Theme> = fullBleed
+    ? baseDividerSx
+    : {
+        ...baseDividerSx,
+        width: '100%',
+        left: 'auto',
+        transform: 'none',
       };
 
   return (
@@ -139,18 +150,18 @@ export default function PageHeader({
               {titleRight}
             </Box>
             {subtitle && (
-              <Box sx={{ mt: 0.5 }}>
+              <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {subtitle}
               </Box>
             )}
           </Box>
 
-          {/* Orange divider under header */}
-          <Box sx={[baseDividerSx, ...toSxArray(dividerSx)]} />
+          {/* Orange divider under header - symmetrical mt and mb */}
+          <Box sx={[dividerStyle, ...toSxArray(dividerSx)]} />
 
           {/* Controls / filters / subheader children */}
           {children && (
-            <Box sx={{ width: '100%', mt: 0 }}>
+            <Box sx={{ width: '100%', mt: 0, pb: { xs: 0, md: 3 } }}>
               {children}
             </Box>
           )}
