@@ -63,6 +63,7 @@ import Cookies from 'js-cookie';
 import { getAuthToken } from '@/lib/tokenManager';
 import { playerAPI } from '@/lib/api';
 import CloseButton from '@/Components/CloseButton';
+import PageHeader from '@/Components/PageHeader';
 import PlayerCareerLoadingSkeleton from '@/Components/loading/PlayerCareerLoadingSkeleton';
 import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 
@@ -2647,69 +2648,8 @@ export default function CareerPage() {
         }}
       >
         <Box sx={{ maxWidth: '100%', mx: 'auto', overflowX: 'visible' }}>
-          {/* Dark Header Section - Full Width */}
-          <Box sx={{
-            mt: 0,
-            mb: 4,
-            width: '100%',
-            maxWidth: '100%',
-            overflow: 'visible',
-            background: '#0e0e0e',
-            position: 'relative',
-            // zIndex: 1400,
-          }}>
-            <Paper sx={{
-              px: 0,
-              py: { xs: 1, md: 0.5 },
-              background: '#0e0e0e',
-              color: 'white',
-              boxShadow: 'none',
-              minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
-              overflow: 'visible',
-              position: 'relative',
-              zIndex: 10,
-            }}>
-
-              {/* Centered Title */}
-              <Box sx={{
-                display: { xs: 'none', md: 'flex' },
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                pt: { xs: 1, md: 2 },
-                pb: 2,
-              }}>
-                <Typography
-                  variant="h2"
-                  component="h1"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#fff',
-                    fontSize: { xs: '32px', sm: '42px', md: '55px' },
-                    textTransform: 'uppercase',
-                    letterSpacing: 0,
-                    textAlign: 'center',
-                    fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                    lineHeight: '100%',
-                  }}
-                >
-                  {dashboardTitle}
-                </Typography>
-              </Box>
-
-              {/* Orange divider under header */}
-              <Box
-                sx={{
-                  display: { xs: 'none', md: 'block' },
-                  height: 'var(--header-divider-height)',
-                  bgcolor: 'var(--header-divider-color)',
-                  mt: { xs: 1.5, md: 2 },
-                  width: '100vw',
-                  position: 'relative',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                }}
-              />
+          {/* Unified PageHeader */}
+          <PageHeader title={dashboardTitle}>
 
 
               {/* Filters Section */}
@@ -3478,8 +3418,7 @@ export default function CareerPage() {
                   </button>
                 </Box>
               </Box>
-            </Paper>
-          </Box>
+          </PageHeader>
 
           {/* Main Content */}
           <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: 2, md: 0 }, position: 'relative' }}>

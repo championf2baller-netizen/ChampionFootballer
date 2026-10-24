@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { SystemStyleObject } from '@mui/system';
 
@@ -13,23 +13,68 @@ const toSxArray = (value?: SxProps<Theme>): SxArrayItem[] => {
   return Array.isArray(value) ? (value as SxArrayItem[]) : [value as SxArrayItem];
 };
 
-type PageHeaderProps = {
-  title: string;
+export type PageHeaderProps = {
+  title: React.ReactNode;
   children?: React.ReactNode;
   sx?: SxProps<Theme>;
   titleSx?: SxProps<Theme>;
   titleRowSx?: SxProps<Theme>;
   titleLeft?: React.ReactNode;
   titleRight?: React.ReactNode;
+  subtitle?: React.ReactNode;
   dividerSx?: SxProps<Theme>;
   fullBleed?: boolean;
 };
 
-const baseHeaderSx: SystemStyleObject<Theme> = {
-  mb: { xs: 0.5, md: 5 },
+const baseOuterSx: SystemStyleObject<Theme> = {
+  mt: 0,
+  mb: 4,
+  width: '100vw',
+  position: 'relative',
+  left: '50%',
+  transform: 'translateX(-50%)',
   bgcolor: '#0E0E0E',
-  p: { xs: 0.5, md: 3 },
-  minHeight: { xs: 'auto', md: 'auto' },
+};
+
+const basePaperSx: SystemStyleObject<Theme> = {
+  px: 0,
+  py: { xs: 0.5, md: 2 },
+  bgcolor: '#0E0E0E',
+  color: 'white',
+  minHeight: 'auto',
+  borderRadius: 0,
+  boxShadow: 'none',
+};
+
+const baseContainerSx: SystemStyleObject<Theme> = {
+  display: 'flex',
+  alignItems: 'center',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  width: '100%',
+  position: 'relative',
+  mt: { xs: 1.5, sm: 2, md: 2 },
+};
+
+const baseTitleBoxSx: SystemStyleObject<Theme> = {
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  px: { xs: 1.5, sm: 2, md: 0 },
+  gap: 0.5,
+  mt: 0,
+  minHeight: { xs: '56px', sm: '72px', md: '72x' },
+};
+
+const baseTitleRowSx: SystemStyleObject<Theme> = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: { xs: 0.8, sm: 1, md: 1.25 },
+  textAlign: 'center',
 };
 
 const baseTitleSx: SystemStyleObject<Theme> = {
@@ -37,23 +82,23 @@ const baseTitleSx: SystemStyleObject<Theme> = {
   fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
   fontWeight: 700,
   fontSize: { xs: '32px', sm: '42px', md: '55px' },
-  lineHeight: 1.1,
+  lineHeight: { xs: 1, sm: 1.1 },
   textAlign: 'center',
   textTransform: 'uppercase',
   letterSpacing: '0px',
-  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-  pt: { xs: 1, md: 2 },
-  pb: { xs: 3, md: 6 },
 };
 
 const baseDividerSx: SystemStyleObject<Theme> = {
+  height: 'var(--header-divider-height, 3px)',
+  minHeight: '3px',
+  bgcolor: 'var(--header-divider-color, #e16419)',
+  mt: { xs: 2, sm: 3, md: 4 },
+  mb: { xs: 1.25, sm: 1.5, md: 1.5 },
   width: '100vw',
   position: 'relative',
   left: '50%',
   transform: 'translateX(-50%)',
-  height: 'var(--header-divider-height)',
-  background: 'var(--header-divider-color)',
-  mb: { xs: 0.5, md: 2 },
+  display: 'block',
 };
 
 export default function PageHeader({
@@ -64,58 +109,53 @@ export default function PageHeader({
   titleRowSx,
   titleLeft,
   titleRight,
+  subtitle,
   dividerSx,
   fullBleed = true,
 }: PageHeaderProps) {
-  const fullBleedSx: SystemStyleObject<Theme> = fullBleed
-    ? {
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        mx: 0,
-      }
-    : {};
-  const dividerBaseSx: SystemStyleObject<Theme> = fullBleed
-    ? {
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        height: 'var(--header-divider-height)',
-        background: 'var(--header-divider-color)',
-        mb: { xs: 2, md: 2 },
-      }
-    : baseDividerSx;
-  const headerSx: SxProps<Theme> = [baseHeaderSx, fullBleedSx, ...toSxArray(sx)];
-  const headerTitleSx: SxProps<Theme> = [baseTitleSx, ...toSxArray(titleSx)];
-  const headerTitleRowSx: SxProps<Theme> = [
-    {
-      display: { xs: 'none', md: 'flex' },
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: { xs: 1, md: 1.25 },
-    },
-    ...toSxArray(titleRowSx),
-  ];
-  const headerDividerSx: SxProps<Theme> = [
-    dividerBaseSx,
-    { display: { xs: 'none', md: 'block' } },
-    ...toSxArray(dividerSx)
-  ];
+  const outerSx: SystemStyleObject<Theme> = fullBleed
+    ? baseOuterSx
+    : {
+        mt: 0,
+        mb: 4,
+        width: '100%',
+        bgcolor: '#0E0E0E',
+      };
+
   return (
-    <Box sx={headerSx}>
-      <Box sx={headerTitleRowSx}>
-        {titleLeft}
-        <Typography variant="h3" sx={headerTitleSx}>
-          {title}
-        </Typography>
-        {titleRight}
-      </Box>
-      <Box sx={headerDividerSx} />
-      {children}
+    <Box sx={[outerSx, ...toSxArray(sx)]}>
+      <Paper sx={basePaperSx}>
+        <Box sx={baseContainerSx}>
+          <Box sx={baseTitleBoxSx}>
+            <Box sx={[baseTitleRowSx, ...toSxArray(titleRowSx)]}>
+              {titleLeft}
+              {typeof title === 'string' ? (
+                <Typography variant="h3" sx={[baseTitleSx, ...toSxArray(titleSx)]}>
+                  {title}
+                </Typography>
+              ) : (
+                title
+              )}
+              {titleRight}
+            </Box>
+            {subtitle && (
+              <Box sx={{ mt: 0.5 }}>
+                {subtitle}
+              </Box>
+            )}
+          </Box>
+
+          {/* Orange divider under header */}
+          <Box sx={[baseDividerSx, ...toSxArray(dividerSx)]} />
+
+          {/* Controls / filters / subheader children */}
+          {children && (
+            <Box sx={{ width: '100%', mt: 0 }}>
+              {children}
+            </Box>
+          )}
+        </Box>
+      </Paper>
     </Box>
   );
 }

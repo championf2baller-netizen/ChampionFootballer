@@ -1035,41 +1035,19 @@ export default function RewardsPage() {
   return (
     <Box sx={{ minHeight: '160vh', backgroundColor: '#0E0E0E', overflowX: 'hidden' }}>
       {/* Header */}
-      <Box
-        sx={{
-          width: '100vw',
-          position: 'relative',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
-      >
-        <PageHeader
-          title="Rewards"
-          fullBleed={false}
-          sx={{ mb: { xs: 2, md: 3 }, mx: 0 }}
-          titleRowSx={{ gap: { xs: 1.25, md: 1.75 } }}
-          titleLeft={(
-            <Box sx={{ mt: { xs: -3, md: -6 }, display: 'flex', alignItems: 'center' }}>
-              <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride="#ffc000" />
-            </Box>
-          )}
-          titleRight={(
-            <Box sx={{ mt: { xs: -3, md: -6 }, display: 'flex', alignItems: 'center' }}>
-              <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride="#ffc000" />
-            </Box>
-          )}
-          titleSx={{
-            // Adjust this padding to move the divider line up/down
-            pb: { xs: 4, md: 8 }
-          }}
-          dividerSx={{
-            width: '100vw',
-            position: 'relative',
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      </Box>
+      <PageHeader
+        title="Rewards"
+        titleLeft={(
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride="#ffc000" />
+          </Box>
+        )}
+        titleRight={(
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride="#ffc000" />
+          </Box>
+        )}
+      />
 
       <Box sx={{ px: { xs: 2, sm: 3, md: 5, lg: 11.2 }, pb: 4, mt: -0.5 }}>
         {/* <Typography

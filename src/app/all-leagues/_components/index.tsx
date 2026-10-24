@@ -32,6 +32,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Slide, { SlideProps } from '@mui/material/Slide';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { TokenManager } from '@/lib/tokenManager';
+import PageHeader from '@/Components/PageHeader';
 
 
 // Lazy load heavy components
@@ -5585,65 +5586,8 @@ function AllLeagues() {
           transition: all 0.2s ease;
         }
       `}</style>
-      <Container maxWidth={false} disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
-
-        {/* <Button
-          startIcon={<ArrowLeft />}
-          onClick={handleBackToAllLeagues}
-          sx={{
-            mb: 2, color: 'white', backgroundColor: '#388e3c',
-            '&:hover': { backgroundColor: '#388e3c' ,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            },
-          }}
-        >
-          Back to Dashboard
-        </Button> */}
         {/* Close Button */}
-        <Box
-          sx={{
-            mb: { xs: 1.5, md: 5 },
-            bgcolor: '#0E0E0E',
-            p: { xs: 1.5, md: 3 },
-            minHeight: { xs: 'auto', md: 'auto' },
-            width: '100vw',
-            position: 'relative',
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        >
-          {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: { xs: 3, md: 4 } }}> */}
-          <Typography variant="h3" sx={{
-            display: { xs: 'none', md: 'block' },
-            color: 'white',
-            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-            fontWeight: 700,
-            fontSize: { xs: '32px', sm: '42px', md: '55px' },
-            textAlign: 'center',
-            textTransform: 'uppercase',
-            letterSpacing: '0px',
-            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-            pt: { xs: 1, md: 2 },
-            pb: { xs: 3, md: 6 }
-          }}
-            className='all-leagues-heading'
-          >
-            {getCms('page_all_leagues_heading', 'LEAGUES')}
-          </Typography>
-
-          {/* Divider line below heading */}
-          <Box sx={{
-            display: { xs: 'none', md: 'block' },
-            width: '100vw',
-            position: 'relative',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            height: 'var(--header-divider-height)',
-            background: 'var(--header-divider-color)',
-            mb: { xs: 2, md: 2 },
-          }} />
-
-          {/* </Box> */}
+        <PageHeader title={getCms('page_all_leagues_heading', 'LEAGUES')}>
           {/* Create/Join League Section */}
           {/* Single unified inline layout */}
           <Box
@@ -6118,7 +6062,9 @@ function AllLeagues() {
               </Button>
             </Box>
           </Box>
-        </Box>
+        </PageHeader>
+
+        <Container maxWidth={false} disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
 
         {/* Leagues List - Card Format */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7, mt: 4 }}>

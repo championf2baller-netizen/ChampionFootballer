@@ -2298,8 +2298,6 @@ export default function AllMatches() {
             `}</style>
             <PageHeader
                 title={getCms('page_all_matches_heading', 'Matches')}
-                fullBleed={false}
-                sx={{ mb: 4 }}
             >
                 <Box
                         sx={{

@@ -373,14 +373,6 @@ export default function WorldRankingTable() {
       {/* ────────── HEADER ────────── */}
       <PageHeader
         title="WORLD RANKING"
-        fullBleed={false}
-        sx={{ mb: { xs: 1.2, md: 4 } }}
-        dividerSx={{
-          width: '100vw',
-          position: 'relative',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
       >
         <Box sx={{
           display: 'flex',

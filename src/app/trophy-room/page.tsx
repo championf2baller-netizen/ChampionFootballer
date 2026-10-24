@@ -51,6 +51,7 @@ const PlayerCard = dynamic(() => import('@/Components/playercard/playercard').th
 });
 import XPStarMilestoneCard from '@/Components/XPStarMilestoneCard';
 import { formatPlayerDisplayName } from '@/lib/playerIdentity';
+import PageHeader from '@/Components/PageHeader';
 
 // import { achievementsAPI } from '@/lib/api';
 
@@ -2616,60 +2617,12 @@ export default function GlobalTrophyRoom() {
           transition: all 0.2s ease;
         }
       `}</style>
-      {/* Full-Width Header Section */}
-      <Box sx={{
-        mt: 0,
-        mb: { xs: 4, sm: 4, md: 4 },
-      }}>
-        {/* Orange top border */}
-        {/* <Box sx={{ height: '4px', bgcolor: '#E56A16', width: '100%' }} /> */}
-
-        <Paper sx={{
-          p: { xs: 1.5, md: 3 },
-          background: '#0e0e0e',
-          color: 'white',
-          borderRadius: 0,
-          minHeight: { xs: 'auto', md: 'auto' },
-          width: '100vw',
-          position: 'relative',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}>
-          <Typography
-            variant="h3"
-            className="all-leagues-heading"
-            sx={{
-              display: { xs: 'none', sm: 'block' },
-              color: 'white',
-              fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-              fontWeight: 700,
-              fontSize: { xs: '32px', sm: '42px', md: '55px' },
-              lineHeight: 1.1,
-              textAlign: 'center',
-              textTransform: 'uppercase',
-              letterSpacing: '0px',
-              textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              pt: { xs: 1, md: 2 },
-              pb: { xs: 3, md: 3 },
-            }}
-          >
-            {filter === 'my' && user
-              ? formatPlayerDisplayName(user.firstName, user.lastName)
-              : getCms('page_trophy_room_heading', 'TROPHY ROOM')}
-          </Typography>
-
-          {/* Orange divider */}
-          <Box sx={{
-            display: { xs: 'none', sm: 'block' },
-            height: 'var(--header-divider-height)',
-            bgcolor: 'var(--header-divider-color)',
-            width: '100vw',
-            position: 'relative',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            mb: { xs: 2, md: 2 },
-            mt: 0
-          }} />
+      {/* Unified PageHeader */}
+      <PageHeader
+        title={filter === 'my' && user
+          ? formatPlayerDisplayName(user.firstName, user.lastName)
+          : getCms('page_trophy_room_heading', 'TROPHY ROOM')}
+      >
 
           {filter !== 'my' && (
             <Box
@@ -3270,10 +3223,8 @@ export default function GlobalTrophyRoom() {
                 </Button>
               </Box>
             </Box>
-
           </Box>
-        </Paper>
-      </Box>
+      </PageHeader>
 
 
       {filter === 'my' ? (

@@ -50,6 +50,7 @@ import XPStarMilestoneCard, { XP_TIERS, getXPTier } from '@/Components/XPStarMil
 import PlayerProfileLoadingSkeleton from '@/Components/loading/PlayerProfileLoadingSkeleton';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
+import PageHeader from '@/Components/PageHeader';
 
 import PlayerOverviewContainer from './PlayerOverviewContainer';
 
@@ -2220,66 +2221,7 @@ export default function PlayerStatsPage() {
                 }
             `}</style>
             {/* Header Section */}
-            <Box sx={{
-                mt: 0,
-                mb: { sm: 0, xs: 0, md: 4 },
-                width: '100vw',
-                position: 'relative',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: '#0e0e0e',
-                zIndex: 20,
-            }}>
-                <Paper sx={{
-                    px: 0,
-                    py: { xs: 2, md: 3.5 },
-                    background: '#0E0E0E',
-                    color: 'white',
-                    boxShadow: 'none',
-                    minHeight: { xs: 'var(--header-mobile-min-height)', md: 'auto' },
-                    position: 'relative',
-                    zIndex: 10,
-                }}>
-                    {/* Centered Title */}
-                    <Box sx={{
-                        display: { xs: 'none', md: 'flex' },
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pt: { xs: 1, md: 2 },
-                        pb: 2,
-                    }}>
-                        <Typography
-                            variant="h2"
-                            component="h1"
-                            sx={{
-                                fontWeight: 700,
-                                color: '#fff',
-                                fontSize: { xs: '32px', sm: '42px', md: '55px' },
-                                textTransform: 'uppercase',
-                                letterSpacing: 0,
-                                textAlign: 'center',
-                                fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                lineHeight: '100%',
-                            }}
-                        >
-                            {getCms('page_player_stats_heading', 'PLAYER STATS')}
-                        </Typography>
-                    </Box>
-
-                    {/* Orange divider under header */}
-                    <Box
-                        sx={{
-                            display: { xs: 'none', md: 'block' },
-                            height: 'var(--header-divider-height)',
-                            bgcolor: 'var(--header-divider-color)',
-                            mt: { xs: 2, md: 4.5 },
-                            width: '100vw',
-                            position: 'relative',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                        }}
-                    />
+            <PageHeader title={getCms('page_player_stats_heading', 'PLAYER STATS')}>
 
                     {/* Search and Filters Section */}
                     <Box sx={{
@@ -2289,7 +2231,8 @@ export default function PlayerStatsPage() {
                         justifyContent: 'space-between',
                         gap: { xs: 2, md: 3 },
                         px: { xs: 2, md: 4 },
-                        py: { xs: 1.5, md: 1.3 },
+                        pt: { xs: 0.5, md: 0.5 },
+                        pb: { xs: 1.5, md: 1.3 },
                         maxWidth: '1230px',
                         mx: 'auto',
                         position: 'relative',
@@ -3029,8 +2972,7 @@ export default function PlayerStatsPage() {
                             </Button>
                         </Box>
                     </Box>
-                </Paper>
-            </Box>
+            </PageHeader>
 
             <PlayerOverviewContainer
                 loading={loading}
