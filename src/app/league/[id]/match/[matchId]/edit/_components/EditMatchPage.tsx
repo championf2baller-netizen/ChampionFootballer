@@ -2180,13 +2180,105 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#fff', mb: 2, fontSize: { xs: '0.75rem', sm: '1rem' }, textAlign: 'center' }}>
                   {/* Click on a player from the home or away team to switch or remove players. */}
-                  Pick Your Players From the Dropdown And Set Up Your Home And Away Teams. Tap On Any Player To Switch Them Between Teams And Perfect Your Line-Up
+                  Pick your players from the dropdown and set up your home and away teams. Tap on any player to switch them between teams and perfect your line-up.
                 </Typography>
                 {/* Action Buttons */}
-                <Box sx={{ display: 'flex', gap: 1, mb: 2.5, flexWrap: 'wrap', justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' } }}>
-                  <Button startIcon={<Image src={GuestIcon} alt="Guest" width={18} height={18} />} variant='contained' onClick={() => setGuestDialogOpen(true)} sx={{ width: { xs: '100%', sm: 'auto' }, background: 'linear-gradient(135deg,#e56a16,#cf2326)', color: 'white', fontWeight: 600, borderRadius: 3, px: { xs: 1, sm: 2 }, fontSize: { xs: '0.7rem', sm: '0.875rem' }, '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)', transform: 'translateY(-2px)' }, transition: 'all .25s ease' }}>Add Guest</Button>
-                  <Button startIcon={<Scale size={18} />} variant="outlined" onClick={balanceTeams} disabled={xpLoading || isBalancing || (homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2)} sx={{ width: { xs: '100%', sm: 'auto' }, borderColor: '#1a8a6d', color: '#1a8a6d', fontWeight: 600, borderRadius: 3, px: { xs: 1, sm: 2 }, fontSize: { xs: '0.7rem', sm: '0.875rem' }, '&:hover': { borderColor: '#157a62', backgroundColor: 'rgba(26, 138, 109, 0.1)' } }}>{xpLoading || isBalancing ? 'Balancing...' : 'Balance Teams'}</Button>
-                  <Button startIcon={<Shuffle size={18} />} variant="outlined" onClick={shuffleTeams} disabled={homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2} sx={{ width: { xs: '100%', sm: 'auto' }, borderColor: '#e56a16', color: '#e56a16', fontWeight: 600, borderRadius: 3, px: { xs: 1, sm: 2 }, fontSize: { xs: '0.7rem', sm: '0.875rem' }, '&:hover': { borderColor: '#d35a0f', backgroundColor: 'rgba(229, 106, 22, 0.1)' } }}>Shuffle Teams</Button>
+                <Box sx={{
+                  display: 'flex',
+                  gap: { xs: 1, md: 1 },
+                  mb: 2.5,
+                  flexDirection: { xs: 'column', md: 'row' },
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                }}>
+                  <Button
+                    startIcon={<Image src={GuestIcon} alt="Guest" width={18} height={18} />}
+                    variant='contained'
+                    onClick={() => setGuestDialogOpen(true)}
+                    sx={{
+                      width: { xs: '100%', md: 'auto' },
+                      flex: { md: 1 },
+                      whiteSpace: 'nowrap',
+                      background: 'linear-gradient(135deg,#e56a16,#cf2326)',
+                      color: 'white',
+                      fontWeight: 600,
+                      borderRadius: 3,
+                      px: { xs: 1.5, md: 1.2, lg: 2 },
+                      py: 0.85,
+                      fontSize: { xs: '0.75rem', md: '0.75rem', lg: '0.85rem' },
+                      '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)', transform: 'translateY(-2px)' },
+                      transition: 'all .25s ease'
+                    }}
+                  >
+                    Add Guest
+                  </Button>
+                  <Button
+                    startIcon={<Scale size={18} />}
+                    variant="outlined"
+                    onClick={balanceTeams}
+                    disabled={xpLoading || isBalancing || (homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2)}
+                    sx={{
+                      display: { xs: 'none', md: 'inline-flex' },
+                      flex: { md: 1 },
+                      whiteSpace: 'nowrap',
+                      borderColor: '#00a77f',
+                      color: '#00a77f',
+                      fontWeight: 700,
+                      borderRadius: '10px',
+                      px: { md: 1.2, lg: 2 },
+                      py: 0.85,
+                      fontSize: { md: '0.72rem', lg: '0.82rem' },
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      borderWidth: '1.5px',
+                      backgroundColor: 'transparent',
+                      '&:hover': {
+                        borderColor: '#00a77f',
+                        borderWidth: '1.5px',
+                        backgroundColor: 'rgba(0, 167, 127, 0.12)'
+                      },
+                      '&.Mui-disabled': {
+                        borderColor: 'rgba(0, 167, 127, 0.3)',
+                        color: 'rgba(0, 167, 127, 0.4)',
+                      }
+                    }}
+                  >
+                    {xpLoading || isBalancing ? 'BALANCING...' : 'BALANCE TEAMS'}
+                  </Button>
+                  <Button
+                    startIcon={<Shuffle size={18} />}
+                    variant="outlined"
+                    onClick={shuffleTeams}
+                    disabled={homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2}
+                    sx={{
+                      display: { xs: 'none', md: 'inline-flex' },
+                      flex: { md: 1 },
+                      whiteSpace: 'nowrap',
+                      borderColor: '#e56a16',
+                      color: '#e56a16',
+                      fontWeight: 700,
+                      borderRadius: '10px',
+                      px: { md: 1.2, lg: 2 },
+                      py: 0.85,
+                      fontSize: { md: '0.72rem', lg: '0.82rem' },
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      borderWidth: '1.5px',
+                      backgroundColor: 'transparent',
+                      '&:hover': {
+                        borderColor: '#d35a0f',
+                        borderWidth: '1.5px',
+                        backgroundColor: 'rgba(229, 106, 22, 0.12)'
+                      },
+                      '&.Mui-disabled': {
+                        borderColor: 'rgba(229, 106, 22, 0.3)',
+                        color: 'rgba(229, 106, 22, 0.4)',
+                      }
+                    }}
+                  >
+                    SHUFFLE TEAMS
+                  </Button>
                 </Box>
                 {/* Player Selection Section */}
                 {(homeSelectedCount > 0 || awaySelectedCount > 0) && !hasMinimumTeamRequirements && (
@@ -2920,6 +3012,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
               {/* MATCH DETAIL */}
               <Paper sx={{ mt: 0, mb: 0, p: { xs: 2, sm: 3, md: 4 }, bgcolor: '#1a1a1a', color: '#E5E7EB', borderRadius: 0, border: '1px solid white', borderTop: 'none' }}>
+                <Typography variant='h6' sx={{ mb: 1.5, fontWeight: 700, textTransform: 'uppercase', fontSize: { xs: '1rem', sm: '1.2rem' }, color: 'white' }}>Match Detail</Typography>
                 {/* Add Match Notification */}
                 <Box sx={{ mb: 2, }}>
                   <Typography
@@ -2959,7 +3052,6 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     </Box>
                   )}
                 </Box>
-                <Typography variant='h6' sx={{ mb: 0.1, fontWeight: 700, textTransform: 'uppercase', fontSize: { xs: '1rem', sm: '1.2rem' }, color: 'white' }}>Match Detail</Typography>
                 <Grid container spacing={1}>
                   <Grid item xs={12} md={6}>
                     <Typography sx={{ color: 'white', fontSize: { xs: '0.9rem', sm: '1.3rem' }, fontWeight: 500, fontFamily: 'var(--font-woodford-bourne-pro)', mb: 0.1, textTransform: 'capitalize' }}>Match Date <Box component="span" sx={{ color: '#ef4444', ml: 0.5 }}>*</Box></Typography>
@@ -3222,6 +3314,78 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     {awayTeamName || 'Away'}
                   </Typography>
                 </Box>
+              </Box>
+
+              {/* Action Buttons: Balance Teams & Shuffle Teams (Mobile View as per design mockup) */}
+              <Box sx={{
+                display: { xs: 'flex', md: 'none' },
+                gap: { xs: 0.8, sm: 1 },
+                mb: { xs: 1.5, sm: 2 },
+                width: '100%',
+                alignItems: 'center',
+              }}>
+                <Button
+                  startIcon={<Scale size={18} />}
+                  variant="outlined"
+                  onClick={balanceTeams}
+                  disabled={xpLoading || isBalancing || (homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2)}
+                  sx={{
+                    flex: 1,
+                    borderColor: '#00a77f',
+                    color: '#00a77f',
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    py: { xs: 0.85, sm: 1 },
+                    px: { xs: 1, sm: 1.5 },
+                    fontSize: { xs: '0.72rem', sm: '0.82rem', md: '0.875rem' },
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    borderWidth: '1.5px',
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                      borderColor: '#00a77f',
+                      borderWidth: '1.5px',
+                      backgroundColor: 'rgba(0, 167, 127, 0.12)',
+                    },
+                    '&.Mui-disabled': {
+                      borderColor: 'rgba(0, 167, 127, 0.3)',
+                      color: 'rgba(0, 167, 127, 0.4)',
+                    }
+                  }}
+                >
+                  {xpLoading || isBalancing ? 'BALANCING...' : 'BALANCE TEAMS'}
+                </Button>
+                <Button
+                  startIcon={<Shuffle size={18} />}
+                  variant="outlined"
+                  onClick={shuffleTeams}
+                  disabled={homeTeamUsers.filter(p => !p.isGuest).length + awayTeamUsers.filter(p => !p.isGuest).length < 2}
+                  sx={{
+                    flex: 1,
+                    borderColor: '#e56a16',
+                    color: '#e56a16',
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    py: { xs: 0.85, sm: 1 },
+                    px: { xs: 1, sm: 1.5 },
+                    fontSize: { xs: '0.72rem', sm: '0.82rem', md: '0.875rem' },
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                    borderWidth: '1.5px',
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                      borderColor: '#d35a0f',
+                      borderWidth: '1.5px',
+                      backgroundColor: 'rgba(229, 106, 22, 0.12)',
+                    },
+                    '&.Mui-disabled': {
+                      borderColor: 'rgba(229, 106, 22, 0.3)',
+                      color: 'rgba(229, 106, 22, 0.4)',
+                    }
+                  }}
+                >
+                  SHUFFLE TEAMS
+                </Button>
               </Box>
 
               { /* Player lists */}
