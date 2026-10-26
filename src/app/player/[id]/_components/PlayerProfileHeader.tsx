@@ -167,15 +167,16 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             : `${Math.max(0, xp).toLocaleString()} / ${PAGE_XP_MAX_POINTS.toLocaleString()} XP (${pageXpProgressToMax}%)`}
                     </Typography>
                 </Box>
+                {/* Desktop View Buttons: Stats Over Season & Performance Dashboard (hidden on mobile) */}
                 <Box
                     sx={{
                         mt: 1.8,
-                        display: 'grid',
-                        gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                        display: { xs: 'none', md: 'grid' },
+                        gridTemplateColumns: { md: 'repeat(2, minmax(0, 1fr))' },
                         width: '100%',
-                        maxWidth: { xs: 520, md: 500 },
+                        maxWidth: { md: 500 },
                         mx: 'auto',
-                        gap: { xs: 0.7, md: 1.5 },
+                        gap: 1.5,
                     }}
                 >
                     {/* Stats Over Season button */}
@@ -199,9 +200,6 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             width: '100%',
                             minWidth: 0,
                             justifyContent: 'center',
-                            // '&:hover': {
-                            // bgcolor: '#007b5eff'
-                            // }
                         }}
                         onClick={onOpenStatsModal}
                     >
@@ -213,7 +211,6 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             width: { xs: 38, sm: 40, md: 44 },
                             borderRight: '1px solid rgba(255,255,255,0.25)',
                             py: { xs: 0.55, md: 0.7 },
-
                         }}>
                             <BarChart sx={{ color: '#fff', fontSize: { xs: 20, md: 26 } }} />
                         </Box>
@@ -225,7 +222,6 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                             px: { xs: 0.6, md: 0.9 },
                             py: { xs: 0.55, md: 0.7 },
                             width: '100%',
-
                         }}>
                             <Typography sx={{
                                 color: '#fff',
@@ -236,7 +232,6 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                                 whiteSpace: { xs: 'normal', sm: 'nowrap' },
                                 lineHeight: 1.1,
                                 textAlign: 'center',
-
                             }}>
                                 Stats Over Season
                             </Typography>
@@ -269,7 +264,7 @@ export const PlayerProfileHeader: React.FC<PlayerProfileHeaderProps> = ({
                         }}
                         onClick={() => {
                             if (!playerId) return;
-                            onNavigateCareer();
+                            if (onNavigateCareer) onNavigateCareer();
                         }}
                     >
                         <Box className="perf-icon-box" sx={{

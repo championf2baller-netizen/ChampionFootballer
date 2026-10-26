@@ -53,8 +53,18 @@ import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdent
 import PageHeader from '@/Components/PageHeader';
 
 import PlayerOverviewContainer from './PlayerOverviewContainer';
+import PlayerViewToggle, { PlayerViewType } from './PlayerViewToggle';
+import PlayerStatsOverSeasonView from './PlayerStatsOverSeasonView';
 
 // Lazy load heavy components
+const CareerPage = dynamic(() => import('../career/page'), {
+    loading: () => (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress size={40} sx={{ color: '#00ff88' }} />
+        </Box>
+    ),
+    ssr: false
+});
 const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
     loading: () => <></>,
     ssr: false
@@ -547,9 +557,19 @@ export default function PlayerStatsPage() {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setPreferredLeagueId(localStorage.getItem('preferredLeagueId'));
+            const params = new URLSearchParams(window.location.search);
+            const viewParam = params.get('view');
+            if (viewParam === 'performance' || viewParam === 'stats' || viewParam === 'overview') {
+                setSelectedView(viewParam);
+            } else if (params.get('openStats') === 'true') {
+                setSelectedView('stats');
+            }
         }
         setPreferredLeagueLoaded(true);
     }, []);
+
+    // Main 3-view toggle state (Overview, Performance, Stats / Season)
+    const [selectedView, setSelectedView] = useState<PlayerViewType>('overview');
 
     // Tab navigation state
     const [activeTab, setActiveTab] = useState('career');
@@ -1386,6 +1406,40 @@ export default function PlayerStatsPage() {
         return count;
     }, [careerMatches, playerId]);
 
+    // Count Positive Mentality votes / captain picks - Current League
+    const mentalityCount = useMemo(() => {
+        return currentLeagueMatches.reduce((acc, match) => {
+            const m = match as any;
+            const isPick = sameId(m.homeMentalityId, playerId) ||
+                sameId(m.awayMentalityId, playerId) ||
+                sameId(m.homeInfluenceId, playerId) ||
+                sameId(m.awayInfluenceId, playerId);
+            const votes = m.votes || [];
+            const votesForPlayer = votes.filter((v: any) =>
+                (v.category === 'influence' || v.category === 'mentality') && sameId(v.votedForId, playerId)
+            ).length;
+            const countForMatch = votesForPlayer > 0 ? votesForPlayer : (isPick ? 1 : 0);
+            return acc + countForMatch;
+        }, 0);
+    }, [currentLeagueMatches, playerId]);
+
+    // Count Positive Mentality votes / captain picks - Career (All Matches)
+    const careerMentalityCount = useMemo(() => {
+        return careerMatches.reduce((acc, match) => {
+            const m = match as any;
+            const isPick = sameId(m.homeMentalityId, playerId) ||
+                sameId(m.awayMentalityId, playerId) ||
+                sameId(m.homeInfluenceId, playerId) ||
+                sameId(m.awayInfluenceId, playerId);
+            const votes = m.votes || [];
+            const votesForPlayer = votes.filter((v: any) =>
+                (v.category === 'influence' || v.category === 'mentality') && sameId(v.votedForId, playerId)
+            ).length;
+            const countForMatch = votesForPlayer > 0 ? votesForPlayer : (isPick ? 1 : 0);
+            return acc + countForMatch;
+        }, 0);
+    }, [careerMatches, playerId]);
+
     // Fallback XP from already-loaded profile payload
     const profileXPFallback = useMemo(() => {
         const playerObj = (fullPlayerData?.player || {}) as Record<string, unknown>;
@@ -1471,6 +1525,9 @@ export default function PlayerStatsPage() {
     const displayedDefensiveImpact = isCurrentStatsTab
         ? (leagueId === 'all' ? careerDefensiveImpactCount : defensiveImpactCount)
         : careerDefensiveImpactCount;
+    const displayedMentality = isCurrentStatsTab
+        ? (leagueId === 'all' ? careerMentalityCount : mentalityCount)
+        : careerMentalityCount;
 
     const statsRowXpStatusTier = useMemo(() => getXPTier(displayXp), [displayXp]);
 
@@ -2974,48 +3031,86 @@ export default function PlayerStatsPage() {
                     </Box>
             </PageHeader>
 
-            <PlayerOverviewContainer
-                loading={loading}
-                reduxError={reduxError}
-                playerId={playerId ? String(playerId) : null}
-                leagueId={leagueId}
-                year={year}
-                onRetry={() => playerId && dispatch(fetchPlayerStats({ playerId: String(playerId), leagueId, year }))}
-                playerName={playerName}
-                playerPositionType={playerPositionType}
-                profileAvatarSrc={profileAvatarSrc}
-                xp={xp}
-                xpLoading={xpLoading}
-                pageXpStatusTier={pageXpStatusTier}
-                pageXpStatusTextColor={pageXpStatusTextColor}
-                pageXpProgressToMax={pageXpProgressToMax}
-                PAGE_XP_MAX_POINTS={PAGE_XP_MAX_POINTS}
-                isMobile={isMobile}
-                onOpenStatsModal={() => setStatsModalOpen(true)}
-                onNavigateCareer={() => playerId && router.push(`/player/${playerId}/career`)}
-                activeTab={activeTab}
-                onTabClick={handleTabClick}
-                displayedStatsMatches={displayedStatsMatches}
-                displayedStatsTotals={displayedStatsTotals}
-                displayedMotmVotes={displayedMotmVotes}
-                displayedDefensiveImpact={displayedDefensiveImpact}
-                displayXp={displayXp}
-                CARD_BG={CARD_BG}
-                TEAL_PRIMARY={TEAL_PRIMARY}
-                trophiesCardRef={trophiesCardRef}
-                trophiesLoading={trophiesLoading}
-                earnedTrophies={earnedTrophies}
-                TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
-                getTrophyIconSize={getTrophyIconSize}
-                rewardsCardRef={rewardsCardRef}
-                badgesLoading={badgesLoading}
-                playerBadges={playerBadges}
-                historyCardRef={historyCardRef}
-                historyRecordsLoading={historyRecordsLoading}
-                historyRecords={historyRecords}
-                historyXpLabel={historyXpLabel}
-                getCms={getCms}
-            />
+            {/* Main 3-View Toggle (Overview | Performance | Stats / Season) */}
+            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: { xs: 1, sm: 1.5 } }}>
+                <PlayerViewToggle
+                    activeView={selectedView}
+                    onSelectView={(view) => {
+                        setSelectedView(view);
+                    }}
+                />
+            </Box>
+
+            {/* View 1: Overview */}
+            {selectedView === 'overview' && (
+                <PlayerOverviewContainer
+                    loading={loading}
+                    reduxError={reduxError}
+                    playerId={playerId ? String(playerId) : null}
+                    leagueId={leagueId}
+                    year={year}
+                    onRetry={() => playerId && dispatch(fetchPlayerStats({ playerId: String(playerId), leagueId, year }))}
+                    playerName={playerName}
+                    playerPositionType={playerPositionType}
+                    profileAvatarSrc={profileAvatarSrc}
+                    xp={xp}
+                    xpLoading={xpLoading}
+                    pageXpStatusTier={pageXpStatusTier}
+                    pageXpStatusTextColor={pageXpStatusTextColor}
+                    pageXpProgressToMax={pageXpProgressToMax}
+                    PAGE_XP_MAX_POINTS={PAGE_XP_MAX_POINTS}
+                    isMobile={isMobile}
+                    onOpenStatsModal={() => {
+                        setSelectedView('stats');
+                    }}
+                    onNavigateCareer={() => {
+                        setSelectedView('performance');
+                    }}
+                    activeTab={activeTab}
+                    onTabClick={handleTabClick}
+                    displayedStatsMatches={displayedStatsMatches}
+                    displayedStatsTotals={displayedStatsTotals}
+                    displayedMotmVotes={displayedMotmVotes}
+                    displayedDefensiveImpact={displayedDefensiveImpact}
+                    displayedMentality={displayedMentality}
+                    displayXp={displayXp}
+                    CARD_BG={CARD_BG}
+                    TEAL_PRIMARY={TEAL_PRIMARY}
+                    trophiesCardRef={trophiesCardRef}
+                    trophiesLoading={trophiesLoading}
+                    earnedTrophies={earnedTrophies}
+                    TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
+                    getTrophyIconSize={getTrophyIconSize}
+                    rewardsCardRef={rewardsCardRef}
+                    badgesLoading={badgesLoading}
+                    playerBadges={playerBadges}
+                    historyCardRef={historyCardRef}
+                    historyRecordsLoading={historyRecordsLoading}
+                    historyRecords={historyRecords}
+                    historyXpLabel={historyXpLabel}
+                    getCms={getCms}
+                />
+            )}
+
+            {/* View 2: Performance */}
+            {selectedView === 'performance' && (
+                <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pb: 5 }}>
+                    <CareerPage isEmbedded={true} playerId={playerId ? String(playerId) : undefined} />
+                </Box>
+            )}
+
+            {/* View 3: Stats / Season */}
+            {selectedView === 'stats' && (
+                <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pb: 5 }}>
+                    <PlayerStatsOverSeasonView
+                        leagueId={leagueId}
+                        currentLeagueName={currentLeagueName}
+                        playerName={playerName}
+                        seasonWiseStats={seasonWiseStats}
+                        isMobile={isMobile}
+                    />
+                </Box>
+            )}
 
             {/* Stats Over Season Modal */}
             <Dialog

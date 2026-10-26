@@ -45,6 +45,7 @@ export interface PlayerOverviewContainerProps {
     };
     displayedMotmVotes: number;
     displayedDefensiveImpact: number;
+    displayedMentality: number;
     displayXp: number;
 
     // Cards section props
@@ -88,6 +89,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
     displayedStatsTotals,
     displayedMotmVotes,
     displayedDefensiveImpact,
+    displayedMentality,
     displayXp,
     CARD_BG,
     TEAL_PRIMARY,
@@ -156,6 +158,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
                         displayedStatsTotals={displayedStatsTotals}
                         displayedMotmVotes={displayedMotmVotes}
                         displayedDefensiveImpact={displayedDefensiveImpact}
+                        displayedMentality={displayedMentality}
                         xpLoading={xpLoading}
                         displayXp={displayXp}
                         getCms={getCms}

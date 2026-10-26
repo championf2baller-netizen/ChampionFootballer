@@ -338,8 +338,16 @@ input:-webkit-autofill:active {
 @media (max-width: 767px) {
 
   .league-table-heading,
-  .league-table-heading1 {
-    font-size: 14px !important;
+  .league-table-heading1,
+  .league-header-row .league-table-heading,
+  .league-header-row th,
+  .league-header-row .MuiTableCell-head,
+  .MuiTableCell-head,
+  th.MuiTableCell-root,
+  table thead th {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    font-family: var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important;
   }
 }
 

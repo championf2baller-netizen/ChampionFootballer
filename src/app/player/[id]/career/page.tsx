@@ -66,6 +66,7 @@ import CloseButton from '@/Components/CloseButton';
 import PageHeader from '@/Components/PageHeader';
 import PlayerCareerLoadingSkeleton from '@/Components/loading/PlayerCareerLoadingSkeleton';
 import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
+import PlayerViewToggle from '../_components/PlayerViewToggle';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -115,7 +116,7 @@ const DEFAULT_INFLUENCE_RADAR_DATA = [
 ];
 
 const DEFAULT_WIN_LOSS_DATA = [
-  { name: 'Win', value: 0, color: '#15b57a', fill: '#15b57a' },
+  { name: 'Won', value: 0, color: '#15b57a', fill: '#15b57a' },
   { name: 'Loss', value: 0, color: '#d22f2f', fill: '#d22f2f' },
   { name: 'Draw', value: 0, color: '#ff4bd2', fill: '#ff4bd2' },
 ];
@@ -930,7 +931,8 @@ const strengthDescriptionMap: Record<string, string> = {
 };
 
 // ---------- COMPONENT ----------
-export default function CareerPage() {
+export default function CareerPage(props?: any) {
+  const isEmbedded = Boolean(props?.isEmbedded);
   // ...existing code...
   // Make sure data is initialized before leaguesForYear
   const { data: rawData, filters } = useSelector((s: RootState) => s.playerStats);
@@ -958,7 +960,7 @@ export default function CareerPage() {
   const { user, token, loading: authLoading } = useAuth();
   const params = useParams();
   const searchParams = useSearchParams();
-  const playerId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const playerId = props?.playerId || (Array.isArray(params?.id) ? params.id[0] : params?.id);
   const authUser = user as (typeof user & { userId?: string | number; user_id?: string | number; _id?: string | number });
   const currentUserId = String(authUser?.id ?? authUser?.userId ?? authUser?.user_id ?? authUser?._id ?? '').trim();
   const routePlayerId = String(playerId || '').trim();
@@ -2265,10 +2267,13 @@ export default function CareerPage() {
     const activeDashboard = winLossLeague === 'all'
       ? (filters.leagueId === 'all' ? careerDashboardData : (allCareerDashboardData || careerDashboardData))
       : careerDashboardData;
-    if (activeDashboard?.winLossBreakdown && Array.isArray(activeDashboard.winLossBreakdown) && activeDashboard.winLossBreakdown.length > 0) {
-      return activeDashboard.winLossBreakdown;
-    }
-    return DEFAULT_WIN_LOSS_DATA;
+    const raw = (activeDashboard?.winLossBreakdown && Array.isArray(activeDashboard.winLossBreakdown) && activeDashboard.winLossBreakdown.length > 0)
+      ? activeDashboard.winLossBreakdown
+      : DEFAULT_WIN_LOSS_DATA;
+    return raw.map((entry: any) => ({
+      ...entry,
+      name: entry.name === 'Win' ? 'Won' : entry.name,
+    }));
   }, [winLossLeague, careerDashboardData, allCareerDashboardData, filters.leagueId]);
 
   // Add synergy types (place near other interfaces)
@@ -2633,9 +2638,9 @@ export default function CareerPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
-        background: themeColors.surfaceBase,
-        py: 2,
+        minHeight: isEmbedded ? 'auto' : '100vh',
+        background: isEmbedded ? 'transparent' : themeColors.surfaceBase,
+        py: isEmbedded ? 0 : 2,
         px: 0,
       }}
     >
@@ -2643,13 +2648,13 @@ export default function CareerPage() {
         disableGutters
         maxWidth={false}
         sx={{
-          py: 2,
-          background: themeColors.surfaceBase,
+          py: isEmbedded ? 0 : 2,
+          background: isEmbedded ? 'transparent' : themeColors.surfaceBase,
         }}
       >
         <Box sx={{ maxWidth: '100%', mx: 'auto', overflowX: 'visible' }}>
-          {/* Unified PageHeader */}
-          <PageHeader title={dashboardTitle}>
+          {!isEmbedded && (
+            <PageHeader title={dashboardTitle}>
 
 
               {/* Filters Section */}
@@ -3418,10 +3423,24 @@ export default function CareerPage() {
                   </button>
                 </Box>
               </Box>
-          </PageHeader>
+            </PageHeader>
+          )}
 
           {/* Main Content */}
-          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: { xs: 2, sm: 2, md: 3 }, mt: { xs: 2, md: 0 }, position: 'relative' }}>
+          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: isEmbedded ? 0 : { xs: 2, sm: 2, md: 3 }, mt: isEmbedded ? 0 : { xs: 2, md: 0 }, position: 'relative' }}>
+            {!isEmbedded && (
+              <PlayerViewToggle
+                activeView="performance"
+                onSelectView={(view) => {
+                  if (view === 'overview') {
+                    router.push(`/player/${playerId}`);
+                  } else if (view === 'stats') {
+                    router.push(`/player/${playerId}?openStats=true`);
+                  }
+                }}
+              />
+            )}
+
             {loading && (
               <Box sx={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
                 <CircularProgress size={22} sx={{ color: '#e56a16' }} />
@@ -4042,7 +4061,7 @@ export default function CareerPage() {
                         textTransform: 'uppercase',
                         mb: 1
                       }}>
-                        {getCms('page_player_career_winloss_title', 'WIN/LOSS/DRAW')}
+                        {getCms('page_player_career_winloss_title', 'WON/LOSS/DRAW')}
                       </Typography>
 
                       <Box sx={{ height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

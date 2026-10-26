@@ -118,20 +118,20 @@ export default function PageHeader({
   const outerSx: SystemStyleObject<Theme> = fullBleed
     ? baseOuterSx
     : {
-        mt: 0,
-        mb: { xs: 0.5, md: 4 },
-        width: '100%',
-        bgcolor: '#0E0E0E',
-      };
+      mt: 0,
+      mb: { xs: 0.5, md: 4 },
+      width: '100%',
+      bgcolor: '#0E0E0E',
+    };
 
   const dividerStyle: SystemStyleObject<Theme> = fullBleed
     ? baseDividerSx
     : {
-        ...baseDividerSx,
-        width: '100%',
-        left: 'auto',
-        transform: 'none',
-      };
+      ...baseDividerSx,
+      width: '100%',
+      left: 'auto',
+      transform: 'none',
+    };
 
   return (
     <Box sx={[outerSx, ...toSxArray(sx)]}>

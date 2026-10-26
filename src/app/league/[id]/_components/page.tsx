@@ -99,6 +99,7 @@ const MatchDetailsPage = dynamic(() => import('@/app/match/[matchId]/_components
 });
 import CloseIcon from '@mui/icons-material/Close';
 import MatchDetailModal from '@/Components/MatchDetailModal';
+import LeagueViewToggle from './LeagueViewToggle';
 import { useCombinedMatchRefresh } from '@/lib/useMatchAutoRefresh';
 // import { LeaderboardResponse } from '@/types/api';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
@@ -4450,10 +4451,23 @@ export default function LeagueDetailPage() {
                                     }}
                                 />
 
-                                {/* Navigation Tabs - Pill style */}
+                                {/* Mobile View: Segmented toggle control for Table, Leaderboard, Dream Team */}
+                                <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', px: { xs: 1, sm: 0 }, mt: 1.5 }}>
+                                    <LeagueViewToggle
+                                        activeView={section}
+                                        onSelectView={(view) => {
+                                            setSection(view);
+                                            const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                            router.replace(`/league/${encodeURIComponent(leagueId)}?tab=${view}${seasonParam}`);
+                                        }}
+                                        sx={{ mt: 0 }}
+                                    />
+                                </Box>
+
+                                {/* Navigation Tabs - Pill style (Desktop View) */}
                                 <Box
                                     sx={{
-                                        display: 'flex',
+                                        display: { xs: 'none', sm: 'flex' },
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         width: '100%',
@@ -4690,7 +4704,7 @@ export default function LeagueDetailPage() {
                             minHeight: 400,
                             borderRadius: 3,
                             boxShadow: 'none',
-                            mt: section === 'dream-team' ? 0 : 4,
+                            mt: { xs: 0, sm: section === 'dream-team' ? 0 : 4 },
                             // backdropFilter: 'blur(10px)'
                         }}>
                             {(!league && error && !isSigningOut) ? (
