@@ -67,7 +67,7 @@ const baseTitleBoxSx: SystemStyleObject<Theme> = {
   px: { xs: 1.5, sm: 2, md: 0 },
   gap: 0.5,
   mt: 0,
-  minHeight: { xs: 0, md: '84px' },
+  minHeight: { xs: 0, md: '87px' },
 };
 
 const baseTitleRowSx: SystemStyleObject<Theme> = {
