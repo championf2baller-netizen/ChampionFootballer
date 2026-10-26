@@ -304,6 +304,53 @@ const formatLocationForCard = (location?: string): string => {
         : normalized;
 };
 
+const formatFixtureDateTime = (dateString?: string | Date): string => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    const weekday = date.toLocaleDateString('en-GB', { weekday: 'short' });
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-GB', { month: 'short' });
+    const timeStr = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    }).toLowerCase();
+    return `${weekday} ${day} ${month} · ${timeStr}`;
+};
+
+const getKickoffCountdown = (dateInput?: string | Date): string | null => {
+    if (!dateInput) return null;
+    const matchTime = new Date(dateInput).getTime();
+    if (isNaN(matchTime)) return null;
+    const now = Date.now();
+    const diffMs = matchTime - now;
+
+    if (diffMs <= 0) {
+        return 'Kick-off started';
+    }
+
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+    const matchDate = new Date(matchTime);
+    const nowDate = new Date(now);
+    const isSameDay = matchDate.getFullYear() === nowDate.getFullYear() &&
+                      matchDate.getMonth() === nowDate.getMonth() &&
+                      matchDate.getDate() === nowDate.getDate();
+
+    if (isSameDay || diffHours < 24) {
+        const remMinutes = diffMinutes % 60;
+        if (diffHours === 0) {
+            return `Kick-off in ${diffMinutes}m`;
+        }
+        return `Kick-off in ${diffHours}h${remMinutes > 0 ? ` ${remMinutes}m` : ''}`;
+    } else {
+        const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        return `Kick-off in ${days} ${days === 1 ? 'day' : 'days'}`;
+    }
+};
+
 const formatDisplayTeamName = (name?: string | null, fallback: string = 'Team'): string => {
     if (!name || !name.trim()) return fallback;
     return name.trim();
@@ -347,7 +394,13 @@ const formatPlayerCardStyleName = (firstName?: string, lastName?: string): strin
     return lastInitial ? `${firstUpper} ${lastInitial}.` : firstUpper;
 };
 
-const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): string | null => {
+interface MotmPlayerInfo {
+    name: string;
+    initial: string;
+    picture?: string | null;
+}
+
+const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlayerInfo | null => {
     const votes = match.manOfTheMatchVotes;
     if (!votes || typeof votes !== 'object') return null;
 
@@ -408,8 +461,105 @@ const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): strin
     });
 
     if (!winningPlayer) return null;
-    const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName);
-    return winnerName || null;
+    const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName) || winningPlayer.firstName || 'Player';
+    const initial = (winningPlayer.firstName?.[0] || winnerName[0] || 'M').toUpperCase();
+    return {
+        name: winnerName,
+        initial,
+        picture: winningPlayer.profilePicture || null,
+    };
+};
+
+const getTopMotmPlayerName = (match: Match, fallbackPlayers: User[] = []): string | null => {
+    return getTopMotmPlayer(match, fallbackPlayers)?.name || null;
+};
+
+const isUserInMatch = (match: Match, uid?: string | null): boolean => {
+    if (!uid) return false;
+    const target = String(uid).trim();
+    if (!target) return false;
+    const isSame = (idVal: unknown) => {
+        if (!idVal) return false;
+        const s = String(idVal).trim();
+        return s === target || (s.startsWith('guest-') && s.slice(6) === target);
+    };
+    if (match.homeTeamUsers?.some(u => isSame(u?.id || (u as any)?._id))) return true;
+    if (match.awayTeamUsers?.some(u => isSame(u?.id || (u as any)?._id))) return true;
+    if ((match as any).players?.some((u: any) => isSame(u?.id || u?._id))) return true;
+    if ((match as any).confirmedPlayers?.some((u: any) => isSame(u?.id || u?._id))) return true;
+    const ps = (match as any).playerStats || (match as any).statistics || (match as any).stats;
+    if (ps && typeof ps === 'object' && !Array.isArray(ps)) {
+        if (Object.keys(ps).some(k => isSame(k))) return true;
+    } else if (Array.isArray(ps)) {
+        if (ps.some((s: any) => isSame(s?.userId || s?.user_id || s?.user?.id))) return true;
+    }
+    return false;
+};
+
+const hasPlayerAddedStats = (stat: any): boolean => {
+    if (!stat) return false;
+    if (typeof stat === 'boolean') return stat;
+    if (typeof stat.hasSubmittedStats === 'boolean') return stat.hasSubmittedStats;
+
+    const goals = Number(stat.goals) || 0;
+    const assists = Number(stat.assists) || 0;
+    const cleanSheets = Number(stat.cleanSheets ?? stat.clean_sheets) || 0;
+    const defence = Number(stat.defence) || 0;
+    const penalties = Number(stat.penalties) || 0;
+    const freeKicks = Number(stat.freeKicks ?? stat.free_kicks) || 0;
+    const yellowCards = Number(stat.yellowCards ?? stat.yellow_cards) || 0;
+    const redCards = Number(stat.redCards ?? stat.red_cards) || 0;
+
+    if (goals > 0 || assists > 0 || cleanSheets > 0 || defence > 0 || penalties > 0 || freeKicks > 0 || yellowCards > 0 || redCards > 0) {
+        return true;
+    }
+
+    const impact = Number(stat.impact) || 0;
+    const minutes = Number(stat.minutesPlayed ?? stat.minutes_played) || 0;
+    const rating = Number(stat.rating) || 0;
+
+    if (impact > 0 && minutes === 0 && rating === 0) {
+        return true;
+    }
+
+    return false;
+};
+
+const getMatchStatsProgress = (match: Match, statsCountFallback?: number) => {
+    const rawGuests = (match.guests && match.guests.length > 0 ? match.guests : match.guestPlayers) || [];
+    const homeCount = match.homeTeamUsers?.length || 0;
+    const awayCount = match.awayTeamUsers?.length || 0;
+    const guestCount = rawGuests.length;
+    let totalPlayers = homeCount + awayCount + guestCount;
+    if (totalPlayers === 0) {
+        totalPlayers = match.availableUsers?.length || 14;
+    }
+
+    let statsCount = 0;
+    const ps = (match as any).playerStats || (match as any).statistics || (match as any).stats;
+    if (Array.isArray(ps) && ps.length > 0) {
+        const validStats = ps.filter(hasPlayerAddedStats);
+        const uniqueUserIds = new Set(
+            validStats.map((s: any) => String(s?.userId || s?.user_id || s?.user?.id || s?.id || '')).filter(Boolean)
+        );
+        statsCount = uniqueUserIds.size > 0 ? uniqueUserIds.size : validStats.length;
+    } else if (ps && typeof ps === 'object' && !Array.isArray(ps) && Object.keys(ps).length > 0) {
+        const validStats = Object.values(ps).filter(hasPlayerAddedStats);
+        statsCount = validStats.length;
+    } else if (typeof statsCountFallback === 'number' && statsCountFallback >= 0) {
+        statsCount = statsCountFallback;
+    }
+
+    const effectiveTotal = Math.max(totalPlayers, statsCount, 1);
+    const displayTotal = totalPlayers > 0 ? totalPlayers : effectiveTotal;
+    const displayCount = Math.min(statsCount, displayTotal);
+    const percent = Math.min(100, Math.round((displayCount / displayTotal) * 100));
+
+    return {
+        count: displayCount,
+        total: displayTotal,
+        percent,
+    };
 };
 
 const LEADERBOARD_METRIC_CONFIG = [
@@ -480,11 +630,28 @@ interface TableData {
     motmCount?: number;
 }
 
+const leagueMemoryCache = new Map<string, League>();
+
 export default function LeagueDetailPage() {
+    const params = useParams();
+    const router = useRouter();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const leagueId = params?.id ? String(params.id) : '';
     const [matchStatsOpen, setMatchStatsOpen] = React.useState(false);
     const [selectedMatchIdForDialog, setSelectedMatchIdForDialog] = React.useState<string | null>(null);
     const [shouldShowAdminGoals, setShouldShowAdminGoals] = React.useState(false);
-    const [league, setLeague] = useState<League | null>(null);
+    const [league, setLeague] = useState<League | null>(() => {
+        if (typeof window !== 'undefined' && leagueId) {
+            const inMem = leagueMemoryCache.get(leagueId);
+            if (inMem) return inMem;
+            try {
+                const stored = sessionStorage.getItem(`cf_league_${leagueId}`);
+                if (stored) return JSON.parse(stored);
+            } catch {}
+        }
+        return null;
+    });
     console.log('leagues matches', league?.matches)
     console.log('league archived status:', league?.archived, '| league active:', league?.active, '| league name:', league?.name)
     const [error, setError] = useState<string | null>(null);
@@ -494,11 +661,6 @@ export default function LeagueDetailPage() {
     const [hasLoadedAllLeagues, setHasLoadedAllLeagues] = useState(false);
     const [allLeaguesFetchFailed, setAllLeaguesFetchFailed] = useState(false);
     const { user, token, loading: authLoading, isAuthenticated } = useAuth();
-    const params = useParams();
-    const router = useRouter();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const leagueId = params?.id ? String(params.id) : '';
     const [teamModalOpen, setTeamModalOpen] = useState(false);
     const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
     const [availabilityLoading, setAvailabilityLoading] = useState<{ [matchId: string]: boolean }>({});
@@ -518,6 +680,31 @@ export default function LeagueDetailPage() {
     const [hasCommonLeague, setHasCommonLeague] = useState(false);
     const [checkedCommonLeague, setCheckedCommonLeague] = useState(false);
     const [userLeagueXP, setUserLeagueXP] = useState<Record<string, number>>({});
+    const [matchStatsMap, setMatchStatsMap] = useState<Record<string, number>>({});
+
+    // Fetch stats for completed matches if not already provided in match.playerStats
+    useEffect(() => {
+        if (!token || !league?.matches || league.matches.length === 0) return;
+        const completedMatches = league.matches.filter(m => isResultLikeStatus(m.status));
+        completedMatches.forEach(async (m) => {
+            const hasStatsArray = Array.isArray((m as any).playerStats) && (m as any).playerStats.length > 0;
+            if (hasStatsArray) return;
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${m.id}/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.success && Array.isArray(data.stats)) {
+                    const validStats = data.stats.filter(hasPlayerAddedStats);
+                    const uniqueCount = new Set(
+                        validStats.map((s: any) => String(s?.userId || s?.user_id || s?.user?.id || s?.id || '')).filter(Boolean)
+                    ).size;
+                    setMatchStatsMap(prev => (prev[m.id] === uniqueCount ? prev : { ...prev, [m.id]: uniqueCount }));
+                }
+            } catch {}
+        });
+    }, [league?.matches, token]);
     const syncTableHorizontalScroll = useCallback(() => {
         const scrollEl = tableScrollRef.current;
         if (!scrollEl) {
@@ -1171,11 +1358,13 @@ export default function LeagueDetailPage() {
 
     console.log('league', league)
 
-    const fetchLeagueDetails = useCallback(async (seasonIdOverride?: string | null) => {
+    const fetchLeagueDetails = useCallback(async (seasonIdOverride?: string | null, options?: { silent?: boolean }) => {
         const effectiveToken = token || (typeof window !== 'undefined' ? TokenManager.getInstance().getToken() : null);
         if (!effectiveToken || !leagueId || isSigningOut) return;
         setLeagueDetailsAttempted(true);
-        setLeagueDetailsLoading(true);
+        if (!league && !options?.silent) {
+            setLeagueDetailsLoading(true);
+        }
         try {
             setError((prev) => (prev === 'No leagues found' ? prev : null));
             console.log("Fetching league details - Token:", effectiveToken ? 'Present' : 'Missing');
@@ -1311,6 +1500,12 @@ export default function LeagueDetailPage() {
                     });
                 }
                 setLeague(fetchedLeague);
+                if (leagueId) {
+                    leagueMemoryCache.set(leagueId, fetchedLeague);
+                    try {
+                        sessionStorage.setItem(`cf_league_${leagueId}`, JSON.stringify(fetchedLeague));
+                    } catch {}
+                }
 
                 // 🔄 Fetch fresh league XP map for all members
                 try {
@@ -1374,10 +1569,16 @@ export default function LeagueDetailPage() {
     ]);
 
     useEffect(() => {
-        setLeague(null);
+        const cached = leagueId ? leagueMemoryCache.get(leagueId) : null;
+        if (cached) {
+            setLeague(cached);
+            setLeagueDetailsLoading(false);
+        } else {
+            setLeague(null);
+            setLeagueDetailsLoading(true);
+        }
         setError(null);
         setLeagueDetailsAttempted(false);
-        setLeagueDetailsLoading(false);
     }, [leagueId]);
 
     // Fetch dream team data based on selected league and season
@@ -1504,28 +1705,19 @@ export default function LeagueDetailPage() {
         }
     }, [league, selectedSeasonId, seasonOptions, fetchLeagueDetails]);
 
-    // 🔄 Refresh league data when page becomes visible (e.g., user comes back from settings)
+    // 🔄 Refresh league data silently when page becomes visible (e.g., user comes back from settings)
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible' && token && leagueId) {
-                console.log('🔄 Page became visible, refreshing league data...');
-                fetchLeagueDetails();
-            }
-        };
-
-        const handleFocus = () => {
-            if (token && leagueId) {
-                console.log('🔄 Window focused, refreshing league data...');
-                fetchLeagueDetails();
+                console.log('🔄 Page became visible, refreshing league data silently...');
+                void fetchLeagueDetails(undefined, { silent: true });
             }
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', handleFocus);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', handleFocus);
         };
     }, [fetchLeagueDetails, token, leagueId]);
 
@@ -4522,7 +4714,7 @@ export default function LeagueDetailPage() {
                                         Retry Loading
                                     </Button>
                                 </Box>
-                            ) : (!league || leagueDetailsLoading) ? (
+                            ) : (!league && leagueDetailsLoading) ? (
                                 <LeagueDetailLoadingSkeleton mode={section} />
                             ) : (
                                 <>
@@ -5125,17 +5317,13 @@ export default function LeagueDetailPage() {
                                                             <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', flex: 1, '&:last-child': { pb: 0 } }}>
                                                                 {/* Top Section - Teams & VS */}
                                                                 <Box sx={{
-                                                                    pl: 1,
-                                                                    pr: 1,
-                                                                    pt: 1.25,
-                                                                    pb: 0.25,
+                                                                    px: 2,
+                                                                    pt: { xs: 2.5, sm: 3 },
+                                                                    pb: 1.5,
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     justifyContent: 'space-between',
-                                                                    borderBottom: '1px solid #fff',
-                                                                    gap: 0,
-                                                                    minHeight: { xs: '102px', sm: '102px' },
-                                                                    maxHeight: { xs: '102px', sm: '102px' },
+                                                                    borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
                                                                     boxSizing: 'border-box'
                                                                 }}>
                                                                     {/* Home Team */}
@@ -5143,44 +5331,34 @@ export default function LeagueDetailPage() {
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
-                                                                        width: '31%',
-                                                                        maxWidth: '31%',
+                                                                        width: '32%',
                                                                         minWidth: 0,
                                                                         px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.homeTeamImage || HomeTeamImage)}
-                                                                            alt={match.homeTeamName}
+                                                                            alt={match.homeTeamName || 'Home'}
                                                                             width={50}
                                                                             height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Box sx={{
-                                                                            height: { xs: '2.4em', sm: '2.4em' },
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            width: '100%',
+                                                                        <Typography sx={{
+                                                                            color: 'white',
+                                                                            fontWeight: 700,
+                                                                            fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                                                                            lineHeight: 1.2,
+                                                                            textAlign: 'center',
                                                                             mt: 0.25,
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box',
+                                                                            WebkitLineClamp: 2,
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            wordBreak: 'break-word',
+                                                                            width: '100%',
                                                                         }}>
-                                                                            <Typography sx={{
-                                                                                color: 'white',
-                                                                                fontWeight: 600,
-                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
-                                                                                lineHeight: 1.15,
-                                                                                textAlign: 'center',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                                display: '-webkit-box',
-                                                                                WebkitLineClamp: 2,
-                                                                                WebkitBoxOrient: 'vertical',
-                                                                                wordBreak: 'break-word',
-                                                                                maxWidth: '100%',
-                                                                                width: '100%',
-                                                                            }}>
-                                                                                {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home')}
+                                                                        </Typography>
                                                                     </Box>
 
                                                                     {/* VS Center */}
@@ -5189,27 +5367,26 @@ export default function LeagueDetailPage() {
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'center',
-                                                                        width: '38%',
-                                                                        maxWidth: '38%',
-                                                                        flexShrink: 0,
-                                                                        minWidth: 0
+                                                                        flex: 1,
+                                                                        minWidth: 0,
+                                                                        px: 0.5
                                                                     }}>
                                                                         <Typography sx={{
                                                                             fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                                                            fontWeight: 600,
-                                                                            fontSize: { xs: '1.4rem', sm: '1.8rem' },
-                                                                            lineHeight: 0.5,
-                                                                            letterSpacing: '-2px',
+                                                                            fontWeight: 700,
+                                                                            fontSize: { xs: '1.6rem', sm: '2rem' },
+                                                                            lineHeight: 1,
+                                                                            letterSpacing: '1px',
                                                                             textTransform: 'uppercase',
                                                                             color: 'white',
                                                                         }}>
                                                                             V/S
                                                                         </Typography>
                                                                         <Typography sx={{
-                                                                            color: '#ddd',
+                                                                            color: '#b0b3b8',
                                                                             fontSize: { xs: '0.72rem', sm: '0.78rem' },
                                                                             textAlign: 'center',
-                                                                            mt: 1,
+                                                                            mt: 0.75,
                                                                             whiteSpace: 'nowrap'
                                                                         }}>
                                                                             {durationMinutes} Minutes Match
@@ -5221,285 +5398,333 @@ export default function LeagueDetailPage() {
                                                                         display: 'flex',
                                                                         flexDirection: 'column',
                                                                         alignItems: 'center',
-                                                                        width: '31%',
-                                                                        maxWidth: '31%',
+                                                                        width: '32%',
                                                                         minWidth: 0,
                                                                         px: 0.5
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.awayTeamImage || AwayTeamImage)}
-                                                                            alt={match.awayTeamName}
+                                                                            alt={match.awayTeamName || 'Away'}
                                                                             width={50}
                                                                             height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Box sx={{
-                                                                            height: { xs: '2.4em', sm: '2.4em' },
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            width: '100%',
+                                                                        <Typography sx={{
+                                                                            color: 'white',
+                                                                            fontWeight: 700,
+                                                                            fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                                                                            lineHeight: 1.2,
+                                                                            textAlign: 'center',
                                                                             mt: 0.25,
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box',
+                                                                            WebkitLineClamp: 2,
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            wordBreak: 'break-word',
+                                                                            width: '100%',
                                                                         }}>
-                                                                            <Typography sx={{
-                                                                                color: 'white',
-                                                                                fontWeight: 600,
-                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
-                                                                                lineHeight: 1.15,
-                                                                                textAlign: 'center',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                                display: '-webkit-box',
-                                                                                WebkitLineClamp: 2,
-                                                                                WebkitBoxOrient: 'vertical',
-                                                                                wordBreak: 'break-word',
-                                                                                maxWidth: '100%',
-                                                                                width: '100%',
-                                                                            }}>
-                                                                                {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away')}
+                                                                        </Typography>
                                                                     </Box>
                                                                 </Box>
 
-                                                                {/* Bottom Info Panel */}
+                                                                {/* Match Details Row: Date/Time, Location (Centered), Kick-off Countdown */}
+                                                                <Box sx={{
+                                                                    display: 'grid',
+                                                                    gridTemplateColumns: '1fr auto 1fr',
+                                                                    alignItems: 'center',
+                                                                    gap: 1,
+                                                                    px: 1.5,
+                                                                    pt: 1.25,
+                                                                    pb: 0.5,
+                                                                    width: '100%'
+                                                                }}>
+                                                                    {/* Left: Date & Time */}
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                                                        <Typography sx={{
+                                                                            color: '#d1d5db',
+                                                                            fontSize: { xs: '0.72rem', sm: '0.8rem' },
+                                                                            fontWeight: 600,
+                                                                            whiteSpace: 'nowrap',
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis'
+                                                                        }}>
+                                                                            {formatFixtureDateTime(match.date || match.start)}
+                                                                        </Typography>
+                                                                    </Box>
+
+                                                                    {/* Center: Location */}
+                                                                    <Box sx={{
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                        gap: 0.5,
+                                                                        minWidth: 0,
+                                                                        textAlign: 'center'
+                                                                    }}>
+                                                                        {match.location ? (
+                                                                            <>
+                                                                                <MapPin size={15} color="#d1d5db" style={{ flexShrink: 0 }} />
+                                                                                <Typography sx={{
+                                                                                    color: '#d1d5db',
+                                                                                    fontSize: { xs: '0.72rem', sm: '0.8rem' },
+                                                                                    fontWeight: 500,
+                                                                                    overflow: 'hidden',
+                                                                                    textOverflow: 'ellipsis',
+                                                                                    whiteSpace: 'nowrap'
+                                                                                }}>
+                                                                                    {formatLocationForCard(match.location)}
+                                                                                </Typography>
+                                                                            </>
+                                                                        ) : null}
+                                                                    </Box>
+
+                                                                    {/* Right: Kick-off Countdown Badge */}
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                                                        {getKickoffCountdown(match.date || match.start) ? (
+                                                                            <Box sx={{
+                                                                                bgcolor: 'rgba(255, 255, 255, 0.06)',
+                                                                                border: '1px solid rgba(255, 255, 255, 0.12)',
+                                                                                borderRadius: '6px',
+                                                                                px: { xs: 0.75, sm: 1 },
+                                                                                py: 0.4,
+                                                                                fontSize: { xs: '0.68rem', sm: '0.75rem' },
+                                                                                color: '#adb5bd',
+                                                                                fontWeight: 500,
+                                                                                whiteSpace: 'nowrap',
+                                                                                display: 'inline-flex',
+                                                                                alignItems: 'center'
+                                                                            }}>
+                                                                                {getKickoffCountdown(match.date || match.start)}
+                                                                            </Box>
+                                                                        ) : null}
+                                                                    </Box>
+                                                                </Box>
+
+                                                                {/* Confirmed Count & See Who Is Playing */}
                                                                 <Box sx={{
                                                                     display: 'flex',
-                                                                    flexDirection: 'row',
-                                                                    flex: 1
+                                                                    alignItems: 'center',
+                                                                    gap: 1.5,
+                                                                    px: 1.5,
+                                                                    py: 0.75,
+                                                                    mx: 1.5,
+                                                                    my: 0.5,
+                                                                    bgcolor: 'rgba(255, 255, 255, 0.04)',
+                                                                    borderRadius: '6px'
                                                                 }}>
-                                                                    {/* Left Info Column */}
-                                                                    <Box sx={{
-                                                                        flex: 1,
-                                                                        minWidth: 0,
-                                                                        p: 1.5,
-                                                                        display: 'flex',
-                                                                        flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
-                                                                        gap: 1.5,
-                                                                        // pl: 2,
-                                                                        // pr: 2
+                                                                    <Typography sx={{
+                                                                        color: '#9ca3af',
+                                                                        fontSize: '0.82rem',
+                                                                        fontWeight: 700
                                                                     }}>
-                                                                        {/* Date Row */}
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'nowrap', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
-                                                                                <Image src={CalendarImg} alt="Date" width={16} height={16} />
-                                                                                <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                                                                                    {formatMatchDate(match.date)}
-                                                                                </Typography>
-                                                                            </Box>
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 'fit-content', flexShrink: 0 }}>
-                                                                                <Image src={ClockImg} alt="Time" width={16} height={16} />
-                                                                                <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                                                                                    {formatMatchTime(match.date)}
-                                                                                </Typography>
-                                                                            </Box>
+                                                                        {match.availableUsers?.length || 0} Confirmed
+                                                                    </Typography>
+                                                                    <Button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedMatchDetail(match);
+                                                                            setMatchDetailModalOpen(true);
+                                                                        }}
+                                                                        sx={{
+                                                                            color: '#00D09E',
+                                                                            fontSize: '0.82rem',
+                                                                            fontWeight: 600,
+                                                                            textTransform: 'none',
+                                                                            textDecoration: 'underline',
+                                                                            p: 0,
+                                                                            minWidth: 0,
+                                                                            background: 'none',
+                                                                            border: 'none',
+                                                                            cursor: 'pointer',
+                                                                            '&:hover': {
+                                                                                color: '#00af80',
+                                                                                textDecoration: 'underline',
+                                                                                bgcolor: 'transparent'
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        See who is playing
+                                                                    </Button>
+                                                                </Box>
+
+                                                                {/* Action Buttons: I'm in, Can't make it, Teams */}
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    gap: 1,
+                                                                    px: 1.5,
+                                                                    pt: 0.75,
+                                                                    pb: 1.5,
+                                                                    width: '100%',
+                                                                    boxSizing: 'border-box'
+                                                                }}>
+                                                                    {isMember && (
+                                                                        <>
                                                                             <Button
+                                                                                variant="contained"
                                                                                 size="small"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
-                                                                                    setViewTeamMatch({ leagueId, matchId: match.id, matchNumber });
-                                                                                    setViewTeamOpen(true);
+                                                                                    handleToggleAvailability(match.id, true);
                                                                                 }}
-                                                                                startIcon={<Image src={ViewTeamImg} alt="View Team" width={20} height={20} />}
+                                                                                disabled={availabilityLoading[match.id] || !league?.active || !isSelectedSeasonActive}
                                                                                 sx={{
+                                                                                    background: '#00af80',
                                                                                     color: 'white',
-                                                                                    fontSize: '0.65rem',
                                                                                     textTransform: 'none',
-                                                                                    p: 0,
-                                                                                    minWidth: 'max-content',
-                                                                                    flexShrink: 0,
-                                                                                    textDecoration: 'underline',
+                                                                                    fontWeight: 700,
+                                                                                    fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                                    py: 0.9,
+                                                                                    px: 1,
+                                                                                    borderRadius: '10px',
                                                                                     whiteSpace: 'nowrap',
-                                                                                    '&:hover': { color: '#ccc' },
-                                                                                    '& .MuiButton-startIcon': { mr: 0.5 },
+                                                                                    flex: 1,
+                                                                                    minWidth: 0,
+                                                                                    position: 'relative',
+                                                                                    zIndex: isUserAvailable ? 2 : 1,
+                                                                                    boxShadow: isUserAvailable ? '0 0 14px 4px rgba(0, 255, 170, 0.8), 0 0 22px rgba(0, 255, 170, 0.5)' : 'none',
+                                                                                    border: isUserAvailable ? '2px solid #00ffaa' : 'none',
+                                                                                    '&:hover': { background: '#008f6a' },
+                                                                                    '&.Mui-disabled': { opacity: 0.5 }
                                                                                 }}
                                                                             >
-                                                                                View Teams
+                                                                                {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : "I'm in"}
+                                                                            </Button>
+                                                                            <Button
+                                                                                variant="contained"
+                                                                                size="small"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleToggleAvailability(match.id, false);
+                                                                                }}
+                                                                                disabled={availabilityLoading[match.id] || !league?.active || !isSelectedSeasonActive}
+                                                                                sx={{
+                                                                                    background: isUserUnavailable ? '#c62828' : '#23272f',
+                                                                                    color: 'white',
+                                                                                    textTransform: 'none',
+                                                                                    fontWeight: 700,
+                                                                                    fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                                    py: 0.9,
+                                                                                    px: 1,
+                                                                                    borderRadius: '10px',
+                                                                                    whiteSpace: 'nowrap',
+                                                                                    flex: 1,
+                                                                                    minWidth: 0,
+                                                                                    position: 'relative',
+                                                                                    zIndex: isUserUnavailable ? 2 : 1,
+                                                                                    boxShadow: isUserUnavailable ? '0 0 14px 4px rgba(255, 75, 75, 0.8), 0 0 22px rgba(255, 100, 100, 0.5)' : 'none',
+                                                                                    border: isUserUnavailable ? '2px solid #ff6b6b' : '1px solid rgba(255, 255, 255, 0.15)',
+                                                                                    '&:hover': { background: isUserUnavailable ? '#b71c1c' : '#2e333d' },
+                                                                                    '&.Mui-disabled': { opacity: 0.5 }
+                                                                                }}
+                                                                            >
+                                                                                {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : "Can't make it"}
+                                                                            </Button>
+                                                                        </>
+                                                                    )}
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        size="small"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setViewTeamMatch({ leagueId, matchId: match.id, matchNumber });
+                                                                            setViewTeamOpen(true);
+                                                                        }}
+                                                                        sx={{
+                                                                            background: '#7c3aed',
+                                                                            color: 'white',
+                                                                            textTransform: 'none',
+                                                                            fontWeight: 700,
+                                                                            fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                            py: 0.9,
+                                                                            px: 1,
+                                                                            borderRadius: '10px',
+                                                                            whiteSpace: 'nowrap',
+                                                                            flex: 1,
+                                                                            minWidth: 0,
+                                                                            '&:hover': { background: '#6d28d9' }
+                                                                        }}
+                                                                    >
+                                                                        Teams
+                                                                    </Button>
+                                                                </Box>
+
+                                                                {/* Admin Section at Bottom */}
+                                                                {isAdmin && (
+                                                                    <Box sx={{
+                                                                        mt: 'auto',
+                                                                        pt: 1,
+                                                                        pb: 1,
+                                                                        px: 1.5,
+                                                                        borderTop: '1px dashed #e56a16',
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'space-between',
+                                                                        bgcolor: '#191919',
+                                                                        width: '100%',
+                                                                        boxSizing: 'border-box'
+                                                                    }}>
+                                                                        <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                                            Admin
+                                                                        </Typography>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                            <Button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setEditMatchId(match.id);
+                                                                                    setEditMatchDialogOpen(true);
+                                                                                }}
+                                                                                disabled={!league?.active}
+                                                                                startIcon={<Edit size={14} color="#00D09E" />}
+                                                                                sx={{
+                                                                                    color: 'white',
+                                                                                    bgcolor: 'transparent',
+                                                                                    border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                    borderRadius: '8px',
+                                                                                    px: 1.2,
+                                                                                    py: 0.4,
+                                                                                    fontSize: '0.75rem',
+                                                                                    fontWeight: 600,
+                                                                                    textTransform: 'none',
+                                                                                    minWidth: 0,
+                                                                                    '&:hover': {
+                                                                                        bgcolor: 'rgba(0, 208, 158, 0.15)',
+                                                                                        borderColor: '#00D09E'
+                                                                                    },
+                                                                                    '&.Mui-disabled': { opacity: 0.4 }
+                                                                                }}
+                                                                            >
+                                                                                Edit match
+                                                                            </Button>
+                                                                            <Button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleRequestDeleteMatch(match);
+                                                                                }}
+                                                                                startIcon={<Trash2 size={14} color="#ff4d4f" />}
+                                                                                sx={{
+                                                                                    color: '#ff4d4f',
+                                                                                    bgcolor: 'transparent',
+                                                                                    border: '1px solid rgba(255, 77, 79, 0.4)',
+                                                                                    borderRadius: '8px',
+                                                                                    px: 1.2,
+                                                                                    py: 0.4,
+                                                                                    fontSize: '0.75rem',
+                                                                                    fontWeight: 600,
+                                                                                    textTransform: 'none',
+                                                                                    minWidth: 0,
+                                                                                    '&:hover': {
+                                                                                        bgcolor: 'rgba(255, 77, 79, 0.15)',
+                                                                                        borderColor: '#ff4d4f'
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                Delete
                                                                             </Button>
                                                                         </Box>
-
-                                                                        {/* Location Row */}
-                                                                        {match.location && (
-                                                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                                                                <Box sx={{ mt: 0.3 }}><Image src={LocationImg} alt="Location" width={18} height={18} /></Box>
-                                                                                <Typography sx={{ color: '#ccc', fontSize: '0.85rem', lineHeight: 1.3, wordBreak: 'break-word' }}>
-                                                                                    {formatLocationForCard(match.location)}
-                                                                                </Typography>
-                                                                            </Box>
-                                                                        )}
-
-                                                                        {/* Availability Buttons & See Who Is Playing Link */}
-                                                                        {isMember && (
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mt: 0.5, width: '100%' }}>
-                                                                                <Box sx={{
-                                                                                    display: 'flex', gap: 1, mb: 0, flexWrap: 'nowrap', width: '100%'
-                                                                                }}>
-                                                                                    <Button
-                                                                                        variant="contained"
-                                                                                        size="small"
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            handleToggleAvailability(match.id, true);
-                                                                                        }}
-                                                                                        disabled={availabilityLoading[match.id] || !league?.active || !isSelectedSeasonActive}
-                                                                                        sx={{
-                                                                                            background: '#00af80',
-                                                                                            color: 'white',
-                                                                                            textTransform: 'none',
-                                                                                            fontWeight: 500,
-                                                                                            fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
-                                                                                            py: 0.35,
-                                                                                            px: { xs: 0.5, sm: 1, md: 1.25 },
-                                                                                            whiteSpace: 'nowrap',
-                                                                                            flex: 1,
-                                                                                            minWidth: 0,
-                                                                                            position: 'relative',
-                                                                                            zIndex: isUserAvailable ? 2 : 1,
-                                                                                            boxShadow: isUserAvailable ? '0 0 14px 4px rgba(0, 255, 170, 0.8), 0 0 22px rgba(0, 255, 170, 0.5)' : 'none',
-                                                                                            border: isUserAvailable ? '2px solid #00ffaa' : 'none',
-                                                                                            '&:hover': { background: '#008f6a' },
-                                                                                            '&.Mui-disabled': { opacity: 0.5 }
-                                                                                        }}
-                                                                                    >
-                                                                                        {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : '✓ Available'}
-                                                                                    </Button>
-                                                                                    <Button
-                                                                                        variant="contained"
-                                                                                        size="small"
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            handleToggleAvailability(match.id, false);
-                                                                                        }}
-                                                                                        disabled={availabilityLoading[match.id] || !league?.active || !isSelectedSeasonActive}
-                                                                                        sx={{
-                                                                                            background: '#c62828',
-                                                                                            color: 'white',
-                                                                                            textTransform: 'none',
-                                                                                            fontWeight: 500,
-                                                                                            fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
-                                                                                            py: 0.35,
-                                                                                            px: { xs: 0.5, sm: 1, md: 1.25 },
-                                                                                            whiteSpace: 'nowrap',
-                                                                                            flex: 1,
-                                                                                            minWidth: 0,
-                                                                                            position: 'relative',
-                                                                                            zIndex: isUserUnavailable ? 2 : 1,
-                                                                                            boxShadow: isUserUnavailable ? '0 0 14px 4px rgba(255, 75, 75, 0.8), 0 0 22px rgba(255, 100, 100, 0.5)' : 'none',
-                                                                                            border: isUserUnavailable ? '2px solid #ff6b6b' : 'none',
-                                                                                            '&:hover': { background: '#b71c1c' },
-                                                                                            '&.Mui-disabled': { opacity: 0.5 }
-                                                                                        }}
-                                                                                    >
-                                                                                        {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : '✕ Unavailable'}
-                                                                                    </Button>
-                                                                                </Box>
-                                                                            </Box>
-                                                                        )}
-
-                                                                        <Button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setSelectedMatchDetail(match);
-                                                                                setMatchDetailModalOpen(true);
-                                                                            }}
-                                                                            sx={{
-                                                                                color: '#00D09E',
-                                                                                fontSize: '0.85rem',
-                                                                                textTransform: 'none',
-                                                                                fontWeight: 600,
-                                                                                p: 0,
-                                                                                mt: 1,
-                                                                                justifyContent: 'flex-start',
-                                                                                alignSelf: 'flex-start',
-                                                                                textDecoration: 'underline',
-                                                                                minWidth: 0,
-                                                                                background: 'none',
-                                                                                border: 'none',
-                                                                                cursor: 'pointer',
-                                                                                '&:hover': {
-                                                                                    color: '#00af80',
-                                                                                    textDecoration: 'underline',
-                                                                                    background: 'none',
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            See who is playing
-                                                                        </Button>
                                                                     </Box>
-
-                                                                    {/* Right Admin Column */}
-                                                                    <Box sx={{
-                                                                        width: { xs: '91px', sm: '95px' },
-                                                                        flexShrink: 0,
-                                                                        borderLeft: '1px solid #fff',
-                                                                        borderTop: 'none',
-                                                                        pl: 1,
-                                                                        pr: 2,
-                                                                        py: 1,
-                                                                        display: 'flex',
-                                                                        flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
-                                                                        gap: 2,
-                                                                        mr: 1
-                                                                    }}>
-                                                                        {isAdmin ? (
-                                                                            <>
-                                                                                <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left' }}>
-                                                                                    Admin Only
-                                                                                </Typography>
-                                                                                <Button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        setEditMatchId(match.id);
-                                                                                        setEditMatchDialogOpen(true);
-                                                                                    }}
-                                                                                    disabled={!league?.active}
-                                                                                    startIcon={<Edit color="#00a77f" size={16} />}
-                                                                                    sx={{
-                                                                                        color: '#fff',
-                                                                                        justifyContent: 'flex-start',
-                                                                                        textTransform: 'none',
-                                                                                        p: 0,
-                                                                                        fontSize: '0.7rem',
-                                                                                        whiteSpace: 'nowrap',
-                                                                                        '&:hover': { textDecoration: 'none' },
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 },
-                                                                                        textDecoration: 'underline',
-                                                                                        fontWeight: 600,
-                                                                                    }}
-                                                                                >
-                                                                                    Edit Match
-                                                                                </Button>
-                                                                                <Button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        handleRequestDeleteMatch(match);
-                                                                                    }}
-                                                                                    startIcon={<Trash2 size={16} />}
-                                                                                    sx={{
-                                                                                        color: '#fff',
-                                                                                        justifyContent: 'flex-start',
-                                                                                        textTransform: 'none',
-                                                                                        p: 0,
-                                                                                        fontSize: '0.7rem',
-                                                                                        whiteSpace: 'nowrap',
-                                                                                        '&:hover': { textDecoration: 'none' },
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 },
-                                                                                        textDecoration: 'underline',
-                                                                                        fontWeight: 600,
-                                                                                    }}
-                                                                                >
-                                                                                    Delete Match
-                                                                                </Button>
-                                                                            </>
-                                                                        ) : (
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.3 }}>
-                                                                                <Crown size={32} color="white" />
-                                                                            </Box>
-                                                                        )}
-                                                                    </Box>
-                                                                </Box>
+                                                                )}
                                                             </CardContent>
                                                         </Card>
                                                     );
@@ -5597,8 +5822,8 @@ export default function LeagueDetailPage() {
                                                     const awayGoals = match.awayTeamGoals ?? 0;
                                                     const goalDiff = Math.abs(homeGoals - awayGoals);
                                                     let resultText = 'Draw';
-                                                    if (homeGoals > awayGoals) resultText = `Home Team Win By ${goalDiff} Goal${goalDiff > 1 ? 's' : ''}`;
-                                                    else if (awayGoals > homeGoals) resultText = `Away Team Win By ${goalDiff} Goal${goalDiff > 1 ? 's' : ''}`;
+                                                    if (homeGoals > awayGoals) resultText = `Home Team Won By ${goalDiff} Goal${goalDiff > 1 ? 's' : ''}`;
+                                                    else if (awayGoals > homeGoals) resultText = `Away Team Won By ${goalDiff} Goal${goalDiff > 1 ? 's' : ''}`;
 
                                                     return (
                                                         <Card
@@ -5701,10 +5926,9 @@ export default function LeagueDetailPage() {
                                                                     alignItems: 'center',
                                                                     justifyContent: 'space-between',
                                                                     borderBottom: '1px solid #fff',
-                                                                    mt: -3,
+                                                                    mt: -1.75,
                                                                     gap: 0,
-                                                                    minHeight: { xs: '104px', sm: '104px' },
-                                                                    maxHeight: { xs: '104px', sm: '104px' },
+                                                                    minHeight: { xs: '100px', sm: '104px' },
                                                                     boxSizing: 'border-box'
                                                                 }}>
                                                                     {/* Home Team */}
@@ -5715,41 +5939,34 @@ export default function LeagueDetailPage() {
                                                                         width: '30%',
                                                                         maxWidth: '30%',
                                                                         minWidth: 0,
-                                                                        px: 0.5
+                                                                        px: 0.5,
+                                                                        pt: 0.75
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.homeTeamImage || HomeTeamImage)}
                                                                             alt={match.homeTeamName}
-                                                                            width={54}
-                                                                            height={54}
+                                                                            width={50}
+                                                                            height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Box sx={{
-                                                                            height: { xs: '2.4em', sm: '2.4em' },
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            width: '100%',
+                                                                        <Typography sx={{
+                                                                            color: 'white',
+                                                                            fontWeight: 600,
+                                                                            fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                            lineHeight: 1.15,
+                                                                            textAlign: 'center',
                                                                             mt: 0.25,
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box',
+                                                                            WebkitLineClamp: 2,
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            wordBreak: 'break-word',
+                                                                            maxWidth: '100%',
+                                                                            width: '100%',
                                                                         }}>
-                                                                            <Typography sx={{
-                                                                                color: 'white',
-                                                                                fontWeight: 600,
-                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
-                                                                                lineHeight: 1.15,
-                                                                                textAlign: 'center',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                                display: '-webkit-box',
-                                                                                WebkitLineClamp: 2,
-                                                                                WebkitBoxOrient: 'vertical',
-                                                                                wordBreak: 'break-word',
-                                                                                maxWidth: '100%',
-                                                                                width: '100%',
-                                                                            }}>
-                                                                                {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                            {formatDisplayTeamName(match.homeTeamName || match.homeTeam, 'Home Team')}
+                                                                        </Typography>
                                                                     </Box>
 
                                                                     {/* Score Center */}
@@ -5835,366 +6052,451 @@ export default function LeagueDetailPage() {
                                                                         width: '30%',
                                                                         maxWidth: '30%',
                                                                         minWidth: 0,
-                                                                        px: 0.5
+                                                                        px: 0.5,
+                                                                        pt: 0.75
                                                                     }}>
                                                                         <Image
                                                                             src={resolveImageUrl(match.awayTeamImage || AwayTeamImage)}
                                                                             alt={match.awayTeamName}
-                                                                            width={54}
-                                                                            height={54}
+                                                                            width={50}
+                                                                            height={50}
                                                                             style={{ objectFit: 'contain' }}
                                                                         />
-                                                                        <Box sx={{
-                                                                            height: { xs: '2.4em', sm: '2.4em' },
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            width: '100%',
+                                                                        <Typography sx={{
+                                                                            color: 'white',
+                                                                            fontWeight: 600,
+                                                                            fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                                                                            lineHeight: 1.15,
+                                                                            textAlign: 'center',
                                                                             mt: 0.25,
+                                                                            overflow: 'hidden',
+                                                                            textOverflow: 'ellipsis',
+                                                                            display: '-webkit-box',
+                                                                            WebkitLineClamp: 2,
+                                                                            WebkitBoxOrient: 'vertical',
+                                                                            wordBreak: 'break-word',
+                                                                            maxWidth: '100%',
+                                                                            width: '100%',
                                                                         }}>
-                                                                            <Typography sx={{
-                                                                                color: 'white',
-                                                                                fontWeight: 600,
-                                                                                fontSize: { xs: '0.78rem', sm: '0.84rem' },
-                                                                                lineHeight: 1.15,
-                                                                                textAlign: 'center',
-                                                                                overflow: 'hidden',
-                                                                                textOverflow: 'ellipsis',
-                                                                                display: '-webkit-box',
-                                                                                WebkitLineClamp: 2,
-                                                                                WebkitBoxOrient: 'vertical',
-                                                                                wordBreak: 'break-word',
-                                                                                maxWidth: '100%',
-                                                                                width: '100%',
-                                                                            }}>
-                                                                                {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
-                                                                            </Typography>
-                                                                        </Box>
+                                                                            {formatDisplayTeamName(match.awayTeamName || match.awayTeam, 'Away Team')}
+                                                                        </Typography>
                                                                     </Box>
                                                                 </Box>
 
-                                                                {/* Bottom Info Panel */}
-                                                                <Box sx={{
-                                                                    display: 'flex',
-                                                                    flexDirection: 'row',
-                                                                    flex: 1
-                                                                }}>
-                                                                    {/* Left Info Column */}
-                                                                    <Box sx={{
-                                                                        flex: 1,
-                                                                        p: 1.5,
-                                                                        display: 'flex',
-                                                                        flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
-                                                                        gap: 1
-                                                                    }}>
-                                                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                                                            {/* Date Row */}
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 0.75 }, flexWrap: 'wrap', overflow: 'visible', whiteSpace: 'nowrap' }}>
-                                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
-                                                                                    <Image src={CalendarImg} alt="Date" width={16} height={16} />
-                                                                                    <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                                                                                        {formatMatchDate(match.date)}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 'fit-content' }}>
-                                                                                    <Image src={ClockImg} alt="Time" width={16} height={16} />
-                                                                                    <Typography sx={{ color: 'white', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                                                                                        {formatMatchTime(match.date)}
-                                                                                    </Typography>
-                                                                                </Box>
-                                                                            </Box>
+                                                                {/* Match Details Row: Date/Time, Location (Centered), Played Indicator */}
+                                                                {(() => {
+                                                                    const currentUserId = user?.id || (user as any)?._id;
+                                                                    const hasPlayed = isUserInMatch(match, currentUserId);
+                                                                    const isCompleted = !league?.active || !matchSeasonActiveForStats;
+                                                                    const { count, total, percent } = getMatchStatsProgress(match, matchStatsMap[match.id]);
+                                                                    const motm = getTopMotmPlayer(match, league?.members || []);
 
-                                                                            {/* Location Row */}
-                                                                            {match.location ? (
-                                                                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, maxWidth: '160px' }}>
-                                                                                    <Box sx={{ mt: 0.3, flexShrink: 0 }}><Image src={LocationImg} alt="Location" width={18} height={18} /></Box>
-                                                                                    <Typography sx={{ color: '#ccc', fontSize: '0.6rem', lineHeight: 1.3, wordBreak: 'break-word' }}>
-                                                                                        {formatLocationForCard(match.location)}
+                                                                    return (
+                                                                        <>
+                                                                            <Box sx={{
+                                                                                display: 'grid',
+                                                                                gridTemplateColumns: '1fr auto 1fr',
+                                                                                alignItems: 'center',
+                                                                                gap: 1,
+                                                                                px: 1.5,
+                                                                                pt: 1.25,
+                                                                                pb: 0.5,
+                                                                                width: '100%'
+                                                                            }}>
+                                                                                {/* Left: Date & Time */}
+                                                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                                                                    <Typography sx={{
+                                                                                        color: '#d1d5db',
+                                                                                        fontSize: { xs: '0.72rem', sm: '0.8rem' },
+                                                                                        fontWeight: 600,
+                                                                                        whiteSpace: 'nowrap',
+                                                                                        overflow: 'hidden',
+                                                                                        textOverflow: 'ellipsis'
+                                                                                    }}>
+                                                                                        {formatFixtureDateTime(match.date || match.start)}
                                                                                     </Typography>
                                                                                 </Box>
-                                                                            ) : (
-                                                                                <Box sx={{ height: '20px' }} />
-                                                                            )}
-                                                                        </Box>
 
-                                                                        {/* MOTM Section */}
-                                                                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', mt: { xs: -5, sm: -7.5 } }}>
-                                                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', minHeight: 52, gap: 0 }}>
-                                                                                <Image src={CardStar} alt="MOTM" width={34} height={34} />
-                                                                                {(() => {
-                                                                                    const motmPlayerName = getTopMotmPlayerName(match, league?.members || []);
-                                                                                    return (
+                                                                                {/* Center: Location */}
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center',
+                                                                                    gap: 0.5,
+                                                                                    minWidth: 0,
+                                                                                    textAlign: 'center'
+                                                                                }}>
+                                                                                    {match.location ? (
                                                                                         <>
-                                                                                            <Typography
-                                                                                                sx={{
-                                                                                                    color: motmPlayerName ? '#FFD700' : '#ffff',
-                                                                                                    fontSize: '0.6rem',
-                                                                                                    fontWeight: 700,
-                                                                                                    textAlign: 'center',
-                                                                                                    mt: 0.5,
-                                                                                                    minHeight: '0.8rem',
-                                                                                                    lineHeight: 1.1,
-                                                                                                    maxWidth: '100px',
-                                                                                                    whiteSpace: 'nowrap',
-                                                                                                    overflow: 'hidden',
-                                                                                                    textOverflow: 'ellipsis',
-                                                                                                    visibility: motmPlayerName ? 'visible' : 'visible'
-                                                                                                }}
-                                                                                            >
-                                                                                                {motmPlayerName || 'Select the MOTM'}
-                                                                                            </Typography>
-                                                                                            <Typography sx={{ color: 'white', fontSize: '0.6rem', fontWeight: 600, textAlign: 'center' }}>
-                                                                                                Man Of The Match
+                                                                                            <MapPin size={15} color="#d1d5db" style={{ flexShrink: 0 }} />
+                                                                                            <Typography sx={{
+                                                                                                color: '#d1d5db',
+                                                                                                fontSize: { xs: '0.72rem', sm: '0.8rem' },
+                                                                                                fontWeight: 500,
+                                                                                                overflow: 'hidden',
+                                                                                                textOverflow: 'ellipsis',
+                                                                                                whiteSpace: 'nowrap'
+                                                                                            }}>
+                                                                                                {formatLocationForCard(match.location)}
                                                                                             </Typography>
                                                                                         </>
-                                                                                    );
-                                                                                })()}
-                                                                            </Box>
-                                                                        </Box>
+                                                                                    ) : null}
+                                                                                </Box>
 
-                                                                        {/* Action Buttons */}
-                                                                        <Box sx={{
-                                                                            display: 'grid',
-                                                                            gridTemplateColumns: (isAdmin || isMember) ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))',
-                                                                            alignItems: 'center',
-                                                                            gap: 1,
-                                                                            mt: 0.5,
-                                                                            width: '100%'
-                                                                        }}>
-                                                                            {/* Add Stats Button */}
-                                                                            {(isAdmin || isMember) && (() => {
-                                                                                const isInMatch = match.homeTeamUsers?.some((u) => String(u?.id) === String(user?.id)) ||
-                                                                                    match.awayTeamUsers?.some((u) => String(u?.id) === String(user?.id));
-                                                                                const isCompleted = !league?.active || !matchSeasonActiveForStats;
-                                                                                return (
-                                                                                    <Box
-                                                                                        onClick={() => {
-                                                                                            if (isCompleted) {
-                                                                                                const toastMsg = !league?.active
-                                                                                                    ? 'League is complete you are not able to add new stats. Please contact admin to update stats.'
-                                                                                                    : 'Season is complete you are not able to add new stats. Please contact admin to update stats.';
-                                                                                                toast(toastMsg, {
-                                                                                                    icon: '🏆',
-                                                                                                    duration: 5000,
-                                                                                                    style: {
-                                                                                                        color: '#fff',
-                                                                                                        fontWeight: 600,
-                                                                                                        fontSize: '0.95rem',
-                                                                                                        padding: '14px 20px',
-                                                                                                        borderRadius: '12px',
-                                                                                                        background: '#EF4444',
-                                                                                                        boxShadow: '0 4px 20px rgba(239, 68, 68, 0.5)',
-                                                                                                    },
-                                                                                                });
-                                                                                                return;
-                                                                                            }
-                                                                                            if (idx >= 2) {
-                                                                                                toast('unable to enter stats as this match has been locked, please request admin to make any changes etc', {
-                                                                                                    icon: '🔒',
-                                                                                                    duration: 5000,
-                                                                                                    style: {
-                                                                                                        background: '#F59E0B',
-                                                                                                        color: '#fff',
-                                                                                                        fontWeight: 600,
-                                                                                                        fontSize: '0.95rem',
-                                                                                                        padding: '14px 20px',
-                                                                                                        borderRadius: '12px',
-                                                                                                        boxShadow: '0 4px 20px rgba(245, 158, 11, 0.5)',
-                                                                                                    },
-                                                                                                });
-                                                                                                return;
-                                                                                            }
-                                                                                            if (!isInMatch) {
-                                                                                                toast('You are not added in this match.', {
-                                                                                                    icon: '⚠️',
-                                                                                                    duration: 4000,
-                                                                                                    style: {
-                                                                                                        background: '#F97316',
-                                                                                                        color: '#fff',
-                                                                                                        fontWeight: 600,
-                                                                                                        fontSize: '0.95rem',
-                                                                                                        padding: '14px 20px',
-                                                                                                        borderRadius: '2px',
-                                                                                                        boxShadow: '0 4px 20px rgba(249, 115, 22, 0.5)',
-                                                                                                    },
-                                                                                                });
-                                                                                                return;
-                                                                                            }
-                                                                                            setSelectedMatchIdForDialog(match.id);
-                                                                                            setShouldShowAdminGoals(false);
-                                                                                            setMatchStatsOpen(true);
-                                                                                        }}
+                                                                                {/* Right: Played Indicator */}
+                                                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                                                                    {hasPlayed ? (
+                                                                                        <Box sx={{
+                                                                                            bgcolor: 'rgba(34, 197, 94, 0.1)',
+                                                                                            border: '1px solid rgba(34, 197, 94, 0.3)',
+                                                                                            borderRadius: '6px',
+                                                                                            px: { xs: 0.75, sm: 1 },
+                                                                                            py: 0.35,
+                                                                                            fontSize: { xs: '0.68rem', sm: '0.75rem' },
+                                                                                            color: '#22c55e',
+                                                                                            fontWeight: 700,
+                                                                                            whiteSpace: 'nowrap',
+                                                                                            display: 'inline-flex',
+                                                                                            alignItems: 'center'
+                                                                                        }}>
+                                                                                            Played
+                                                                                        </Box>
+                                                                                    ) : null}
+                                                                                </Box>
+                                                                            </Box>
+
+                                                                            {/* MOTM Row */}
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'space-between',
+                                                                                px: 1.5,
+                                                                                py: 0.75,
+                                                                                mx: 1.5,
+                                                                                my: 0.5,
+                                                                                bgcolor: 'rgba(255, 255, 255, 0.04)',
+                                                                                borderRadius: '8px',
+                                                                            }}>
+                                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
+                                                                                    <Avatar
+                                                                                        src={motm?.picture || undefined}
                                                                                         sx={{
-                                                                                            cursor: 'pointer',
-                                                                                            width: '100%',
-                                                                                            '&:hover .add-stats-btn': {
-                                                                                                backgroundColor: '#1D4ED8',
-                                                                                            },
+                                                                                            width: 32,
+                                                                                            height: 32,
+                                                                                            bgcolor: '#eab308',
+                                                                                            color: '#000',
+                                                                                            fontWeight: 700,
+                                                                                            fontSize: '0.85rem'
                                                                                         }}
                                                                                     >
-                                                                                        <Button
-                                                                                            className="add-stats-btn"
-                                                                                            size="small"
-                                                                                            startIcon={<Image src={ADDSTATS} alt="Add Stats" width={isMobile ? 13 : 17} height={isMobile ? 13 : 17} />}
-                                                                                            sx={{
-                                                                                                ...cardActionButtonSx,
-                                                                                                pointerEvents: 'none',
-                                                                                                backgroundColor: '#2563EB',
-                                                                                                color: 'white',
-                                                                                                border: 'none',
-                                                                                            }}
-                                                                                        >
-                                                                                            Add Stats
-                                                                                        </Button>
+                                                                                        {motm ? motm.initial : <Crown size={16} />}
+                                                                                    </Avatar>
+                                                                                    <Box sx={{ minWidth: 0 }}>
+                                                                                        <Typography sx={{
+                                                                                            color: motm ? '#fff' : '#9ca3af',
+                                                                                            fontSize: '0.82rem',
+                                                                                            fontWeight: 700,
+                                                                                            lineHeight: 1.2,
+                                                                                            overflow: 'hidden',
+                                                                                            textOverflow: 'ellipsis',
+                                                                                            whiteSpace: 'nowrap'
+                                                                                        }}>
+                                                                                            {motm ? motm.name : 'Select the MOTM'}
+                                                                                        </Typography>
+                                                                                        <Typography sx={{
+                                                                                            color: '#9ca3af',
+                                                                                            fontSize: '0.68rem',
+                                                                                            fontWeight: 500,
+                                                                                            lineHeight: 1.1
+                                                                                        }}>
+                                                                                            Man of the match
+                                                                                        </Typography>
                                                                                     </Box>
-                                                                                );
-                                                                            })()}
+                                                                                </Box>
+                                                                                <Star sx={{ fontSize: 20, color: motm ? '#f59e0b' : '#6b7280' }} />
+                                                                            </Box>
 
-                                                                            {/* View Team Button */}
-                                                                            <Button
-                                                                                size="small"
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation();
-                                                                                    setViewTeamMatch({ leagueId, matchId: match.id, matchNumber });
-                                                                                    setViewTeamOpen(true);
-                                                                                }}
-                                                                                startIcon={<Image src={ViewTeamImg} alt="View Team" width={isMobile ? 13 : 17} height={isMobile ? 13 : 17} />}
-                                                                                sx={{
-                                                                                    ...cardActionButtonSx,
-                                                                                    backgroundColor: '#7C3AED',
-                                                                                    color: 'white',
-                                                                                    border: 'none',
-                                                                                    '&:hover': {
-                                                                                        backgroundColor: '#6D28D9',
-                                                                                    },
-                                                                                }}
-                                                                            >
-                                                                                View Teams
-                                                                            </Button>
-
-                                                                            {/* Results Button */}
-                                                                            <Button
-                                                                                size="small"
-                                                                                onClick={() => { setResultsDialogMatchId(match.id); setResultsDialogOpen(true); }}
-                                                                                startIcon={<Image src={RESULTS} alt="Results" width={isMobile ? 12 : 14} height={isMobile ? 12 : 14} />}
-                                                                                sx={{
-                                                                                    ...cardActionButtonSx,
-                                                                                    backgroundColor: '#FF007F',
-                                                                                    color: 'white',
-                                                                                    border: 'none',
-                                                                                    '&:hover': {
-                                                                                        backgroundColor: '#DB2777',
-                                                                                    },
-                                                                                    '&.Mui-disabled': {
-                                                                                        backgroundColor: '#FF007F',
-                                                                                        color: 'white',
-                                                                                        opacity: 0.5,
-                                                                                    },
-                                                                                }}
-                                                                            >
-                                                                                Results
-                                                                            </Button>
-                                                                        </Box>
-                                                                    </Box>
-
-                                                                    {/* Right Admin Column */}
-                                                                    <Box sx={{
-                                                                        width: '100px',
-                                                                        borderLeft: '1px solid #fff',
-                                                                        borderTop: 'none',
-                                                                        p: 1,
-                                                                        display: 'flex',
-                                                                        flexDirection: 'column',
-                                                                        justifyContent: 'flex-start',
-                                                                        gap: 1
-                                                                    }}>
-                                                                        {isAdmin ? (
-                                                                            <>
-                                                                                <Typography sx={{ color: 'white', fontSize: '0.65rem', textAlign: 'left', ml: '5px' }}>
-                                                                                    Admin Only
+                                                                            {/* Player Statistics Progress Indicator */}
+                                                                            <Box sx={{ px: 1.5, py: 0.5, mx: 1.5, my: 0.25 }}>
+                                                                                <Typography sx={{ color: '#9ca3af', fontSize: '0.72rem', fontWeight: 500, mb: 0.6 }}>
+                                                                                    Stats added for {count} of {total} players
                                                                                 </Typography>
-                                                                                {/* Add Score Button */}
+                                                                                <Box sx={{
+                                                                                    width: '100%',
+                                                                                    height: 5,
+                                                                                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                                                                                    borderRadius: 3,
+                                                                                    overflow: 'hidden'
+                                                                                }}>
+                                                                                    <Box sx={{
+                                                                                        width: `${percent}%`,
+                                                                                        height: '100%',
+                                                                                        bgcolor: '#2563eb',
+                                                                                        borderRadius: 3,
+                                                                                        transition: 'width 0.3s ease'
+                                                                                    }} />
+                                                                                </Box>
+                                                                            </Box>
+
+                                                                            {/* Action Buttons: + My Stats, Teams, Report */}
+                                                                            <Box sx={{
+                                                                                display: 'flex',
+                                                                                gap: 1,
+                                                                                px: 1.5,
+                                                                                pt: 0.75,
+                                                                                pb: 1.5,
+                                                                                width: '100%',
+                                                                                boxSizing: 'border-box'
+                                                                            }}>
                                                                                 <Button
+                                                                                    variant="contained"
+                                                                                    size="small"
                                                                                     onClick={() => {
+                                                                                        if (match.archived) return;
+                                                                                        if (isCompleted) {
+                                                                                            const toastMsg = !league?.active
+                                                                                                ? 'League is complete you are not able to add new stats. Please contact admin to update stats.'
+                                                                                                : 'Season is complete you are not able to add new stats. Please contact admin to update stats.';
+                                                                                            toast(toastMsg, {
+                                                                                                icon: '🏆',
+                                                                                                duration: 5000,
+                                                                                                style: {
+                                                                                                    color: '#fff',
+                                                                                                    fontWeight: 600,
+                                                                                                    fontSize: '0.95rem',
+                                                                                                    padding: '14px 20px',
+                                                                                                    borderRadius: '12px',
+                                                                                                    background: '#EF4444',
+                                                                                                    boxShadow: '0 4px 20px rgba(239, 68, 68, 0.5)',
+                                                                                                },
+                                                                                            });
+                                                                                            return;
+                                                                                        }
+                                                                                        if (idx >= 2) {
+                                                                                            toast('unable to enter stats as this match has been locked, please request admin to make any changes etc', {
+                                                                                                icon: '🔒',
+                                                                                                duration: 5000,
+                                                                                                style: {
+                                                                                                    background: '#F59E0B',
+                                                                                                    color: '#fff',
+                                                                                                    fontWeight: 600,
+                                                                                                    fontSize: '0.95rem',
+                                                                                                    padding: '14px 20px',
+                                                                                                    borderRadius: '12px',
+                                                                                                    boxShadow: '0 4px 20px rgba(245, 158, 11, 0.5)',
+                                                                                                },
+                                                                                            });
+                                                                                            return;
+                                                                                        }
+                                                                                        if (!hasPlayed && !isAdmin) {
+                                                                                            toast('You are not added in this match.', {
+                                                                                                icon: '⚠️',
+                                                                                                duration: 4000,
+                                                                                                style: {
+                                                                                                    background: '#F97316',
+                                                                                                    color: '#fff',
+                                                                                                    fontWeight: 600,
+                                                                                                    fontSize: '0.95rem',
+                                                                                                    padding: '14px 20px',
+                                                                                                    borderRadius: '2px',
+                                                                                                    boxShadow: '0 4px 20px rgba(249, 115, 22, 0.5)',
+                                                                                                },
+                                                                                            });
+                                                                                            return;
+                                                                                        }
                                                                                         setSelectedMatchIdForDialog(match.id);
-                                                                                        setShouldShowAdminGoals(true);
+                                                                                        setShouldShowAdminGoals(false);
                                                                                         setMatchStatsOpen(true);
                                                                                     }}
-                                                                                    disabled={match.archived || !league?.active || !matchSeasonActiveForStats}
-                                                                                    startIcon={<Edit size={14} color="#00a77f" />}
+                                                                                    disabled={match.archived}
                                                                                     sx={{
-                                                                                        color: '#fff',
-                                                                                        justifyContent: 'flex-start',
+                                                                                        color: 'white',
                                                                                         textTransform: 'none',
-                                                                                        p: 0,
-                                                                                        ml: '5px',
-                                                                                        fontSize: '0.7rem',
-                                                                                        fontWeight: 600,
+                                                                                        fontWeight: 700,
+                                                                                        fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                                        py: 0.9,
+                                                                                        px: 1,
+                                                                                        borderRadius: '10px',
                                                                                         whiteSpace: 'nowrap',
-                                                                                        textDecoration: 'underline',
-                                                                                        '& .MuiButton-startIcon': { mr: 1 },
+                                                                                        flex: 1,
+                                                                                        minWidth: 0,
+                                                                                        lineHeight: 1.2,
+                                                                                        background: '#2563EB',
+                                                                                        '&:hover': { background: '#1D4ED8' },
+                                                                                        '&.Mui-disabled': { opacity: 0.5 }
                                                                                     }}
                                                                                 >
-                                                                                    Add Score
+                                                                                    + My Stats
                                                                                 </Button>
                                                                                 <Button
+                                                                                    variant="contained"
+                                                                                    size="small"
                                                                                     onClick={(e) => {
                                                                                         e.stopPropagation();
-                                                                                        setEditMatchId(match.id);
-                                                                                        setEditMatchDialogOpen(true);
+                                                                                        setViewTeamMatch({ leagueId, matchId: match.id, matchNumber });
+                                                                                        setViewTeamOpen(true);
                                                                                     }}
-                                                                                    disabled={!league?.active || match.archived}
-                                                                                    startIcon={<Edit size={14} color="#00a77f" />}
+                                                                                    disabled={match.archived}
                                                                                     sx={{
-                                                                                        color: '#fff',
-                                                                                        justifyContent: 'flex-start',
+                                                                                        color: 'white',
                                                                                         textTransform: 'none',
-                                                                                        p: 0,
-                                                                                        ml: '5px',
-                                                                                        fontSize: '0.7rem',
-                                                                                        fontWeight: 600,
+                                                                                        fontWeight: 700,
+                                                                                        fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                                        py: 0.9,
+                                                                                        px: 1,
+                                                                                        borderRadius: '10px',
                                                                                         whiteSpace: 'nowrap',
-                                                                                        textDecoration: 'underline',
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 }
+                                                                                        flex: 1,
+                                                                                        minWidth: 0,
+                                                                                        lineHeight: 1.2,
+                                                                                        background: '#7C3AED',
+                                                                                        '&:hover': { background: '#6D28D9' },
+                                                                                        '&.Mui-disabled': { opacity: 0.5 }
                                                                                     }}
                                                                                 >
-                                                                                    Edit Match
+                                                                                    Teams
                                                                                 </Button>
                                                                                 <Button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        if (match.archived) {
-                                                                                            setArchivedActionMatch(match);
-                                                                                            setArchivedActionOpen(true);
-                                                                                        } else {
-                                                                                            handleRequestDeleteMatch(match);
-                                                                                        }
+                                                                                    variant="contained"
+                                                                                    size="small"
+                                                                                    onClick={() => {
+                                                                                        setResultsDialogMatchId(match.id);
+                                                                                        setResultsDialogOpen(true);
                                                                                     }}
-                                                                                    startIcon={match.archived ? <Undo2 size={14} /> : <Trash2 size={14} />}
+                                                                                    disabled={match.archived}
                                                                                     sx={{
-                                                                                        color: '#fff',
-                                                                                        justifyContent: 'flex-start',
+                                                                                        color: 'white',
                                                                                         textTransform: 'none',
-                                                                                        p: 0,
-                                                                                        ml: '5px',
-                                                                                        fontSize: '0.65rem',
-                                                                                        fontWeight: 600,
+                                                                                        fontWeight: 700,
+                                                                                        fontSize: { xs: '0.78rem', sm: '0.85rem' },
+                                                                                        py: 0.9,
+                                                                                        px: 1,
+                                                                                        borderRadius: '10px',
                                                                                         whiteSpace: 'nowrap',
-                                                                                        textDecoration: 'underline',
-                                                                                        '& .MuiButton-startIcon': { mr: 0.5 }
+                                                                                        flex: 1,
+                                                                                        minWidth: 0,
+                                                                                        lineHeight: 1.2,
+                                                                                        background: '#FF007F',
+                                                                                        '&:hover': { background: '#DB2777' },
+                                                                                        '&.Mui-disabled': { opacity: 0.5 }
                                                                                     }}
                                                                                 >
-                                                                                    {match.archived ? 'Restore' : 'Delete Match'}
+                                                                                    Report
                                                                                 </Button>
-                                                                            </>
-                                                                        ) : (
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.3 }}>
-                                                                                <Crown size={32} color="white" />
                                                                             </Box>
-                                                                        )}
-                                                                    </Box>
-                                                                </Box>
+
+                                                                            {/* Admin Section at Bottom */}
+                                                                            {isAdmin && (
+                                                                                <Box sx={{
+                                                                                    mt: 'auto',
+                                                                                    pt: 1,
+                                                                                    pb: 1,
+                                                                                    px: 1.5,
+                                                                                    borderTop: '1px dashed #e56a16',
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'space-between',
+                                                                                    bgcolor: '#191919',
+                                                                                    width: '100%',
+                                                                                    boxSizing: 'border-box'
+                                                                                }}>
+                                                                                    <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                                                        Admin
+                                                                                    </Typography>
+                                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                                                                                        <Button
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                setSelectedMatchIdForDialog(match.id);
+                                                                                                setShouldShowAdminGoals(true);
+                                                                                                setMatchStatsOpen(true);
+                                                                                            }}
+                                                                                            disabled={match.archived || !league?.active || !matchSeasonActiveForStats}
+                                                                                            startIcon={<Plus size={13} color="#00D09E" />}
+                                                                                            sx={{
+                                                                                                color: 'white',
+                                                                                                bgcolor: 'transparent',
+                                                                                                border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                                borderRadius: '8px',
+                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                py: 0.4,
+                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontWeight: 600,
+                                                                                                textTransform: 'none',
+                                                                                                minWidth: 0,
+                                                                                                '&:hover': {
+                                                                                                    bgcolor: 'rgba(0, 208, 158, 0.15)',
+                                                                                                    borderColor: '#00D09E'
+                                                                                                },
+                                                                                                '&.Mui-disabled': { opacity: 0.4 }
+                                                                                            }}
+                                                                                        >
+                                                                                            + Add Score
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                setEditMatchId(match.id);
+                                                                                                setEditMatchDialogOpen(true);
+                                                                                            }}
+                                                                                            disabled={!league?.active || match.archived}
+                                                                                            startIcon={<Edit size={13} color="#00D09E" />}
+                                                                                            sx={{
+                                                                                                color: 'white',
+                                                                                                bgcolor: 'transparent',
+                                                                                                border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                                borderRadius: '8px',
+                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                py: 0.4,
+                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontWeight: 600,
+                                                                                                textTransform: 'none',
+                                                                                                minWidth: 0,
+                                                                                                '&:hover': {
+                                                                                                    bgcolor: 'rgba(0, 208, 158, 0.15)',
+                                                                                                    borderColor: '#00D09E'
+                                                                                                },
+                                                                                                '&.Mui-disabled': { opacity: 0.4 }
+                                                                                            }}
+                                                                                        >
+                                                                                            Edit Match
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation();
+                                                                                                if (match.archived) {
+                                                                                                    setArchivedActionMatch(match);
+                                                                                                    setArchivedActionOpen(true);
+                                                                                                } else {
+                                                                                                    handleRequestDeleteMatch(match);
+                                                                                                }
+                                                                                            }}
+                                                                                            startIcon={match.archived ? <Undo2 size={13} color="#f97316" /> : <Trash2 size={13} color="#ff4d4f" />}
+                                                                                            sx={{
+                                                                                                color: match.archived ? '#f97316' : '#ff4d4f',
+                                                                                                bgcolor: 'transparent',
+                                                                                                border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
+                                                                                                borderRadius: '8px',
+                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                py: 0.4,
+                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontWeight: 600,
+                                                                                                textTransform: 'none',
+                                                                                                minWidth: 0,
+                                                                                                '&:hover': {
+                                                                                                    bgcolor: match.archived ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 77, 79, 0.15)',
+                                                                                                    borderColor: match.archived ? '#f97316' : '#ff4d4f'
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            {match.archived ? 'Restore' : 'Delete'}
+                                                                                        </Button>
+                                                                                    </Box>
+                                                                                </Box>
+                                                                            )}
+                                                                        </>
+                                                                    );
+                                                                })()}
                                                             </CardContent>
                                                             {isAdmin && match.archived && (
                                                                 <Box
