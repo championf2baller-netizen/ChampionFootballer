@@ -56,6 +56,7 @@ import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLo
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
 import MatchResultLoadingSkeleton from '@/Components/loading/MatchResultLoadingSkeleton';
 import PlayerCardLoadingSkeleton from '@/Components/loading/PlayerCardLoadingSkeleton';
+import PageHeader from '@/Components/PageHeader';
 import { isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { TokenManager } from '@/lib/tokenManager';
@@ -3383,90 +3384,7 @@ export default function LeagueDetailPage() {
         return !isResultMatch(match);
     }
 
-    if (error && !isSigningOut) {
-        return (
-            <Box
-                sx={{
-                    minHeight: '100vh',
-                    fontFamily: 'var(--font-inter), var(--font-woodford-bourne-pro), Arial, sans-serif',
-                    py: { xs: 2, md: 4 },
-                    px: { xs: 1, md: 0 },
-                    background: 'transparent',
-                    backgroundAttachment: 'fixed',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}
-            >
-                <Container maxWidth="lg">
-                    <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                        {error}
-                    </Typography>
-                </Container>
-            </Box>
-        );
-    }
 
-    if (!league && !isSigningOut) {
-        // Show skeleton loader whenever league is null AND no explicit error has occurred yet.
-        // Never show the error screen on page refresh or while awaiting responses/tokens.
-        const shouldShowLeagueSkeleton = !error || authLoading || leagueDetailsLoading || !leagueDetailsAttempted;
-
-        if (shouldShowLeagueSkeleton) {
-            return (
-                <Box
-                    sx={{
-                        minHeight: '100vh',
-                        fontFamily: 'var(--font-inter), var(--font-woodford-bourne-pro), Arial, sans-serif',
-                        py: { xs: 2, md: 4 },
-                        px: { xs: 1, md: 0 },
-                        background: 'transparent',
-                    }}
-                >
-                    <Container maxWidth="lg">
-                        <LeagueDetailLoadingSkeleton mode="page" />
-                    </Container>
-                </Box>
-            );
-        }
-
-        return (
-            <Box
-                sx={{
-                    minHeight: '100vh',
-                    fontFamily: 'var(--font-inter), var(--font-woodford-bourne-pro), Arial, sans-serif',
-                    py: { xs: 2, md: 4 },
-                    px: { xs: 1, md: 0 },
-                    background: 'transparent',
-                }}
-            >
-                <Container maxWidth="lg">
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
-                        <Button
-                            startIcon={<RefreshCw size={16} />}
-                            onClick={() => {
-                                setError(null);
-                                setLeagueDetailsAttempted(false);
-                                void fetchLeagueDetails();
-                            }}
-                            sx={{
-                                color: 'white',
-                                backgroundColor: '#e56a16',
-                                '&:hover': { backgroundColor: '#d1590d' },
-                            }}
-                        >
-                            Retry Loading
-                        </Button>
-                    </Box>
-                    <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold' }}>
-                        {error}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)', mt: 1 }}>
-                        Please verify your server connection or try again.
-                    </Typography>
-                </Container>
-            </Box>
-        );
-    }
 
     // Add these handlers before the return statement
 
@@ -3941,147 +3859,129 @@ export default function LeagueDetailPage() {
                                                 height={isMobile ? 24 : 56}
                                                 style={{ objectFit: 'contain', pointerEvents: 'none' }}
                                             />
-                                            {league ? (
-                                                <Button
-                                                    onClick={handleLeaguesDropdownOpen}
-                                                    sx={{
-                                                        textTransform: 'uppercase',
-                                                        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                                        fontSize: { xs: getLeagueTitleFontSize(league?.name), sm: '42px', md: '55px' },
-                                                        fontWeight: 700,
-                                                        lineHeight: { xs: 1, sm: 1.1 },
-                                                        wordBreak: 'normal',
-                                                        overflow: 'visible',
-                                                        textOverflow: 'clip',
-                                                        whiteSpace: 'nowrap',
-                                                        flexShrink: 1,
-                                                        minWidth: 0,
-                                                        maxWidth: { xs: '100%', sm: '72vw', md: '56vw' },
-                                                        textAlign: 'center',
-                                                        color: 'white',
-                                                        backgroundColor: 'transparent',
-                                                        borderRadius: 0,
-                                                        px: 0,
-                                                        py: 0,
-                                                        height: 'auto',
-                                                        '&:hover': {
-                                                            backgroundColor: 'transparent',
-                                                        },
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        flexWrap: 'nowrap',
-                                                        gap: 0.5,
-                                                    }}
-                                                    endIcon={
-                                                        <Box
-                                                            component="span"
-                                                            sx={{
-                                                                width: 0,
-                                                                height: 0,
-                                                                borderLeft: { xs: '6px solid transparent', sm: '10px solid transparent' },
-                                                                borderRight: { xs: '6px solid transparent', sm: '10px solid transparent' },
-                                                                borderTop: { xs: '10px solid #FFFFFF', sm: '16px solid #FFFFFF' },
-                                                                display: 'inline-block',
-                                                                ml: 0.5
-                                                            }}
-                                                        />
-                                                    }
-                                                >
-                                                    <Box
-                                                        component="span"
+                                            {(() => {
+                                                const displayedLeagueName = league?.name || allLeagues.find(l => String(l.id) === String(leagueId))?.name || 'LEAGUE';
+                                                return (
+                                                    <Button
+                                                        onClick={handleLeaguesDropdownOpen}
                                                         sx={{
-                                                            display: 'inline-block',
-                                                            maxWidth: { xs: 'calc(100vw - 96px)', sm: '58vw', md: '48vw' },
+                                                            textTransform: 'uppercase',
+                                                            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+                                                            fontSize: { xs: getLeagueTitleFontSize(displayedLeagueName), sm: '42px', md: '55px' },
+                                                            fontWeight: 700,
+                                                            lineHeight: { xs: 1, sm: 1.1 },
+                                                            wordBreak: 'normal',
                                                             overflow: 'visible',
                                                             textOverflow: 'clip',
                                                             whiteSpace: 'nowrap',
-                                                            wordBreak: 'normal',
-                                                            verticalAlign: 'middle',
+                                                            flexShrink: 1,
+                                                            minWidth: 0,
+                                                            maxWidth: { xs: '100%', sm: '72vw', md: '56vw' },
+                                                            textAlign: 'center',
+                                                            color: 'white',
+                                                            backgroundColor: 'transparent',
+                                                            borderRadius: 0,
+                                                            px: 0,
+                                                            py: 0,
+                                                            height: 'auto',
+                                                            '&:hover': {
+                                                                backgroundColor: 'transparent',
+                                                            },
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            flexWrap: 'nowrap',
+                                                            gap: 0.5,
                                                         }}
+                                                        endIcon={
+                                                            <Box
+                                                                component="span"
+                                                                sx={{
+                                                                    width: 0,
+                                                                    height: 0,
+                                                                    borderLeft: { xs: '6px solid transparent', sm: '10px solid transparent' },
+                                                                    borderRight: { xs: '6px solid transparent', sm: '10px solid transparent' },
+                                                                    borderTop: { xs: '10px solid #FFFFFF', sm: '16px solid #FFFFFF' },
+                                                                    display: 'inline-block',
+                                                                    ml: 0.5
+                                                                }}
+                                                            />
+                                                        }
                                                     >
-                                                        {formatLeagueName(league.name)}
-                                                    </Box>
-                                                </Button>
-                                            ) : (
-                                                <Typography
-                                                    sx={{
-                                                        textTransform: 'uppercase',
-                                                        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                                        fontSize: { xs: '32px', sm: '42px', md: '55px' },
-                                                        fontWeight: 700,
-                                                        color: 'white',
-                                                    }}
-                                                >
-                                                    Loading...
-                                                </Typography>
-                                            )}
+                                                        <Box
+                                                            component="span"
+                                                            sx={{
+                                                                display: 'inline-block',
+                                                                maxWidth: { xs: 'calc(100vw - 96px)', sm: '58vw', md: '48vw' },
+                                                                overflow: 'visible',
+                                                                textOverflow: 'clip',
+                                                                whiteSpace: 'nowrap',
+                                                                wordBreak: 'normal',
+                                                                verticalAlign: 'middle',
+                                                            }}
+                                                        >
+                                                            {formatLeagueName(displayedLeagueName)}
+                                                        </Box>
+                                                    </Button>
+                                                );
+                                            })()}
                                         </Box>
-                                        {league && (
-                                            <Button
-                                                onClick={handleSeasonDropdownOpen}
-                                                sx={{
-                                                    mt: -1,
-                                                    color: 'rgba(255,255,255,0.9)',
-                                                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
-                                                    fontWeight: 500,
-                                                    letterSpacing: 0.25,
-                                                    textTransform: 'none',
-                                                    backgroundColor: 'transparent',
-                                                    borderRadius: 0,
-                                                    px: 1,
-                                                    py: 0,
-                                                    minHeight: 'auto',
-                                                    minWidth: 0,
-                                                    maxWidth: { xs: '88vw', sm: '60vw', md: '50vw' },
-                                                    overflow: 'hidden',
-                                                    '&:hover': {
-                                                        backgroundColor: 'rgba(255,255,255,0.05)',
-                                                    },
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 0.5,
-                                                }}
-                                                startIcon={
-                                                    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-                                                        {/* <Image
-                                                            src={LeagueIcon}
-                                                            alt="Season Icon"
-                                                            width={isMobile ? 14 : 16}
-                                                            height={isMobile ? 14 : 16}
-                                                            style={{ objectFit: 'contain', opacity: 0.95 }}
-                                                        /> */}
-                                                        {!isSelectedSeasonActive ? <Lock size={14} color="rgba(255,255,255,0.6)" /> : null}
-                                                    </Box>
-                                                }
-                                                endIcon={
-                                                    <Box
-                                                        component="span"
-                                                        sx={{
-                                                            width: 0,
-                                                            height: 0,
-                                                            borderLeft: '6px solid transparent',
-                                                            borderRight: '6px solid transparent',
-                                                            borderTop: '10px solid rgba(255,255,255,0.9)',
-                                                            display: 'inline-block',
-                                                        }}
-                                                    />
-                                                }
-                                            >
+                                        <Button
+                                            onClick={handleSeasonDropdownOpen}
+                                            sx={{
+                                                mt: -1,
+                                                color: 'rgba(255,255,255,0.9)',
+                                                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
+                                                fontWeight: 500,
+                                                letterSpacing: 0.25,
+                                                textTransform: 'none',
+                                                backgroundColor: 'transparent',
+                                                borderRadius: 0,
+                                                px: 1,
+                                                py: 0,
+                                                minHeight: 'auto',
+                                                minWidth: 0,
+                                                maxWidth: { xs: '88vw', sm: '60vw', md: '50vw' },
+                                                overflow: 'hidden',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255,255,255,0.05)',
+                                                },
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 0.5,
+                                            }}
+                                            startIcon={
+                                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                                                    {!isSelectedSeasonActive ? <Lock size={14} color="rgba(255,255,255,0.6)" /> : null}
+                                                </Box>
+                                            }
+                                            endIcon={
                                                 <Box
                                                     component="span"
                                                     sx={{
+                                                        width: 0,
+                                                        height: 0,
+                                                        borderLeft: '6px solid transparent',
+                                                        borderRight: '6px solid transparent',
+                                                        borderTop: '10px solid rgba(255,255,255,0.9)',
                                                         display: 'inline-block',
-                                                        maxWidth: { xs: '75vw', sm: '46vw', md: '40vw' },
-                                                        overflow: 'hidden',
-                                                        textOverflow: 'clip',
-                                                        whiteSpace: 'nowrap',
                                                     }}
-                                                >
-                                                    {seasonLabel}
-                                                </Box>
-                                            </Button>
-                                        )}
+                                                />
+                                            }
+                                        >
+                                            <Box
+                                                component="span"
+                                                sx={{
+                                                    display: 'inline-block',
+                                                    maxWidth: { xs: '75vw', sm: '46vw', md: '40vw' },
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'clip',
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                {seasonLabel || '#Season 1'}
+                                            </Box>
+                                        </Button>
                                     </Box>
 
                                     {/* Season Dropdown Menu */}
@@ -4601,49 +4501,74 @@ export default function LeagueDetailPage() {
                             mt: section === 'dream-team' ? 0 : 4,
                             // backdropFilter: 'blur(10px)'
                         }}>
-                            {section === 'members' && (
-                                <div className="w-full mx-auto">
-                                    <Card sx={{
-                                        background: '#383838',
-                                        backdropFilter: 'blur(10px)',
-                                        borderRadius: { xs: 2, sm: 3 },
-                                        boxShadow: 'none',
-                                        mt: 1.2,
-                                        mb: 4,
-                                        overflow: 'hidden',
-                                        '&::-webkit-scrollbar': {
-                                            height: '6px',
-                                        },
-                                        '&::-webkit-scrollbar-track': {
-                                            background: '#383838',
-                                        },
-                                        '&::-webkit-scrollbar-thumb': {
-                                            background: '#383838',
-                                            borderRadius: '3px',
-                                        },
-                                    }} className="text-white">
-                                        <Box
-                                            sx={{
-                                                width: '100%',
-                                                overflowX: 'auto',
-                                                overflowY: 'auto',
-                                                maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
-                                                WebkitOverflowScrolling: 'touch',
-                                                scrollbarWidth: 'thin',
+                            {(!league && error && !isSigningOut) ? (
+                                <Box sx={{ py: 6, textAlign: 'center' }}>
+                                    <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', fontWeight: 'bold', mb: 2 }}>
+                                        {error}
+                                    </Typography>
+                                    <Button
+                                        startIcon={<RefreshCw size={16} />}
+                                        onClick={() => {
+                                            setError(null);
+                                            setLeagueDetailsAttempted(false);
+                                            void fetchLeagueDetails();
+                                        }}
+                                        sx={{
+                                            color: 'white',
+                                            backgroundColor: '#e56a16',
+                                            '&:hover': { backgroundColor: '#d1590d' },
+                                        }}
+                                    >
+                                        Retry Loading
+                                    </Button>
+                                </Box>
+                            ) : (!league || leagueDetailsLoading) ? (
+                                <LeagueDetailLoadingSkeleton mode={section} />
+                            ) : (
+                                <>
+                                    {section === 'members' && (
+                                        <div className="w-full mx-auto">
+                                            <Card sx={{
+                                                background: '#383838',
+                                                backdropFilter: 'blur(10px)',
+                                                borderRadius: { xs: 2, sm: 3 },
+                                                boxShadow: 'none',
+                                                mt: 1.2,
+                                                mb: 4,
+                                                overflow: 'hidden',
                                                 '&::-webkit-scrollbar': {
-                                                    height: '8px',
-                                                    width: '8px',
+                                                    height: '6px',
                                                 },
                                                 '&::-webkit-scrollbar-track': {
-                                                    background: 'rgba(255,255,255,0.12)',
-                                                    borderRadius: '9999px',
+                                                    background: '#383838',
                                                 },
                                                 '&::-webkit-scrollbar-thumb': {
-                                                    background: '#F97316',
-                                                    borderRadius: '9999px',
+                                                    background: '#383838',
+                                                    borderRadius: '3px',
                                                 },
-                                            }}
-                                        >
+                                            }} className="text-white">
+                                                <Box
+                                                    sx={{
+                                                        width: '100%',
+                                                        overflowX: 'auto',
+                                                        overflowY: 'auto',
+                                                        maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+                                                        WebkitOverflowScrolling: 'touch',
+                                                        scrollbarWidth: 'thin',
+                                                        '&::-webkit-scrollbar': {
+                                                            height: '8px',
+                                                            width: '8px',
+                                                        },
+                                                        '&::-webkit-scrollbar-track': {
+                                                            background: 'rgba(255,255,255,0.12)',
+                                                            borderRadius: '9999px',
+                                                        },
+                                                        '&::-webkit-scrollbar-thumb': {
+                                                            background: '#F97316',
+                                                            borderRadius: '9999px',
+                                                        },
+                                                    }}
+                                                >
                                         <Box sx={{ width: 'max-content', minWidth: '100%', borderRadius: '8px', overflow: 'visible' }}>
                                             {/* Table Header */}
                                             <Box className="league-header-row" sx={{
@@ -7416,6 +7341,8 @@ export default function LeagueDetailPage() {
                                         ))}
                                     </Box>
                                 </Box>
+                            )}
+                                </>
                             )}
                         </Paper>
 

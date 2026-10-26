@@ -321,13 +321,6 @@ export default function WorldRankingTable() {
     }
   }, [loading, filtered.length]);
 
-  if (loading && !data) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
-        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
-      </Box>
-    );
-  }
 
   const formatNum = (n: number | undefined | null, opts: { decimals?: number } = {}) => {
     if (n === undefined || n === null) return '-';
@@ -566,11 +559,7 @@ export default function WorldRankingTable() {
           pb: 1.5,
           px: 0,
         }}>
-          {loading && (
-            <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'rgba(0,0,0,0.45)', zIndex: 2 }}>
-              <CircularProgress size={40} sx={{ color: '#e56a16' }} />
-            </Box>
-          )}
+
           <TableContainer
             sx={{
               maxHeight: 620,
@@ -673,7 +662,10 @@ export default function WorldRankingTable() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filtered.map((p, idx) => {
+                {loading ? (
+                  <WorldRankingLoadingSkeleton />
+                ) : (
+                  filtered.map((p, idx) => {
                   const isMe = user?.id === p.id;
                   const rowBg = isMe ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
                   const rowHoverBg = isMe ? '#165b4c' : (idx % 2 === 0 ? '#444444' : '#383838');
@@ -725,7 +717,7 @@ export default function WorldRankingTable() {
                       </TableCell>
                     </TableRow>
                   );
-                })}
+                }))}
                 {!loading && error && filtered.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} sx={{ bgcolor: 'transparent' }}>
@@ -744,15 +736,6 @@ export default function WorldRankingTable() {
                     </TableCell>
                   </TableRow>
                 )}
-                {loading && Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={`sk-${i}`} sx={{ bgcolor: i % 2 === 0 ? '#1e1e1e' : '#242424', opacity: 0.5 }}>
-                    {Array.from({ length: 6 }).map((__, c) => (
-                      <TableCell key={c}>
-                        <Box sx={{ height: 14, width: c === 1 ? '60%' : '40%', bgcolor: '#333', borderRadius: 1 }} />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
           </TableContainer>

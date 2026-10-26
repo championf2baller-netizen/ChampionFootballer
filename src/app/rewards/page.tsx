@@ -1017,22 +1017,6 @@ export default function RewardsPage() {
   // Calculate total XP from all rewards
   const totalRewardsXP = myBadges.reduce((sum, badge) => sum + (badge.count * badge.xp), 0);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ minHeight: '160vh', backgroundColor: '#0E0E0E', overflowX: 'hidden' }}>
       {/* Header */}
@@ -1051,28 +1035,25 @@ export default function RewardsPage() {
       />
 
       <Box sx={{ px: { xs: 2, sm: 3, md: 5, lg: 11.2 }, pb: 4, mt: -0.5 }}>
-        {/* <Typography
-          sx={{
-            mb: 2,
-            color: '#d1d5db',
-            textAlign: 'center',
-            fontSize: { xs: '0.8rem', sm: '0.9rem' },
-            fontFamily: 'var(--font-woodford-bourne-pro)',
-          }}
-        >
-          Reward points are added to your XP profile and XP status only. They do not count toward league table points.
-        </Typography> */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: { xs: 1, sm: 1.5, md: 1.2 }, rowGap: { xs: 2, sm: 3, md: 3 }, justifyContent: 'center', alignItems: 'stretch' }}>
-          {myBadges.length > 0 ? myBadges.map(b => (
-            <Box key={b.id} sx={{ height: '100%', width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 8px)', lg: 'calc(20% - 8px)' } }}>
-              <BadgeCard {...b} onOpen={() => openBadgeDetail(b)} />
-            </Box>
-          )) : (
-            <Typography sx={{ mt: 4, gridColumn: '1 / -1', textAlign: 'center' }}>
-              No badge progress yet.
-            </Typography>
-          )}
-        </Box>
+        {loading ? (
+          <RewardsLoadingSkeleton />
+        ) : error ? (
+          <Box sx={{ p: 4, maxWidth: '1200px', mx: 'auto' }}>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: { xs: 1, sm: 1.5, md: 1.2 }, rowGap: { xs: 2, sm: 3, md: 3 }, justifyContent: 'center', alignItems: 'stretch' }}>
+            {myBadges.length > 0 ? myBadges.map(b => (
+              <Box key={b.id} sx={{ height: '100%', width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 8px)', lg: 'calc(20% - 8px)' } }}>
+                <BadgeCard {...b} onOpen={() => openBadgeDetail(b)} />
+              </Box>
+            )) : (
+              <Typography sx={{ mt: 4, gridColumn: '1 / -1', textAlign: 'center' }}>
+                No badge progress yet.
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {/* Badge detail modal */}
         <Dialog

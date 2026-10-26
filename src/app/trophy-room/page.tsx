@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import { Box, Typography, Paper, Button, Chip, CircularProgress, Alert, MenuItem, Menu, Avatar, Tooltip, useTheme, useMediaQuery, TextField } from '@mui/material';
+import TrophyRoomLoadingSkeleton from '@/Components/loading/TrophyRoomLoadingSkeleton';
 import TrophyImg from '@/Components/images/awardtrophy.png';
 import RunnerUpImg from '@/Components/images/runnerup.png';
 import BaloonDImg from '@/Components/images/baloond.png';
@@ -2563,18 +2564,6 @@ export default function GlobalTrophyRoom() {
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress size={40} sx={{ color: '#00ff88' }} />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return <Box sx={{ p: 4 }}><Alert severity="error">{error}</Alert></Box>;
-  }
-
   const selectedLeagueSelectValue =
     selectedLeagueId && selectedLeagueId !== 'all' && filteredLeagues.some((leagueItem) => String(leagueItem.id) === String(selectedLeagueId))
       ? String(selectedLeagueId)
@@ -3234,7 +3223,13 @@ export default function GlobalTrophyRoom() {
       </PageHeader>
 
 
-      {filter === 'my' ? (
+      {loading ? (
+        <TrophyRoomLoadingSkeleton />
+      ) : error ? (
+        <Box sx={{ p: 4, maxWidth: '1200px', mx: 'auto' }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : filter === 'my' ? (
         <Box sx={{
           maxWidth: '783px',
           mx: 'auto',
