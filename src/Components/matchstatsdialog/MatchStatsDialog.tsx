@@ -4042,18 +4042,16 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             <Box
                                 sx={{
                                     width: '100%',
-                                    border: '1px solid rgba(0,0,0,0.28)',
-                                    borderRadius: '2px',
                                     overflow: 'hidden',
                                 }}
                             >
-                                <Box sx={{ px: 1, py: 0.55, borderBottom: '1px solid rgba(0,0,0,0.28)' }}>
+                                <Box sx={{ px: 1, py: 0.55 }}>
                                     <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
                                         {adminHeaderLeagueText}
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                                    <Box sx={{ px: 1, py: 0.5, borderRight: '1px solid rgba(0,0,0,0.28)' }}>
+                                    <Box sx={{ px: 1, py: 0.5 }}>
                                         <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
                                             MATCH {computedMatchNumber ?? ''}
                                         </Typography>
@@ -4536,18 +4534,16 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             <Box
                                 sx={{
                                     width: '100%',
-                                    border: '1px solid rgba(0,0,0,0.28)',
-                                    borderRadius: '2px',
                                     overflow: 'hidden',
                                 }}
                             >
-                                <Box sx={{ px: 1, py: 0.55, borderBottom: '1px solid rgba(0,0,0,0.28)' }}>
+                                <Box sx={{ px: 1, py: 0.55 }}>
                                     <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
                                         {dialogLeagueTitle}
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                                    <Box sx={{ px: 1, py: 0.5, borderRight: '1px solid rgba(0,0,0,0.28)' }}>
+                                    <Box sx={{ px: 1, py: 0.5 }}>
                                         <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
                                             Match {computedMatchNumber || ''}
                                         </Typography>

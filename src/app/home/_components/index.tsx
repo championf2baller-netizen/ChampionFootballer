@@ -2521,8 +2521,8 @@ export default function PlayerDashboard() {
       <Paper
         elevation={0}
         sx={{
-          backgroundImage: `url(${dash.src})`,
-          // backgroundColor: '#0E0E0E',
+          backgroundImage: {xs: 'none', md: `url(${dash.src})`},
+          backgroundColor: { xs: '#0E0E0E', md: 'none' },
           backgroundSize: { xs: 'cover', md: '100% 100%' },
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -2905,7 +2905,7 @@ export default function PlayerDashboard() {
                 background: 'linear-gradient(135deg,#004e5f,#007a95)',
                 color: '#fff',
                 py: 0,
-                borderRadius: '12px',
+                borderRadius: 2,
                 fontWeight: 600,
                 letterSpacing: '0%',
                 lineHeight: '100%',
