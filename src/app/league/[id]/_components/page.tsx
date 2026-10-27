@@ -4040,6 +4040,7 @@ export default function LeagueDetailPage() {
                                         px: { xs: 1.5, sm: 2, md: 0 },
                                         gap: 0.5,
                                         mt: 0,
+                                        py:{xs:1, md:0},
                                         minHeight: { xs: 0, md: '87px' },
                                         height: { xs: 'auto', md: '87px' },
                                     }}>
@@ -4125,7 +4126,7 @@ export default function LeagueDetailPage() {
                                         <Button
                                             onClick={handleSeasonDropdownOpen}
                                             sx={{
-                                                mt: -0.75,
+                                                mt: {xs: 0.5, md:-0.75},
                                                 color: 'rgba(255,255,255,0.9)',
                                                 fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.05rem' },
                                                 fontWeight: 500,
