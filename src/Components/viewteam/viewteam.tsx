@@ -1662,10 +1662,13 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                 borderRadius: 1,
                 bgcolor: '#2b2b2b',
                 overflow: 'hidden',
-                mx: { xs: 0, sm: 1, md: 'auto' },
-                maxWidth: { md: `${DESKTOP_PITCH_MAX_WIDTH}px` },
-                /* Desktop: horizontal pitch, Mobile: vertical pitch */
-                height: { xs: 500, sm: 500, md: `${desktopPitchShortSide}px` },
+                mx: 'auto',
+                maxWidth: { xs: 'calc(500px * 1014 / 1600)', sm: 'calc(500px * 1014 / 1600)', md: `${DESKTOP_PITCH_MAX_WIDTH}px` },
+                width: { xs: '100%', md: 'auto' },
+                aspectRatio: { xs: `${PITCH_VIEWBOX_WIDTH} / ${PITCH_VIEWBOX_HEIGHT}`, md: 'unset' },
+                /* Desktop: horizontal pitch (strictly preserved), Mobile: vertical pitch */
+                height: { xs: 'auto', sm: 'auto', md: `${desktopPitchShortSide}px` },
+                maxHeight: { xs: 500, sm: 500, md: 'none' },
                 position: 'relative',
               }}
             >
@@ -1703,11 +1706,13 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
 
                     <rect x="227" y="8" width="560" height="220" />
                     <rect x="332" y="8" width="350" height="120" />
-                    <path d="M 352 228 A 155 155 0 0 0 662 228" />
+                    {/* Top penalty arc (D) - reduced from semicircle */}
+                    <path d="M 405.5 228 A 125 125 0 0 0 608.5 228" />
 
                     <rect x="227" y="1372" width="560" height="220" />
                     <rect x="332" y="1472" width="350" height="120" />
-                    <path d="M 352 1372 A 155 155 0 0 1 662 1372" />
+                    {/* Bottom penalty arc (D) - reduced from semicircle */}
+                    <path d="M 405.5 1372 A 125 125 0 0 1 608.5 1372" />
 
                     {/* ===== Corner Edges (EDIT THESE 4 PATHS) =====
                     Format:

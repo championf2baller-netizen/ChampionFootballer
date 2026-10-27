@@ -2288,12 +2288,14 @@ export default function PlayerStatsPage() {
                         justifyContent: 'space-between',
                         gap: { xs: 2, md: 3 },
                         px: { xs: 1, sm: 2, md: 3 },
-                            py: { xs: 1.5, md: 0 },
-                            mt:{xs:2, md:0},
+                        py: { xs: 1.5, md: 0 },
+                        mt: { xs: 2, md: 0 },
                         maxWidth: '1230px',
+                        width: '100%',
                         mx: 'auto',
                         position: 'relative',
                         zIndex: 10,
+                        mb: { xs: 1.5, md: 0 },
                     }}>
                         {/* Search Input */}
                         <Box
@@ -2302,7 +2304,7 @@ export default function PlayerStatsPage() {
                                 width: { xs: '100%', md: 460 },
                                 minWidth: { md: 300 },
                                 maxWidth: { md: 480 },
-                                ml: { xs: 0, md: 0.8 },
+                                ml: 0,
                                 position: 'relative',
                                 zIndex: 20,
                                 mt: { xs: -2, md: 0 }
@@ -3032,7 +3034,7 @@ export default function PlayerStatsPage() {
             </PageHeader>
 
             {/* Main 3-View Toggle (Overview | Performance | Stats / Season) */}
-            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: { xs: 1, sm: 1.5 } }}>
+            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: 0 }}>
                 <PlayerViewToggle
                     activeView={selectedView}
                     onSelectView={(view) => {

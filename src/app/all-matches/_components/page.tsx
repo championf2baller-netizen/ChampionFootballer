@@ -2485,29 +2485,21 @@ export default function AllMatches() {
             <PageHeader
                 title={getCms('page_all_matches_heading', 'Matches')}
             >
-                <Box
-                        sx={{
-                            mb: { xs: 1.5, md: 2 },
-                            bgcolor: '#0E0E0E',
-                            px: { xs: 1, sm: 2, md: 3 },
-                            py: { xs: 1.5, md: 0 },
-                            borderRadius: 0,
-                            minHeight: { xs: 'auto', md: 'auto' },
-                        }}
-                    >
                     {/* Create/Join League Section */}
                     <Box sx={{
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        flexDirection: { xs: 'column', md: 'row' },
                         alignItems: 'center',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        rowGap: 2.25,
-                        columnGap: 2,
-                        mb: { xs: 3, md: 3 },
-                        px: { xs: 0.5, sm: 1.5, md: 2 },
-                        maxWidth: '1200px',
-                        mx: 'auto',
+                        justifyContent: 'space-between',
+                        gap: { xs: 1.5, md: 3 },
+                        px: { xs: 1, sm: 2, md: 3 },
+                        py: { xs: 1.5, md: 0 },
+                        maxWidth: '1230px',
                         width: '100%',
+                        mx: 'auto',
+                        position: 'relative',
+                        zIndex: 10,
+                        mb: { xs: 2, md: 0 },
                     }}>
                         {/* Left side: New Match */}
                         <Box sx={{
@@ -3016,7 +3008,7 @@ export default function AllMatches() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         mt: { xs: 2, md: 3 },
-                        mb: { xs: 1.5, md: 4 }
+                        mb: { xs: 1.5, md: 0 }
                     }}>
                         <Box sx={{
                             display: 'flex',
@@ -3089,7 +3081,6 @@ export default function AllMatches() {
                             )}
                         </Box>
                     </Box>
-                </Box>
             </PageHeader>
             <Container>
                 {/* Match Cards */}
@@ -3099,7 +3090,7 @@ export default function AllMatches() {
                     gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
                     gap: 3,
                     mb: { xs: 1, md: 4 },
-                    mt:4
+                    mt: 0
                 }}>
                     {loading ? (
                         <Box sx={{ gridColumn: '1 / -1' }}>
@@ -3392,23 +3383,23 @@ export default function AllMatches() {
                                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
                                                                 {hasPlayed ? (
                                                                     <Box sx={{
-                                                                        bgcolor: 'rgba(34, 197, 94, 0.1)',
-                                                                        border: '1px solid rgba(34, 197, 94, 0.3)',
-                                                                        borderRadius: '6px',
-                                                                        px: { xs: 0.75, sm: 1 },
-                                                                        py: 0.35,
-                                                                        fontSize: { xs: '0.68rem', sm: '0.75rem' },
+                                                                        px: { xs: 1.25, sm: 1.75 },
+                                                                        py: 0.4,
+                                                                        fontSize: { xs: '0.72rem', sm: '0.78rem' },
                                                                         color: '#22c55e',
                                                                         fontWeight: 700,
                                                                         whiteSpace: 'nowrap',
                                                                         display: 'inline-flex',
-                                                                        alignItems: 'center'
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
                                                                     }}>
                                                                         Played
                                                                     </Box>
                                                                 ) : null}
                                                             </Box>
                                                         </Box>
+
+                                                        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
                                                         {/* MOTM Row */}
                                                         <Box sx={{
@@ -3417,10 +3408,6 @@ export default function AllMatches() {
                                                             justifyContent: 'space-between',
                                                             px: 1.5,
                                                             py: 0.75,
-                                                            mx: 1.5,
-                                                            my: 0.5,
-                                                            bgcolor: 'rgba(255, 255, 255, 0.04)',
-                                                            borderRadius: '8px',
                                                         }}>
                                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
                                                                 <Avatar
@@ -3461,8 +3448,10 @@ export default function AllMatches() {
                                                             <Star size={20} fill={motm ? '#f59e0b' : 'none'} color={motm ? '#f59e0b' : '#6b7280'} />
                                                         </Box>
 
+                                                        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+
                                                         {/* Player Statistics Progress Indicator */}
-                                                        <Box sx={{ px: 1.5, py: 0.5, mx: 1.5, my: 0.25 }}>
+                                                        <Box sx={{ px: 1, py: 0.5, mx: 1, my: 0.25 }}>
                                                             <Typography sx={{ color: '#9ca3af', fontSize: '0.72rem', fontWeight: 500, mb: 0.6 }}>
                                                                 Stats added for {count} of {total} players
                                                             </Typography>
@@ -3482,6 +3471,8 @@ export default function AllMatches() {
                                                                 }} />
                                                             </Box>
                                                         </Box>
+
+                                                        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
                                                         {/* Action Buttons: + My Stats, Teams, Report */}
                                                         <Box sx={{
@@ -3637,19 +3628,31 @@ export default function AllMatches() {
                                                                 mt: 'auto',
                                                                 pt: 1,
                                                                 pb: 1,
-                                                                px: 1.5,
+                                                                px: { xs: 0.75, sm: 1.5 },
                                                                 borderTop: '1px dashed #e56a16',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'space-between',
-                                                                bgcolor: '#191919',
+                                                                gap: { xs: 0.5, sm: 1 },
+                                                                bgcolor: 'rgba(255,255,255,0.05)',
                                                                 width: '100%',
                                                                 boxSizing: 'border-box'
                                                             }}>
-                                                                <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                                <Typography sx={{
+                                                                    color: '#888',
+                                                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                                                    fontWeight: 600,
+                                                                    flexShrink: 0
+                                                                }}>
                                                                     Admin
                                                                 </Typography>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: { xs: 0.4, sm: 0.75 },
+                                                                    flexWrap: 'nowrap',
+                                                                    minWidth: 0
+                                                                }}>
                                                                     <Button
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
@@ -3659,26 +3662,28 @@ export default function AllMatches() {
                                                                             setMatchStatsOpen(true);
                                                                         }}
                                                                         disabled={match.archived || !leagueForMatch?.active || !matchSeasonActiveForStats}
-                                                                        startIcon={<Plus size={13} color="#00D09E" />}
+                                                                        startIcon={<Plus size={12} color="#3B82F6" />}
                                                                         sx={{
                                                                             color: 'white',
                                                                             bgcolor: 'transparent',
-                                                                            border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                            border: '1px solid rgba(255, 255, 255, 0.1)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: 0.8, sm: 1.2 },
+                                                                            px: { xs: 0.6, sm: 1.2 },
                                                                             py: 0.4,
-                                                                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                             fontWeight: 600,
                                                                             textTransform: 'none',
                                                                             minWidth: 0,
+                                                                            whiteSpace: 'nowrap',
+                                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                             '&:hover': {
-                                                                                bgcolor: 'rgba(0, 208, 158, 0.15)',
-                                                                                borderColor: '#00D09E'
+                                                                                bgcolor: 'rgba(59, 130, 246, 0.15)',
+                                                                                borderColor: '#3B82F6'
                                                                             },
                                                                             '&.Mui-disabled': { opacity: 0.4 }
                                                                         }}
                                                                     >
-                                                                        + Add Score
+                                                                        Add Score
                                                                     </Button>
                                                                     <Button
                                                                         onClick={(e) => {
@@ -3688,18 +3693,20 @@ export default function AllMatches() {
                                                                             setEditMatchOpen(true);
                                                                         }}
                                                                         disabled={!leagueForMatch?.active || match.archived}
-                                                                        startIcon={<Edit size={13} color="#00D09E" />}
+                                                                        startIcon={<Edit size={12} color="#00D09E" />}
                                                                         sx={{
                                                                             color: 'white',
                                                                             bgcolor: 'transparent',
-                                                                            border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                            border: '1px solid rgba(255, 255, 255, 0.1)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: 0.8, sm: 1.2 },
+                                                                            px: { xs: 0.6, sm: 1.2 },
                                                                             py: 0.4,
-                                                                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                             fontWeight: 600,
                                                                             textTransform: 'none',
                                                                             minWidth: 0,
+                                                                            whiteSpace: 'nowrap',
+                                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                             '&:hover': {
                                                                                 bgcolor: 'rgba(0, 208, 158, 0.15)',
                                                                                 borderColor: '#00D09E'
@@ -3719,18 +3726,20 @@ export default function AllMatches() {
                                                                                 handleRequestDeleteMatch(match);
                                                                             }
                                                                         }}
-                                                                        startIcon={match.archived ? <Undo2 size={13} color="#f97316" /> : <Trash2 size={13} color="#ff4d4f" />}
+                                                                        startIcon={match.archived ? <Undo2 size={12} color="#f97316" /> : <Trash2 size={12} color="#ff4d4f" />}
                                                                         sx={{
                                                                             color: match.archived ? '#f97316' : '#ff4d4f',
                                                                             bgcolor: 'transparent',
                                                                             border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: 0.8, sm: 1.2 },
+                                                                            px: { xs: 0.6, sm: 1.2 },
                                                                             py: 0.4,
-                                                                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                             fontWeight: 600,
                                                                             textTransform: 'none',
                                                                             minWidth: 0,
+                                                                            whiteSpace: 'nowrap',
+                                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                             '&:hover': {
                                                                                 bgcolor: match.archived ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 77, 79, 0.15)',
                                                                                 borderColor: match.archived ? '#f97316' : '#ff4d4f'
@@ -4114,34 +4123,48 @@ export default function AllMatches() {
                                                 mt: 'auto',
                                                 pt: 1,
                                                 pb: 1,
-                                                px: 1.5,
+                                                px: { xs: 0.75, sm: 1.5 },
                                                 borderTop: '1px dashed #e56a16',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
-                                                bgcolor: '#191919',
+                                                gap: { xs: 0.5, sm: 1 },
+                                                bgcolor: 'rgba(255,255,255,0.05)',
                                                 width: '100%',
                                                 boxSizing: 'border-box'
                                             }}>
-                                                <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                <Typography sx={{
+                                                    color: '#888',
+                                                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                                    fontWeight: 600,
+                                                    flexShrink: 0
+                                                }}>
                                                     Admin
                                                 </Typography>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: { xs: 0.4, sm: 0.75 },
+                                                    flexWrap: 'nowrap',
+                                                    minWidth: 0
+                                                }}>
                                                     <Button
                                                         onClick={(e) => { e.stopPropagation(); setEditMatchLeagueId(String(match.leagueId)); setEditMatchId(match.id); setEditMatchOpen(true); }}
                                                         disabled={!league?.active || match.archived}
-                                                        startIcon={<Edit size={14} color="#00D09E" />}
+                                                        startIcon={<Edit size={12} color="#00D09E" />}
                                                         sx={{
                                                             color: 'white',
                                                             bgcolor: 'transparent',
-                                                            border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                            border: '1px solid rgba(255, 255, 255, 0.1)',
                                                             borderRadius: '8px',
-                                                            px: 1.2,
+                                                            px: { xs: 0.6, sm: 1.2 },
                                                             py: 0.4,
-                                                            fontSize: '0.75rem',
+                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                             fontWeight: 600,
                                                             textTransform: 'none',
                                                             minWidth: 0,
+                                                            whiteSpace: 'nowrap',
+                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                             '&:hover': {
                                                                 bgcolor: 'rgba(0, 208, 158, 0.15)',
                                                                 borderColor: '#00D09E'
@@ -4149,7 +4172,7 @@ export default function AllMatches() {
                                                             '&.Mui-disabled': { opacity: 0.4 }
                                                         }}
                                                     >
-                                                        Edit match
+                                                        Edit Match
                                                     </Button>
                                                     <Button
                                                         onClick={(e) => {
@@ -4161,21 +4184,23 @@ export default function AllMatches() {
                                                                 handleRequestDeleteMatch(match);
                                                             }
                                                         }}
-                                                        startIcon={match.archived ? <Undo2 size={14} /> : <Trash2 size={14} color="#ff4d4f" />}
+                                                        startIcon={match.archived ? <Undo2 size={12} color="#f97316" /> : <Trash2 size={12} color="#ff4d4f" />}
                                                         sx={{
-                                                            color: match.archived ? '#fff' : '#ff4d4f',
+                                                            color: match.archived ? '#f97316' : '#ff4d4f',
                                                             bgcolor: 'transparent',
-                                                            border: match.archived ? '1px solid rgba(255, 255, 255, 0.3)' : '1px solid rgba(255, 77, 79, 0.4)',
+                                                            border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
                                                             borderRadius: '8px',
-                                                            px: 1.2,
+                                                            px: { xs: 0.6, sm: 1.2 },
                                                             py: 0.4,
-                                                            fontSize: '0.75rem',
+                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                             fontWeight: 600,
                                                             textTransform: 'none',
                                                             minWidth: 0,
+                                                            whiteSpace: 'nowrap',
+                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                             '&:hover': {
-                                                                bgcolor: match.archived ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 77, 79, 0.15)',
-                                                                borderColor: match.archived ? '#fff' : '#ff4d4f'
+                                                                bgcolor: match.archived ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 77, 79, 0.15)',
+                                                                borderColor: match.archived ? '#f97316' : '#ff4d4f'
                                                             }
                                                         }}
                                                     >
