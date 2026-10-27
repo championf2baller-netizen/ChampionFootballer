@@ -21,7 +21,30 @@ const woodfordBournePro = localFont({
 
 export const metadata: Metadata = {
   title: "Champion Footballer",
-  description: "Your ultimate football management platform",
+  description: "Your ultimate football management platform. Create Matches, Track Performance, and Claim Bragging Rights!",
+  metadataBase: new URL('https://www.championfootballer.com'),
+  openGraph: {
+    title: "Champion Footballer - Where Champions Are Made!",
+    description: "Create Matches. Track Performance. Claim Bragging Rights. Join Champion Footballer today!",
+    url: "https://www.championfootballer.com",
+    siteName: "Champion Footballer",
+    images: [
+      {
+        url: "/assets/images/hero_top_bg.webp",
+        width: 1200,
+        height: 630,
+        alt: "Champion Footballer",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Champion Footballer - Where Champions Are Made!",
+    description: "Create Matches. Track Performance. Claim Bragging Rights.",
+    images: ["/assets/images/hero_top_bg.webp"],
+  },
 };
 
 export default function RootLayout({

@@ -50,7 +50,8 @@ import { Tooltip, Slide } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
-import { shareContent } from '@/lib/utils/shareUtils';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { shareContent, captureElementAsFile, shareToWhatsApp } from '@/lib/utils/shareUtils';
 import LeagueDetailLoadingSkeleton from '@/Components/loading/LeagueDetailLoadingSkeleton';
 import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLoadingSkeleton';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
@@ -85,10 +86,7 @@ const TeamPreviewScreen = dynamic(() => import('@/Components/viewteam/viewteam')
     loading: () => <ViewTeamPopupLoadingSkeleton />,
     ssr: false
 });
-const PlayerCard = dynamic(() => import('@/Components/playercard/playercard').then(mod => ({ default: mod.default })), {
-    loading: () => <PlayerCardLoadingSkeleton />,
-    ssr: false,
-});
+import PlayerCard from '@/Components/playercard/playercard';
 const EditMatchPage = dynamic(() => import('@/app/league/[id]/match/[matchId]/edit/_components/EditMatchPage'), {
     loading: () => <EditMatchPopupLoadingSkeleton />,
     ssr: false,
@@ -671,6 +669,7 @@ export default function LeagueDetailPage() {
     const [selectedMemberPosition, setSelectedMemberPosition] = useState<string>('all');
     const [memberPositionMenuAnchor, setMemberPositionMenuAnchor] = useState<null | HTMLElement>(null);
     const tableScrollRef = React.useRef<HTMLDivElement | null>(null);
+    const quickViewCardRef = React.useRef<HTMLDivElement | null>(null);
     const [tableScrollPercent, setTableScrollPercent] = useState(0);
     const [tableHasHorizontalOverflow, setTableHasHorizontalOverflow] = useState(false);
     const searchParams = useSearchParams();
@@ -1102,6 +1101,8 @@ export default function LeagueDetailPage() {
         xpRecentTotal?: number;
         profileXP?: number;
     }>({});
+    const [playerShareAnchorEl, setPlayerShareAnchorEl] = useState<null | HTMLElement>(null);
+
 
     // Dream Team state
     const [dreamTeam, setDreamTeam] = useState<{
@@ -8154,6 +8155,8 @@ export default function LeagueDetailPage() {
                 >
                     {quickView.player && (
                         <Box
+                            id="player-quick-view-card"
+                            ref={quickViewCardRef}
                             sx={{
                                 display: 'grid',
                                 gridTemplateColumns: { xs: '64px 160px 64px', sm: '100px 260px 100px' },
@@ -8161,6 +8164,10 @@ export default function LeagueDetailPage() {
                                 alignItems: 'start',
                                 justifyContent: 'center',
                                 minHeight: { xs: '308px', sm: '438px' },
+                                bgcolor: '#ffffff',
+                                p: { xs: 0.4, sm: 1 },
+                                borderRadius: 2,
+                                overflow: 'hidden',
                             }}
                         >
                             {/* Left: Stats Icons */}
@@ -8348,7 +8355,12 @@ export default function LeagueDetailPage() {
                                 border: '1px solid rgba(15, 23, 42, 0.2)',
                                 backgroundColor: '#fff',
                                 borderRadius: 2,
+                                overflow: 'hidden',
+                                overflowX: 'hidden',
                                 overflowY: 'hidden',
+                                scrollbarWidth: 'none',
+                                msOverflowStyle: 'none',
+                                '&::-webkit-scrollbar': { display: 'none', width: 0, height: 0 },
                                 minWidth: 0,
                                 width: '100%',
                                 position: 'relative',
@@ -8380,7 +8392,7 @@ export default function LeagueDetailPage() {
                                                 {m.result}
                                             </Box>
                                             {idx === 0 && (
-                                                <Typography variant="body2" sx={{ color: '#94a3b8', fontSize: { xs: '0.45rem', sm: '0.6rem' }, display: { xs: 'none', sm: 'block' } }}>
+                                                <Typography variant="body2" sx={{ color: '#94a3b8', fontSize: { xs: '0.42rem', sm: '0.55rem' }, display: { xs: 'none', sm: 'block' } }}>
                                                     Latest
                                                 </Typography>
                                             )}
@@ -8395,36 +8407,112 @@ export default function LeagueDetailPage() {
                             </Paper>
                         </Box>
                     )}
-                    {quickView.player && (
-                        <Box sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
-                            <IconButton
-                                sx={{
-                                    bgcolor: '#10b981',
-                                    color: '#fff',
-                                    width: { xs: 34, sm: 36 },
-                                    height: { xs: 34, sm: 36 },
-                                    borderRadius: 1.2,
-                                    '&:hover': { bgcolor: '#059669' },
-                                }}
-                                onClick={() => {
-                                    const playerName = [quickView.player?.firstName, quickView.player?.lastName]
-                                        .map((part) => (typeof part === 'string' ? part.trim() : ''))
-                                        .filter(Boolean)
-                                        .join(' ')
-                                        .trim() || 'Player';
-                                    const playerId = quickView.player?.id;
-                                    const playerUrl = typeof window !== 'undefined' && playerId ? `${window.location.origin}/player/${playerId}` : undefined;
-                                    shareContent({
-                                        title: `${playerName} | Champion Footballer`,
-                                        text: `Check out ${playerName}'s stats on Champion Footballer (${Number(quickView.xp ?? 0)} XP)!`,
-                                        url: playerUrl,
-                                    });
-                                }}
-                            >
-                                <Share2 size={18} />
-                            </IconButton>
-                        </Box>
-                    )}
+                    {quickView.player && (() => {
+                        const playerName = [quickView.player?.firstName, quickView.player?.lastName]
+                            .map((part) => (typeof part === 'string' ? part.trim() : ''))
+                            .filter(Boolean)
+                            .join(' ')
+                            .trim() || 'Player';
+                        const xp = Number(quickView.xp ?? quickView.profileXP ?? 0);
+                        const playerLine = playerName && playerName !== 'Player' ? `Player: ${playerName} (${xp} XP)\n` : '';
+                        const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
+
+                        const shareWhatsApp = async () => {
+                            let fileToShare: File | null = null;
+                            if (quickViewCardRef.current) {
+                                fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                            }
+
+                            await shareToWhatsApp({
+                                title: `${playerName} | Champion Footballer`,
+                                message: shareMessage,
+                                file: fileToShare,
+                                fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
+                            });
+                        };
+
+                        const shareNative = async () => {
+                            let fileToShare: File | null = null;
+                            if (quickViewCardRef.current) {
+                                fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                            }
+                            shareContent({
+                                title: `${playerName} | Champion Footballer`,
+                                customFullText: shareMessage,
+                                url: 'https://www.championfootballer.com',
+                                files: fileToShare ? [fileToShare] : undefined,
+                            });
+                        };
+
+                        return (
+                            <Box data-share-exclude="true" sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
+                                <IconButton
+                                    sx={{
+                                        bgcolor: '#10b981',
+                                        color: '#fff',
+                                        width: { xs: 34, sm: 36 },
+                                        height: { xs: 34, sm: 36 },
+                                        borderRadius: 1.2,
+                                        '&:hover': { bgcolor: '#059669' },
+                                    }}
+                                    onClick={(e) => setPlayerShareAnchorEl(e.currentTarget)}
+                                    title="Share player card"
+                                >
+                                    <Share2 size={18} />
+                                </IconButton>
+
+                                <Menu
+                                    anchorEl={playerShareAnchorEl}
+                                    open={Boolean(playerShareAnchorEl)}
+                                    onClose={() => setPlayerShareAnchorEl(null)}
+                                    PaperProps={{
+                                        sx: {
+                                            bgcolor: '#2b2b2b',
+                                            color: '#fff',
+                                            border: '1px solid #444',
+                                            borderRadius: '6px',
+                                            boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+                                            minWidth: 210,
+                                            zIndex: 1400,
+                                        }
+                                    }}
+                                >
+                                    <MenuItem
+                                        onClick={() => {
+                                            setPlayerShareAnchorEl(null);
+                                            shareWhatsApp();
+                                        }}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1.2,
+                                            py: 1,
+                                            '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                                        }}
+                                    >
+                                        <WhatsAppIcon sx={{ fontSize: 18, color: '#25D366' }} />
+                                        <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Share to WhatsApp</Typography>
+                                    </MenuItem>
+                                    <MenuItem
+                                        onClick={() => {
+                                            setPlayerShareAnchorEl(null);
+                                            shareNative();
+                                        }}
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1.2,
+                                            py: 1,
+                                            '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                                        }}
+                                    >
+                                        <Share2 size={18} color="#00a77f" />
+                                        <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>More Sharing Options</Typography>
+                                    </MenuItem>
+                                </Menu>
+                            </Box>
+                        );
+                    })()}
                 </DialogContent>
             </Dialog>
 

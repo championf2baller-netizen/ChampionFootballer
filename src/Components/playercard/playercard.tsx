@@ -20,7 +20,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '@/lib/hooks';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { getPositionShortForm } from '@/lib/playerIdentity';
-import { shareContent } from '@/lib/utils/shareUtils';
+import { shareContent, captureElementAsFile } from '@/lib/utils/shareUtils';
 
 // const fallback = '/assets/cflogo2.png';
 
@@ -175,6 +175,7 @@ const PlayerCard = ({
   const [cameraOpen, setCameraOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const cardContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Helper to build display src with cache-busting
   // const withVersion = (url?: string | null, v?: number) =>
@@ -484,7 +485,18 @@ const PlayerCard = ({
       }}
     >
       {/* Inner wrapper keeps fill-images constrained even with padding */}
-      <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
+      <Box
+        ref={cardContainerRef}
+        sx={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url(${typeof vectorImg === 'string' ? vectorImg : (vectorImg as any)?.src || ''})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
         {/* Background Image */}
         <Image
           src={vectorImg}
@@ -566,6 +578,7 @@ const PlayerCard = ({
                     sizes="105px"
                     unoptimized
                     priority={false}
+                    crossOrigin="anonymous"
                     style={{ objectFit: 'cover', imageRendering: 'auto' }}
                   />
                 </Box>
@@ -706,11 +719,22 @@ const PlayerCard = ({
                 bgcolor: '#007a5e',
               },
             }}
-            onClick={() => {
+            onClick={async () => {
+              const playerName = name || 'Player';
+              const xp = points || 0;
+              const playerLine = playerName && playerName !== 'Player' ? `Player: ${playerName} (${xp} XP)\n` : '';
+              const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
+
+              let fileToShare: File | null = null;
+              if (cardContainerRef.current) {
+                fileToShare = await captureElementAsFile(cardContainerRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+              }
+
               shareContent({
-                title: `${name} | Champion Footballer`,
-                text: `Check out ${name}'s stats on Champion Footballer (${points} XP)!`,
-                url: typeof window !== 'undefined' ? window.location.href : undefined,
+                title: `${playerName} | Champion Footballer`,
+                customFullText: shareMessage,
+                url: 'https://www.championfootballer.com',
+                files: fileToShare ? [fileToShare] : undefined,
               });
             }}
           >

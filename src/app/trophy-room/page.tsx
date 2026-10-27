@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
 import { Box, Typography, Paper, Button, Chip, CircularProgress, Alert, MenuItem, Menu, Avatar, Tooltip, useTheme, useMediaQuery, TextField } from '@mui/material';
@@ -37,7 +37,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ShareIcon from '@mui/icons-material/Share';
-import { shareContent } from '@/lib/utils/shareUtils';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import { shareContent, captureElementAsFile, shareToWhatsApp } from '@/lib/utils/shareUtils';
 import Goals from "@/Components/images/goal.png"
 import Assist from "@/Components/images/Assist.png"
 import Cleansheet from "@/Components/images/cleansheet.png"
@@ -47,9 +48,7 @@ import Mentality from "@/Components/images/metality.png"
 import cflogo from '@/Components/images/champion football logo 3 (1).png';
 import Raisingstart from '@/Components/images/brown.svg';
 import StarKeeperImg from '@/Components/images/startkeeper.png';
-const PlayerCard = dynamic(() => import('@/Components/playercard/playercard').then(mod => ({ default: mod.default })), {
-  ssr: false
-});
+import PlayerCard from '@/Components/playercard/playercard';
 import XPStarMilestoneCard from '@/Components/XPStarMilestoneCard';
 import { formatPlayerDisplayName } from '@/lib/playerIdentity';
 import PageHeader from '@/Components/PageHeader';
@@ -1718,6 +1717,8 @@ export default function GlobalTrophyRoom() {
   const router = useRouter();
 
   // Quick-view modal state
+  const quickViewCardRef = useRef<HTMLDivElement | null>(null);
+
   const [openQuickView, setOpenQuickView] = useState(false);
   const [quickView, setQuickView] = useState<{
     player?: User & PlayerProfileLike;
@@ -1736,6 +1737,9 @@ export default function GlobalTrophyRoom() {
     xpRecentTotal?: number;
     profileXP?: number;
   }>({});
+  const [playerShareAnchorEl, setPlayerShareAnchorEl] = useState<null | HTMLElement>(null);
+
+
 
   // League filter dropdown (like league page)
   const [selectedLeagueId, setSelectedLeagueId] = useState<string | 'all' | null>(null);
@@ -3948,6 +3952,8 @@ export default function GlobalTrophyRoom() {
         >
           {quickView.player && (
             <Box
+              id="player-quick-view-card"
+              ref={quickViewCardRef}
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '64px 160px 64px', sm: '100px 260px 100px' },
@@ -3955,6 +3961,10 @@ export default function GlobalTrophyRoom() {
                 alignItems: 'start',
                 justifyContent: 'center',
                 minHeight: { xs: '308px', sm: '438px' },
+                bgcolor: '#ffffff',
+                p: { xs: 0.4, sm: 1 },
+                borderRadius: 2,
+                overflow: 'hidden',
               }}
             >
               {/* Left: Stats Icons */}
@@ -4137,7 +4147,12 @@ export default function GlobalTrophyRoom() {
                 border: '1px solid rgba(15, 23, 42, 0.2)',
                 backgroundColor: '#fff',
                 borderRadius: 2,
+                overflow: 'hidden',
+                overflowX: 'hidden',
                 overflowY: 'hidden',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                '&::-webkit-scrollbar': { display: 'none', width: 0, height: 0 },
                 minWidth: 0,
                 width: '100%',
                 position: 'relative',
@@ -4169,7 +4184,7 @@ export default function GlobalTrophyRoom() {
                         {m.result}
                       </Box>
                       {idx === 0 && (
-                        <Typography variant="body2" sx={{ color: '#94a3b8', fontSize: { xs: '0.45rem', sm: '0.6rem' }, display: { xs: 'none', sm: 'block' } }}>
+                        <Typography variant="body2" sx={{ color: '#94a3b8', fontSize: { xs: '0.42rem', sm: '0.55rem' }, display: { xs: 'none', sm: 'block' } }}>
                           Latest
                         </Typography>
                       )}
@@ -4185,7 +4200,7 @@ export default function GlobalTrophyRoom() {
             </Box>
           )}
           {quickView.player && (
-            <Box sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
+            <Box data-share-exclude="true" sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
               <IconButton
                 sx={{
                   bgcolor: '#10b981',
@@ -4195,19 +4210,99 @@ export default function GlobalTrophyRoom() {
                   borderRadius: 1.2,
                   '&:hover': { bgcolor: '#059669' },
                 }}
-                onClick={() => {
-                  const playerName = formatPlayerDisplayName(quickView.player?.firstName, quickView.player?.lastName);
-                  const playerId = quickView.player?.id;
-                  const playerUrl = typeof window !== 'undefined' && playerId ? `${window.location.origin}/player/${playerId}` : undefined;
-                  shareContent({
-                    title: `${playerName} | Champion Footballer`,
-                    text: `Check out ${playerName}'s stats on Champion Footballer (${Number(quickView.xp ?? 0)} XP)!`,
-                    url: playerUrl,
-                  });
-                }}
+                onClick={(e) => setPlayerShareAnchorEl(e.currentTarget)}
+                title="Share player card"
               >
                 <ShareIcon sx={{ fontSize: 18 }} />
               </IconButton>
+
+              <Menu
+                anchorEl={playerShareAnchorEl}
+                open={Boolean(playerShareAnchorEl)}
+                onClose={() => setPlayerShareAnchorEl(null)}
+                PaperProps={{
+                  sx: {
+                    bgcolor: '#2b2b2b',
+                    color: '#fff',
+                    border: '1px solid #444',
+                    borderRadius: '6px',
+                    boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+                    minWidth: 200,
+                    zIndex: 1400,
+                  }
+                }}
+              >
+                {(() => {
+                  const playerName = formatPlayerDisplayName(quickView.player?.firstName, quickView.player?.lastName) || 'Player';
+                  const xp = Number(quickView.xp ?? quickView.profileXP ?? 0);
+                  const playerLine = playerName && playerName !== 'Player' ? `Player: ${playerName} (${xp} XP)\n` : '';
+                  const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
+
+                  const shareWhatsApp = async () => {
+                    let fileToShare: File | null = null;
+                    if (quickViewCardRef.current) {
+                      fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                    }
+
+                    await shareToWhatsApp({
+                      title: `${playerName} | Champion Footballer`,
+                      message: shareMessage,
+                      file: fileToShare,
+                      fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
+                    });
+                  };
+
+                  const shareNative = async () => {
+                    let fileToShare: File | null = null;
+                    if (quickViewCardRef.current) {
+                      fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                    }
+                    shareContent({
+                      title: `${playerName} | Champion Footballer`,
+                      customFullText: shareMessage,
+                      url: 'https://www.championfootballer.com',
+                      files: fileToShare ? [fileToShare] : undefined,
+                    });
+                  };
+
+                  return [
+                    <MenuItem
+                      key="whatsapp"
+                      onClick={() => {
+                        setPlayerShareAnchorEl(null);
+                        shareWhatsApp();
+                      }}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.2,
+                        py: 1,
+                        '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                      }}
+                    >
+                      <WhatsAppIcon sx={{ fontSize: 18, color: '#25D366' }} />
+                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Share to WhatsApp</Typography>
+                    </MenuItem>,
+                    <MenuItem
+                      key="share"
+                      onClick={() => {
+                        setPlayerShareAnchorEl(null);
+                        shareNative();
+                      }}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.2,
+                        py: 1,
+                        '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                      }}
+                    >
+                      <ShareIcon sx={{ fontSize: 18, color: '#00a77f' }} />
+                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>More Sharing Options</Typography>
+                    </MenuItem>
+                  ];
+                })()}
+              </Menu>
             </Box>
           )}
         </DialogContent>
