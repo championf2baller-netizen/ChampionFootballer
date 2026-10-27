@@ -17,10 +17,13 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ShareIcon from '@mui/icons-material/Share';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import FlagIcon from '@mui/icons-material/Flag';
+import toast from 'react-hot-toast';
 import Shirt from '@/Components/images/viewteamhome.png';
 import Shirtaway from '@/Components/images/viewteamaway.png';
 import { shareContent } from '@/lib/utils/shareUtils';
@@ -881,11 +884,85 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     window.addEventListener('pointerup', up, { once: true });
   };
 
-  const shareTeam = async () => {
+  const [shareMenuAnchor, setShareMenuAnchor] = React.useState<null | HTMLElement>(null);
+
+  const getShareMessage = () => {
+    const matchup = (homeTeamName && awayTeamName && homeTeamName !== 'Home' && awayTeamName !== 'Away')
+      ? `${homeTeamName} vs ${awayTeamName}`
+      : 'Home Team vs Away Team';
+
+    return `Champion Footballer \nWhere Champions Are Made!\nTeam line-up: (${matchup}) \n[show team preview here]\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com`;
+  };
+
+  const copyTeamContent = async () => {
+    const text = getShareMessage();
+    let copied = false;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        copied = true;
+      }
+    } catch (err) {
+      console.warn('Clipboard writeText failed, using fallback:', err);
+    }
+
+    if (!copied && typeof document !== 'undefined') {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        copied = document.execCommand('copy');
+        document.body.removeChild(textarea);
+      } catch (err) {
+        console.error('execCommand copy failed:', err);
+      }
+    }
+
+    if (copied) {
+      toast.success('Team line-up copied to clipboard!');
+    } else {
+      toast.error('Unable to copy to clipboard.');
+    }
+  };
+
+  const handleShareClick = (event: React.MouseEvent<HTMLElement>) => {
+    setShareMenuAnchor(event.currentTarget);
+  };
+
+  const handleShareClose = () => {
+    setShareMenuAnchor(null);
+  };
+
+  const handleShareWhatsApp = () => {
+    handleShareClose();
+    const text = getShareMessage();
+    if (typeof window !== 'undefined') {
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleShareNative = async () => {
+    handleShareClose();
+    const matchup = (homeTeamName && awayTeamName && homeTeamName !== 'Home' && awayTeamName !== 'Away')
+      ? `${homeTeamName} vs ${awayTeamName}`
+      : 'Home Team vs Away Team';
+    const text = getShareMessage();
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+    } catch {}
+
     shareContent({
-      title: `Match Lineup: ${homeTeamName} vs ${awayTeamName}`,
-      text: `Check out the team lineup for today's match (${homeTeamName} vs ${awayTeamName}) on Champion Footballer!`,
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
+      title: `Team line-up: (${matchup})`,
+      customFullText: text,
+      url: 'https://www.championfootballer.com',
     });
   };
 
@@ -2025,11 +2102,84 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
 
           {/* Right: Share button */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: { xs: 40, sm: 52 }, flexShrink: 0 }}>
-            <Box sx={{ width: { xs: 34, sm: 44 }, height: { xs: 34, sm: 44 }, ml: { xs: 0, sm: -13 }, borderRadius: '3px', bgcolor: '#00a77f', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-              onClick={shareTeam}
+            <Box
+              sx={{
+                width: { xs: 34, sm: 44 },
+                height: { xs: 34, sm: 44 },
+                ml: { xs: 0, sm: -13 },
+                borderRadius: '3px',
+                bgcolor: '#00a77f',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                '&:hover': { bgcolor: '#008f6b' }
+              }}
+              onClick={handleShareClick}
+              title="Share line-up"
             >
               <ShareIcon sx={{ color: '#fff', fontSize: { xs: 16, sm: 20 } }} />
             </Box>
+
+            <Menu
+              anchorEl={shareMenuAnchor}
+              open={Boolean(shareMenuAnchor)}
+              onClose={handleShareClose}
+              PaperProps={{
+                sx: {
+                  bgcolor: '#2b2b2b',
+                  color: '#fff',
+                  border: '1px solid #444',
+                  borderRadius: '6px',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.6)',
+                  minWidth: 200,
+                }
+              }}
+            >
+              <MenuItem
+                onClick={() => {
+                  handleShareClose();
+                  copyTeamContent();
+                }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.2,
+                  py: 1,
+                  '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                }}
+              >
+                <ContentCopyIcon sx={{ fontSize: 18, color: '#00a77f' }} />
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Copy Line-up Details</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={handleShareWhatsApp}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.2,
+                  py: 1,
+                  '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                }}
+              >
+                <WhatsAppIcon sx={{ fontSize: 18, color: '#25D366' }} />
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Share to WhatsApp</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={handleShareNative}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.2,
+                  py: 1,
+                  '&:hover': { bgcolor: 'rgba(0, 167, 127, 0.25)' }
+                }}
+              >
+                <ShareIcon sx={{ fontSize: 18, color: '#00a77f' }} />
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>More Sharing Options</Typography>
+              </MenuItem>
+            </Menu>
           </Box>
         </Box>
 

@@ -27,25 +27,26 @@ export async function shareContent(options: ShareOptions): Promise<void> {
     fullText = mainText
       ? `${mainText}\n\n${slogan}\n${shareUrl}`
       : `${slogan}\n${shareUrl}`;
-  } else {
-    if (!fullText.includes(slogan)) {
-      fullText = `${fullText}\n\n${slogan}`;
-    }
-    if (!fullText.includes(shareUrl)) {
-      fullText = `${fullText}\n${shareUrl}`;
-    }
   }
 
   const shareTitle = options.title || 'Champion Footballer';
 
+  // Proactively copy the full text to clipboard so it is ready to paste immediately
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(fullText).catch(() => {});
+    }
+  } catch {}
+
   // 1. Try Native Web Share API first
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
-      await navigator.share({
+      const shareData: ShareData = {
         title: shareTitle,
         text: fullText,
         url: shareUrl,
-      });
+      };
+      await navigator.share(shareData);
       return;
     } catch (error: any) {
       if (error?.name === 'AbortError') return;
