@@ -3994,7 +3994,7 @@ export default function LeagueDetailPage() {
 
                         <Box sx={{
                             mt: 0,
-                            mb: 4,
+                            mb: { xs: 2, md: 4 },
                             width: '100vw',
                             position: 'relative',
                             left: '50%',
@@ -4012,7 +4012,8 @@ export default function LeagueDetailPage() {
                             )}
                             <Paper sx={{
                                 px: 0,
-                                py: { xs: 0.5, md: 2 },
+                                pt: { xs: 0, md: 3 },
+                                pb: { xs: 2, md: 3 },
                                 background: '#0e0e0e',
                                 color: 'white',
                                 minHeight: 'auto',
@@ -4025,7 +4026,7 @@ export default function LeagueDetailPage() {
                                         justifyContent: 'center',
                                         width: '100%',
                                         position: 'relative',
-                                        mt: { xs: 1.5, sm: 2, md: 2 }
+                                        mt: 0,
                                     }}
                                 >
                                     {/* Centered League Name */}
@@ -4039,6 +4040,8 @@ export default function LeagueDetailPage() {
                                         px: { xs: 1.5, sm: 2, md: 0 },
                                         gap: 0.5,
                                         mt: 0,
+                                        minHeight: { xs: 0, md: '87px' },
+                                        height: { xs: 'auto', md: '87px' },
                                     }}>
                                         <Box sx={{
                                             display: 'flex',
@@ -4048,8 +4051,8 @@ export default function LeagueDetailPage() {
                                             <Image
                                                 src={LeagueIcon}
                                                 alt="League Icon"
-                                                width={isMobile ? 24 : 56}
-                                                height={isMobile ? 24 : 56}
+                                                width={isMobile ? 24 : 46}
+                                                height={isMobile ? 24 : 46}
                                                 style={{ objectFit: 'contain', pointerEvents: 'none' }}
                                             />
                                             {(() => {
@@ -4060,9 +4063,9 @@ export default function LeagueDetailPage() {
                                                         sx={{
                                                             textTransform: 'uppercase',
                                                             fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                                            fontSize: { xs: getLeagueTitleFontSize(displayedLeagueName), sm: '42px', md: '55px' },
+                                                            fontSize: { xs: getLeagueTitleFontSize(displayedLeagueName), sm: '42px', md: '52px' },
                                                             fontWeight: 700,
-                                                            lineHeight: { xs: 1, sm: 1.1 },
+                                                            lineHeight: 1,
                                                             wordBreak: 'normal',
                                                             overflow: 'visible',
                                                             textOverflow: 'clip',
@@ -4122,9 +4125,9 @@ export default function LeagueDetailPage() {
                                         <Button
                                             onClick={handleSeasonDropdownOpen}
                                             sx={{
-                                                mt: -1,
+                                                mt: -0.75,
                                                 color: 'rgba(255,255,255,0.9)',
-                                                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.15rem' },
+                                                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.05rem' },
                                                 fontWeight: 500,
                                                 letterSpacing: 0.25,
                                                 textTransform: 'none',
@@ -4136,6 +4139,7 @@ export default function LeagueDetailPage() {
                                                 minWidth: 0,
                                                 maxWidth: { xs: '88vw', sm: '60vw', md: '50vw' },
                                                 overflow: 'hidden',
+                                                lineHeight: 1.2,
                                                 '&:hover': {
                                                     backgroundColor: 'rgba(255,255,255,0.05)',
                                                 },
@@ -4444,15 +4448,20 @@ export default function LeagueDetailPage() {
                                 {/* Orange divider under header */}
                                 <Box
                                     sx={{
-                                        height: 'var(--header-divider-height)',
-                                        bgcolor: 'var(--header-divider-color)',
-                                        mt: { xs: 1.5, sm: 2, md: 2 },
-                                        width: '100%',
+                                        height: 'var(--header-divider-height, 3px)',
+                                        minHeight: '3px',
+                                        bgcolor: 'var(--header-divider-color, #e16419)',
+                                        mt: { xs: 0, md: 3 },
+                                        mb: { xs: 0, md: 2 },
+                                        width: '100vw',
+                                        position: 'relative',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
                                     }}
                                 />
 
                                 {/* Mobile View: Segmented toggle control for Table, Leaderboard, Dream Team */}
-                                <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', px: { xs: 1, sm: 0 }, mt: 1.5 }}>
+                                <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', px: { xs: 1, sm: 0 }, mt: 1.5, mb: { xs: 1.5, md: 0 } }}>
                                     <LeagueViewToggle
                                         activeView={section}
                                         onSelectView={(view) => {
@@ -4474,9 +4483,8 @@ export default function LeagueDetailPage() {
                                         overflowX: { xs: 'visible', sm: 'auto' },
                                         overflowY: 'hidden',
                                         px: 1,
-                                        // mx: 'aut90100o',
-                                        mt: 3,
-
+                                        mt: 0,
+                                        mb: { xs: 1.5, md: 0 },
                                     }}
                                 >
                                     <ButtonGroup
@@ -4704,7 +4712,7 @@ export default function LeagueDetailPage() {
                             minHeight: 400,
                             borderRadius: 3,
                             boxShadow: 'none',
-                            mt: { xs: 0, sm: section === 'dream-team' ? 0 : 4 },
+                            mt: 0,
                             // backdropFilter: 'blur(10px)'
                         }}>
                             {(!league && error && !isSigningOut) ? (
@@ -5516,6 +5524,8 @@ export default function LeagueDetailPage() {
                                                                     </Box>
                                                                 </Box>
 
+                                                                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+
                                                                 {/* Confirmed Count & See Who Is Playing */}
                                                                 <Box sx={{
                                                                     display: 'flex',
@@ -5562,6 +5572,8 @@ export default function LeagueDetailPage() {
                                                                         See who is playing
                                                                     </Button>
                                                                 </Box>
+
+                                                                <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
                                                                 {/* Action Buttons: I'm in, Can't make it, Teams */}
                                                                 <Box sx={{
@@ -5670,19 +5682,31 @@ export default function LeagueDetailPage() {
                                                                         mt: 'auto',
                                                                         pt: 1,
                                                                         pb: 1,
-                                                                        px: 1.5,
+                                                                        px: { xs: 0.75, sm: 1.5 },
                                                                         borderTop: '1px dashed #e56a16',
                                                                         display: 'flex',
                                                                         alignItems: 'center',
                                                                         justifyContent: 'space-between',
-                                                                        bgcolor: '#191919',
+                                                                        gap: { xs: 0.5, sm: 1 },
+                                                                        bgcolor: 'rgba(255,255,255,0.05)',
                                                                         width: '100%',
                                                                         boxSizing: 'border-box'
                                                                     }}>
-                                                                        <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                                        <Typography sx={{
+                                                                            color: '#888',
+                                                                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                                                            fontWeight: 600,
+                                                                            flexShrink: 0
+                                                                        }}>
                                                                             Admin
                                                                         </Typography>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Box sx={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: { xs: 0.4, sm: 0.75 },
+                                                                            flexWrap: 'nowrap',
+                                                                            minWidth: 0
+                                                                        }}>
                                                                             <Button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
@@ -5690,18 +5714,20 @@ export default function LeagueDetailPage() {
                                                                                     setEditMatchDialogOpen(true);
                                                                                 }}
                                                                                 disabled={!league?.active}
-                                                                                startIcon={<Edit size={14} color="#00D09E" />}
+                                                                                startIcon={<Edit size={12} color="#00D09E" />}
                                                                                 sx={{
                                                                                     color: 'white',
                                                                                     bgcolor: 'transparent',
-                                                                                    border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
                                                                                     borderRadius: '8px',
-                                                                                    px: 1.2,
+                                                                                    px: { xs: 0.6, sm: 1.2 },
                                                                                     py: 0.4,
-                                                                                    fontSize: '0.75rem',
+                                                                                    fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                                     fontWeight: 600,
                                                                                     textTransform: 'none',
                                                                                     minWidth: 0,
+                                                                                    whiteSpace: 'nowrap',
+                                                                                    '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                                     '&:hover': {
                                                                                         bgcolor: 'rgba(0, 208, 158, 0.15)',
                                                                                         borderColor: '#00D09E'
@@ -5709,25 +5735,27 @@ export default function LeagueDetailPage() {
                                                                                     '&.Mui-disabled': { opacity: 0.4 }
                                                                                 }}
                                                                             >
-                                                                                Edit match
+                                                                                Edit Match
                                                                             </Button>
                                                                             <Button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
                                                                                     handleRequestDeleteMatch(match);
                                                                                 }}
-                                                                                startIcon={<Trash2 size={14} color="#ff4d4f" />}
+                                                                                startIcon={<Trash2 size={12} color="#ff4d4f" />}
                                                                                 sx={{
                                                                                     color: '#ff4d4f',
                                                                                     bgcolor: 'transparent',
                                                                                     border: '1px solid rgba(255, 77, 79, 0.4)',
                                                                                     borderRadius: '8px',
-                                                                                    px: 1.2,
+                                                                                    px: { xs: 0.6, sm: 1.2 },
                                                                                     py: 0.4,
-                                                                                    fontSize: '0.75rem',
+                                                                                    fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                                     fontWeight: 600,
                                                                                     textTransform: 'none',
                                                                                     minWidth: 0,
+                                                                                    whiteSpace: 'nowrap',
+                                                                                    '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                                     '&:hover': {
                                                                                         bgcolor: 'rgba(255, 77, 79, 0.15)',
                                                                                         borderColor: '#ff4d4f'
@@ -6161,23 +6189,25 @@ export default function LeagueDetailPage() {
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
                                                                                     {hasPlayed ? (
                                                                                         <Box sx={{
-                                                                                            bgcolor: 'rgba(34, 197, 94, 0.1)',
-                                                                                            border: '1px solid rgba(34, 197, 94, 0.3)',
-                                                                                            borderRadius: '6px',
-                                                                                            px: { xs: 0.75, sm: 1 },
-                                                                                            py: 0.35,
-                                                                                            fontSize: { xs: '0.68rem', sm: '0.75rem' },
+                                                                                            // bgcolor: 'rgba(255, 255, 255, 0.05)',
+                                                                                            // borderRadius: '4px',
+                                                                                            px: { xs: 1.25, sm: 1.75 },
+                                                                                            py: 0.4,
+                                                                                            fontSize: { xs: '0.72rem', sm: '0.78rem' },
                                                                                             color: '#22c55e',
                                                                                             fontWeight: 700,
                                                                                             whiteSpace: 'nowrap',
                                                                                             display: 'inline-flex',
-                                                                                            alignItems: 'center'
+                                                                                            alignItems: 'center',
+                                                                                            justifyContent: 'center',
                                                                                         }}>
                                                                                             Played
                                                                                         </Box>
                                                                                     ) : null}
                                                                                 </Box>
                                                                             </Box>
+
+                                                                            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
                                                                             {/* MOTM Row */}
                                                                             <Box sx={{
@@ -6186,10 +6216,10 @@ export default function LeagueDetailPage() {
                                                                                 justifyContent: 'space-between',
                                                                                 px: 1.5,
                                                                                 py: 0.75,
-                                                                                mx: 1.5,
-                                                                                my: 0.5,
-                                                                                bgcolor: 'rgba(255, 255, 255, 0.04)',
-                                                                                borderRadius: '8px',
+                                                                                // mx: 1.5,
+                                                                                // my: 0.5,
+                                                                                // bgcolor: 'rgba(255, 255, 255, 0.04)',
+                                                                                // borderRadius: '8px',
                                                                             }}>
                                                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
                                                                                     <Avatar
@@ -6230,8 +6260,10 @@ export default function LeagueDetailPage() {
                                                                                 <Star sx={{ fontSize: 20, color: motm ? '#f59e0b' : '#6b7280' }} />
                                                                             </Box>
 
+                                                                            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+
                                                                             {/* Player Statistics Progress Indicator */}
-                                                                            <Box sx={{ px: 1.5, py: 0.5, mx: 1.5, my: 0.25 }}>
+                                                                            <Box sx={{ px: 1, py: 0.5, mx: 1, my: 0.25 }}>
                                                                                 <Typography sx={{ color: '#9ca3af', fontSize: '0.72rem', fontWeight: 500, mb: 0.6 }}>
                                                                                     Stats added for {count} of {total} players
                                                                                 </Typography>
@@ -6251,6 +6283,8 @@ export default function LeagueDetailPage() {
                                                                                     }} />
                                                                                 </Box>
                                                                             </Box>
+
+                                                                            <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
                                                                             {/* Action Buttons: + My Stats, Teams, Report */}
                                                                             <Box sx={{
@@ -6405,19 +6439,31 @@ export default function LeagueDetailPage() {
                                                                                     mt: 'auto',
                                                                                     pt: 1,
                                                                                     pb: 1,
-                                                                                    px: 1.5,
+                                                                                    px: { xs: 0.75, sm: 1.5 },
                                                                                     borderTop: '1px dashed #e56a16',
                                                                                     display: 'flex',
                                                                                     alignItems: 'center',
                                                                                     justifyContent: 'space-between',
-                                                                                    bgcolor: '#191919',
+                                                                                    gap: { xs: 0.5, sm: 1 },
+                                                                                    bgcolor: 'rgba(255,255,255,0.05)',
                                                                                     width: '100%',
                                                                                     boxSizing: 'border-box'
                                                                                 }}>
-                                                                                    <Typography sx={{ color: '#888', fontSize: '0.8rem', fontWeight: 600 }}>
+                                                                                    <Typography sx={{
+                                                                                        color: '#888',
+                                                                                        fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                                                                        fontWeight: 600,
+                                                                                        flexShrink: 0
+                                                                                    }}>
                                                                                         Admin
                                                                                     </Typography>
-                                                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+                                                                                    <Box sx={{
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        gap: { xs: 0.4, sm: 0.75 },
+                                                                                        flexWrap: 'nowrap',
+                                                                                        minWidth: 0
+                                                                                    }}>
                                                                                         <Button
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
@@ -6426,26 +6472,28 @@ export default function LeagueDetailPage() {
                                                                                                 setMatchStatsOpen(true);
                                                                                             }}
                                                                                             disabled={match.archived || !league?.active || !matchSeasonActiveForStats}
-                                                                                            startIcon={<Plus size={13} color="#00D09E" />}
+                                                                                            startIcon={<Plus size={12} color="#3B82F6" />}
                                                                                             sx={{
                                                                                                 color: 'white',
                                                                                                 bgcolor: 'transparent',
-                                                                                                border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                                border: '1px solid rgba(255, 255, 255, 0.1)',
                                                                                                 borderRadius: '8px',
-                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                px: { xs: 0.6, sm: 1.2 },
                                                                                                 py: 0.4,
-                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                                                 fontWeight: 600,
                                                                                                 textTransform: 'none',
                                                                                                 minWidth: 0,
+                                                                                                whiteSpace: 'nowrap',
+                                                                                                '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                                                 '&:hover': {
-                                                                                                    bgcolor: 'rgba(0, 208, 158, 0.15)',
-                                                                                                    borderColor: '#00D09E'
+                                                                                                    bgcolor: 'rgba(59, 130, 246, 0.15)',
+                                                                                                    borderColor: '#3B82F6'
                                                                                                 },
                                                                                                 '&.Mui-disabled': { opacity: 0.4 }
                                                                                             }}
                                                                                         >
-                                                                                            + Add Score
+                                                                                            Add Score
                                                                                         </Button>
                                                                                         <Button
                                                                                             onClick={(e) => {
@@ -6454,18 +6502,20 @@ export default function LeagueDetailPage() {
                                                                                                 setEditMatchDialogOpen(true);
                                                                                             }}
                                                                                             disabled={!league?.active || match.archived}
-                                                                                            startIcon={<Edit size={13} color="#00D09E" />}
+                                                                                            startIcon={<Edit size={12} color="#00D09E" />}
                                                                                             sx={{
                                                                                                 color: 'white',
                                                                                                 bgcolor: 'transparent',
-                                                                                                border: '1px solid rgba(0, 208, 158, 0.4)',
+                                                                                                border: '1px solid rgba(255, 255, 255, 0.1)',
                                                                                                 borderRadius: '8px',
-                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                px: { xs: 0.6, sm: 1.2 },
                                                                                                 py: 0.4,
-                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                                                 fontWeight: 600,
                                                                                                 textTransform: 'none',
                                                                                                 minWidth: 0,
+                                                                                                whiteSpace: 'nowrap',
+                                                                                                '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                                                 '&:hover': {
                                                                                                     bgcolor: 'rgba(0, 208, 158, 0.15)',
                                                                                                     borderColor: '#00D09E'
@@ -6485,18 +6535,20 @@ export default function LeagueDetailPage() {
                                                                                                     handleRequestDeleteMatch(match);
                                                                                                 }
                                                                                             }}
-                                                                                            startIcon={match.archived ? <Undo2 size={13} color="#f97316" /> : <Trash2 size={13} color="#ff4d4f" />}
+                                                                                            startIcon={match.archived ? <Undo2 size={12} color="#f97316" /> : <Trash2 size={12} color="#ff4d4f" />}
                                                                                             sx={{
                                                                                                 color: match.archived ? '#f97316' : '#ff4d4f',
                                                                                                 bgcolor: 'transparent',
                                                                                                 border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
                                                                                                 borderRadius: '8px',
-                                                                                                px: { xs: 0.8, sm: 1.2 },
+                                                                                                px: { xs: 0.6, sm: 1.2 },
                                                                                                 py: 0.4,
-                                                                                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                                                                                fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                                                                 fontWeight: 600,
                                                                                                 textTransform: 'none',
                                                                                                 minWidth: 0,
+                                                                                                whiteSpace: 'nowrap',
+                                                                                                '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                                                                 '&:hover': {
                                                                                                     bgcolor: match.archived ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 77, 79, 0.15)',
                                                                                                     borderColor: match.archived ? '#f97316' : '#ff4d4f'

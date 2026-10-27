@@ -28,7 +28,7 @@ export type PageHeaderProps = {
 
 const baseOuterSx: SystemStyleObject<Theme> = {
   mt: 0,
-  mb: { xs: 0.5, md: 4 },
+  mb: { xs: 2, md: 4 },
   width: '100vw',
   position: 'relative',
   left: '50%',
@@ -68,6 +68,7 @@ const baseTitleBoxSx: SystemStyleObject<Theme> = {
   gap: 0.5,
   mt: 0,
   minHeight: { xs: 0, md: '87px' },
+  height: { xs: 'auto', md: '87px' },
 };
 
 const baseTitleRowSx: SystemStyleObject<Theme> = {
@@ -119,7 +120,7 @@ export default function PageHeader({
     ? baseOuterSx
     : {
       mt: 0,
-      mb: { xs: 0.5, md: 4 },
+      mb: { xs: 2, md: 4 },
       width: '100%',
       bgcolor: '#0E0E0E',
     };
@@ -161,7 +162,7 @@ export default function PageHeader({
 
           {/* Controls / filters / subheader children */}
           {children && (
-            <Box sx={{ width: '100%', mt: 0, pb: { xs: 0, md: 3 } }}>
+            <Box sx={{ width: '100%', mt: 0, pb: { xs: 2, md: 3 } }}>
               {children}
             </Box>
           )}

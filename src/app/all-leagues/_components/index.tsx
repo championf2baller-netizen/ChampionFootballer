@@ -5593,11 +5593,18 @@ function AllLeagues() {
           <Box
             sx={{
               display: 'flex',
-              gap: { xs: 1.25, md: 2 },
-              flexWrap: 'wrap',
-              alignItems: { xs: 'stretch', md: 'center' },
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
               justifyContent: 'space-between',
-              px: { xs: 0, sm: 2, md: 14 }
+              gap: { xs: 1.5, md: 3 },
+              px: { xs: 1, sm: 2, md: 3 },
+              py: { xs: 1.5, md: 0 },
+              maxWidth: '1230px',
+              width: '100%',
+              mx: 'auto',
+              position: 'relative',
+              zIndex: 10,
+              mb: { xs: 2, md: 0 },
             }}
           >
             {/* Left side: Create + Invite + Join */}
@@ -5605,7 +5612,7 @@ function AllLeagues() {
               sx={{
                 display: 'flex',
                 gap: { xs: 1, md: 2 },
-                alignItems: { xs: 'stretch', md: 'center' },
+                alignItems: 'center',
                 flexWrap: 'wrap',
                 width: { xs: '100%', md: 'auto' }
               }}
@@ -6010,7 +6017,7 @@ function AllLeagues() {
             justifyContent: 'center',
             alignItems: 'center',
             mt: { xs: 2, md: 3 },
-            mb: 4
+            mb: { xs: 1.5, md: 0 }
           }}>
             <Box sx={{
               display: 'flex',
@@ -6067,7 +6074,7 @@ function AllLeagues() {
         <Container maxWidth={false} disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
 
         {/* Leagues List - Card Format */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7, mt: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7, mt: 0 }}>
           {loading ? (
             <AllLeaguesLoadingSkeleton compact />
           ) : leagues.length === 0 ? (

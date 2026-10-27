@@ -1146,15 +1146,17 @@ const AllPlayersPage = () => {
           <Box sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'stretch', md: 'center' },
+            alignItems: 'center',
             justifyContent: 'space-between',
             gap: { xs: 2, md: 3 },
-            // Offset PageHeader internal padding so controls align with table edges.
-            // mx: { xs: -2, md: -3 },
             px: { xs: 1, sm: 2, md: 3 },
             py: { xs: 1.5, md: 0 },
-            maxWidth: '1280px',
+            maxWidth: '1230px',
+            width: '100%',
             mx: 'auto',
+            position: 'relative',
+            zIndex: 10,
+            mb: { xs: 1.5, md: 0 },
           }}>
             {/* Search Input */}
             <TextField
@@ -1177,7 +1179,7 @@ const AllPlayersPage = () => {
               }}
               sx={{
                 width: { xs: '100%', md: '440px' },
-                ml: { xs: 0, md: 0.8 },
+                ml: 0,
                 color: 'white',
                 '& .MuiOutlinedInput-root': {
                   height: { xs: 38, sm: 42 },
@@ -1701,7 +1703,7 @@ const AllPlayersPage = () => {
               backdropFilter: 'blur(10px)',
               borderRadius: { xs: 2, sm: 3 },
               boxShadow: 'none',
-              mt: 1.2,
+              mt: 0,
               mb: 4,
               overflow: 'hidden',
               '&::-webkit-scrollbar': {

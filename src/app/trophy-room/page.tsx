@@ -2624,6 +2624,7 @@ export default function GlobalTrophyRoom() {
               px: { xs: 1, sm: 2, md: 3 },
               py: { xs: 1.5, md: 0 },
               maxWidth: '1230px',
+              width: '100%',
               mx: 'auto',
               position: 'relative',
               zIndex: 10,
@@ -3155,69 +3156,61 @@ export default function GlobalTrophyRoom() {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            position: 'relative',
-            mt: 1,
+            mt: { xs: 2, md: 3 },
+            mb: { xs: 1.5, md: 0 },
             px: { xs: 1, sm: 3, md: 9.3 },
+            width: '100%',
+            position: 'relative',
+            zIndex: 5,
           }}
         >
-          {/* Center: Navigation buttons */}
           <Box sx={{
             display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            mt: { xs: 2, md: 3 },
-            mb: 1,
-            width: '100%',
-            zIndex: 5
+            bgcolor: '#3F4652',
+            borderRadius: '12px',
+            p: 0.5,
+            width: { xs: '90%', sm: 400, md: 600 }
           }}>
-            <Box sx={{
-              display: 'flex',
-              bgcolor: '#3F4652',
-              borderRadius: '12px',
-              p: 0.5,
-              width: { xs: '90%', sm: 400, md: 600 }
-            }}>
-              <Button
-                onClick={() => setFilter('all')}
-                sx={{
-                  flex: 1,
-                  textTransform: 'uppercase',
-                  borderRadius: '10px',
-                  py: { xs: 1, md: 1.5 },
-                  fontSize: { xs: '14px', sm: '16px', md: '18px' },
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                  fontWeight: 700,
-                  bgcolor: filter === 'all' ? '#00a896' : 'transparent',
-                  color: '#ffffff',
-                  '&:hover': {
-                    bgcolor: filter === 'all' ? '#00a896' : '#3f4652',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                {getCms('page_trophy_room_tab_league', 'LEAGUE AWARDS')}
-              </Button>
-              <Button
-                onClick={() => setFilter('my')}
-                sx={{
-                  flex: 1,
-                  textTransform: 'uppercase',
-                  borderRadius: '10px',
-                  py: { xs: 1, md: 1.5 },
-                  fontSize: { xs: '14px', sm: '16px', md: '18px' },
-                  fontFamily: 'var(--font-woodford-bourne-pro)',
-                  fontWeight: 700,
-                  bgcolor: filter === 'my' ? '#00a896' : 'transparent',
-                  color: '#ffffff',
-                  '&:hover': {
-                    bgcolor: filter === 'my' ? '#00a896' : '#3f4652',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                {getCms('page_trophy_room_tab_achievements', 'Achievements')}
-              </Button>
-            </Box>
+            <Button
+              onClick={() => setFilter('all')}
+              sx={{
+                flex: 1,
+                textTransform: 'uppercase',
+                borderRadius: '10px',
+                py: { xs: 1, md: 1.5 },
+                fontSize: { xs: '14px', sm: '16px', md: '18px' },
+                fontFamily: 'var(--font-woodford-bourne-pro)',
+                fontWeight: 700,
+                bgcolor: filter === 'all' ? '#00a896' : 'transparent',
+                color: '#ffffff',
+                '&:hover': {
+                  bgcolor: filter === 'all' ? '#00a896' : '#3f4652',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {getCms('page_trophy_room_tab_league', 'LEAGUE AWARDS')}
+            </Button>
+            <Button
+              onClick={() => setFilter('my')}
+              sx={{
+                flex: 1,
+                textTransform: 'uppercase',
+                borderRadius: '10px',
+                py: { xs: 1, md: 1.5 },
+                fontSize: { xs: '14px', sm: '16px', md: '18px' },
+                fontFamily: 'var(--font-woodford-bourne-pro)',
+                fontWeight: 700,
+                bgcolor: filter === 'my' ? '#00a896' : 'transparent',
+                color: '#ffffff',
+                '&:hover': {
+                  bgcolor: filter === 'my' ? '#00a896' : '#3f4652',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {getCms('page_trophy_room_tab_achievements', 'Achievements')}
+            </Button>
           </Box>
         </Box>
       </PageHeader>
