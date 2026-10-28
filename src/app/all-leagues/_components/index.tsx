@@ -2278,7 +2278,7 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                     value={selectedSeasonId}
                     // disabled={isCompletedLeague}
                     onChange={(e) => {
-                      if (isCompletedLeague) return;
+                      // if (isCompletedLeague) return;
                       setSelectedSeasonId(e.target.value as string);
                     }}
                     sx={{
