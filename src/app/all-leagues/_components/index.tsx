@@ -1229,9 +1229,27 @@ interface LeagueSettingsDialogProps {
   onArchive?: () => void | Promise<void>;
   onUnarchive?: () => void | Promise<void>;
   onSeasonArchived?: (payload: { leagueId: string; seasonId: string }) => void;
+  isCompleted?: boolean;
 }
 
-function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, currentUserId, onRemoveMember, onLeaveLeague, onMembersChanged, onArchive, onUnarchive, onSeasonArchived }: LeagueSettingsDialogProps) {
+function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, currentUserId, onRemoveMember, onLeaveLeague, onMembersChanged, onArchive, onUnarchive, onSeasonArchived, isCompleted }: LeagueSettingsDialogProps) {
+  const isCompletedLeague = useMemo(() => {
+    if (typeof isCompleted === 'boolean') return isCompleted;
+    const l = league as any;
+    const st = String(l?.status || '').toLowerCase().trim();
+    return Boolean(
+      st === 'completed' ||
+      st === 'complete' ||
+      st === 'finished' ||
+      st === 'closed' ||
+      l?.isCompleted ||
+      l?.isComplete ||
+      l?.computedStatus?.isCompleted ||
+      l?.computedStatus?.isComplete ||
+      l?.computedStatus?.locked ||
+      l?.isLocked
+    );
+  }, [isCompleted, league]);
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [name, setName] = useState('')
@@ -2183,7 +2201,25 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ px: { xs: 2, sm: 3 }, overflowX: 'hidden' }}>
+      <DialogContent sx={{
+        px: { xs: 2, sm: 3 },
+        overflowX: 'hidden',
+        '& .Mui-disabled': {
+          WebkitTextFillColor: 'inherit',
+        },
+        '& .MuiFormHelperText-root': {
+          color: '#9CA3AF !important',
+        },
+        '& .MuiFormHelperText-root.Mui-disabled': {
+          color: '#9CA3AF !important',
+        },
+        '& .MuiFormControlLabel-root.Mui-disabled .MuiFormControlLabel-label': {
+          color: '#E5E7EB !important',
+        },
+        '& .MuiFormControlLabel-label.Mui-disabled': {
+          color: '#E5E7EB !important',
+        },
+      }}>
         <Grid container spacing={3} sx={{ mt: 0, minWidth: 0 }}>
           <Grid item xs={12} md={6} sx={{ minWidth: 0 }}>
             <Box component="form" noValidate autoComplete="off" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
@@ -2196,22 +2232,37 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   fullWidth
                   value={name}
                   onChange={(e) => {
+                    if (isCompletedLeague) return;
                     const raw = e.target.value || ''
                     const cleaned = raw.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 30)
                     setName(cleaned)
                   }}
-                  disabled={!canManageLeagueSettings}
+                  disabled={!canManageLeagueSettings || isCompletedLeague}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: '#E5E7EB',
                       '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
                       '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
                       '&.Mui-focused fieldset': { borderColor: '#0388E3' },
+                      '&.Mui-disabled': {
+                        color: '#E5E7EB !important',
+                        '& fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      },
                     },
                     '& .MuiInputBase-input': { color: '#E5E7EB' },
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: '#E5E7EB !important',
+                      WebkitTextFillColor: '#E5E7EB !important',
+                      cursor: 'not-allowed',
+                    },
                   }}
                   InputLabelProps={{ sx: { color: '#9CA3AF' } }}
-                  FormHelperTextProps={{ sx: { color: '#E5E7EB' } }}
+                  FormHelperTextProps={{
+                    sx: {
+                      color: '#9CA3AF !important',
+                      '&.Mui-disabled': { color: '#9CA3AF !important' },
+                    },
+                  }}
                   inputProps={{ maxLength: 30 }}
                   helperText="Max 30 characters, letters/numbers only"
                 />
@@ -2225,13 +2276,31 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   </Typography>
                   <Select
                     value={selectedSeasonId}
-                    onChange={(e) => setSelectedSeasonId(e.target.value as string)}
+                    // disabled={isCompletedLeague}
+                    onChange={(e) => {
+                      if (isCompletedLeague) return;
+                      setSelectedSeasonId(e.target.value as string);
+                    }}
                     sx={{
                       color: '#E5E7EB',
                       '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
                       '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.35)' },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#0388E3' },
                       '& .MuiSelect-icon': { color: '#E5E7EB' },
+                      '&.Mui-disabled': {
+                        color: '#E5E7EB !important',
+                      },
+                      '& .MuiSelect-select.Mui-disabled': {
+                        color: '#E5E7EB !important',
+                        WebkitTextFillColor: '#E5E7EB !important',
+                        cursor: 'not-allowed',
+                      },
+                      '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'rgba(255,255,255,0.2) !important',
+                      },
+                      '&.Mui-disabled .MuiSelect-icon': {
+                        color: 'rgba(229, 231, 235, 0.5) !important',
+                      },
                     }}
                     MenuProps={{
                       ...dropdownMenuBaseProps,
@@ -2270,14 +2339,31 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 </Typography>
                 <Select
                   value={sortedLeagueMembers.some((member) => String(member.id) === String(adminId)) ? adminId : ''}
-                  onChange={(e) => setAdminId(e.target.value as string)}
-                  disabled={!canManageLeagueSettings || sortedLeagueMembers.length === 0}
+                  onChange={(e) => {
+                    if (isCompletedLeague) return;
+                    setAdminId(e.target.value as string);
+                  }}
+                  disabled={!canManageLeagueSettings || sortedLeagueMembers.length === 0 || isCompletedLeague}
                   sx={{
                     color: '#E5E7EB',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
                     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.35)' },
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#0388E3' },
                     '& .MuiSelect-icon': { color: '#E5E7EB' },
+                    '&.Mui-disabled': {
+                      color: '#E5E7EB !important',
+                    },
+                    '& .MuiSelect-select.Mui-disabled': {
+                      color: '#E5E7EB !important',
+                      WebkitTextFillColor: '#E5E7EB !important',
+                      cursor: 'not-allowed',
+                    },
+                    '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                      borderColor: 'rgba(255,255,255,0.2) !important',
+                    },
+                    '&.Mui-disabled .MuiSelect-icon': {
+                      color: 'rgba(229, 231, 235, 0.5) !important',
+                    },
                   }}
                   MenuProps={{
                     ...dropdownMenuBaseProps,
@@ -2353,9 +2439,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   {canManageLeagueSettings ? (
                     <>
                       <Button
-                        component="label"
+                        component={isCompletedLeague ? 'button' : 'label'}
                         variant="outlined"
                         startIcon={<CloudUpload />}
+                        disabled={isCompletedLeague}
                         sx={{
                           color: '#0388E3',
                           borderColor: 'rgba(3,136,227,0.5)',
@@ -2366,6 +2453,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                           minWidth: 0,
                           whiteSpace: 'normal',
                           textAlign: 'center',
+                          '&.Mui-disabled': {
+                            color: 'rgba(3,136,227,0.5) !important',
+                            borderColor: 'rgba(3,136,227,0.25) !important',
+                            cursor: 'not-allowed',
+                          },
                           '&:hover': {
                             borderColor: '#0388E3',
                             backgroundColor: 'rgba(3,136,227,0.08)',
@@ -2373,31 +2465,35 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                         }}
                       >
                         {settingsImagePreview && !settingsRemoveImage ? 'Change Image' : 'Upload Image'}
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          ref={settingsFileInputRef}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0]
-                            if (!file) return
-                            if (!validateLeagueImageFile(file)) {
-                              try { (e.target as HTMLInputElement).value = '' } catch { }
-                              return
-                            }
-                            setSettingsImageFile(file)
-                            setSettingsRemoveImage(false)
-                            const reader = new FileReader()
-                            reader.onload = (ev) => setSettingsImagePreview(ev.target?.result as string)
-                            reader.readAsDataURL(file)
-                          }}
-                          onClick={(e) => { try { (e.target as HTMLInputElement).value = '' } catch { } }}
-                        />
+                        {!isCompletedLeague && (
+                          <input
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            ref={settingsFileInputRef}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+                              if (!validateLeagueImageFile(file)) {
+                                try { (e.target as HTMLInputElement).value = '' } catch { }
+                                return
+                              }
+                              setSettingsImageFile(file)
+                              setSettingsRemoveImage(false)
+                              const reader = new FileReader()
+                              reader.onload = (ev) => setSettingsImagePreview(ev.target?.result as string)
+                              reader.readAsDataURL(file)
+                            }}
+                            onClick={(e) => { try { (e.target as HTMLInputElement).value = '' } catch { } }}
+                          />
+                        )}
                       </Button>
                       {settingsImagePreview && !settingsRemoveImage && (
                         <Button
                           variant="outlined"
+                          disabled={isCompletedLeague}
                           onClick={() => {
+                            if (isCompletedLeague) return;
                             setSettingsImageFile(null)
                             setSettingsImagePreview(null)
                             setSettingsRemoveImage(true)
@@ -2412,6 +2508,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                             fontSize: 13,
                             minWidth: 0,
                             whiteSpace: 'normal',
+                            '&.Mui-disabled': {
+                              color: 'rgba(255,107,107,0.5) !important',
+                              borderColor: 'rgba(255,107,107,0.25) !important',
+                              cursor: 'not-allowed',
+                            },
                             '&:hover': {
                               borderColor: '#ff6b6b',
                               backgroundColor: 'rgba(255,107,107,0.08)',
@@ -2437,7 +2538,10 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 <RadioGroup
                   row
                   value={seasonIsActive ? 'active' : 'inactive'}
-                  onChange={(event) => setSeasonIsActive(event.target.value === 'active')}
+                  onChange={(event) => {
+                    if (isCompletedLeague) return;
+                    setSeasonIsActive(event.target.value === 'active');
+                  }}
                   sx={{
                     gap: { xs: 0.5, sm: 1.5 },
                     flexWrap: 'wrap',
@@ -2447,19 +2551,26 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                       minWidth: 0,
                     },
                     '& .MuiFormControlLabel-label': {
-                      color: '#E5E7EB',
+                      color: '#E5E7EB !important',
                       fontWeight: 600,
+                    },
+                    '&.Mui-disabled .MuiFormControlLabel-label, & .MuiFormControlLabel-label.Mui-disabled': {
+                      color: '#E5E7EB !important',
                     },
                   }}
                 >
                   <FormControlLabel
                     value="active"
-                    disabled={!selectedSeasonId || !canManageLeagueSettings}
+                    disabled={!selectedSeasonId || !canManageLeagueSettings || isCompletedLeague}
                     control={
                       <Radio
                         sx={{
                           color: 'rgba(39,171,131,0.75)',
                           '&.Mui-checked': { color: '#27ab83' },
+                          '&.Mui-disabled': {
+                            color: 'rgba(255, 255, 255, 0.4) !important',
+                            '&.Mui-checked': { color: '#27ab83 !important' },
+                          },
                         }}
                       />
                     }
@@ -2467,12 +2578,16 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   />
                   <FormControlLabel
                     value="inactive"
-                    disabled={!selectedSeasonId || !canManageLeagueSettings}
+                    disabled={!selectedSeasonId || !canManageLeagueSettings || isCompletedLeague}
                     control={
                       <Radio
                         sx={{
                           color: 'rgba(239,83,80,0.75)',
                           '&.Mui-checked': { color: '#ef5350' },
+                          '&.Mui-disabled': {
+                            color: 'rgba(255, 255, 255, 0.4) !important',
+                            '&.Mui-checked': { color: '#ef5350 !important' },
+                          },
                         }}
                       />
                     }
@@ -2491,17 +2606,23 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   inputProps={{ min: 0, max: 999 }}
                   value={seasonMaxGames === 0 || seasonMaxGames === '0' ? '' : seasonMaxGames}
                   onFocus={(e) => {
+                    if (isCompletedLeague) return;
                     e.target.select();
                     if (seasonMaxGames === 0 || seasonMaxGames === '0') {
                       setSeasonMaxGames('');
                     }
                   }}
                   onKeyDown={(e) => {
+                    if (isCompletedLeague) {
+                      e.preventDefault();
+                      return;
+                    }
                     if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
                       e.preventDefault();
                     }
                   }}
                   onChange={(e) => {
+                    if (isCompletedLeague) return;
                     const val = e.target.value;
                     if (val === '') {
                       setSeasonMaxGames('');
@@ -2516,24 +2637,42 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                     }
                   }}
                   onBlur={() => {
+                    if (isCompletedLeague) return;
                     if (seasonMaxGames === '' || seasonMaxGames === null || seasonMaxGames === undefined || Number(seasonMaxGames) < 0) {
                       setSeasonMaxGames(0);
                     } else {
                       setSeasonMaxGames(Math.max(0, Math.min(999, Number(seasonMaxGames))));
                     }
                   }}
-                  disabled={!selectedSeasonId || !canManageLeagueSettings}
+                  disabled={!selectedSeasonId || !canManageLeagueSettings || isCompletedLeague}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       color: '#E5E7EB',
                       '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
                       '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.35)' },
                       '&.Mui-focused fieldset': { borderColor: '#0388E3' },
+                      '&.Mui-disabled': {
+                        color: '#E5E7EB !important',
+                        '& fieldset': { borderColor: 'rgba(255,255,255,0.2) !important' },
+                      },
                     },
                     '& .MuiInputBase-input': { color: '#E5E7EB' },
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: '#E5E7EB !important',
+                      WebkitTextFillColor: '#E5E7EB !important',
+                      cursor: 'not-allowed',
+                    },
                   }}
                   helperText={!selectedSeasonId ? 'Select a season first' : `This setting controls how many matches can be played in ${currentSeason?.name || 'this season'}`}
-                  FormHelperTextProps={{ sx: { color: '#9CA3AF', overflowWrap: 'anywhere', mx: 0, lineHeight: 1.35 } }}
+                  FormHelperTextProps={{
+                    sx: {
+                      color: '#9CA3AF !important',
+                      '&.Mui-disabled': { color: '#9CA3AF !important' },
+                      overflowWrap: 'anywhere',
+                      mx: 0,
+                      lineHeight: 1.35,
+                    },
+                  }}
                 />
               </FormControl>
 
@@ -2541,8 +2680,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 control={
                   <Switch
                     checked={seasonShowPoints}
-                    onChange={(e) => setSeasonShowPoints(e.target.checked)}
-                    disabled={!selectedSeasonId || !canManageLeagueSettings}
+                    onChange={(e) => {
+                      if (isCompletedLeague) return;
+                      setSeasonShowPoints(e.target.checked);
+                    }}
+                    disabled={!selectedSeasonId || !canManageLeagueSettings || isCompletedLeague}
                     sx={{
                       '& .MuiSwitch-switchBase': {
                         color: '#9CA3AF',
@@ -2557,6 +2699,20 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                       '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
                         backgroundColor: '#27ab83',
                         opacity: 1,
+                      },
+                      '& .MuiSwitch-switchBase.Mui-disabled.Mui-checked': {
+                        color: '#27ab83 !important',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-disabled.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: '#27ab83 !important',
+                        opacity: '0.6 !important',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-disabled': {
+                        color: '#9CA3AF !important',
+                      },
+                      '& .MuiSwitch-switchBase.Mui-disabled + .MuiSwitch-track': {
+                        backgroundColor: 'rgba(255,255,255,0.2) !important',
+                        opacity: '1 !important',
                       },
                     }}
                   />
@@ -2577,11 +2733,14 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                     mt: -0.5,
                   },
                   '& .MuiFormControlLabel-label': {
-                    color: seasonShowPoints ? '#E5E7EB' : '#E5E7EB',
+                    color: '#E5E7EB !important',
                     fontWeight: 600,
                     lineHeight: 1.35,
                     minWidth: 0,
                     overflowWrap: 'anywhere',
+                  },
+                  '&.Mui-disabled .MuiFormControlLabel-label, & .MuiFormControlLabel-label.Mui-disabled': {
+                    color: '#E5E7EB !important',
                   },
                 }}
               />
@@ -2659,17 +2818,28 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
 
                         {/* Right-side remove button: visible to any league admin for any member except themself */}
                         {currentUserIsAdmin && member.id !== currentUserId && (
-                          <Tooltip title={`Remove ${memberName}`} arrow>
-                            <IconButton
-                              onClick={() => handleAdminRemoveMember(member)}
-                              sx={{
-                                color: '#ff6b6b',
-                                bgcolor: 'rgba(255, 107, 107, 0.12)',
-                                '&:hover': { bgcolor: 'rgba(255, 107, 107, 0.2)' },
-                              }}
-                            >
-                              <Delete sx={{ fontSize: 20 }} />
-                            </IconButton>
+                          <Tooltip title={isCompletedLeague ? `Cannot remove member from completed league` : `Remove ${memberName}`} arrow>
+                            <span>
+                              <IconButton
+                                disabled={isCompletedLeague}
+                                onClick={() => {
+                                  if (isCompletedLeague) return;
+                                  handleAdminRemoveMember(member);
+                                }}
+                                sx={{
+                                  color: '#ff6b6b',
+                                  bgcolor: 'rgba(255, 107, 107, 0.12)',
+                                  '&:hover': { bgcolor: 'rgba(255, 107, 107, 0.2)' },
+                                  '&.Mui-disabled': {
+                                    color: 'rgba(255, 107, 107, 0.4) !important',
+                                    bgcolor: 'rgba(255, 107, 107, 0.05) !important',
+                                    cursor: 'not-allowed',
+                                  },
+                                }}
+                              >
+                                <Delete sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         )}
                       </ListItem>
@@ -2715,7 +2885,9 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
               startIcon={<ExitToApp />}
               variant="outlined"
               color="warning"
+              disabled={isCompletedLeague}
               onClick={async () => {
+                if (isCompletedLeague) return;
                 const isAdmin = !!(league && league.adminId === currentUserId)
                 const otherMembers = ((league?.members || []) as User[]).filter(m => m.id !== currentUserId)
                 const confirmMsg = isAdmin
@@ -2757,26 +2929,15 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                   transform: "translateY(-1px)",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
                 },
+                '&.Mui-disabled': {
+                  bgcolor: '#ffffff !important',
+                  color: 'rgba(211, 47, 47, 0.5) !important',
+                  opacity: 0.7,
+                  cursor: 'not-allowed',
+                },
                 transition: "all 0.2s ease",
               }}
             >
-              {/* onClick={handleLeaveLeague}
-            sx={{
-              fontWeight: 600,
-              bgcolor: "#fff",
-              color: "#d32f2f",
-              borderRadius: 2,
-              px: 3,
-              py: 1,
-              textTransform: "none",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-              "&:hover": {
-                bgcolor: "#ffebee",
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-              },
-              transition: "all 0.2s ease",
-            }} */}
               Leave League
             </Button>
           )}
@@ -2784,7 +2945,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
             <Button
               startIcon={<ExitToApp />}
               variant="contained"
-              onClick={() => { void handleLeaveSelectedSeason() }}
+              disabled={isCompletedLeague}
+              onClick={() => {
+                if (isCompletedLeague) return;
+                void handleLeaveSelectedSeason();
+              }}
               sx={{
                 bgcolor: '#e56a16',
                 color: '#fff',
@@ -2792,6 +2957,11 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 flex: { md: 1 },
                 minHeight: { xs: 42, md: 'auto' },
                 '&:hover': { bgcolor: '#c75712' },
+                '&.Mui-disabled': {
+                  bgcolor: 'rgba(229, 106, 22, 0.4) !important',
+                  color: 'rgba(255, 255, 255, 0.6) !important',
+                  cursor: 'not-allowed',
+                },
               }}
             >
               Leave Season
@@ -2803,11 +2973,18 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
                 variant="contained"
                 color="error"
                 onClick={openArchiveSeasonConfirm}
-                disabled={!currentSeason || seasonArchiveLoading}
+                disabled={isCompletedLeague || !currentSeason || seasonArchiveLoading}
                 sx={{
                   width: { xs: '100%', md: 'auto' },
                   flex: { md: 1 },
                   minHeight: { xs: 42, md: 'auto' },
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  '&.Mui-disabled': {
+                    bgcolor: 'rgba(211, 47, 47, 0.4) !important',
+                    color: 'rgba(255, 255, 255, 0.7) !important',
+                    cursor: 'not-allowed',
+                  },
                 }}
               >
                 {seasonArchiveLoading
@@ -2826,103 +3003,37 @@ function LeagueSettingsDialog({ open, onClose, league, onUpdate, onDelete, curre
 
                   onDelete?.();
                 }}
-                sx={{ width: { xs: '100%', md: 'auto' }, flex: { md: 1 }, minHeight: { xs: 42, md: 'auto' } }}
+                sx={{
+                  width: { xs: '100%', md: 'auto' },
+                  flex: { md: 1 },
+                  minHeight: { xs: 42, md: 'auto' },
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}
               >
                 Delete League
               </Button>
             </>
           )}
-          {/* {canManageLeagueSettings && (
-            <Button
-              variant="outlined"
-              onClick={() => setArchivedSeasonsOpen(true)}
-              sx={{
-                borderColor: 'rgba(3,136,227,0.6)',
-                color: '#0388E3',
-                width: { xs: '100%', md: 'auto' },
-                flex: { md: 1 },
-                minHeight: { xs: 42, md: 'auto' },
-                '&:hover': { borderColor: '#0388E3', bgcolor: 'rgba(3,136,227,0.08)' }
-              }}
-            >
-              Archived Seasons ({archivedSeasons.length})
-            </Button>
-          )} */}
-          {/* <Button
-            variant="outlined"
-            onClick={openArchivedMatchesDialog}
-            sx={{
-              borderColor: 'rgba(3,136,227,0.6)',
-              color: '#0388E3',
-              width: { xs: '100%', md: 'auto' },
-              minHeight: { xs: 42, md: 'auto' },
-              '&:hover': { borderColor: '#0388E3', bgcolor: 'rgba(3,136,227,0.08)' }
-            }}
-          >
-            Archived Matches
-          </Button> */}
-          {/* {leagueIsArchived ? (
-            onUnarchive && (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  if (!window.confirm('Restore this league from archive? It will become active again.')) return;
-                  onUnarchive?.();
-                }}
-                sx={{
-                  bgcolor: '#27ab83',
-                  width: { xs: '100%', md: 'auto' },
-                  minHeight: { xs: 42, md: 'auto' },
-                  '&:hover': { bgcolor: '#1e8463' },
-                }}
-              >
-                Unarchive League
-              </Button>
-            )
-          ) : (
-            onArchive && (
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  if (!window.confirm('Are you sure you want to archive this league? It will be hidden from active views.')) return;
-                  onArchive?.();
-                }}
-                sx={{
-                  borderColor: 'rgba(211,47,47,0.6)',
-                  color: '#d32f2f',
-                  width: { xs: '100%', md: 'auto' },
-                  minHeight: { xs: 42, md: 'auto' },
-                  '&:hover': { borderColor: '#d32f2f', bgcolor: 'rgba(211,47,47,0.08)' },
-                  bgcolor: 'transparent'
-                }}
-              >
-                Archive League
-              </Button>
-            )
-          )} */}
-          {/* <Button
-            variant="outlined"
-            onClick={() => setArchivedSeasonsOpen(true)}
-            sx={{
-              borderColor: 'rgba(3,136,227,0.6)',
-              color: '#0388E3',
-              width: { xs: '100%', md: 'auto' },
-              minHeight: { xs: 42, md: 'auto' },
-              '&:hover': { borderColor: '#0388E3', bgcolor: 'rgba(3,136,227,0.08)' }
-            }}
-          >
-            Archived Seasons ({archivedSeasons.length})
-          </Button> */}
           {canManageLeagueSettings && (
             <Button
               onClick={handleUpdate}
               variant="contained"
+              disabled={isCompletedLeague}
               sx={{
                 bgcolor: '#27ab83',
+                color: '#fff',
                 width: { xs: '100%', md: 'auto' },
                 flex: { md: 1 },
                 minHeight: { xs: 42, md: 'auto' },
+                textTransform: 'uppercase',
+                fontWeight: 600,
                 '&:hover': { bgcolor: '#1e8463' },
+                '&.Mui-disabled': {
+                  bgcolor: 'rgba(39, 171, 131, 0.4) !important',
+                  color: 'rgba(255, 255, 255, 0.7) !important',
+                  cursor: 'not-allowed',
+                },
               }}
             >
               Update League
@@ -4759,7 +4870,12 @@ function AllLeagues() {
       if (data.success) {
         const normalized = normalizeLeagueFromPayload(data.league);
         if (normalized) {
-          setAdminSettingsLeague(normalized);
+          const wasCompleted = isLeagueCompleted(league);
+          setAdminSettingsLeague({
+            ...league,
+            ...normalized,
+            ...(wasCompleted ? { isCompleted: true, isComplete: true, active: false } : {}),
+          });
           setOpenAdminSettings(true);
         }
       } else {
@@ -6201,54 +6317,67 @@ function AllLeagues() {
                   </Box>
 
                   {/* Settings Icon - Top Right */}
-                  {isCompleted ? (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 14,
-                        right: 14,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        zIndex: 4,
-                        color: '#16a34a',
-                      }}
-                    >
-                      <CheckCircle sx={{ color: '#16a34a' }} />
-                      <Chip label="Completed" size="small" sx={{ bgcolor: 'rgba(22,163,74,0.1)', color: '#14532d', borderColor: '#16a34a' }} variant="outlined" />
-                    </Box>
-                  ) : (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: { xs: 8, md: 14 },
+                      right: { xs: 8, md: 18 },
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: { xs: 1, sm: 1.5 },
+                      zIndex: 4,
+                    }}
+                  >
+                    {isCompleted && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          color: '#16a34a',
+                        }}
+                      >
+                        <CheckCircle sx={{ color: '#16a34a', fontSize: { xs: 18, md: 22 } }} />
+                        <Chip
+                          label="Completed"
+                          size="small"
+                          sx={{
+                            bgcolor: 'rgba(22,163,74,0.1)',
+                            color: '#14532d',
+                            borderColor: '#16a34a',
+                            fontWeight: 600,
+                          }}
+                          variant="outlined"
+                        />
+                      </Box>
+                    )}
+
                     <IconButton
                       sx={{
-                        position: 'absolute',
-                        top: { xs: 8, md: 18 },
-                        bottom: { xs: 'auto', md: 'auto' },
-                        right: { xs: 8, md: 18 },
-                        color: 'white',
+                        color: isCompleted ? '#111827' : 'white',
                         '& .settings-icon': {
                           transition: 'filter 0.2s ease',
-                          // Keep source icon pure white in default state
-                          filter: 'brightness(0) saturate(100%) invert(100%)',
+                          filter: isCompleted
+                            ? 'brightness(0) opacity(0.75)'
+                            : 'brightness(0) saturate(100%) invert(100%)',
                         },
                         '&:hover': {
                           backgroundColor: 'transparent',
                         },
                         '&:hover .settings-icon': {
-                          // Recolor white icon to orange/red on hover
                           filter: 'brightness(0) saturate(100%) invert(56%) sepia(84%) saturate(2061%) hue-rotate(354deg) brightness(95%) contrast(92%)',
                         },
-                        zIndex: 4,
                         p: { xs: 0.25, md: 1 },
-                        pr: { xs: 0.25, md: 3 }
+                        pr: { xs: 0.25, md: 1 },
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        const isAdmin = (league.adminId || league.administrators?.[0]?.id) === (user?.id || '')
+                        const isAdmin = (league.adminId || league.administrators?.[0]?.id) === (user?.id || '');
                         if (isAdmin) {
                           // Open standalone settings dialog for admins after loading details
                           void handleOpenAdminSettings(league);
                         } else {
-                          handleOpenMembers(league)
+                          handleOpenMembers(league);
                         }
                       }}
                     >
@@ -6261,7 +6390,7 @@ function AllLeagues() {
                         style={{ flexShrink: 0 }}
                       />
                     </IconButton>
-                  )}
+                  </Box>
 
                   {/* Grid Layout - 6/6 Split */}
                   <Grid container spacing={{ xs: 1, md: 2 }} alignItems="center" sx={{ width: '100%' }}>
@@ -7939,6 +8068,7 @@ function AllLeagues() {
           open={openAdminSettings}
           onClose={() => setOpenAdminSettings(false)}
           league={adminSettingsLeague}
+          isCompleted={adminSettingsLeague ? isLeagueCompleted(adminSettingsLeague) : false}
           onUpdate={async (data) => {
             await handleUpdateLeagueFromAdminSettings(data);
             setOpenAdminSettings(false);
