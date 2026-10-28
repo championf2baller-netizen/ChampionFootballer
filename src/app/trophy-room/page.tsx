@@ -384,7 +384,7 @@ const TrophyCard = ({
       onClick={onButtonClick}
     >
       {/* Top Section - Title */}
-      <Box sx={{ pt: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2 } }}>
+      <Box sx={{ pt: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 2 }, flexShrink: 0 }}>
         <Typography
           variant="h6"
           sx={{
@@ -396,6 +396,13 @@ const TrophyCard = ({
             letterSpacing: 1,
             textTransform: 'uppercase',
             mb: { xs: 0.7, sm: 1.5 },
+            lineHeight: 1.25,
+            minHeight: '2.5em',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
           }}
         >
           {title}
@@ -417,6 +424,7 @@ const TrophyCard = ({
                 ? { xs: '0.75rem', sm: '0.85rem', md: '1.05rem' }
                 : { xs: '0.58rem', sm: '0.68rem', md: '0.74rem' },
               lineHeight: 1.4,
+              minHeight: '2.8em',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -439,6 +447,7 @@ const TrophyCard = ({
           width: imgSize,
           margin: '0 auto',
           mb: { xs: 1.2, sm: 2.5 },
+          flexShrink: 0,
         }}
       >
         <Image
@@ -461,6 +470,7 @@ const TrophyCard = ({
           mt: 'auto',
           pb: { xs: 1.2, sm: 2 },
           px: { xs: 1.5, sm: 2 },
+          flexShrink: 0,
         }}
       >
         <Button
