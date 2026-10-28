@@ -6,7 +6,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { shareContent, buildLeagueSeasonInviteText } from '@/lib/utils/shareUtils';
+import { shareContent, buildLeagueSeasonInviteText, copyTextToClipboard } from '@/lib/utils/shareUtils';
 import { SettingsIcon, X, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import AllLeaguesLoadingSkeleton from '@/Components/loading/AllLeaguesLoadingSkeleton';
@@ -6650,15 +6650,26 @@ function AllLeagues() {
                                     p: { xs: 0.2, sm: 0.5 },
                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
                                   }}
-                                  onClick={(e) => {
+                                  onClick={async (e) => {
                                     e.stopPropagation();
                                     if (!activeSeasonInviteCode) {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
+                                    const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
+                                    const leagueName = league.name?.trim() || 'League';
                                     const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
-                                    navigator.clipboard.writeText(inviteUrl);
-                                    toast.success('Invite link copied!');
+                                    const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
+                                    try {
+                                      const copied = await copyTextToClipboard(shareText);
+                                      if (copied) {
+                                        toast.success('Invite copied!');
+                                      } else {
+                                        toast.error('Unable to copy invite right now.');
+                                      }
+                                    } catch {
+                                      toast.error('Unable to copy invite right now.');
+                                    }
                                   }}
                                 >
                                   <svg width="19" height="21" viewBox="0 0 24 24" fill="white">
@@ -6687,6 +6698,7 @@ function AllLeagues() {
                                     const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
                                     shareContent({
                                       title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
+                                      customFullText: shareText,
                                       text: shareText,
                                       url: inviteUrl,
                                     });

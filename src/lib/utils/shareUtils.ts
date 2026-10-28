@@ -1,13 +1,46 @@
 import toast from 'react-hot-toast';
 import { toBlob } from 'html-to-image';
 
-export const CHAMPION_SLOGAN = "*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nwww.championfootballer.com";
+export const CHAMPION_SLOGAN = "Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com";
+
+/**
+ * Copies plain text to the clipboard with robust fallbacks.
+ */
+export async function copyTextToClipboard(text: string): Promise<boolean> {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {}
+  }
+  if (typeof document !== 'undefined') {
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      const success = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return success;
+    } catch {}
+  }
+  return false;
+}
 
 /**
  * Builds the official League Season Invite text according to Champion Footballer specifications:
  *
- * Join {leagueName} / season {seasonNumber}. Use invite code: {inviteCode} or click link to join:
+ * Champion Footballer 
+ * Where Champions Are Made!
+ * Join {leagueName} / season {seasonNumber}. Use invite code: {inviteCode} or 
+ * click link to join:
  * https://championfootballer.com/home?nvitecode={inviteCode}
+ * Create Matches. Track Performance. Claim Bragging Rights
+ * Join Champion Footballer today:
+ * www.championfootballer.com
  */
 export function buildLeagueSeasonInviteText(
   leagueName: string,
@@ -19,7 +52,7 @@ export function buildLeagueSeasonInviteText(
   const cleanCode = (inviteCode || '').trim();
   const sNum = seasonNumber || 1;
   const url = inviteUrl || `https://championfootballer.com/home?nvitecode=${encodeURIComponent(cleanCode)}`;
-  return `*Champion Footballer*\nWhere Champions Are Made!\n\nJoin ${cleanLeague} / season ${sNum}. Use invite code: *${cleanCode}* or *click link to join:*\n${url}`;
+  return `Champion Footballer \nWhere Champions Are Made!\nJoin ${cleanLeague} / season ${sNum}. Use invite code: ${cleanCode} or \nclick link to join:\n${url}\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com`;
 }
 
 export interface ShareOptions {
@@ -108,18 +141,28 @@ export async function shareContent(options: ShareOptions): Promise<void> {
   let fullText = options.customFullText;
   if (!fullText) {
     const mainText = options.text ? options.text.trim() : '';
-    const alreadyHasUrl =
-      (mainText && (mainText.includes('http://') || mainText.includes('https://'))) ||
-      (slogan && (slogan.includes('http://') || slogan.includes('https://') || slogan.includes('www.')));
+    const alreadyHasSlogan =
+      Boolean(mainText) &&
+      (mainText.includes('Join Champion Footballer today:') ||
+        mainText.includes('Create Matches. Track Performance') ||
+        mainText.includes('Where Champions Are Made!'));
 
-    if (mainText) {
-      fullText = alreadyHasUrl
-        ? `${mainText}\n\n${slogan}`
-        : `${mainText}\n\n${slogan}\n${shareUrl}`;
+    if (alreadyHasSlogan) {
+      fullText = mainText;
     } else {
-      fullText = alreadyHasUrl
-        ? `${slogan}`
-        : `${slogan}\n${shareUrl}`;
+      const alreadyHasUrl =
+        (mainText && (mainText.includes('http://') || mainText.includes('https://'))) ||
+        (slogan && (slogan.includes('http://') || slogan.includes('https://') || slogan.includes('www.')));
+
+      if (mainText) {
+        fullText = alreadyHasUrl
+          ? `${mainText}\n\n${slogan}`
+          : `${mainText}\n\n${slogan}\n${shareUrl}`;
+      } else {
+        fullText = alreadyHasUrl
+          ? `${slogan}`
+          : `${slogan}\n${shareUrl}`;
+      }
     }
   }
 
@@ -127,8 +170,8 @@ export async function shareContent(options: ShareOptions): Promise<void> {
 
   // Proactively copy text or try to copy
   try {
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText && (!options.files || options.files.length === 0)) {
-      navigator.clipboard.writeText(fullText).catch(() => {});
+    if (typeof navigator !== 'undefined' && (!options.files || options.files.length === 0)) {
+      copyTextToClipboard(fullText).catch(() => {});
     }
   } catch {}
 
@@ -166,8 +209,8 @@ export async function shareContent(options: ShareOptions): Promise<void> {
     toast.success('Card image downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.', { duration: 6000 });
   } else {
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(fullText);
+      const copied = await copyTextToClipboard(fullText);
+      if (copied) {
         toast.success('Details copied to clipboard!');
       }
     } catch (err) {

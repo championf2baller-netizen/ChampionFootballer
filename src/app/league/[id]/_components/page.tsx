@@ -51,7 +51,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { shareContent, captureElementAsFile, shareToWhatsApp, buildLeagueSeasonInviteText } from '@/lib/utils/shareUtils';
+import { shareContent, captureElementAsFile, shareToWhatsApp, buildLeagueSeasonInviteText, copyTextToClipboard } from '@/lib/utils/shareUtils';
 import LeagueDetailLoadingSkeleton from '@/Components/loading/LeagueDetailLoadingSkeleton';
 import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLoadingSkeleton';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
@@ -2700,14 +2700,21 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
+        const leagueName = league?.name?.trim() || 'League';
+        const seasonNum = selectedSeasonNumber || 1;
         const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(code)}`;
+        const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, code, inviteUrl);
         try {
-            await navigator.clipboard.writeText(inviteUrl);
-            toast.success('Invite link copied successfully.');
+            const copied = await copyTextToClipboard(shareText);
+            if (copied) {
+                toast.success('Invite copied successfully.');
+            } else {
+                toast.error('Unable to copy invite right now.');
+            }
         } catch {
-            toast.error('Unable to copy invite link right now.');
+            toast.error('Unable to copy invite right now.');
         }
-    }, [inviteCodeForSelectedSeason]);
+    }, [inviteCodeForSelectedSeason, league?.name, selectedSeasonNumber]);
 
     const handleShareSeasonInvite = useCallback(async () => {
         const code = inviteCodeForSelectedSeason.trim();
@@ -2721,6 +2728,7 @@ export default function LeagueDetailPage() {
         const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, code, inviteUrl);
         shareContent({
             title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
+            customFullText: shareText,
             text: shareText,
             url: inviteUrl,
         });
