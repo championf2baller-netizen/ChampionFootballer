@@ -51,7 +51,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import { shareContent, captureElementAsFile, shareToWhatsApp } from '@/lib/utils/shareUtils';
+import { shareContent, captureElementAsFile, shareToWhatsApp, buildLeagueSeasonInviteText } from '@/lib/utils/shareUtils';
 import LeagueDetailLoadingSkeleton from '@/Components/loading/LeagueDetailLoadingSkeleton';
 import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLoadingSkeleton';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
@@ -2689,7 +2689,7 @@ export default function LeagueDetailPage() {
     }, [league, selectedSeasonId, seasonOptions, readSeasonInviteCode]);
 
     const inviteCodeDisplay = inviteCodeForSelectedSeason || '-';
-    const inviteSeasonLabel = `${league?.name || 'League'} - Season ${selectedSeasonNumber || 1}`;
+    const inviteSeasonLabel = `${league?.name || 'League'} / season ${selectedSeasonNumber || 1}`;
     const invitePlayersMessage = inviteCodeForSelectedSeason
         ? `Invites players to ${inviteSeasonLabel} using the code`
         : `Invite code unavailable for ${inviteSeasonLabel}`;
@@ -2700,9 +2700,7 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
-        const inviteUrl = typeof window !== 'undefined'
-            ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(code)}`
-            : `/home?inviteCode=${encodeURIComponent(code)}`;
+        const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(code)}`;
         try {
             await navigator.clipboard.writeText(inviteUrl);
             toast.success('Invite link copied successfully.');
@@ -2717,15 +2715,16 @@ export default function LeagueDetailPage() {
             toast.error('Invite code is not available for this season yet.');
             return;
         }
-        const inviteUrl = typeof window !== 'undefined'
-            ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(code)}`
-            : `/home?inviteCode=${encodeURIComponent(code)}`;
+        const leagueName = league?.name?.trim() || 'League';
+        const seasonNum = selectedSeasonNumber || 1;
+        const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(code)}`;
+        const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, code, inviteUrl);
         shareContent({
-            title: `Join ${inviteSeasonLabel} | Champion Footballer`,
-            text: `Join ${inviteSeasonLabel} on Champion Footballer using invite code: ${code}! Click to join: ${inviteUrl}`,
+            title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
+            text: shareText,
             url: inviteUrl,
         });
-    }, [inviteCodeForSelectedSeason, inviteSeasonLabel]);
+    }, [inviteCodeForSelectedSeason, league?.name, selectedSeasonNumber]);
 
     // Check if selected season is active
     const isSelectedSeasonActive = React.useMemo(() => {
@@ -8466,9 +8465,7 @@ export default function LeagueDetailPage() {
                             .filter(Boolean)
                             .join(' ')
                             .trim() || 'Player';
-                        const xp = Number(quickView.xp ?? quickView.profileXP ?? 0);
-                        const playerLine = playerName && playerName !== 'Player' ? `Player: ${playerName} (${xp} XP)\n` : '';
-                        const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
+                        const shareMessage = `*Champion Footballer*\nWhere Champions Are Made!\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
 
                         const shareWhatsApp = async () => {
                             let fileToShare: File | null = null;

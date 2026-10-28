@@ -284,10 +284,10 @@ export default function WorldRankingTable() {
   };
 
   const filterSelectSx = {
-    height: 39,
+    height: { xs: 34, md: 39 },
     color: '#fff',
     borderRadius: '24px',
-    fontSize: 15,
+    fontSize: { xs: 11, sm: 13, md: 15 },
     fontWeight: 600,
     '& .MuiOutlinedInput-notchedOutline': {
       borderColor: '#e56a16',
@@ -301,13 +301,17 @@ export default function WorldRankingTable() {
       borderWidth: '1.5px',
     },
     '& .MuiSelect-select': {
-      py: 0.95,
-      pr: '34px !important',
-      pl: 1.5,
+      py: { xs: 0.5, md: 0.95 },
+      pr: { xs: '20px !important', md: '34px !important' },
+      pl: { xs: '6px !important', md: 1.5 },
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
     '& .MuiSelect-icon': {
       color: '#fff',
-      right: 10,
+      right: { xs: 4, md: 10 },
+      fontSize: { xs: 18, md: 22 },
     },
   } as const;
 
@@ -338,27 +342,27 @@ export default function WorldRankingTable() {
         @media (max-width: 600px) {
           .wr-right-filters {
             display: grid !important;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            width: 100%;
-            gap: 8px;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            width: 100% !important;
+            gap: 4px !important;
           }
           .wr-right-filters .wr-filter-control,
           .wr-right-filters .wr-clear-btn {
-            width: 100%;
-            min-width: 0;
+            width: 100% !important;
+            min-width: 0 !important;
           }
           .wr-right-filters .wr-country-filter {
-            width: 100%;
-            min-width: 0;
-            max-width: none;
-            justify-self: stretch;
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            justify-self: stretch !important;
           }
           .wr-right-filters .wr-clear-btn {
-            width: 100%;
-            justify-content: center;
-            box-sizing: border-box;
-            padding-left: 0;
-            padding-right: 0;
+            width: 100% !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
           }
         }
       `}</style>
@@ -369,55 +373,34 @@ export default function WorldRankingTable() {
       >
         <Box sx={{
           display: 'flex',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: { xs: 1, md: 1.2 },
-          maxWidth: 1150,
+          gap: { xs: 1.5, md: 2 },
+          maxWidth: '1230px',
           mx: 'auto',
-          px: { xs: 2, md: 4 },
+          px: { xs: 1, sm: 2, md: 3 },
+          pt: { xs: 2, md: 0 },
+          width: '100%',
         }}>
-          {/* Left side - Mode toggle and Search */}
+          {/* Top row: Search & Filters */}
           <Box sx={{
             display: 'flex',
-            flexWrap: 'wrap',
-            gap: { xs: 1, md: 1.2 },
+            flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
-            flex: { xs: '1 1 100%', md: '0 1 auto' }
+            justifyContent: 'space-between',
+            gap: { xs: 1.2, md: 1.5 },
+            width: '100%',
           }}>
-            {/* Mode toggle */}
-            <Box sx={{ display: 'flex', borderRadius: '2px', overflow: 'hidden', border: '1.5px solid #e56a16' }}>
-              {(['total', 'avg'] as const).map(mode => (
-                <Box
-                  key={mode}
-                  onClick={() => setFilters(f => ({ ...f, mode }))}
-                  sx={{
-                    px: 2.2, py: 1,
-                    cursor: 'pointer',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                    bgcolor: filters.mode === mode ? '#e56a16' : 'transparent',
-                    color: '#fff',
-                    userSelect: 'none',
-                    transition: 'background 0.2s',
-                  }}
-                >
-                  {mode === 'total' ? 'Total XP' : 'Avg/Match'}
-                </Box>
-              ))}
-            </Box>
-
             {/* Search */}
             <Box sx={{
-              flex: { xs: '1 1 100%', md: '0 0 300px' },
+              width: { xs: '100%', md: 440 },
               display: 'flex',
               alignItems: 'center',
               gap: 1,
               bgcolor: '#1a1a1a',
               borderRadius: '2px',
               px: 1.5,
-              height: 40,
+              height: { xs: 36, md: 40 },
               border: '1.5px solid #e56a16',
             }}>
               <svg className="wr-search-icon" viewBox="0 0 24 24">
@@ -439,91 +422,130 @@ export default function WorldRankingTable() {
                 }}
               />
             </Box>
-          </Box>
 
-          {/* Right side - Filters group */}
-          <Box
-            className="wr-right-filters"
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: { xs: 1, md: 1.2 },
-              alignItems: 'center',
-              justifyContent: { xs: 'flex-start', md: 'flex-end' }
-            }}>
-            {/* Year */}
-            <FormControl className="wr-filter-control" size="small" sx={{ width: 150 }}>
-              <Select
-                value={filters.year || ''}
-                onOpen={handleFilterDropdownOpen}
-                onChange={(e) => setFilters((f) => ({ ...f, year: (e.target.value as string) || undefined }))}
-                displayEmpty
-                MenuProps={filterMenuProps}
-                sx={filterSelectSx}
-              >
-                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Years</MenuItem>
-                {years.map((y) => (
-                  <MenuItem key={y} value={y} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{y}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            {/* Country */}
-            <FormControl className="wr-filter-control wr-country-filter" size="small" sx={{ width: 150 }}>
-              <Select
-                value={filters.country || ''}
-                onOpen={handleFilterDropdownOpen}
-                onChange={(e) => setFilters((f) => ({ ...f, country: (e.target.value as string) || undefined }))}
-                displayEmpty
-                MenuProps={countryFilterMenuProps}
-                sx={filterSelectSx}
-              >
-                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Country</MenuItem>
-                {countries.map((c) => (
-                  <MenuItem key={c} value={c} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{c}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {/* Position */}
-            <FormControl className="wr-filter-control" size="small" sx={{ width: 150 }}>
-              <Select
-                value={filters.positionType || ''}
-                onOpen={handleFilterDropdownOpen}
-                onChange={(e) => setFilters((f) => ({ ...f, positionType: (e.target.value as string) || undefined }))}
-                displayEmpty
-                MenuProps={filterMenuProps}
-                sx={filterSelectSx}
-              >
-                <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Position</MenuItem>
-                <MenuItem value="Defender" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Defender</MenuItem>
-                <MenuItem value="Midfielder" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Midfielder</MenuItem>
-                <MenuItem value="Forward" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Forward</MenuItem>
-                <MenuItem value="Goalkeeper" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Goalkeeper</MenuItem>
-              </Select>
-            </FormControl>
-
-            {/* Clear */}
+            {/* Right side - Filters group (single row on mobile) */}
             <Box
-              className="wr-clear-btn"
-              onClick={clearFilters}
+              className="wr-right-filters"
               sx={{
-                height: 39,
-                px: 2.2,
-                border: '1.5px solid rgba(255,255,255,0.5)',
-                borderRadius: '24px',
-                display: 'flex',
+                display: { xs: 'grid', md: 'flex' },
+                gridTemplateColumns: { xs: 'repeat(4, minmax(0, 1fr))', md: 'none' },
+                gap: { xs: 0.5, md: 1.2 },
                 alignItems: 'center',
-                cursor: 'pointer',
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                color: '#fff',
-                userSelect: 'none',
-                '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.05)' },
-                transition: 'all 0.2s',
+                justifyContent: { xs: 'center', md: 'flex-end' },
+                width: { xs: '100%', md: 'auto' },
+                flexWrap: 'nowrap',
               }}
             >
-              Clear
+              {/* Year */}
+              <FormControl className="wr-filter-control" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
+                <Select
+                  value={filters.year || ''}
+                  onOpen={handleFilterDropdownOpen}
+                  onChange={(e) => setFilters((f) => ({ ...f, year: (e.target.value as string) || undefined }))}
+                  displayEmpty
+                  MenuProps={filterMenuProps}
+                  sx={filterSelectSx}
+                >
+                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Years</MenuItem>
+                  {years.map((y) => (
+                    <MenuItem key={y} value={y} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{y}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Country */}
+              <FormControl className="wr-filter-control wr-country-filter" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
+                <Select
+                  value={filters.country || ''}
+                  onOpen={handleFilterDropdownOpen}
+                  onChange={(e) => setFilters((f) => ({ ...f, country: (e.target.value as string) || undefined }))}
+                  displayEmpty
+                  MenuProps={countryFilterMenuProps}
+                  sx={filterSelectSx}
+                >
+                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Country</MenuItem>
+                  {countries.map((c) => (
+                    <MenuItem key={c} value={c} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{c}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Position */}
+              <FormControl className="wr-filter-control" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
+                <Select
+                  value={filters.positionType || ''}
+                  onOpen={handleFilterDropdownOpen}
+                  onChange={(e) => setFilters((f) => ({ ...f, positionType: (e.target.value as string) || undefined }))}
+                  displayEmpty
+                  MenuProps={filterMenuProps}
+                  sx={filterSelectSx}
+                >
+                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Position</MenuItem>
+                  <MenuItem value="Defender" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Defender</MenuItem>
+                  <MenuItem value="Midfielder" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Midfielder</MenuItem>
+                  <MenuItem value="Forward" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Forward</MenuItem>
+                  <MenuItem value="Goalkeeper" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Goalkeeper</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Clear */}
+              <Box
+                className="wr-clear-btn"
+                onClick={clearFilters}
+                sx={{
+                  height: { xs: 34, md: 39 },
+                  px: { xs: 0.5, sm: 1.5, md: 2.2 },
+                  border: '1.5px solid rgba(255,255,255,0.5)',
+                  borderRadius: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: { xs: 11, sm: 13, md: 15 },
+                  fontWeight: 600,
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  color: '#fff',
+                  userSelect: 'none',
+                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.05)' },
+                  transition: 'all 0.2s',
+                  whiteSpace: 'nowrap',
+                  boxSizing: 'border-box',
+                }}
+              >
+                Clear
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Mode toggle beneath the 4 filters */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            mt: { xs: 0.5, md: 0.5 },
+          }}>
+            <Box sx={{ display: 'flex', borderRadius: '2px', overflow: 'hidden', border: '1.5px solid #e56a16' }}>
+              {(['total', 'avg'] as const).map(mode => (
+                <Box
+                  key={mode}
+                  onClick={() => setFilters(f => ({ ...f, mode }))}
+                  sx={{
+                    px: { xs: 2.2, md: 2.5 },
+                    py: { xs: 0.8, md: 1 },
+                    cursor: 'pointer',
+                    fontSize: { xs: 13, md: 15 },
+                    fontWeight: 600,
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    bgcolor: filters.mode === mode ? '#e56a16' : 'transparent',
+                    color: '#fff',
+                    userSelect: 'none',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  {mode === 'total' ? 'Total XP' : 'Avg/Match'}
+                </Box>
+              ))}
             </Box>
           </Box>
         </Box>

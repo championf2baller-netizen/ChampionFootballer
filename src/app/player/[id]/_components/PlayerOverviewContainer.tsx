@@ -55,7 +55,7 @@ export interface PlayerOverviewContainerProps {
     trophiesLoading: boolean;
     earnedTrophies: EarnedTrophy[];
     TROPHY_ICON_FRAME_SIZE: number;
-    getTrophyIconSize: (label: string) => number;
+    getTrophyIconSize: (label?: string, isMobile?: boolean) => number;
     rewardsCardRef: React.RefObject<HTMLDivElement | null>;
     badgesLoading: boolean;
     playerBadges: PlayerBadgeItem[];
@@ -174,6 +174,7 @@ export const PlayerOverviewContainer: React.FC<PlayerOverviewContainerProps> = (
                         earnedTrophies={earnedTrophies}
                         TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
                         getTrophyIconSize={getTrophyIconSize}
+                        isMobile={isMobile}
                         rewardsCardRef={rewardsCardRef}
                         badgesLoading={badgesLoading}
                         playerBadges={playerBadges}

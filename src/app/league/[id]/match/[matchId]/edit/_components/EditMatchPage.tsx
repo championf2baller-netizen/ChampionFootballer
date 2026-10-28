@@ -3934,12 +3934,26 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGuestTeam(e.target.value as 'home' | 'away')}
             sx={{ mb: 3, justifyContent: 'center' }}
           >
-            <FormControlLabel value='home' control={<Radio sx={{ color: '#43a047' }} />} label='Home Team' />
-            <FormControlLabel value='away' control={<Radio sx={{ color: '#ef5350' }} />} label='Away Team' />
+            <FormControlLabel
+              value='home'
+              control={
+                <Radio sx={{ color: '#9CA3AF', '&.Mui-checked': { color: '#43a047' } }} />
+              }
+              label='Home Team'
+              sx={{ '& .MuiFormControlLabel-label': { color: guestTeam === 'home' ? '#43a047' : 'white' } }}
+            />
+            <FormControlLabel
+              value='away'
+              control={
+                <Radio sx={{ color: '#9CA3AF', '&.Mui-checked': { color: '#ef5350' } }} />
+              }
+              label='Away Team'
+              sx={{ '& .MuiFormControlLabel-label': { color: guestTeam === 'away' ? '#ef5350' : 'white' } }}
+            />
           </RadioGroup>
           <TextField
             autoFocus
-            label='Guest Full Name'
+            label='Player Full Name'
             value={guestName}
             onChange={e => setGuestName(e.target.value)}
             onKeyDown={(e) => {
@@ -3950,7 +3964,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
             }}
             fullWidth
             placeholder='e.g. John Doe'
-            sx={{ '& .MuiOutlinedInput-root': { color: 'white' }, '& .MuiInputLabel-root': { color: '#9CA3AF' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                color: 'white',
+                // bgcolor: `${guestTeam === 'home' ? '#43a047' : '#ef5350'}14`,              // subtle tinted fill (~8% opacity)
+                '& fieldset': { borderColor: guestTeam === 'home' ? '#43a047' : '#ef5350', borderWidth: 2 },
+                '&:hover fieldset': { borderColor: guestTeam === 'home' ? '#43a047' : '#ef5350' },
+                '&.Mui-focused fieldset': { borderColor: guestTeam === 'home' ? '#43a047' : '#ef5350' },
+              },
+              '& .MuiInputLabel-root': { color: 'white' },
+              '& .MuiInputLabel-root.Mui-focused': { color: 'white' },
+            }}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, bgcolor: 'rgba(15,15,15,0.95)' }}>

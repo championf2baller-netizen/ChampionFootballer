@@ -15,7 +15,8 @@ export interface PlayerCardsSectionProps {
     trophiesLoading: boolean;
     earnedTrophies: EarnedTrophy[];
     TROPHY_ICON_FRAME_SIZE: number;
-    getTrophyIconSize: (label: string) => number;
+    getTrophyIconSize: (label?: string, isMobile?: boolean) => number;
+    isMobile?: boolean;
     // Rewards props
     rewardsCardRef: React.RefObject<HTMLDivElement | null>;
     badgesLoading: boolean;
@@ -37,6 +38,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
     earnedTrophies,
     TROPHY_ICON_FRAME_SIZE,
     getTrophyIconSize,
+    isMobile,
     rewardsCardRef,
     badgesLoading,
     playerBadges,
@@ -57,6 +59,7 @@ export const PlayerCardsSection: React.FC<PlayerCardsSectionProps> = ({
                 TEAL_PRIMARY={TEAL_PRIMARY}
                 TROPHY_ICON_FRAME_SIZE={TROPHY_ICON_FRAME_SIZE}
                 getTrophyIconSize={getTrophyIconSize}
+                isMobile={isMobile}
                 getCms={getCms}
             />
             <RewardsCard

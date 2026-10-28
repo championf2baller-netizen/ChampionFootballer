@@ -92,7 +92,7 @@ export default function LandingPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const urlParams = new URLSearchParams(window.location.search);
-    const codeFromUrl = (urlParams.get('inviteCode') || urlParams.get('code') || '').trim().toUpperCase();
+    const codeFromUrl = (urlParams.get('nvitecode') || urlParams.get('invitecode') || urlParams.get('inviteCode') || urlParams.get('code') || '').trim().toUpperCase();
     if (codeFromUrl) {
       localStorage.setItem('pendingInviteCode', codeFromUrl);
       sessionStorage.setItem('pendingInviteCode', codeFromUrl);

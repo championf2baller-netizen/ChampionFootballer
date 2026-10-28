@@ -597,8 +597,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
         setAgeError("")
       } else {
         const ageNum = parseInt(nextValue, 10)
-        if (isNaN(ageNum) || ageNum < 18) {
-          setAgeError("Age must be at least 18 years old")
+        if (isNaN(ageNum) || ageNum < 13) {
+          setAgeError("You must be 13 years or older to use Champion Footballer.")
         } else if (ageNum > 65) {
           setAgeError("Age must be 65 or younger")
         } else {
@@ -858,8 +858,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       msg = phoneValidationError
       setPhoneError(msg)
     }
-    else if (isNaN(age) || age < 14 || age > 65) {
-      msg = age < 14 ? "Age must be at least 14 years old" : "Age must be between 14 and 65"
+    else if (isNaN(age) || age < 13 || age > 65) {
+      msg = age < 13 ? "You must be 13 years or older to use Champion Footballer." : "Age must be between 13 and 65"
       setAgeError(msg)
     }
     else if (!acceptTerms) msg = "Please accept the terms"
@@ -1590,7 +1590,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 placeholder="Age"
                 name="age"
                 type="number"
-                inputProps={{ min: 14, max: 65 }}
+                inputProps={{ min: 13, max: 65 }}
                 value={registerData.age}
                 onChange={handleRegisterChange}
                 required
@@ -1599,19 +1599,19 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 helperText={
                   ageError
                     ? ageError
-                    : registerData.age && Number(registerData.age) >= 14 && Number(registerData.age) <= 65
-                    ? '✓ Age requirement met (14+)'
-                    : 'Must be at least 14 years old'
+                    : registerData.age && Number(registerData.age) >= 13 && Number(registerData.age) <= 65
+                    ? '✓ Age requirement met (13+)'
+                    : 'Must be at least 13 years old'
                 }
                 FormHelperTextProps={{
                   sx: {
                     color: ageError
                       ? '#d32f2f'
-                      : registerData.age && Number(registerData.age) >= 14 && Number(registerData.age) <= 65
+                      : registerData.age && Number(registerData.age) >= 13 && Number(registerData.age) <= 65
                       ? '#2e7d32'
                       : '#555',
                     fontSize: '0.75rem',
-                    fontWeight: registerData.age && Number(registerData.age) >= 14 && Number(registerData.age) <= 65 ? 600 : 400
+                    fontWeight: registerData.age && Number(registerData.age) >= 13 && Number(registerData.age) <= 65 ? 600 : 400
                   }
                 }}
               />

@@ -1,7 +1,26 @@
 import toast from 'react-hot-toast';
 import { toBlob } from 'html-to-image';
 
-export const CHAMPION_SLOGAN = "Join Champion Footballer and play with friends like a true Champion! ⚽🏆";
+export const CHAMPION_SLOGAN = "*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nwww.championfootballer.com";
+
+/**
+ * Builds the official League Season Invite text according to Champion Footballer specifications:
+ *
+ * Join {leagueName} / season {seasonNumber}. Use invite code: {inviteCode} or click link to join:
+ * https://championfootballer.com/home?nvitecode={inviteCode}
+ */
+export function buildLeagueSeasonInviteText(
+  leagueName: string,
+  seasonNumber: number | string = 1,
+  inviteCode: string,
+  inviteUrl?: string
+): string {
+  const cleanLeague = (leagueName || 'League').trim();
+  const cleanCode = (inviteCode || '').trim();
+  const sNum = seasonNumber || 1;
+  const url = inviteUrl || `https://championfootballer.com/home?nvitecode=${encodeURIComponent(cleanCode)}`;
+  return `*Champion Footballer*\nWhere Champions Are Made!\n\nJoin ${cleanLeague} / season ${sNum}. Use invite code: *${cleanCode}* or *click link to join:*\n${url}`;
+}
 
 export interface ShareOptions {
   title?: string;
@@ -89,9 +108,19 @@ export async function shareContent(options: ShareOptions): Promise<void> {
   let fullText = options.customFullText;
   if (!fullText) {
     const mainText = options.text ? options.text.trim() : '';
-    fullText = mainText
-      ? `${mainText}\n\n${slogan}\n${shareUrl}`
-      : `${slogan}\n${shareUrl}`;
+    const alreadyHasUrl =
+      (mainText && (mainText.includes('http://') || mainText.includes('https://'))) ||
+      (slogan && (slogan.includes('http://') || slogan.includes('https://') || slogan.includes('www.')));
+
+    if (mainText) {
+      fullText = alreadyHasUrl
+        ? `${mainText}\n\n${slogan}`
+        : `${mainText}\n\n${slogan}\n${shareUrl}`;
+    } else {
+      fullText = alreadyHasUrl
+        ? `${slogan}`
+        : `${slogan}\n${shareUrl}`;
+    }
   }
 
   const shareTitle = options.title || 'Champion Footballer';
@@ -117,7 +146,7 @@ export async function shareContent(options: ShareOptions): Promise<void> {
         }
       }
 
-      if (!shareData.files && shareUrl) {
+      if (!shareData.files && shareUrl && !fullText.includes(shareUrl)) {
         shareData.url = shareUrl;
       }
 

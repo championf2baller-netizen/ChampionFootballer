@@ -6,7 +6,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { shareContent } from '@/lib/utils/shareUtils';
+import { shareContent, buildLeagueSeasonInviteText } from '@/lib/utils/shareUtils';
 import { SettingsIcon, X, Trophy } from 'lucide-react';
 import Image from 'next/image';
 import AllLeaguesLoadingSkeleton from '@/Components/loading/AllLeaguesLoadingSkeleton';
@@ -6527,9 +6527,7 @@ function AllLeagues() {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
-                                    const inviteUrl = typeof window !== 'undefined'
-                                      ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`
-                                      : `/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
                                     navigator.clipboard.writeText(inviteUrl);
                                     toast.success('Invite link copied!');
                                   }}
@@ -6554,12 +6552,13 @@ function AllLeagues() {
                                       toast.error('Invite code is not available for this season yet.');
                                       return;
                                     }
-                                    const inviteUrl = typeof window !== 'undefined'
-                                      ? `${window.location.origin}/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`
-                                      : `/home?inviteCode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
+                                    const leagueName = league.name?.trim() || 'League';
+                                    const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
                                     shareContent({
-                                      title: `Join ${league.name} | Champion Footballer`,
-                                      text: `Join ${league.name} on Champion Footballer using invite code: ${activeSeasonInviteCode}! Click to join: ${inviteUrl}`,
+                                      title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
+                                      text: shareText,
                                       url: inviteUrl,
                                     });
                                   }}
@@ -6654,7 +6653,7 @@ function AllLeagues() {
                                   +
                                 </Box>
                                 <Box component="span" sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                                  {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
+                                  {isCreatingSeason ? 'Creating Season...' : 'New Season'}
                                 </Box>
                               </Button>
                             )}

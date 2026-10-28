@@ -1463,7 +1463,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           )}
         </Box>
         <Box sx={{ height: { xs: 2, sm: 4 } }} />
-        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: '#fff', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: { xs: '48px', sm: '60px' } }}>
+        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : 'red', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: { xs: '48px', sm: '60px' } }}>
           {player.name}
         </Typography>
       </Box>
@@ -1508,7 +1508,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           />
         </Box>
         <Box sx={{ height: { xs: 3, sm: 6 } }} />
-        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: '#fff', textAlign: 'center', maxWidth: { xs: '48px', sm: '60px' } }}>
+        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : 'red', textAlign: 'center', maxWidth: { xs: '48px', sm: '60px' } }}>
           {name}
         </Typography>
       </Box>
@@ -1845,7 +1845,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                     <Box key={i} sx={{ bgcolor: '#2b2b2b', border: '1.5px solid #166956', borderRadius: 1, px: { xs: 1, sm: 1.5 }, py: { xs: 0.8, sm: 1 }, boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, flexWrap: 'wrap' }}>
-                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: '#fff' }}>{p.name}</Typography>
+                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: '#00a77f' }}>{p.name}</Typography>
                           {isCap && <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#00a77f' }}>Captain</Typography>}
                         </Box>
                         {hasPublishedResult && typeof (p as Player).xp === 'number' && (
@@ -1868,7 +1868,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                     <Box key={i} sx={{ bgcolor: '#2b2b2b', border: '1.5px solid #884a20', borderRadius: 1, px: { xs: 1, sm: 1.5 }, py: { xs: 0.8, sm: 1 }, boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, flexWrap: 'wrap' }}>
-                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: '#fff' }}>{p.name}</Typography>
+                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: 'red' }}>{p.name}</Typography>
                           {isCap && <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#00a77f' }}>Captain</Typography>}
                         </Box>
                         {hasPublishedResult && typeof (p as Player).xp === 'number' && (

@@ -198,6 +198,7 @@ const trophyDetails: Record<string, { image: StaticImageData; label: string }> =
     // Other Trophy Room titles
     'Golden Boot': { image: GoldenBootImg, label: 'Golden Boot' },
     'King Playmaker': { image: KingPlayMakerImg, label: 'King Playmaker' },
+    'Assist Trophy': { image: KingPlayMakerImg, label: 'King Playmaker' },
     'Legendary Shield': { image: ShieldImg, label: 'Legendary Shield' },
     'The Dark Horse': { image: DarkHorseImg, label: 'The Dark Horse' },
     // ADD: Star Keeper trophy
@@ -217,35 +218,62 @@ const orderedTrophyKeys = [
 ];
 
 const TROPHY_ICON_FRAME_SIZE = 60;
-const TROPHY_ICON_SIZE_BY_LABEL: Record<string, number> = {
-    'League Champion': 48,
-    'Champion Footballer': 48,
-    'Runner-Up': 62,
-    'Runner Up': 62,
-    "Ballon d'Or": 45,
-    "Ballon D'or": 45,
+const TROPHY_ICON_FRAME_SIZE_MOBILE = 52;
+
+const TROPHY_ICON_SIZES_DESKTOP: Record<string, number> = {
+    'League Champion': 51,
+    'Champion Footballer': 51,
+    'Runner-Up': 53,
+    'Runner Up': 53,
+    "Ballon d'Or": 42,
+    "Ballon D'or": 42,
     'Golden Boot': 48,
-    'King Playmaker': 40,
-    'Legendary Shield': 44,
-    'The Dark Horse': 54,
-    'Dark Horse': 54,
-    'Star Keeper': 46,
+    'King Playmaker': 41,
+    'Assist Trophy': 41,
+    'Assist': 41,
+    'Assists': 41,
+    'Playmaker': 41,
+    'Legendary Shield': 41,
+    'The Dark Horse': 49,
+    'Dark Horse': 49,
+    'Star Keeper': 43,
 };
 
-const getTrophyIconSize = (label?: string): number => {
-    if (!label) return 46;
+const TROPHY_ICON_SIZES_MOBILE: Record<string, number> = {
+    'League Champion': 44,
+    'Champion Footballer': 44,
+    'Runner-Up': 45,
+    'Runner Up': 45,
+    "Ballon d'Or": 36,
+    "Ballon D'or": 36,
+    'Golden Boot': 41,
+    'King Playmaker': 35,
+    'Assist Trophy': 35,
+    'Assist': 35,
+    'Assists': 35,
+    'Playmaker': 35,
+    'Legendary Shield': 35,
+    'The Dark Horse': 42,
+    'Dark Horse': 42,
+    'Star Keeper': 37,
+};
+
+const getTrophyIconSize = (label?: string, isMobileView: boolean = false): number => {
+    const table = isMobileView ? TROPHY_ICON_SIZES_MOBILE : TROPHY_ICON_SIZES_DESKTOP;
+    const defaultSize = isMobileView ? 35 : 41;
+    if (!label) return defaultSize;
     const trimmed = label.trim();
-    if (TROPHY_ICON_SIZE_BY_LABEL[trimmed] !== undefined) {
-        return TROPHY_ICON_SIZE_BY_LABEL[trimmed];
+    if (table[trimmed] !== undefined) {
+        return table[trimmed];
     }
     const lower = trimmed.toLowerCase();
-    const foundKey = Object.keys(TROPHY_ICON_SIZE_BY_LABEL).find(
+    const foundKey = Object.keys(table).find(
         k => k.toLowerCase() === lower
     );
-    if (foundKey && TROPHY_ICON_SIZE_BY_LABEL[foundKey] !== undefined) {
-        return TROPHY_ICON_SIZE_BY_LABEL[foundKey];
+    if (foundKey && table[foundKey] !== undefined) {
+        return table[foundKey];
     }
-    return 46;
+    return defaultSize;
 };
 
 type StatTotals = {
@@ -2224,6 +2252,10 @@ export default function PlayerStatsPage() {
             "Ballon D'or": "Ballon d'Or",
             'Golden Boot': 'Golden Boot',
             'King Playmaker': 'King Playmaker',
+            'Assist Trophy': 'King Playmaker',
+            'Assist': 'King Playmaker',
+            'Assists': 'King Playmaker',
+            'Playmaker': 'King Playmaker',
             'Legendary Shield': 'Legendary Shield',
             'The Dark Horse': 'The Dark Horse',
             'Dark Horse': 'The Dark Horse',

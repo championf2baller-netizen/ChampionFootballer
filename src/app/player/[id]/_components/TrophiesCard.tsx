@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Paper, Box, Typography, CircularProgress, Grid } from '@mui/material';
+import { Paper, Box, Typography, CircularProgress, Grid, useTheme, useMediaQuery } from '@mui/material';
 import Image, { StaticImageData } from 'next/image';
 
 export interface EarnedTrophy {
@@ -19,7 +19,8 @@ export interface TrophiesCardProps {
     CARD_BG: string;
     TEAL_PRIMARY: string;
     TROPHY_ICON_FRAME_SIZE: number;
-    getTrophyIconSize: (label: string) => number;
+    getTrophyIconSize: (label?: string, isMobile?: boolean) => number;
+    isMobile?: boolean;
     getCms?: (key: string, fallback: string) => string;
 }
 
@@ -32,8 +33,13 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
     TEAL_PRIMARY,
     TROPHY_ICON_FRAME_SIZE,
     getTrophyIconSize,
+    isMobile,
     getCms,
 }) => {
+    const theme = useTheme();
+    const mediaIsMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobileView = isMobile !== undefined ? isMobile : mediaIsMobile;
+
     return (
         <Grid
             item
@@ -76,22 +82,26 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
                     </Typography>
                 ) : (
                     <Box sx={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        justifyContent: 'flex-start',
-                        gap: 2
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        justifyItems: 'center',
+                        alignItems: 'start',
+                        rowGap: { xs: 2, md: 2.5 },
+                        columnGap: { xs: 0.5, md: 1 },
+                        width: '100%',
                     }}>
                         {earnedTrophies.map((t) => (
                             <Box key={t.key} sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: 0.5
+                                gap: 0.5,
+                                width: '100%',
                             }}>
                                 <Box
                                     sx={{
-                                        width: TROPHY_ICON_FRAME_SIZE,
-                                        height: TROPHY_ICON_FRAME_SIZE,
+                                        width: { xs: 52, md: TROPHY_ICON_FRAME_SIZE },
+                                        height: { xs: 52, md: TROPHY_ICON_FRAME_SIZE },
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -100,8 +110,8 @@ export const TrophiesCard: React.FC<TrophiesCardProps> = ({
                                     <Image
                                         src={t.image}
                                         alt={t.label}
-                                        width={getTrophyIconSize(t.label)}
-                                        height={getTrophyIconSize(t.label)}
+                                        width={getTrophyIconSize(t.label, isMobileView)}
+                                        height={getTrophyIconSize(t.label, isMobileView)}
                                         style={{
                                             objectFit: 'contain',
                                             filter: 'none'

@@ -845,8 +845,8 @@ const PlayerProfileCard = () => {
 
       if (!isBlank(age)) {
         const parsedAge = Number(String(age).trim())
-        if (Number.isNaN(parsedAge) || parsedAge < 14 || parsedAge > 65) {
-          const msg = parsedAge < 14 ? "Age must be at least 14 years old" : "Age must be between 14 and 65"
+        if (Number.isNaN(parsedAge) || parsedAge < 13 || parsedAge > 65) {
+          const msg = parsedAge < 13 ? "Age must be at least 13 years old" : "Age must be between 13 and 65"
           toast.error(msg)
           setIsUpdating(false)
           return
@@ -1727,18 +1727,18 @@ const PlayerProfileCard = () => {
                             {(() => {
                               const parsedAgeNum = age !== "" && age !== null && age !== undefined ? Number(age) : NaN
                               const isAgeEntered = age !== "" && age !== null && age !== undefined
-                              const isAgeTooYoung = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum < 14
+                              const isAgeTooYoung = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum < 13
                               const isAgeTooOld = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum > 65
                               const isAgeInvalid = isAgeTooYoung || isAgeTooOld || (isAgeEntered && !Number.isInteger(parsedAgeNum))
-                              const isAgeValid = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum >= 14 && parsedAgeNum <= 65
+                              const isAgeValid = isAgeEntered && !Number.isNaN(parsedAgeNum) && parsedAgeNum >= 13 && parsedAgeNum <= 65
 
                               const ageHelperText = isAgeTooYoung
-                                ? "Age must be at least 14 years old"
+                                ? "Age must be at least 13 years old"
                                 : isAgeTooOld
-                                ? "Age must be between 14 and 65"
+                                ? "Age must be between 13 and 65"
                                 : isAgeValid
-                                ? "✓ Age requirement met (14+)"
-                                : "Must be at least 14 years old"
+                                ? "✓ Age requirement met (13+)"
+                                : "Must be at least 13 years old"
 
                               const ageHelperTextColor = isAgeInvalid
                                 ? "#ff6b6b !important"
@@ -1754,7 +1754,7 @@ const PlayerProfileCard = () => {
                                   onChange={e => setAge(e.target.value)}
                                   fullWidth
                                   placeholder="00"
-                                  inputProps={{ min: 14, max: 65 }}
+                                  inputProps={{ min: 13, max: 65 }}
                                   error={isAgeInvalid}
                                   helperText={ageHelperText}
                                   FormHelperTextProps={{

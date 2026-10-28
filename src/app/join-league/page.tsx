@@ -7,7 +7,7 @@ import { Box, CircularProgress } from '@mui/material';
 function JoinLeagueRedirect() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const code = (searchParams?.get('code') || searchParams?.get('inviteCode') || '').trim().toUpperCase();
+  const code = (searchParams?.get('nvitecode') || searchParams?.get('invitecode') || searchParams?.get('inviteCode') || searchParams?.get('code') || '').trim().toUpperCase();
 
   useEffect(() => {
     if (code) {
