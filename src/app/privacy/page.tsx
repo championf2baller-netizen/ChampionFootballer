@@ -45,7 +45,7 @@ function PrivacyPolicies() {
             title: "Purpose of this Privacy Policy",
             content: [
                 "This privacy notice for Champion Footballer, describes how and why we might collect, store, use, and/or share (\"process\") your information when you use our services (\"Services\") through your use of this website and any mobile application (\"Platform\").",
-                "Questions or concerns? Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at championfootballer@outlook.com",
+                "Questions or concerns? Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at info@championfootballer.co.uk",
                 "Champion Footballer respects your privacy and is dedicated to protecting your personal data. This privacy notice will inform you as to how we look after your personal data when you visit our Platform (regardless of where you visit it from) and tell you about your privacy rights and how the law protects you.",
                 "We collect, use and are responsible for certain personal information about you. When we do so we are subject to relevant laws including, but not limited to, the General Data Protection Regulation, which applies across the European Union (including in the United Kingdom) and we are responsible as 'controller' of that personal information for the purposes of those laws.",
                 "It is important that you read this privacy policy carefully together with any other privacy policy or fair processing policy we may provide on specific occasions when we are collecting or processing personal data about you so that you are fully aware of how and why we are using your data. This privacy policy supplements other notices and privacy policies and is not intended to override them."
@@ -164,8 +164,8 @@ function PrivacyPolicies() {
         {
             title: "Do We Collect Information From Minors?",
             content: [
-                "In Short: We do not knowingly collect data from or market to children under 18 years of age.",
-                "We do not knowingly solicit data from or market to children under 18 years of age. By using the Services, you represent that you are at least 18 or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If we learn that personal information from users less than 18 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18, please contact us at championfootballer@outlook.com."
+                "In Short: We do not knowingly collect data from or market to children under 13 years of age.",
+                "We do not knowingly solicit data from or market to children under 13 years of age. By using the Services, you represent that you are at least 13 or that you are the parent or guardian of such a minor and consent to such minor dependent's use of the Services. If we learn that personal information from users less than 13 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 13, please contact us at info@championfootballer.co.uk."
             ]
         },
         {
@@ -205,7 +205,7 @@ function PrivacyPolicies() {
         {
             title: "How Can You Contact Us About This Notice?",
             content: [
-                "If you have questions or comments about this notice, you may email us at championfootballer@outlook.com or by post to:",
+                "If you have questions or comments about this notice, you may email us at info@championfootballer.co.uk or by post to:",
                 "Suite RA01",
                 "195-197 Wood Street,",
                 "London,",
@@ -249,7 +249,7 @@ function PrivacyPolicies() {
                 "We may update this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal or regulatory reasons. Please therefore re-visit this Cookie Policy regularly to stay informed about our use of cookies and related technologies.",
                 "The date at the top of this Cookie Policy indicates when it was last updated.",
                 "Where can I get further information?",
-                "If you have any questions about our use of cookies or other technologies, please email us at championfootballer@outlook.com or by post to:",
+                "If you have any questions about our use of cookies or other technologies, please email us at info@championfootballer.co.uk or by post to:",
                 "Champion Footballer",
                 "First Floor",
                 "85 Great Portland St,",

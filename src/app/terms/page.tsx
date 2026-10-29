@@ -272,7 +272,7 @@ function TermConditions() {
             title: 'CONTACT US',
             content: [
                 'In order to resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at:',
-                'Champion Footballer\nFirst Floor\n85 Great Portland St,\nLondon, England,\nW1W 7LL\nEmail: championfootballer@outlook.com'
+                'Champion Footballer\nFirst Floor\n85 Great Portland St,\nLondon, England,\nW1W 7LL\nEmail: info@championfootballer.co.uk'
             ]
         }
     ];

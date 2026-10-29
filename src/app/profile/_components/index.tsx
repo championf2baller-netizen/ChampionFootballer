@@ -846,7 +846,7 @@ const PlayerProfileCard = () => {
       if (!isBlank(age)) {
         const parsedAge = Number(String(age).trim())
         if (Number.isNaN(parsedAge) || parsedAge < 13 || parsedAge > 65) {
-          const msg = parsedAge < 13 ? "Age must be at least 13 years old" : "Age must be between 13 and 65"
+          const msg = parsedAge < 13 ? "You must be 13 years or older to use Champion Footballer." : "Age must be between 13 and 65"
           toast.error(msg)
           setIsUpdating(false)
           return
