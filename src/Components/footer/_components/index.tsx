@@ -169,7 +169,54 @@ export default function Footer() {
   ].filter(p => p.href && p.href.trim().length > 0);
 
   return (
-    <Box component="footer" sx={{
+    <>
+      {/* Slogan Banner above Footer */}
+      <Box sx={{
+        width: '100%',
+        mt: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: { xs: 2, sm: 3 },
+        pt: { xs: 2.5, sm: 3, md: 3.5 },
+        pb: { xs: 2, sm: 2.5, md: 3 },
+        px: { xs: 2, sm: 4 },
+        maxWidth: 1220,
+        mx: 'auto',
+      }}>
+        {/* Left fading line */}
+        <Box sx={{
+          flex: 1,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18))',
+        }} />
+
+        {/* Slogan */}
+        <Typography sx={{
+          fontSize: { xs: 11, sm: 13, md: 14 },
+          fontWeight: 800,
+          fontStyle: 'italic',
+          letterSpacing: { xs: '2px', sm: '3px' },
+          color: '#8a94a6',
+          textTransform: 'uppercase',
+          fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+          userSelect: 'none',
+          flexShrink: 0,
+        }}>
+          PLAY. <span style={{ color: '#22c55e' }}>WIN.</span> BUILD YOUR LEGACY.
+        </Typography>
+
+        {/* Right fading line */}
+        <Box sx={{
+          flex: 1,
+          height: '1px',
+          background: 'linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent)',
+        }} />
+      </Box>
+
+      <Box component="footer" sx={{
       py: { xs: 3, md: 5 },
       background: 'linear-gradient(90deg, #727272 0%, #3b3b3b 50%, #020202 100%)',
       color: 'white',
@@ -358,5 +405,6 @@ export default function Footer() {
         </Stack>
       </Container>
     </Box>
+    </>
   );
 }

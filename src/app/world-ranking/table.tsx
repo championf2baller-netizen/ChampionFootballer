@@ -289,7 +289,7 @@ export default function WorldRankingTable() {
   }, [filtered, visibleLimit]);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#fff', overflowX: 'hidden' }}>
+    <Box sx={{ bgcolor: 'transparent', color: '#fff', overflowX: 'hidden' }}>
       {/* ────────── HEADER ────────── */}
       <PageHeader title="WORLD RANKING">
         <Box sx={{
@@ -857,7 +857,7 @@ export default function WorldRankingTable() {
       </Box>
 
       {/* ────────── TABLE ────────── */}
-      <Box sx={{ px: { xs: 1.5, sm: 2.5, md: 4 }, pb: 6, maxWidth: 1220, mx: 'auto' }}>
+      <Box sx={{ px: { xs: 1.5, sm: 2.5, md: 4 }, pb: 0, maxWidth: 1220, mx: 'auto' }}>
         <Card sx={{
           background: '#121316',
           border: '1px solid #22242a',
@@ -1318,20 +1318,6 @@ export default function WorldRankingTable() {
             </Table>
           </TableContainer>
         </Card>
-
-        {/* Footer Slogan */}
-        <Typography sx={{
-          textAlign: 'center',
-          color: '#717d8f',
-          fontSize: 12,
-          fontWeight: 700,
-          letterSpacing: '2px',
-          my: 4,
-          textTransform: 'uppercase',
-          fontFamily: 'var(--font-woodford-bourne-pro)',
-        }}>
-          PLAY. <span style={{ color: '#22c55e' }}>WIN.</span> BUILD YOUR LEGACY.
-        </Typography>
       </Box>
     </Box>
   );

@@ -30,6 +30,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           maxWidth: '100%',
           overflowX: 'hidden',
           backgroundColor: '#0E0E0E',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         {!isMainPage && !isAdminPage && <Navbar />}

@@ -1135,7 +1135,7 @@ const AllPlayersPage = () => {
       `}</style>
       <Box sx={{
         position: 'relative',
-        minHeight: '100vh',
+        minHeight: 'auto',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -1678,7 +1678,7 @@ const AllPlayersPage = () => {
               borderRadius: '16px',
               boxShadow: 'none',
               mt: 0,
-              mb: 4,
+              mb: 0,
               overflow: 'hidden',
               '&::-webkit-scrollbar': {
                 height: '6px',
@@ -1879,7 +1879,7 @@ const AllPlayersPage = () => {
                       <Typography className="league-table-heading1" sx={{ color: '#717d8f !important', fontWeight: 'bold', fontSize: { xs: 11, sm: 12 } }}>
                         CAREER XP
                       </Typography>
-                      <Typography sx={{ color: '#4b5563', fontSize: { xs: 9, sm: 10 }, fontWeight: 700, letterSpacing: 0.5, lineHeight: 1 }}>
+                      <Typography sx={{ color: '#4b5563', fontSize: { xs: 9, sm: 10 }, fontWeight: 700, letterSpacing: 0.5, lineHeight: 1, display: { xs: 'none', sm: 'block' } }}>
                         OF 25,000
                       </Typography>
                     </Box>
@@ -2193,7 +2193,7 @@ const AllPlayersPage = () => {
                                 <Typography sx={{ fontWeight: 800, fontSize: { xs: 13, sm: 15, md: 16 }, color: '#22c55e', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'right', lineHeight: 1.2 }}>
                                   {playerXp.toLocaleString()}
                                 </Typography>
-                                <Box sx={{ width: '100%', mt: 0.6, display: 'flex', justifyContent: 'flex-end' }}>
+                                <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end' }}>
                                   <Box sx={{
                                     width: { xs: 55, sm: 75, md: 85 },
                                     height: 3.5,

@@ -4013,7 +4013,7 @@ export default function LeagueDetailPage() {
     return (
         <Box
             sx={{
-                minHeight: '100vh',
+                minHeight: 'auto',
                 fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                 fontWeight: 700,
                 background: 'transparent',
