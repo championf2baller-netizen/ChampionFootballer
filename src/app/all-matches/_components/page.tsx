@@ -2134,14 +2134,13 @@ export default function AllMatches() {
                         color: 'white'
                     }}>
                         {/* Teams in a row layout */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 2, sm: 3 }, flexDirection: { xs: 'column', sm: 'row' } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: { xs: 1, sm: 2 }, width: '100%', flexDirection: 'row' }}>
                             {/* Home Team */}
                             <Box sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2,
+                                gap: { xs: 1, sm: 1.5 },
                                 flex: 1,
-                                width: { xs: '100%', sm: 'auto' },
                                 minWidth: 0 // Prevent overflow
                             }}>
                                 <Image
@@ -2156,7 +2155,8 @@ export default function AllMatches() {
                                         variant="h6"
                                         sx={{
                                             fontWeight: 'bold',
-                                            fontSize: { xs: '1rem', sm: '1.25rem' },
+                                            fontSize: { xs: '0.85rem', sm: '1.15rem' },
+                                            lineHeight: 1.2,
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                             whiteSpace: 'nowrap'
@@ -2168,7 +2168,8 @@ export default function AllMatches() {
                                         variant="body2"
                                         sx={{
                                             opacity: 0.8,
-                                            fontSize: '0.8rem'
+                                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                            lineHeight: 1.2
                                         }}
                                     >
                                         Home
@@ -2180,9 +2181,10 @@ export default function AllMatches() {
                             <Box sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2,
+                                gap: { xs: 0.5, sm: 1 },
                                 justifyContent: 'center',
-                                flexShrink: 0
+                                flexShrink: 0,
+                                px: { xs: 0.5, sm: 1 }
                             }}>
                                 {match.status === 'RESULT_PUBLISHED' && (
                                     <Box sx={{
@@ -2190,17 +2192,17 @@ export default function AllMatches() {
                                         alignItems: 'center',
                                         gap: 1,
                                         backgroundColor: 'rgba(255,255,255,0.15)',
-                                        px: 2,
-                                        py: 1,
+                                        px: { xs: 1.5, sm: 2 },
+                                        py: { xs: 0.5, sm: 1 },
                                         borderRadius: 2
                                     }}>
-                                        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '2rem' } }}>
                                             {match.homeTeamGoals || 0}
                                         </Typography>
-                                        <Typography variant="h6" sx={{ opacity: 0.7 }}>
+                                        <Typography variant="h6" sx={{ opacity: 0.7, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
                                             -
                                         </Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '2rem' } }}>
                                             {match.awayTeamGoals || 0}
                                         </Typography>
                                     </Box>
@@ -2208,11 +2210,11 @@ export default function AllMatches() {
                                 {match.status === 'SCHEDULED' && (
                                     <Box sx={{
                                         backgroundColor: 'rgba(255,255,255,0.2)',
-                                        px: 2,
-                                        py: 1,
+                                        px: { xs: 1.5, sm: 2 },
+                                        py: { xs: 0.5, sm: 0.75 },
                                         borderRadius: 2
                                     }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                                             VS
                                         </Typography>
                                     </Box>
@@ -2223,9 +2225,8 @@ export default function AllMatches() {
                             <Box sx={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 2,
+                                gap: { xs: 1, sm: 1.5 },
                                 flex: 1,
-                                width: { xs: '100%', sm: 'auto' },
                                 flexDirection: 'row-reverse', // Reverse order for visual balance
                                 minWidth: 0
                             }}>
@@ -2241,7 +2242,8 @@ export default function AllMatches() {
                                         variant="h6"
                                         sx={{
                                             fontWeight: 'bold',
-                                            fontSize: { xs: '1rem', sm: '1.25rem' },
+                                            fontSize: { xs: '0.85rem', sm: '1.15rem' },
+                                            lineHeight: 1.2,
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
                                             whiteSpace: 'nowrap'
@@ -2253,7 +2255,8 @@ export default function AllMatches() {
                                         variant="body2"
                                         sx={{
                                             opacity: 0.8,
-                                            fontSize: '0.8rem'
+                                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                                            lineHeight: 1.2
                                         }}
                                     >
                                         Away
@@ -2382,7 +2385,7 @@ export default function AllMatches() {
                     </Box>
                 </DialogContent>
 
-                <DialogActions sx={{ p: { xs: 2, sm: 3 }, gap: 1, borderTop: '1px solid rgba(255,255,255,0.1)', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'stretch', sm: 'center' } }}>
+                <DialogActions sx={{ p: { xs: 2, sm: 3 }, gap: 1, borderTop: '1px solid rgba(255,255,255,0.1)', justifyContent: 'flex-end' }}>
                     <Button
                         onClick={onClose}
                         variant="outlined"
@@ -2397,21 +2400,6 @@ export default function AllMatches() {
                         }}
                     >
                         Close
-                    </Button>
-                    <Button
-                        variant="contained"
-                        onClick={() => {
-                            onClose();
-                            setResultsMatchId(match.id);
-                            setResultsDialogOpen(true);
-                        }}
-                        sx={{
-                            backgroundColor: '#0388E3',
-                            width: { xs: '100%', sm: 'auto' },
-                            '&:hover': { backgroundColor: '#0369a1' }
-                        }}
-                    >
-                        View Full Details
                     </Button>
                 </DialogActions>
             </Dialog>
