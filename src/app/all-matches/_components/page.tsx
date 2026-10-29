@@ -2978,6 +2978,7 @@ export default function AllMatches() {
                   width: { xs: '100%', sm: 'auto' },
                   fontWeight: 'bold',
                   textTransform: 'none',
+                  fontSize:{xs:'11px', md:'16px'},
                   '&:hover': { 
                     borderColor: 'rgba(255,255,255,0.5)',
                     borderWidth: '3px',

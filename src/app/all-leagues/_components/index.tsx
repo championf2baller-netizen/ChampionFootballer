@@ -6105,20 +6105,20 @@ function AllLeagues() {
                 onClick={() => { setSelectedYear('all'); setSearchTerm(''); setSelectedLeagueId('all'); setCompletionTab('live'); }}
                 sx={{
                   color: 'white',
+                  height: { xs: 34, md: 39 },
                   borderRadius: 6,
                   borderColor: 'rgba(255,255,255,0.3)',
                   borderWidth: '3px',
-                  px: { xs: 0.5, sm: 2.5 },
+                  px: 2.5, 
                   py: 1,
                   width: { xs: '100%', sm: 'auto' },
-                  height: { xs: 34, md: 39 },
-                  fontSize: { xs: '11px', md: 'inherit' },
                   fontWeight: 'bold',
                   textTransform: 'none',
-                  '&:hover': {
+                  fontSize:{xs:'11px', md:'16px'},
+                  '&:hover': { 
                     borderColor: 'rgba(255,255,255,0.5)',
                     borderWidth: '3px',
-                    bgcolor: 'rgba(255,255,255,0.05)'
+                    bgcolor: 'rgba(255,255,255,0.05)' 
                   }
                 }}
               >
