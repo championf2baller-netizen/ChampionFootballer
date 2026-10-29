@@ -587,14 +587,31 @@ export default function PlayerStatsPage() {
             setPreferredLeagueId(localStorage.getItem('preferredLeagueId'));
             const params = new URLSearchParams(window.location.search);
             const viewParam = params.get('view');
-            if (viewParam === 'performance' || viewParam === 'stats' || viewParam === 'overview') {
-                setSelectedView(viewParam);
+            const isDesktopScreen = window.innerWidth >= 900;
+            if (viewParam === 'performance') {
+                if (isDesktopScreen && playerId) {
+                    router.push(`/player/${playerId}/career`);
+                } else {
+                    setSelectedView('performance');
+                }
+            } else if (viewParam === 'stats') {
+                if (isDesktopScreen) {
+                    setStatsModalOpen(true);
+                } else {
+                    setSelectedView('stats');
+                }
+            } else if (viewParam === 'overview') {
+                setSelectedView('overview');
             } else if (params.get('openStats') === 'true') {
-                setSelectedView('stats');
+                if (isDesktopScreen) {
+                    setStatsModalOpen(true);
+                } else {
+                    setSelectedView('stats');
+                }
             }
         }
         setPreferredLeagueLoaded(true);
-    }, []);
+    }, [playerId, router]);
 
     // Main 3-view toggle state (Overview, Performance, Stats / Season)
     const [selectedView, setSelectedView] = useState<PlayerViewType>('overview');
@@ -3066,8 +3083,8 @@ export default function PlayerStatsPage() {
                     </Box>
             </PageHeader>
 
-            {/* Main 3-View Toggle (Overview | Performance | Stats / Season) */}
-            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: 0 }}>
+            {/* Main 3-View Toggle (Overview | Performance | Stats / Season) - Mobile only */}
+            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: 0, display: { xs: 'block', md: 'none' } }}>
                 <PlayerViewToggle
                     activeView={selectedView}
                     onSelectView={(view) => {
@@ -3076,8 +3093,8 @@ export default function PlayerStatsPage() {
                 />
             </Box>
 
-            {/* View 1: Overview */}
-            {selectedView === 'overview' && (
+            {/* View 1: Overview (Always visible on desktop, or when selectedView === 'overview' on mobile) */}
+            {(isDesktop || selectedView === 'overview') && (
                 <PlayerOverviewContainer
                     loading={loading}
                     reduxError={reduxError}
@@ -3096,10 +3113,18 @@ export default function PlayerStatsPage() {
                     PAGE_XP_MAX_POINTS={PAGE_XP_MAX_POINTS}
                     isMobile={isMobile}
                     onOpenStatsModal={() => {
-                        setSelectedView('stats');
+                        if (isDesktop) {
+                            setStatsModalOpen(true);
+                        } else {
+                            setSelectedView('stats');
+                        }
                     }}
                     onNavigateCareer={() => {
-                        setSelectedView('performance');
+                        if (isDesktop) {
+                            if (playerId) router.push(`/player/${playerId}/career`);
+                        } else {
+                            setSelectedView('performance');
+                        }
                     }}
                     activeTab={activeTab}
                     onTabClick={handleTabClick}
@@ -3127,15 +3152,15 @@ export default function PlayerStatsPage() {
                 />
             )}
 
-            {/* View 2: Performance */}
-            {selectedView === 'performance' && (
+            {/* View 2: Performance (Mobile only) */}
+            {!isDesktop && selectedView === 'performance' && (
                 <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pb: 5 }}>
                     <CareerPage isEmbedded={true} playerId={playerId ? String(playerId) : undefined} />
                 </Box>
             )}
 
-            {/* View 3: Stats / Season */}
-            {selectedView === 'stats' && (
+            {/* View 3: Stats / Season (Mobile only) */}
+            {!isDesktop && selectedView === 'stats' && (
                 <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pb: 5 }}>
                     <PlayerStatsOverSeasonView
                         leagueId={leagueId}

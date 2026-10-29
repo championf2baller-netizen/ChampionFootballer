@@ -33,7 +33,7 @@ export const PlayerViewToggle: React.FC<PlayerViewToggleProps> = ({
                 bgcolor: '#2f333a',
                 borderRadius: '8px',
                 p: '4px',
-                display: 'grid',
+                display: { xs: 'grid', md: 'none' },
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '4px',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
