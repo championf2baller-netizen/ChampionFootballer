@@ -22,11 +22,11 @@ const woodfordBournePro = localFont({
 export const metadata: Metadata = {
   title: "Champion Footballer",
   description: "Your ultimate football management platform. Create Matches, Track Performance, and Claim Bragging Rights!",
-  metadataBase: new URL('https://www.championfootballer.com'),
+  metadataBase: new URL('https://www.championfootballer.co.uk'),
   openGraph: {
     title: "Champion Footballer - Where Champions Are Made!",
     description: "Create Matches. Track Performance. Claim Bragging Rights. Join Champion Footballer today!",
-    url: "https://www.championfootballer.com",
+    url: "https://www.championfootballer.co.uk",
     siteName: "Champion Footballer",
     images: [
       {

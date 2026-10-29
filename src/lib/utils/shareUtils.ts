@@ -11,7 +11,7 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch {}
+    } catch { }
   }
   if (typeof document !== 'undefined') {
     try {
@@ -25,7 +25,7 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
       const success = document.execCommand('copy');
       document.body.removeChild(textarea);
       return success;
-    } catch {}
+    } catch { }
   }
   return false;
 }
@@ -37,10 +37,10 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
  * Where Champions Are Made!
  * Join {leagueName} / season {seasonNumber}. Use invite code: {inviteCode} or 
  * click link to join:
- * https://championfootballer.com/home?nvitecode={inviteCode}
+ * https://championfootballer.co.uk/home?nvitecode={inviteCode}
  * Create Matches. Track Performance. Claim Bragging Rights
  * Join Champion Footballer today:
- * www.championfootballer.com
+ * www.championfootballer.co.uk
  */
 export function buildLeagueSeasonInviteText(
   leagueName: string,
@@ -51,8 +51,8 @@ export function buildLeagueSeasonInviteText(
   const cleanLeague = (leagueName || 'League').trim();
   const cleanCode = (inviteCode || '').trim();
   const sNum = seasonNumber || 1;
-  const url = inviteUrl || `https://championfootballer.com/home?nvitecode=${encodeURIComponent(cleanCode)}`;
-  return `Champion Footballer \nWhere Champions Are Made!\nJoin ${cleanLeague} / season ${sNum}. Use invite code: ${cleanCode} or \nclick link to join:\n${url}\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com`;
+  const url = inviteUrl || `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(cleanCode)}`;
+  return `Champion Footballer \nWhere Champions Are Made!\nJoin ${cleanLeague} / season ${sNum}. Use invite code: ${cleanCode} or \nclick link to join:\n${url}\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.co.uk`;
 }
 
 export interface ShareOptions {
@@ -93,7 +93,7 @@ export async function shareToWhatsApp({
     let canShareFiles = false;
     try {
       canShareFiles = typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] });
-    } catch {}
+    } catch { }
 
     if (canShareFiles) {
       try {
@@ -114,7 +114,7 @@ export async function shareToWhatsApp({
   if (file) {
     try {
       await copyImageToClipboard(file);
-    } catch {}
+    } catch { }
     downloadBlob(file, fileName);
     toast.success('Card image downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.', {
       duration: 6000,
@@ -171,9 +171,9 @@ export async function shareContent(options: ShareOptions): Promise<void> {
   // Proactively copy text or try to copy
   try {
     if (typeof navigator !== 'undefined' && (!options.files || options.files.length === 0)) {
-      copyTextToClipboard(fullText).catch(() => {});
+      copyTextToClipboard(fullText).catch(() => { });
     }
-  } catch {}
+  } catch { }
 
   // 1. Try Native Web Share API first
   if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
@@ -223,7 +223,7 @@ export async function shareContent(options: ShareOptions): Promise<void> {
     try {
       const encoded = encodeURIComponent(fullText);
       window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
-    } catch {}
+    } catch { }
   }
 }
 
@@ -287,7 +287,7 @@ export function downloadBlob(blobOrFile: Blob | File, fileName: string = 'player
     setTimeout(() => {
       try {
         URL.revokeObjectURL(url);
-      } catch {}
+      } catch { }
     }, 1500);
   } catch (err) {
     console.warn('Download error:', err);
@@ -336,7 +336,7 @@ export async function copyImageAndTextToClipboard(
         const buffer = await blobOrFile.arrayBuffer();
         pngBlob = new Blob([buffer], { type: 'image/png' });
       }
-    } catch {}
+    } catch { }
   }
 
   // 1. Try writing BOTH image and text in a single ClipboardItem
@@ -365,7 +365,7 @@ export async function copyImageAndTextToClipboard(
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch {}
+    } catch { }
   }
 
   // 3. Last fallback execCommand
@@ -381,7 +381,7 @@ export async function copyImageAndTextToClipboard(
       const success = document.execCommand('copy');
       document.body.removeChild(textarea);
       return success;
-    } catch {}
+    } catch { }
   }
 
   return false;

@@ -728,11 +728,11 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
             const rawPct = Number(j?.matchupPct);
             const safePct = Number.isFinite(rawPct) ? Math.max(0, Math.min(100, rawPct)) : 0;
             setTeamInsights({
-              homeStrength: Number(j?.home?.average ?? 0),
-              awayStrength: Number(j?.away?.average ?? 0),
+              homeStrength: Number(j?.home?.total ?? j?.home?.average ?? 0),
+              awayStrength: Number(j?.away?.total ?? j?.away?.average ?? 0),
               matchupPct: safePct,
               predicted: (j?.predicted as 'home' | 'away' | 'draw') || 'draw',
-              predictedScore: String(j?.predictedScore ?? 'â€”'),
+              predictedScore: String(j?.predictedScore ?? '—'),
             });
             setPredictionReason(null);
           } else {
@@ -754,7 +754,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchId, token, leagueId]);
+  }, [matchId, token, leagueId, removed.home, removed.away, homePlayers.length, awayPlayers.length]);
 
   // Build removed sets from server state
   const removedHomeSet = useMemo(
@@ -962,7 +962,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     shareContent({
       title: `Team line-up: (${matchup})`,
       customFullText: text,
-      url: 'https://www.championfootballer.com',
+      url: 'https://www.championfootballer.co.uk',
     });
   };
 
@@ -1237,14 +1237,39 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
         body: JSON.stringify({ team, playerId: id }) // include team
       });
       if (res.ok) {
-        setRemoved(prev => {
-          const updated = Array.from(new Set([...(prev[team] || []), String(id)]));
-          return { ...prev, [team]: updated };
-        });
+        const data = await res.json().catch(() => null);
+        if (data?.prediction) {
+          const rawPct = Number(data.prediction.matchupPct);
+          const safePct = Number.isFinite(rawPct) ? Math.max(0, Math.min(100, rawPct)) : 0;
+          setTeamInsights({
+            homeStrength: Number(data.prediction.home?.total ?? data.prediction.home?.average ?? 0),
+            awayStrength: Number(data.prediction.away?.total ?? data.prediction.away?.average ?? 0),
+            matchupPct: safePct,
+            predicted: (data.prediction.predicted as 'home' | 'away' | 'draw') || 'draw',
+            predictedScore: String(data.prediction.predictedScore ?? '—'),
+          });
+        }
+        if (data?.removed) {
+          setRemoved({
+            home: (data.removed.home || []).map(String),
+            away: (data.removed.away || []).map(String),
+          });
+        } else {
+          setRemoved(prev => {
+            const updated = Array.from(new Set([...(prev[team] || []), String(id)]));
+            return { ...prev, [team]: updated };
+          });
+        }
+        toast.success('Player removed');
       } else {
-        console.warn('Remove failed', await res.text());
+        const errText = await res.text();
+        console.warn('Remove failed', errText);
+        toast.error('Failed to remove player');
       }
-    } catch (e) { console.warn('Remove error', e); }
+    } catch (e) {
+      console.warn('Remove error', e);
+      toast.error('Network error');
+    }
     closeMenu();
   };
 

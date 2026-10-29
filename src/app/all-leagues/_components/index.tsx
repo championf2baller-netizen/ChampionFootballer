@@ -6658,7 +6658,7 @@ function AllLeagues() {
                                     }
                                     const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
                                     const leagueName = league.name?.trim() || 'League';
-                                    const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
                                     const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
                                     try {
                                       const copied = await copyTextToClipboard(shareText);
@@ -6694,7 +6694,7 @@ function AllLeagues() {
                                     }
                                     const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
                                     const leagueName = league.name?.trim() || 'League';
-                                    const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                                    const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
                                     const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
                                     shareContent({
                                       title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,

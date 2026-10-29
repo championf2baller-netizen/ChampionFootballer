@@ -2702,7 +2702,7 @@ export default function LeagueDetailPage() {
         }
         const leagueName = league?.name?.trim() || 'League';
         const seasonNum = selectedSeasonNumber || 1;
-        const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(code)}`;
+        const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(code)}`;
         const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, code, inviteUrl);
         try {
             const copied = await copyTextToClipboard(shareText);
@@ -2724,7 +2724,7 @@ export default function LeagueDetailPage() {
         }
         const leagueName = league?.name?.trim() || 'League';
         const seasonNum = selectedSeasonNumber || 1;
-        const inviteUrl = `https://championfootballer.com/home?nvitecode=${encodeURIComponent(code)}`;
+        const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(code)}`;
         const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, code, inviteUrl);
         shareContent({
             title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
@@ -8473,7 +8473,7 @@ export default function LeagueDetailPage() {
                             .filter(Boolean)
                             .join(' ')
                             .trim() || 'Player';
-                        const shareMessage = `*Champion Footballer*\nWhere Champions Are Made!\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
+                        const shareMessage = `*Champion Footballer*\nWhere Champions Are Made!\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.co.uk`;
 
                         const shareWhatsApp = async () => {
                             let fileToShare: File | null = null;
@@ -8497,7 +8497,7 @@ export default function LeagueDetailPage() {
                             shareContent({
                                 title: `${playerName} | Champion Footballer`,
                                 customFullText: shareMessage,
-                                url: 'https://www.championfootballer.com',
+                                url: 'https://www.championfootballer.co.uk',
                                 files: fileToShare ? [fileToShare] : undefined,
                             });
                         };

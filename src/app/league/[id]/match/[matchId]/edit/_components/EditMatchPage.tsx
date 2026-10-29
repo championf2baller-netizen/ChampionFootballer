@@ -413,6 +413,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   // Track original registered player ids to detect actual changes
   const originalHomeIdsRef = useRef<string[] | null>(null);
   const originalAwayIdsRef = useRef<string[] | null>(null);
+  // Track removed players for prediction score deductions
+  const [removedPlayers, setRemovedPlayers] = useState<{ home: string[]; away: string[] }>({ home: [], away: [] });
   // Form ref for programmatic submit (auto-save after balance)
   const formRef = useRef<HTMLFormElement | null>(null);
 
@@ -732,6 +734,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     if (team === 'home') {
       // Remove from home team
       setHomeTeamUsers(prev => prev.filter(p => p.id !== player.id));
+      if (!player.isGuest) {
+        setRemovedPlayers(prev => ({
+          ...prev,
+          home: Array.from(new Set([...prev.home, String(player.id)])),
+          away: prev.away.filter(id => id !== String(player.id))
+        }));
+      }
       // If it was the captain, clear captain
       if (homeCaptain?.id === player.id) setHomeCaptain(null);
       // If it's a guest, also remove from homeGuests
@@ -742,6 +751,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
     } else {
       // Remove from away team
       setAwayTeamUsers(prev => prev.filter(p => p.id !== player.id));
+      if (!player.isGuest) {
+        setRemovedPlayers(prev => ({
+          ...prev,
+          away: Array.from(new Set([...prev.away, String(player.id)])),
+          home: prev.home.filter(id => id !== String(player.id))
+        }));
+      }
       // If it was the captain, clear captain
       if (awayCaptain?.id === player.id) setAwayCaptain(null);
       // If it's a guest, also remove from awayGuests
@@ -906,6 +922,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       originalHomeIdsRef.current = homeUsers.map(u => u.id);
       originalAwayIdsRef.current = awayUsers.map(u => u.id);
 
+      if ((m as any).removed) {
+        setRemovedPlayers({
+          home: Array.isArray((m as any).removed.home) ? (m as any).removed.home.map(String) : [],
+          away: Array.isArray((m as any).removed.away) ? (m as any).removed.away.map(String) : [],
+        });
+      }
+
       if (m.homeCaptainId && memberIds.has(String(m.homeCaptainId))) {
         const cap = homeUsers.find(u => u.id === m.homeCaptainId);
         if (cap) setHomeCaptain(cap as PlayerOption);
@@ -1025,6 +1048,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         awayIds,
         homeTotal: homeTeamUsers.length,
         awayTotal: awayTeamUsers.length,
+        removed: removedPlayers,
       };
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/prediction`, {
         method: 'POST',
@@ -1039,7 +1063,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       setHomeStrength(typeof j.home?.average === 'number' ? Math.round(j.home.average) : null);
       setAwayStrength(typeof j.away?.average === 'number' ? Math.round(j.away.average) : null);
     } catch { }
-  }, [matchId, token, homeTeamUsers, awayTeamUsers]);
+  }, [matchId, token, homeTeamUsers, awayTeamUsers, removedPlayers]);
 
   // Backend XP Breakdown API Integration
   const [matchXPBreakdown, setMatchXPBreakdown] = useState<any[]>([]);
@@ -1898,6 +1922,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       formData.append('awayTeamUsers', JSON.stringify(newAwayIds));
       formData.append('homeGuests', JSON.stringify(homeGuestsPayload));
       formData.append('awayGuests', JSON.stringify(awayGuestsPayload));
+      formData.append('removed', JSON.stringify(removedPlayers));
 
       if (homeTeamImage) {
         formData.append('homeTeamImage', homeTeamImage);
@@ -2472,6 +2497,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       }
                       value={homeTeamUsers}
                       onChange={(_, newValue) => {
+                        const newIds = new Set(newValue.map(u => String(u.id)));
+                        const newlyRemoved = homeTeamUsers.filter(u => !u.isGuest && !newIds.has(String(u.id))).map(u => String(u.id));
+                        setRemovedPlayers(prev => ({
+                          ...prev,
+                          home: Array.from(new Set([...prev.home, ...newlyRemoved])).filter(id => !newIds.has(id)),
+                          away: prev.away.filter(id => !newIds.has(id))
+                        }));
                         setHomeTeamUsers(newValue);
                         if (homeCaptain && !newValue.some(u => u.id === homeCaptain.id)) {
                           setHomeCaptain(null);
@@ -2682,6 +2714,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       }
                       value={awayTeamUsers}
                       onChange={(_, newValue) => {
+                        const newIds = new Set(newValue.map(u => String(u.id)));
+                        const newlyRemoved = awayTeamUsers.filter(u => !u.isGuest && !newIds.has(String(u.id))).map(u => String(u.id));
+                        setRemovedPlayers(prev => ({
+                          ...prev,
+                          away: Array.from(new Set([...prev.away, ...newlyRemoved])).filter(id => !newIds.has(id)),
+                          home: prev.home.filter(id => !newIds.has(id))
+                        }));
                         setAwayTeamUsers(newValue);
                         if (awayCaptain && !newValue.some(u => u.id === awayCaptain.id)) {
                           setAwayCaptain(null);
