@@ -28,9 +28,9 @@ export default function AboutCF() {
     <main className="min-h-screen p-6">
       <div
         className="max-w-3xl mx-auto rounded-2xl border border-white/10 shadow-xl overflow-hidden"
-        style={{ background: "#2b2b2b" }}
+        style={{ background: "#0E0E0E" }}
       >
-        <header className="px-6 sm:px-8 pt-8 pb-4 bg-[#2b2b2b]">
+        <header className="px-6 sm:px-8 pt-8 pb-4 bg-[#0E0E0E]">
           <h1
             className="text-[32px] sm:text-[42px] md:text-[55px] font-bold text-white text-center uppercase tracking-normal"
             style={{ fontFamily: 'var(--font-oswald), "Oswald", sans-serif' }}
@@ -65,7 +65,7 @@ export default function AboutCF() {
           )}
         </div>
 
-        <footer className="px-6 sm:px-8 pb-8 pt-4 border-t border-white/10 bg-[#2b2b2b]">
+        <footer className="px-6 sm:px-8 pb-8 pt-4 border-t border-white/10 bg-[#0E0E0E]">
           <p className="text-xs sm:text-sm text-white">
             Built with love for the global football community.
           </p>

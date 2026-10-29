@@ -3145,17 +3145,17 @@ export default function GlobalTrophyRoom() {
                   borderRadius: 6,
                   borderColor: 'rgba(255,255,255,0.3)',
                   borderWidth: '3px',
-                  px: { xs: 0.5, sm: 2.5 },
+                  px: 2.5, 
                   py: 1,
                   width: { xs: '100%', sm: 'auto' },
-                  fontSize: { xs: '11px', md: 'inherit' },
                   fontWeight: 'bold',
                   textTransform: 'none',
-                  '&:hover': {
+                  fontSize:{xs:'11px', md:'16px'},
+                  '&:hover': { 
                     borderColor: 'rgba(255,255,255,0.5)',
                     borderWidth: '3px',
-                    bgcolor: 'rgba(255,255,255,0.05)',
-                  },
+                    bgcolor: 'rgba(255,255,255,0.05)' 
+                  }
                 }}
               >
                 {getCms('page_trophy_room_clear_btn', 'Clear')}
