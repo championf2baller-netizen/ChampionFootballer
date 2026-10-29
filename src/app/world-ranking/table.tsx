@@ -1,7 +1,26 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchWorldRanking, WorldRankingPlayer, WorldRankingResponse } from '@/lib/api';
-import { Box, Typography, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, CircularProgress, FormControl, Select, MenuItem } from '@mui/material';
+import {
+  Box,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  Button,
+  ButtonBase,
+  TextField,
+  Avatar,
+  Card,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import Link from 'next/link';
 import { Country } from 'country-state-city';
 import { useAuth } from '@/lib/hooks';
@@ -9,37 +28,31 @@ import WorldRankingLoadingSkeleton from '@/Components/loading/WorldRankingLoadin
 import PageHeader from '@/Components/PageHeader';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
+import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
+import { ChevronDown, Search, Shield } from 'lucide-react';
 
-interface Filters { mode: 'total' | 'avg'; year?: string; positionType?: string; country?: string; }
+interface Filters {
+  mode: 'total' | 'avg';
+  year?: string;
+  positionType?: string;
+  country?: string;
+}
+
 type SortKey = 'rank' | 'name' | 'matches' | 'avgXP' | 'totalXP';
-interface SortState { key: SortKey; direction: 'asc' | 'desc'; }
+interface SortState {
+  key: SortKey;
+  direction: 'asc' | 'desc';
+}
 
-// Column typing and sortable key guard (avoid any casts)
-type ColumnKey = SortKey | 'position' | 'positionType';
-interface Column { label: string; key: ColumnKey }
+type ColumnKey = SortKey | 'position' | 'country' | 'xpStatus';
+interface Column {
+  label: string;
+  key: ColumnKey;
+}
+
 const SORTABLE_KEYS: readonly SortKey[] = ['rank', 'name', 'matches', 'avgXP', 'totalXP'] as const;
 const isSortableKey = (k: ColumnKey): k is SortKey => (SORTABLE_KEYS as readonly string[]).includes(k);
 
-const renderTwoLineHeader = (top: string, bottom: string) => (
-  <Box
-    sx={{
-      width: 'auto',
-      display: 'flex',
-      flexDirection: { xs: 'column', sm: 'row' },
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      gap: { xs: 0, sm: 0.45 },
-      lineHeight: 1.05,
-      whiteSpace: 'nowrap',
-    }}
-  >
-    <Box component="span">{top}</Box>
-    <Box component="span">{bottom}</Box>
-  </Box>
-);
-
-// Helper to get a comparable value for sorting without using any
 function getSortValue(player: WorldRankingPlayer, key: SortKey): string | number {
   switch (key) {
     case 'name':
@@ -53,7 +66,6 @@ function getSortValue(player: WorldRankingPlayer, key: SortKey): string | number
     case 'totalXP':
       return player.totalXP ?? 0;
     default:
-      // Exhaustive check (should never happen)
       return 0;
   }
 }
@@ -64,6 +76,9 @@ const getLevelTitle = (points: number): string => {
 
 export default function WorldRankingTable() {
   const { user, token } = useAuth();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+
   const [filters, setFilters] = useState<Filters>({ mode: 'total' });
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<WorldRankingResponse | null>(null);
@@ -71,9 +86,21 @@ export default function WorldRankingTable() {
   const [error, setError] = useState<string | null>(null);
   const [, setLastUpdated] = useState<Date | null>(null);
   const [sort, setSort] = useState<SortState>({ key: 'rank', direction: 'asc' });
+  const [visibleLimit, setVisibleLimit] = useState(10);
+
   const tableContainerRef = useRef<HTMLDivElement | null>(null);
   const userRowRef = useRef<HTMLTableRowElement | null>(null);
-  const [dropdownMaxHeight, setDropdownMaxHeight] = useState<number>(320);
+
+  // Dropdown states & refs
+  const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
+  const yearFilterButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+  const countryFilterButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const [positionDropdownOpen, setPositionDropdownOpen] = useState(false);
+  const positionFilterButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const years = useMemo(() => {
     const current = new Date().getFullYear();
     const responseYears = Array.isArray(data?.years)
@@ -83,7 +110,6 @@ export default function WorldRankingTable() {
       : [];
 
     const yearSet = new Set<number>([current, ...responseYears]);
-
     return Array.from(yearSet).sort((a, b) => b - a).map(String);
   }, [data?.years]);
 
@@ -94,50 +120,10 @@ export default function WorldRankingTable() {
     }
   }, [filters.year, years]);
 
-  const handleFilterDropdownOpen = (event: React.SyntheticEvent) => {
-    if (typeof window === 'undefined') return;
-    const target = event.currentTarget as HTMLElement | null;
-    if (!target) return;
-
-    const rect = target.getBoundingClientRect();
-    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-    const spaceBelow = Math.floor(viewportHeight - rect.bottom - 10);
-    setDropdownMaxHeight(Math.max(140, spaceBelow));
-  };
-
-  const filterMenuProps = useMemo(() => ({
-    anchorOrigin: { vertical: 'bottom', horizontal: 'left' } as const,
-    transformOrigin: { vertical: 'top', horizontal: 'left' } as const,
-    marginThreshold: 0,
-    PaperProps: {
-      sx: {
-        mt: 0.5,
-        maxHeight: `${dropdownMaxHeight}px`,
-        overflowY: 'auto',
-        overscrollBehavior: 'contain',
-        bgcolor: '#1a1a1a',
-        color: '#fff',
-        border: '1px solid rgba(229,106,22,0.75)',
-      },
-    },
-  }), [dropdownMaxHeight]);
-
-  const countryFilterMenuProps = useMemo(() => ({
-    ...filterMenuProps,
-    PaperProps: {
-      ...filterMenuProps.PaperProps,
-      sx: {
-        ...filterMenuProps.PaperProps.sx,
-        maxWidth: '240px',
-      },
-    },
-  }), [filterMenuProps]);
-  // Use the same full country dataset as the register form
   const countries = useMemo(() => {
     try {
       return Country.getAllCountries().map(c => c.name).sort((a, b) => a.localeCompare(b));
     } catch {
-      // Fallback to any countries present in data if library fails for some reason
       const set = new Set<string>();
       (data?.players || []).forEach(p => { if (p.country) set.add(p.country); });
       return Array.from(set).sort((a, b) => a.localeCompare(b));
@@ -145,9 +131,9 @@ export default function WorldRankingTable() {
   }, [data]);
 
   const load = async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
-      // Request a high limit to show all players; pass auth token for production
       const resPrimary = await fetchWorldRanking({
         mode: filters.mode,
         positionType: filters.positionType,
@@ -160,7 +146,6 @@ export default function WorldRankingTable() {
       setData(resPrimary);
       setLastUpdated(new Date());
     } catch {
-      // Retry with smaller limits in case the server caps or times out on large requests
       try {
         const resFallback = await fetchWorldRanking({
           mode: filters.mode,
@@ -193,19 +178,18 @@ export default function WorldRankingTable() {
           setError(message);
         }
       }
+    } finally {
+      setLoading(false);
     }
-    finally { setLoading(false); }
   };
 
-  // token is intentionally included so load() re-fires once auth resolves after mount
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filters.mode, filters.positionType, filters.year, filters.country, token]);
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.mode, filters.positionType, filters.year, filters.country, token]);
 
-  // Note: Do not auto-set country from the user's profile; keep it manual per request
-
-  // When switching mode, default sort to the shown metric (desc)
   useEffect(() => {
     setSort({ key: filters.mode === 'avg' ? 'avgXP' : 'totalXP', direction: 'desc' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.mode]);
 
   const filtered = useMemo(() => {
@@ -221,7 +205,7 @@ export default function WorldRankingTable() {
       base = base.filter(p => {
         const pt = (p.positionType || '').toLowerCase();
         const pos = (p.position || '').toLowerCase();
-        
+
         if (targetType === 'goalkeeper' || targetType === 'gk') {
           return pt === 'goalkeeper' || pt === 'gk' || pos === 'gk' || pos.includes('gk') || pos.includes('goalkeeper');
         }
@@ -238,7 +222,6 @@ export default function WorldRankingTable() {
       });
     }
 
-    // Compute tie-aware ranks based on current mode metric (competition ranking: 1,2,2,4)
     const metricKey: 'avgXP' | 'totalXP' = filters.mode === 'avg' ? 'avgXP' : 'totalXP';
     const metricVal = (p: WorldRankingPlayer) => (metricKey === 'avgXP' ? (p.avgXP ?? 0) : (p.totalXP ?? 0));
     const byMetricDesc = [...base].sort((a, b) => metricVal(b) - metricVal(a));
@@ -248,13 +231,12 @@ export default function WorldRankingTable() {
     for (const p of byMetricDesc) {
       const v = metricVal(p);
       if (lastVal === null || v !== lastVal) {
-        denseRank += 1; // dense ranking: increment only when value changes
+        denseRank += 1;
         lastVal = v;
       }
       rankMap.set(p.id, denseRank);
     }
 
-    // Client-side sorting (stable by using slice)
     const { key, direction } = sort;
     const dirMul = direction === 'asc' ? 1 : -1;
     base = [...base].sort((a, b) => {
@@ -264,7 +246,7 @@ export default function WorldRankingTable() {
       if (va > vb) return 1 * dirMul;
       return 0;
     });
-    // Attach the computed rank for later use (render)
+
     return base.map(p => ({ ...p, rank: rankMap.get(p.id) ?? p.rank } as WorldRankingPlayer));
   }, [data, search, sort, filters.mode, filters.country, filters.positionType]);
 
@@ -281,50 +263,20 @@ export default function WorldRankingTable() {
     setFilters({ mode: filters.mode });
     setSearch('');
     setSort({ key: 'rank', direction: 'asc' });
+    setVisibleLimit(10);
   };
 
-  const filterSelectSx = {
-    height: { xs: 34, md: 39 },
-    color: '#fff',
-    borderRadius: '24px',
-    fontSize: { xs: 11, sm: 13, md: 15 },
-    fontWeight: 600,
-    '& .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e56a16',
-      borderWidth: '1.5px',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e56a16',
-    },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#e56a16',
-      borderWidth: '1.5px',
-    },
-    '& .MuiSelect-select': {
-      py: { xs: 0.5, md: 0.95 },
-      pr: { xs: '20px !important', md: '34px !important' },
-      pl: { xs: '6px !important', md: 1.5 },
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
-    '& .MuiSelect-icon': {
-      color: '#fff',
-      right: { xs: 4, md: 10 },
-      fontSize: { xs: 18, md: 22 },
-    },
-  } as const;
+  useEffect(() => {
+    setVisibleLimit(10);
+  }, [search, filters, sort]);
 
-  // Scroll current user into view when data loads
   useEffect(() => {
     if (!loading && userRowRef.current && tableContainerRef.current) {
       const container = tableContainerRef.current;
       const rowTop = userRowRef.current.offsetTop;
-      // Smooth scroll so that row appears ~1/3 from top
       container.scrollTo({ top: Math.max(0, rowTop - container.clientHeight / 3), behavior: 'smooth' });
     }
   }, [loading, filtered.length]);
-
 
   const formatNum = (n: number | undefined | null, opts: { decimals?: number } = {}) => {
     if (n === undefined || n === null) return '-';
@@ -332,45 +284,14 @@ export default function WorldRankingTable() {
     return n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
   };
 
-  // Determine if any active filters/search are applied (controls chip + spacing visibility)
-  const hasActiveFilter = Boolean(filters.positionType || filters.year || filters.country || search);
+  const visiblePlayers = useMemo(() => {
+    return filtered.slice(0, visibleLimit);
+  }, [filtered, visibleLimit]);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#0e0e0e', color: '#fff', overflowX: 'hidden' }}>
-      <style>{`
-        .wr-search-icon { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2; }
-        @media (max-width: 600px) {
-          .wr-right-filters {
-            display: grid !important;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-            width: 100% !important;
-            gap: 4px !important;
-          }
-          .wr-right-filters .wr-filter-control,
-          .wr-right-filters .wr-clear-btn {
-            width: 100% !important;
-            min-width: 0 !important;
-          }
-          .wr-right-filters .wr-country-filter {
-            width: 100% !important;
-            min-width: 0 !important;
-            max-width: none !important;
-            justify-self: stretch !important;
-          }
-          .wr-right-filters .wr-clear-btn {
-            width: 100% !important;
-            justify-content: center !important;
-            box-sizing: border-box !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-          }
-        }
-      `}</style>
-
+    <Box sx={{ minHeight: '100vh', bgcolor: 'transparent', color: '#fff', overflowX: 'hidden' }}>
       {/* ────────── HEADER ────────── */}
-      <PageHeader
-        title="WORLD RANKING"
-      >
+      <PageHeader title="WORLD RANKING">
         <Box sx={{
           display: 'flex',
           flexDirection: 'column',
@@ -379,7 +300,7 @@ export default function WorldRankingTable() {
           maxWidth: '1230px',
           mx: 'auto',
           px: { xs: 1, sm: 2, md: 3 },
-          pt: { xs: 2, md: 0 },
+          pt: { xs: 1.5, md: 0 },
           width: '100%',
         }}>
           {/* Top row: Search & Filters */}
@@ -388,399 +309,1030 @@ export default function WorldRankingTable() {
             flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: { xs: 1.2, md: 1.5 },
+            gap: { xs: 1.5, md: 2 },
             width: '100%',
           }}>
-            {/* Search */}
-            <Box sx={{
-              width: { xs: '100%', md: 440 },
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              bgcolor: '#1a1a1a',
-              borderRadius: '2px',
-              px: 1.5,
-              height: { xs: 36, md: 40 },
-              border: '1.5px solid #e56a16',
-            }}>
-              <svg className="wr-search-icon" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="7" />
-                <line x1="16.5" y1="16.5" x2="22" y2="22" />
-              </svg>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search player name and hit enter..."
-                style={{
-                  flex: 1,
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: '#fff',
-                  fontSize: 15,
-                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                }}
-              />
-            </Box>
-
-            {/* Right side - Filters group (single row on mobile) */}
-            <Box
-              className="wr-right-filters"
+            {/* Search Input */}
+            <TextField
+              variant="outlined"
+              placeholder="Search player name and hit enter..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               sx={{
-                display: { xs: 'grid', md: 'flex' },
-                gridTemplateColumns: { xs: 'repeat(4, minmax(0, 1fr))', md: 'none' },
-                gap: { xs: 0.5, md: 1.2 },
-                alignItems: 'center',
-                justifyContent: { xs: 'center', md: 'flex-end' },
-                width: { xs: '100%', md: 'auto' },
+                width: { xs: '100%', md: 440 },
+                ml: 0,
+                color: 'white',
+                '& .MuiOutlinedInput-root': {
+                  height: { xs: 40, sm: 44 },
+                  color: 'white',
+                  backgroundColor: '#121316',
+                  borderRadius: '14px',
+                  '& fieldset': { borderColor: '#22242a', borderWidth: 1 },
+                  '&:hover fieldset': { borderColor: '#32353e' },
+                  '&.Mui-focused fieldset': { borderColor: 'rgba(255,255,255,0.25)', borderWidth: 1 }
+                },
+                '& .MuiInputBase-input': {
+                  color: 'white',
+                  fontSize: { xs: 13, sm: 14.5 },
+                  py: 0.5,
+                  fontFamily: 'var(--font-woodford-bourne-pro)',
+                  '&::placeholder': { color: '#717d8f', opacity: 1 }
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1.5, ml: 0.5, display: 'flex', alignItems: 'center' }}>
+                    <Search size={20} color="#717d8f" />
+                  </Box>
+                ),
+              }}
+            />
+
+            {/* Right side - Filters group */}
+            <Box
+              sx={{
+                display: 'flex',
+                gap: { xs: 0.75, sm: 1, md: 1.5 },
                 flexWrap: 'nowrap',
+                justifyContent: { xs: 'space-between', md: 'flex-end' },
+                width: { xs: '100%', md: 'auto' },
+                alignItems: 'center',
               }}
             >
-              {/* Year */}
-              <FormControl className="wr-filter-control" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
-                <Select
-                  value={filters.year || ''}
-                  onOpen={handleFilterDropdownOpen}
-                  onChange={(e) => setFilters((f) => ({ ...f, year: (e.target.value as string) || undefined }))}
-                  displayEmpty
-                  MenuProps={filterMenuProps}
-                  sx={filterSelectSx}
+              {/* Year Filter */}
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '140px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
+                <button
+                  ref={yearFilterButtonRef}
+                  type="button"
+                  onClick={() => setYearDropdownOpen((prev) => !prev)}
+                  style={{
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
+                    color: '#fff',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    minWidth: 0,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#32353e';
+                    e.currentTarget.style.backgroundColor = '#1e2026';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#22242a';
+                    e.currentTarget.style.backgroundColor = '#16181d';
+                  }}
                 >
-                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Years</MenuItem>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {filters.year ? filters.year : 'All Years'}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
+                </button>
+                <Menu
+                  anchorEl={yearFilterButtonRef.current}
+                  open={yearDropdownOpen}
+                  onClose={() => setYearDropdownOpen(false)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      minWidth: yearFilterButtonRef.current?.offsetWidth || 148,
+                      width: 'max-content',
+                      maxWidth: '90vw',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    }
+                  }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
+                >
+                  <MenuItem
+                    selected={!filters.year}
+                    onClick={() => {
+                      setFilters(f => ({ ...f, year: undefined }));
+                      setYearDropdownOpen(false);
+                    }}
+                    sx={{
+                      color: '#fff',
+                      fontSize: 13,
+                      minHeight: 34,
+                      borderRadius: '6px',
+                      mx: 0.5,
+                      '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                      '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                    }}
+                  >
+                    All Years
+                  </MenuItem>
                   {years.map((y) => (
-                    <MenuItem key={y} value={y} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{y}</MenuItem>
+                    <MenuItem
+                      key={y}
+                      selected={filters.year === y}
+                      onClick={() => {
+                        setFilters(f => ({ ...f, year: y }));
+                        setYearDropdownOpen(false);
+                      }}
+                      sx={{
+                        color: '#fff',
+                        fontSize: 13,
+                        minHeight: 34,
+                        borderRadius: '6px',
+                        mx: 0.5,
+                        '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                        '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                      }}
+                    >
+                      {y}
+                    </MenuItem>
                   ))}
-                </Select>
-              </FormControl>
+                </Menu>
+              </div>
 
-              {/* Country */}
-              <FormControl className="wr-filter-control wr-country-filter" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
-                <Select
-                  value={filters.country || ''}
-                  onOpen={handleFilterDropdownOpen}
-                  onChange={(e) => setFilters((f) => ({ ...f, country: (e.target.value as string) || undefined }))}
-                  displayEmpty
-                  MenuProps={countryFilterMenuProps}
-                  sx={filterSelectSx}
+              {/* Country Filter */}
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '146px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
+                <button
+                  ref={countryFilterButtonRef}
+                  type="button"
+                  onClick={() => setCountryDropdownOpen((prev) => !prev)}
+                  style={{
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
+                    color: '#fff',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    minWidth: 0,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#32353e';
+                    e.currentTarget.style.backgroundColor = '#1e2026';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#22242a';
+                    e.currentTarget.style.backgroundColor = '#16181d';
+                  }}
                 >
-                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Country</MenuItem>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {filters.country ? filters.country : 'All Country'}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
+                </button>
+                <Menu
+                  anchorEl={countryFilterButtonRef.current}
+                  open={countryDropdownOpen}
+                  onClose={() => setCountryDropdownOpen(false)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      minWidth: countryFilterButtonRef.current?.offsetWidth || 160,
+                      maxWidth: '90vw',
+                      maxHeight: 320,
+                      overflowY: 'auto',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    }
+                  }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
+                >
+                  <MenuItem
+                    selected={!filters.country}
+                    onClick={() => {
+                      setFilters(f => ({ ...f, country: undefined }));
+                      setCountryDropdownOpen(false);
+                    }}
+                    sx={{
+                      color: '#fff',
+                      fontSize: 13,
+                      minHeight: 34,
+                      borderRadius: '6px',
+                      mx: 0.5,
+                      '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                      '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                    }}
+                  >
+                    All Country
+                  </MenuItem>
                   {countries.map((c) => (
-                    <MenuItem key={c} value={c} sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>{c}</MenuItem>
+                    <MenuItem
+                      key={c}
+                      selected={filters.country === c}
+                      onClick={() => {
+                        setFilters(f => ({ ...f, country: c }));
+                        setCountryDropdownOpen(false);
+                      }}
+                      sx={{
+                        color: '#fff',
+                        fontSize: 13,
+                        minHeight: 34,
+                        borderRadius: '6px',
+                        mx: 0.5,
+                        '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                        '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                      }}
+                    >
+                      {c}
+                    </MenuItem>
                   ))}
-                </Select>
-              </FormControl>
+                </Menu>
+              </div>
 
-              {/* Position */}
-              <FormControl className="wr-filter-control" size="small" sx={{ width: { xs: '100%', md: 150 }, minWidth: 0 }}>
-                <Select
-                  value={filters.positionType || ''}
-                  onOpen={handleFilterDropdownOpen}
-                  onChange={(e) => setFilters((f) => ({ ...f, positionType: (e.target.value as string) || undefined }))}
-                  displayEmpty
-                  MenuProps={filterMenuProps}
-                  sx={filterSelectSx}
+              {/* Position Filter */}
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '140px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
+                <button
+                  ref={positionFilterButtonRef}
+                  type="button"
+                  onClick={() => setPositionDropdownOpen((prev) => !prev)}
+                  style={{
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
+                    color: '#fff',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    minWidth: 0,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#32353e';
+                    e.currentTarget.style.backgroundColor = '#1e2026';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#22242a';
+                    e.currentTarget.style.backgroundColor = '#16181d';
+                  }}
                 >
-                  <MenuItem value="" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>All Position</MenuItem>
-                  <MenuItem value="Defender" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Defender</MenuItem>
-                  <MenuItem value="Midfielder" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Midfielder</MenuItem>
-                  <MenuItem value="Forward" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Forward</MenuItem>
-                  <MenuItem value="Goalkeeper" sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>Goalkeeper</MenuItem>
-                </Select>
-              </FormControl>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {filters.positionType ? filters.positionType : 'All Position'}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
+                </button>
+                <Menu
+                  anchorEl={positionFilterButtonRef.current}
+                  open={positionDropdownOpen}
+                  onClose={() => setPositionDropdownOpen(false)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      minWidth: positionFilterButtonRef.current?.offsetWidth || 148,
+                      width: 'max-content',
+                      maxWidth: '90vw',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    }
+                  }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
+                >
+                  {[
+                    { label: 'All Position', value: undefined },
+                    { label: 'Defender', value: 'Defender' },
+                    { label: 'Midfielder', value: 'Midfielder' },
+                    { label: 'Forward', value: 'Forward' },
+                    { label: 'Goalkeeper', value: 'Goalkeeper' },
+                  ].map((pos) => (
+                    <MenuItem
+                      key={pos.label}
+                      selected={filters.positionType === pos.value}
+                      onClick={() => {
+                        setFilters(f => ({ ...f, positionType: pos.value }));
+                        setPositionDropdownOpen(false);
+                      }}
+                      sx={{
+                        color: '#fff',
+                        fontSize: 13,
+                        minHeight: 34,
+                        borderRadius: '6px',
+                        mx: 0.5,
+                        '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                        '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                      }}
+                    >
+                      {pos.label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </div>
 
-              {/* Clear */}
-              <Box
-                className="wr-clear-btn"
+              {/* Clear Button */}
+              <Button
+                variant="outlined"
                 onClick={clearFilters}
                 sx={{
-                  height: { xs: 34, md: 39 },
-                  px: { xs: 0.5, sm: 1.5, md: 2.2 },
-                  border: '1.5px solid rgba(255,255,255,0.5)',
-                  borderRadius: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  fontSize: { xs: 11, sm: 13, md: 15 },
-                  fontWeight: 600,
-                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   color: '#fff',
-                  userSelect: 'none',
-                  '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.05)' },
-                  transition: 'all 0.2s',
+                  height: isDesktop ? '42px' : '38px',
+                  borderRadius: '14px',
+                  borderColor: '#22242a',
+                  borderWidth: '1px',
+                  backgroundColor: '#16181d',
+                  px: { xs: 1.25, sm: 2, md: 2.5 },
+                  py: 0.5,
+                  minWidth: 'auto',
+                  flex: isDesktop ? 'none' : '0 0 auto',
+                  flexShrink: 0,
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                  fontSize: { xs: '11.5px', sm: '12.5px', md: '14.5px' },
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   whiteSpace: 'nowrap',
-                  boxSizing: 'border-box',
+                  '&:hover': {
+                    borderColor: '#32353e',
+                    borderWidth: '1px',
+                    backgroundColor: '#1e2026',
+                  },
                 }}
               >
                 Clear
-              </Box>
+              </Button>
             </Box>
           </Box>
 
-          {/* Mode toggle beneath the 4 filters */}
+          {/* Mode Toggle: TOTAL XP | AVG / MATCH */}
           <Box sx={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%',
-            mt: { xs: 0.5, md: 0.5 },
+            mt: { xs: 1.5, md: 2 },
           }}>
-            <Box sx={{ display: 'flex', borderRadius: '2px', overflow: 'hidden', border: '1.5px solid #e56a16' }}>
-              {(['total', 'avg'] as const).map(mode => (
-                <Box
-                  key={mode}
-                  onClick={() => setFilters(f => ({ ...f, mode }))}
+            <Box sx={{
+              bgcolor: '#121316',
+              border: '1px solid #22242a',
+              borderRadius: '16px',
+              p: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              width: { xs: '95%', sm: 400, md: 500 },
+              boxSizing: 'border-box',
+            }}>
+              <ButtonBase
+                onClick={() => setFilters(f => ({ ...f, mode: 'total' }))}
+                sx={{
+                  flex: 1,
+                  py: { xs: 0.9, sm: 1.1 },
+                  px: { xs: 0.6, sm: 1.5 },
+                  borderRadius: '12px',
+                  border: filters.mode === 'total' ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                  bgcolor: filters.mode === 'total' ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                  color: filters.mode === 'total' ? '#ffffff' : '#717d8f',
+                  fontWeight: filters.mode === 'total' ? 700 : 600,
+                  fontSize: { xs: 12, sm: 13, md: 14 },
+                  letterSpacing: '0.8px',
+                  textTransform: 'uppercase',
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  transition: 'all 0.18s ease',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: filters.mode === 'total' ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                    color: '#ffffff',
+                  },
+                }}
+              >
+                <Typography
+                  noWrap
                   sx={{
-                    px: { xs: 2.2, md: 2.5 },
-                    py: { xs: 0.8, md: 1 },
-                    cursor: 'pointer',
-                    fontSize: { xs: 13, md: 15 },
-                    fontWeight: 600,
-                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                    bgcolor: filters.mode === mode ? '#e56a16' : 'transparent',
-                    color: '#fff',
-                    userSelect: 'none',
-                    transition: 'background 0.2s',
+                    fontSize: 'inherit',
+                    fontWeight: 'inherit',
+                    color: 'inherit',
+                    textAlign: 'center',
+                    fontFamily: 'inherit',
+                    letterSpacing: 'inherit',
+                    textTransform: 'uppercase',
                   }}
                 >
-                  {mode === 'total' ? 'Total XP' : 'Avg/Match'}
-                </Box>
-              ))}
+                  TOTAL XP
+                </Typography>
+              </ButtonBase>
+              <ButtonBase
+                onClick={() => setFilters(f => ({ ...f, mode: 'avg' }))}
+                sx={{
+                  flex: 1,
+                  py: { xs: 0.9, sm: 1.1 },
+                  px: { xs: 0.6, sm: 1.5 },
+                  borderRadius: '12px',
+                  border: filters.mode === 'avg' ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                  bgcolor: filters.mode === 'avg' ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                  color: filters.mode === 'avg' ? '#ffffff' : '#717d8f',
+                  fontWeight: filters.mode === 'avg' ? 700 : 600,
+                  fontSize: { xs: 12, sm: 13, md: 14 },
+                  letterSpacing: '0.8px',
+                  textTransform: 'uppercase',
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  transition: 'all 0.18s ease',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: filters.mode === 'avg' ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                    color: '#ffffff',
+                  },
+                }}
+              >
+                <Typography
+                  noWrap
+                  sx={{
+                    fontSize: 'inherit',
+                    fontWeight: 'inherit',
+                    color: 'inherit',
+                    textAlign: 'center',
+                    fontFamily: 'inherit',
+                    letterSpacing: 'inherit',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  AVG / MATCH
+                </Typography>
+              </ButtonBase>
             </Box>
           </Box>
         </Box>
       </PageHeader>
 
-      {/* ────────── INFO ROW ────────── */}
-      <Box sx={{ textAlign: 'center', py: 1, color: '#aaa', fontSize: 15 }}>
-        Mode&nbsp;&nbsp;&nbsp;&nbsp;
-        <Box component="span" sx={{ color: '#fff', fontWeight: 600 }}>
-          {filters.mode === 'total' ? 'Total XP' : 'Avg/Match'}
+      {/* ────────── STATS CARD ────────── */}
+      <Box sx={{ maxWidth: 1220, mx: 'auto', px: { xs: 2, sm: 3, md: 4 } }}>
+        <Box sx={{
+          bgcolor: '#121316',
+          border: '1px solid #22242a',
+          borderRadius: '16px',
+          p: { xs: 1.5, sm: 2 },
+          width: { xs: '100%', sm: 440, md: 520 },
+          mx: 'auto',
+          mt: 2.5,
+          mb: 2.5,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          textAlign: 'center',
+          boxSizing: 'border-box',
+        }}>
+          <Box>
+            <Typography sx={{ fontSize: 10, color: '#717d8f', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', mb: 0.5 }}>
+              MODE
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 700, color: '#ffffff' }}>
+              {filters.mode === 'total' ? 'Total XP' : 'Avg / Match'}
+            </Typography>
+          </Box>
+          <Box sx={{ borderLeft: '1px solid #22242a', borderRight: '1px solid #22242a' }}>
+            <Typography sx={{ fontSize: 10, color: '#717d8f', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', mb: 0.5 }}>
+              PLAYERS SHOWN
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 700, color: '#ffffff' }}>
+              {filtered.length}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography sx={{ fontSize: 10, color: '#717d8f', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', mb: 0.5 }}>
+              YOUR RANK
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 700, color: '#22c55e' }}>
+              {data?.playerRank ? `#${data.playerRank}` : '-'}
+            </Typography>
+          </Box>
         </Box>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Players Shown&nbsp;&nbsp;&nbsp;&nbsp;
-        <Box component="span" sx={{ color: '#fff', fontWeight: 600 }}>
-          {filtered.length}
-        </Box>
-        {data?.playerRank && (
-          <>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your Rank&nbsp;&nbsp;&nbsp;&nbsp;
-            <Box component="span" sx={{ color: '#fff', fontWeight: 600 }}>#{data.playerRank}</Box>
-          </>
-        )}
       </Box>
 
       {/* ────────── TABLE ────────── */}
-      <Box sx={{ px: { xs: 4, sm: 3, md: 4 }, mt: { xs: 2, md: 3 }, pb: 6, maxWidth: 1220, mx: 'auto' }}>
-        <Box sx={{
-          bgcolor: '#242424',
-          borderRadius: 2,
+      <Box sx={{ px: { xs: 1.5, sm: 2.5, md: 4 }, pb: 6, maxWidth: 1220, mx: 'auto' }}>
+        <Card sx={{
+          background: '#121316',
+          border: '1px solid #22242a',
+          borderRadius: '16px',
+          boxShadow: 'none',
           overflow: 'hidden',
-          border: '1px solid #2a2a2a',
-          position: 'relative',
-          pt: 0,
-          pb: 1.5,
-          px: 0,
         }}>
-
           <TableContainer
-            sx={{
-              maxHeight: 620,
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': { display: 'none' },
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
             ref={tableContainerRef}
+            onScroll={(e) => {
+              e.currentTarget.classList.toggle('is-scrolled', e.currentTarget.scrollLeft > 2);
+            }}
+            sx={{
+              maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+              overflowX: 'auto',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'thin',
+              '&::-webkit-scrollbar': { height: '8px', width: '8px' },
+              '&::-webkit-scrollbar-track': { background: '#121316' },
+              '&::-webkit-scrollbar-thumb': { background: '#22242a', borderRadius: '9999px' },
+            }}
           >
-            <Table
-              stickyHeader
-              size="small"
-              sx={{
-                minWidth: { xs: 550, sm: 860 },
-                '& .MuiTableCell-root': { border: 'none' },
-                '& .MuiTableCell-head': {
-                  bgcolor: '#dddddd !important',
-                  backgroundColor: '#dddddd !important',
-                  color: '#000000 !important'
-                }
-              }}
-            >
-              <TableHead className="league-header-row" sx={{ bgcolor: '#dddddd !important' }}>
-                <TableRow className="league-header-row" sx={{ bgcolor: '#dddddd !important' }}>
-                  {(() => {
-                    const showAvg = filters.mode === 'avg';
-                    const cols: Column[] = [
-                      { label: 'RANK', key: 'rank' },
-                      { label: 'PLAYERS', key: 'name' },
-                      { label: 'POSITION', key: 'position' },
-                      { label: 'COUNTRY', key: 'position' },
-                      { label: 'XP STATUS', key: 'position' },
-                      ...(showAvg ? [{ label: 'AVG XP', key: 'avgXP' } as Column] : [{ label: 'TOTAL XP', key: 'totalXP' } as Column]),
-                    ];
-                    const colWidths = [
-                      { xs: 60, sm: 90 },
-                      { xs: 130, sm: 210 },
-                      { xs: 80, sm: 120 },
-                      { xs: 80, sm: 120 },
-                      { xs: 90, sm: 120 },
-                      { xs: 80, sm: 120 },
-                    ];
-                    return cols.map((col, i) => {
-                      const isActiveSort = isSortableKey(col.key) && sort.key === col.key;
-                      const isPrimaryInfoCol = i <= 3;
-                      const headerLabel = col.label === 'XP STATUS'
-                        ? renderTwoLineHeader('XP', 'STATUS')
-                        : col.label === 'TOTAL XP'
-                          ? renderTwoLineHeader('TOTAL', 'XP')
-                          : col.label;
+            <Table stickyHeader size="small" sx={{ minWidth: 680, borderCollapse: 'separate' }}>
+              <TableHead>
+                <TableRow className="league-header-row font-bold" sx={{ bgcolor: '#121316 !important' }}>
+                  {/* Rank Header */}
+                  <TableCell
+                    onClick={() => toggleSort('rank')}
+                    className="league-table-heading"
+                    sx={{
+                      cursor: 'pointer',
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      py: 1.8,
+                      px: 0,
+                      textAlign: 'center',
+                      width: { xs: 32, sm: 40 },
+                      minWidth: { xs: 32, sm: 40 },
+                      maxWidth: { xs: 32, sm: 40 },
+                      position: 'sticky',
+                      top: 0,
+                      left: 0,
+                      zIndex: 40,
+                      borderBottom: '1px solid #22242a',
+                    }}
+                  >
+                    #
+                  </TableCell>
 
-                      return (
-                        <TableCell
-                          key={col.label}
-                          className={`league-table-heading ${isPrimaryInfoCol ? 'league-table-heading-left' : ''}`}
-                          onClick={() => isSortableKey(col.key) && toggleSort(col.key)}
-                          sx={{
-                            cursor: isSortableKey(col.key) ? 'pointer' : 'default',
-                            userSelect: 'none',
-                            bgcolor: '#dddddd !important',
-                            color: '#000000 !important',
-                            py: { xs: 2.2, md: 2.8 },
-                            height: { xs: 40, md: 44 },
-                            minWidth: colWidths[i],
-                            width: colWidths[i],
-                            maxWidth: colWidths[i],
-                            textAlign: isPrimaryInfoCol ? 'left !important' : 'center !important',
-                            pl: i === 0 ? 3 : 1.5,
-                            ...(i === 1 ? {
-                              position: 'sticky',
-                              left: 0,
-                              zIndex: 5,
-                              backgroundColor: '#dddddd !important',
-                              boxShadow: '8px 0 12px -12px rgba(0,0,0,0.45)',
-                            } : {}),
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: '100%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: isPrimaryInfoCol ? 'flex-start' : 'center',
-                            }}
-                          >
-                            <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 0.6 }}>
-                              {headerLabel}
-                              {isActiveSort && (
-                                <Box component="span" sx={{ fontSize: 11, lineHeight: 1 }}>
-                                  {sort.direction === 'asc' ? '\u25B2' : '\u25BC'}
-                                </Box>
-                              )}
-                            </Box>
-                          </Box>
-                        </TableCell>
-                      );
-                    });
-                  })()}
+                  {/* Player Header */}
+                  <TableCell
+                    onClick={() => toggleSort('name')}
+                    className="league-table-heading league-table-heading-left"
+                    sx={{
+                      cursor: 'pointer',
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      py: 1.8,
+                      pl: { xs: 2, sm: 3 },
+                      pr: { xs: 1, sm: 1.5 },
+                      textAlign: 'left',
+                      width: { xs: 170, sm: 230, md: 260 },
+                      minWidth: { xs: 170, sm: 230, md: 260 },
+                      maxWidth: { xs: 170, sm: 230, md: 260 },
+                      position: 'sticky',
+                      top: 0,
+                      left: { xs: 32, sm: 40 },
+                      zIndex: 35,
+                      borderBottom: '1px solid #22242a',
+                      boxShadow: 'none',
+                      transition: 'box-shadow 0.2s',
+                      '.is-scrolled &': {
+                        boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
+                      },
+                    }}
+                  >
+                    PLAYER
+                  </TableCell>
+
+                  {/* Position Header */}
+                  <TableCell sx={{
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: '#121316 !important',
+                    color: '#717d8f !important',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    py: 1.8,
+                    textAlign: 'center',
+                    minWidth: { xs: 75, sm: 100 },
+                    borderBottom: '1px solid #22242a',
+                    zIndex: 20,
+                  }}>
+                    POSITION
+                  </TableCell>
+
+                  {/* Country Header */}
+                  <TableCell sx={{
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: '#121316 !important',
+                    color: '#717d8f !important',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    py: 1.8,
+                    textAlign: 'center',
+                    minWidth: { xs: 90, sm: 120 },
+                    borderBottom: '1px solid #22242a',
+                    zIndex: 20,
+                  }}>
+                    COUNTRY
+                  </TableCell>
+
+                  {/* XP Status Header */}
+                  <TableCell sx={{
+                    position: 'sticky',
+                    top: 0,
+                    bgcolor: '#121316 !important',
+                    color: '#717d8f !important',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    py: 1.8,
+                    textAlign: 'center',
+                    minWidth: { xs: 85, sm: 110 },
+                    borderBottom: '1px solid #22242a',
+                    zIndex: 20,
+                  }}>
+                    XP STATUS
+                  </TableCell>
+
+                  {/* Total / Avg XP Header */}
+                  <TableCell
+                    onClick={() => toggleSort(filters.mode === 'avg' ? 'avgXP' : 'totalXP')}
+                    sx={{
+                      cursor: 'pointer',
+                      position: 'sticky',
+                      top: 0,
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: 12,
+                      py: 1.8,
+                      pr: { xs: 2, sm: 3 },
+                      textAlign: 'right',
+                      minWidth: { xs: 90, sm: 120 },
+                      borderBottom: '1px solid #22242a',
+                      zIndex: 20,
+                    }}
+                  >
+                    {filters.mode === 'avg' ? 'AVG / MATCH' : 'TOTAL XP'}
+                  </TableCell>
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {loading ? (
                   <WorldRankingLoadingSkeleton />
                 ) : (
-                  filtered.map((p, idx) => {
-                  const isMe = user?.id === p.id;
-                  const rowBg = isMe ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
-                  const rowHoverBg = isMe ? '#165b4c' : (idx % 2 === 0 ? '#444444' : '#383838');
-                  return (
-                    <TableRow
-                      key={p.id}
-                      ref={isMe ? userRowRef : undefined}
-                      sx={{
-                        bgcolor: rowBg,
-                        boxShadow: isMe ? 'inset 4px 0 0 #00c48c' : 'none',
-                        '&:hover': { bgcolor: rowHoverBg },
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <TableCell sx={{ color: '#fff', fontWeight: 700, fontSize: 14, pl: 3, py: 1.8, minWidth: { xs: 60, sm: 90 }, width: { xs: 60, sm: 90 }, maxWidth: { xs: 60, sm: 90 } }}>
-                        {p.rank}
-                      </TableCell>
-                      <TableCell
+                  visiblePlayers.map((p) => {
+                    const isMe = user?.id === p.id;
+                    const isRank1 = p.rank === 1;
+                    const isHighlighted = isRank1 || isMe;
+
+                    return (
+                      <TableRow
+                        key={p.id}
+                        ref={isMe ? userRowRef : undefined}
+                        className={`league-table-row-text league-row ${isHighlighted ? 'league-row-current-user' : ''}`}
                         sx={{
-                          fontWeight: 600,
-                          color: '#fff',
-                          fontSize: 14,
-                          py: 1.8,
-                          minWidth: { xs: 130, sm: 210 },
-                          width: { xs: 130, sm: 210 },
-                          maxWidth: { xs: 130, sm: 210 },
-                          position: 'sticky',
-                          left: 0,
-                          zIndex: 3,
-                          backgroundColor: rowBg,
-                          boxShadow: '8px 0 12px -12px rgba(0,0,0,0.62)',
-                          transition: 'background-color 0.15s',
-                          '.MuiTableRow-root:hover &': {
-                            backgroundColor: rowHoverBg,
+                          background: isHighlighted
+                            ? 'linear-gradient(90deg, #183328 0%, #152d24 35%, #12211b 70%, #0f1616 100%) !important'
+                            : '#121316 !important',
+                          boxShadow: isHighlighted ? 'inset 3px 0 0 #54ce91 !important' : 'none',
+                          borderBottom: '1px solid #1c1d22 !important',
+                          transition: 'background-color 0.2s',
+                          '&:hover': {
+                            background: isHighlighted
+                              ? 'linear-gradient(90deg, #1c3c2f 0%, #183329 35%, #14251e 70%, #101817 100%) !important'
+                              : '#18191e !important',
                           },
                         }}
                       >
-                        <Link href={`/player/${p.id}`} style={{ textDecoration: 'none', color: '#fff' }}>
-                          {p.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>{getPositionShortForm(p.position || p.positionType || '')}</TableCell>
-                      <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>{p.country || '-'}</TableCell>
-                      <TableCell sx={{ color: '#ccc', fontSize: 13, py: 1.8, textAlign: 'center', minWidth: { xs: 90, sm: 120 }, width: { xs: 90, sm: 120 }, maxWidth: { xs: 90, sm: 120 } }}>{getLevelTitle(p.totalXP ?? 0)}</TableCell>
-                      <TableCell sx={{ color: '#fff', fontWeight: 700, fontSize: 14, py: 1.8, textAlign: 'center', minWidth: { xs: 80, sm: 120 }, width: { xs: 80, sm: 120 }, maxWidth: { xs: 80, sm: 120 } }}>
-                        {filters.mode === 'avg'
-                          ? formatNum(p.avgXP, { decimals: 2 })
-                          : formatNum(p.totalXP)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                }))}
+                        {/* Rank */}
+                        <TableCell
+                          sx={{
+                            color: isRank1 ? '#54ce91' : '#8a94a6',
+                            fontWeight: 700,
+                            fontSize: { xs: 12, sm: 13.5 },
+                            textAlign: 'center',
+                            py: 1.5,
+                            px: 0,
+                            width: { xs: 32, sm: 40 },
+                            minWidth: { xs: 32, sm: 40 },
+                            maxWidth: { xs: 32, sm: 40 },
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 10,
+                            backgroundColor: isHighlighted ? '#183328 !important' : '#121316 !important',
+                            transition: 'background-color 0.2s',
+                            borderBottom: '1px solid #1c1d22',
+                            boxShadow: isHighlighted ? 'inset 3px 0 0 #54ce91 !important' : 'none',
+                            '.MuiTableRow-root:hover &': {
+                              backgroundColor: isHighlighted ? '#1c3c2f !important' : '#18191e !important',
+                            },
+                          }}
+                        >
+                          {p.rank}
+                        </TableCell>
+
+                        {/* Player */}
+                        <TableCell
+                          sx={{
+                            py: 1.5,
+                            pl: { xs: 2, sm: 3 },
+                            pr: { xs: 1, sm: 1.5 },
+                            width: { xs: 170, sm: 230, md: 260 },
+                            minWidth: { xs: 170, sm: 230, md: 260 },
+                            maxWidth: { xs: 170, sm: 230, md: 260 },
+                            position: 'sticky',
+                            left: { xs: 32, sm: 40 },
+                            zIndex: 9,
+                            backgroundColor: isHighlighted ? '#183328 !important' : '#121316 !important',
+                            boxShadow: 'none',
+                            transition: 'background-color 0.2s, box-shadow 0.2s',
+                            borderBottom: '1px solid #1c1d22',
+                            overflow: 'hidden',
+                            '.MuiTableRow-root:hover &': {
+                              backgroundColor: isHighlighted ? '#1c3c2f !important' : '#18191e !important',
+                            },
+                            '.is-scrolled &': {
+                              boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.75 }, overflow: 'hidden' }}>
+                            <Avatar
+                              src={p.profilePicture}
+                              sx={{
+                                width: { xs: 34, sm: 38 },
+                                height: { xs: 34, sm: 38 },
+                                bgcolor: p.profilePicture ? 'transparent' : getAvatarBackgroundColor(p.name),
+                                color: '#fff',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                flexShrink: 0,
+                                border: isRank1 ? '1.5px solid #22c55e' : '1px solid #22242a',
+                              }}
+                            >
+                              {!p.profilePicture && getAvatarInitials({ name: p.name })}
+                            </Avatar>
+                            <Box sx={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.6, overflow: 'hidden' }}>
+                              <Link
+                                href={`/player/${p.id}`}
+                                style={{
+                                  textDecoration: 'none',
+                                  color: '#ffffff',
+                                  fontWeight: 700,
+                                  fontSize: 14,
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  fontFamily: 'var(--font-woodford-bourne-pro)',
+                                }}
+                              >
+                                {p.name}
+                              </Link>
+                              {isRegisteredPlayerRecord(p) && (
+                                <Shield size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
+                              )}
+                            </Box>
+                          </Box>
+                        </TableCell>
+
+                        {/* Position */}
+                        <TableCell sx={{
+                          color: '#9ca3af',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          py: 1.5,
+                          textAlign: 'center',
+                          minWidth: { xs: 75, sm: 100 },
+                          borderBottom: '1px solid #1c1d22',
+                          backgroundColor: 'transparent !important',
+                        }}>
+                          {getPositionShortForm(p.position || p.positionType || '') || '-'}
+                        </TableCell>
+
+                        {/* Country */}
+                        <TableCell sx={{
+                          color: p.country ? '#d1d5db' : '#6b7280',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          py: 1.5,
+                          textAlign: 'center',
+                          minWidth: { xs: 90, sm: 120 },
+                          borderBottom: '1px solid #1c1d22',
+                          backgroundColor: 'transparent !important',
+                        }}>
+                          {p.country || '-'}
+                        </TableCell>
+
+                        {/* XP Status Pill */}
+                        <TableCell sx={{
+                          py: 1.5,
+                          textAlign: 'center',
+                          minWidth: { xs: 85, sm: 110 },
+                          borderBottom: '1px solid #1c1d22',
+                          backgroundColor: 'transparent !important',
+                        }}>
+                          {(() => {
+                            const statusTitle = getLevelTitle(p.totalXP ?? 0);
+                            const t = statusTitle.toLowerCase();
+                            let bg = 'rgba(255, 255, 255, 0.08)';
+                            let color = '#fff';
+                            let border = '1px solid rgba(255, 255, 255, 0.12)';
+                            if (t === 'pro') {
+                              bg = 'rgba(110, 86, 207, 0.22)';
+                              color = '#c4b5fd';
+                              border = '1px solid rgba(139, 92, 246, 0.3)';
+                            } else if (t === 'baller') {
+                              bg = 'rgba(217, 119, 6, 0.2)';
+                              color = '#fcd34d';
+                              border = '1px solid rgba(245, 158, 11, 0.3)';
+                            } else if (t === 'rookie') {
+                              bg = 'rgba(148, 163, 184, 0.15)';
+                              color = '#cbd5e1';
+                              border = '1px solid rgba(148, 163, 184, 0.25)';
+                            } else if (t === 'rising star') {
+                              bg = 'rgba(56, 189, 248, 0.2)';
+                              color = '#7dd3fc';
+                              border = '1px solid rgba(56, 189, 248, 0.3)';
+                            } else if (t === 'elite') {
+                              bg = 'rgba(59, 130, 246, 0.22)';
+                              color = '#93c5fd';
+                              border = '1px solid rgba(59, 130, 246, 0.3)';
+                            } else if (t.includes('champion')) {
+                              bg = 'rgba(239, 68, 68, 0.22)';
+                              color = '#fca5a5';
+                              border = '1px solid rgba(239, 68, 68, 0.3)';
+                            } else if (t === 'goat') {
+                              bg = 'rgba(234, 179, 8, 0.22)';
+                              color = '#fde047';
+                              border = '1px solid rgba(234, 179, 8, 0.3)';
+                            }
+                            return (
+                              <Box
+                                component="span"
+                                sx={{
+                                  display: 'inline-block',
+                                  px: 1.5,
+                                  py: 0.3,
+                                  borderRadius: '9999px',
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  bgcolor: bg,
+                                  color: color,
+                                  border: border,
+                                  lineHeight: 1.2,
+                                  textTransform: 'capitalize',
+                                }}
+                              >
+                                {statusTitle}
+                              </Box>
+                            );
+                          })()}
+                        </TableCell>
+
+                        {/* Total XP / Avg XP */}
+                        <TableCell sx={{
+                          color: '#22c55e',
+                          fontWeight: 800,
+                          fontSize: 15,
+                          fontFamily: 'var(--font-woodford-bourne-pro)',
+                          py: 1.5,
+                          pr: { xs: 2, sm: 3 },
+                          textAlign: 'right',
+                          minWidth: { xs: 90, sm: 120 },
+                          borderBottom: '1px solid #1c1d22',
+                          backgroundColor: 'transparent !important',
+                        }}>
+                          {filters.mode === 'avg'
+                            ? formatNum(p.avgXP, { decimals: 2 })
+                            : formatNum(p.totalXP)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+
                 {!loading && error && filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ bgcolor: 'transparent' }}>
+                    <TableCell colSpan={6} sx={{ border: 'none' }}>
                       <Typography sx={{ textAlign: 'center', py: 5, fontSize: 14, color: '#e56a16' }}>
                         {error}
                       </Typography>
                     </TableCell>
                   </TableRow>
                 )}
+
                 {!loading && !error && filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ bgcolor: 'transparent' }}>
-                      <Typography sx={{ textAlign: 'center', py: 5, fontSize: 14, color: '#888' }}>
+                    <TableCell colSpan={6} sx={{ border: 'none' }}>
+                      <Typography sx={{ textAlign: 'center', py: 5, fontSize: 14, color: '#717d8f' }}>
                         No players found.
                       </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {/* Show More Row */}
+                {!loading && visibleLimit < filtered.length && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      sx={{
+                        p: 0,
+                        borderBottom: 'none',
+                        bgcolor: '#121316 !important',
+                      }}
+                    >
+                      <Box
+                        onClick={() => setVisibleLimit((prev) => prev + 10)}
+                        sx={{
+                          position: 'sticky',
+                          left: 0,
+                          width: { xs: 'calc(100vw - 32px)', sm: '100%' },
+                          maxWidth: 1220,
+                          py: 2.5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 1,
+                          color: '#e56a16',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                          letterSpacing: '0.8px',
+                          textTransform: 'uppercase',
+                          fontFamily: 'var(--font-woodford-bourne-pro)',
+                          borderTop: '1px solid #1c1d22',
+                          transition: 'all 0.15s ease',
+                          '&:hover': { color: '#f97316' },
+                        }}
+                      >
+                        <span>SHOW MORE</span>
+                        <ChevronDown size={14} color="currentColor" />
+                      </Box>
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
           </TableContainer>
-        </Box>
+        </Card>
+
+        {/* Footer Slogan */}
+        <Typography sx={{
+          textAlign: 'center',
+          color: '#717d8f',
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '2px',
+          my: 4,
+          textTransform: 'uppercase',
+          fontFamily: 'var(--font-woodford-bourne-pro)',
+        }}>
+          PLAY. <span style={{ color: '#22c55e' }}>WIN.</span> BUILD YOUR LEGACY.
+        </Typography>
       </Box>
     </Box>
   );
 }
-
-// Keep for backward compat (unused after redesign but harmless)
-function SummaryPill({ label, value, highlight, compact }: { label: string; value: string; highlight?: boolean; compact?: boolean }) {
-  return (
-    <Box sx={{
-      px: compact ? 1.0 : 1.4,
-      py: compact ? .6 : .75,
-      borderRadius: 2,
-      background: highlight ? '#e56a16' : 'rgba(255,255,255,0.07)',
-      display: 'flex', flexDirection: 'column', minWidth: compact ? 84 : 110,
-      border: highlight ? '1px solid rgba(255,255,255,0.35)' : '1px solid rgba(255,255,255,0.09)',
-    }}>
-      <Typography sx={{ fontSize: compact ? 9 : 10, letterSpacing: .8, textTransform: 'uppercase', color: highlight ? '#ffe8da' : '#b5b5b5', fontWeight: 600 }}>{label}</Typography>
-      <Typography sx={{ fontSize: compact ? 12 : 13, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap' }}>{value}</Typography>
-    </Box>
-  );
-}
-

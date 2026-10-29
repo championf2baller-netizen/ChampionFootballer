@@ -30,13 +30,13 @@ export const PlayerViewToggle: React.FC<PlayerViewToggleProps> = ({
                 mx: 'auto',
                 mb: 2.2,
                 mt: { xs: 0.5, md: 0 },
-                bgcolor: '#2f333a',
-                borderRadius: '8px',
+                bgcolor: '#121316',
+                border: '1px solid #22242a',
+                borderRadius: '16px',
                 p: '4px',
                 display: { xs: 'grid', md: 'none' },
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '4px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
                 boxSizing: 'border-box',
                 ...sx,
             }}
@@ -50,15 +50,19 @@ export const PlayerViewToggle: React.FC<PlayerViewToggleProps> = ({
                         sx={{
                             py: { xs: 0.9, sm: 1.1 },
                             px: { xs: 0.6, sm: 1.5 },
-                            borderRadius: '6px',
-                            bgcolor: isActive ? '#00a77f' : 'transparent',
-                            color: isActive ? '#ffffff' : '#c3c6cb',
-                            fontWeight: isActive ? 700 : 500,
-                            fontSize: { xs: 12, sm: 13, md: 13.5 },
-                            letterSpacing: '0.2px',
+                            borderRadius: '12px',
+                            border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                            bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                            color: isActive ? '#ffffff' : '#717d8f',
+                            fontWeight: isActive ? 700 : 600,
+                            fontSize: { xs: 12, sm: 13, md: 14 },
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase',
+                            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                             transition: 'all 0.18s ease',
+                            cursor: 'pointer',
                             '&:hover': {
-                                bgcolor: isActive ? '#00b58a' : 'rgba(255, 255, 255, 0.08)',
+                                bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
                                 color: '#ffffff',
                             },
                         }}
@@ -71,6 +75,8 @@ export const PlayerViewToggle: React.FC<PlayerViewToggleProps> = ({
                                 color: 'inherit',
                                 textAlign: 'center',
                                 fontFamily: 'inherit',
+                                letterSpacing: 'inherit',
+                                textTransform: 'uppercase',
                             }}
                         >
                             {v.label}

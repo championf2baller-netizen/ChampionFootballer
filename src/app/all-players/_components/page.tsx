@@ -24,7 +24,7 @@ import {
   CircularProgress,
   Divider,
 } from '@mui/material';
-import { Trophy, ChevronDown } from 'lucide-react';
+import { Trophy, ChevronDown, Shield } from 'lucide-react';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
@@ -209,6 +209,7 @@ const AllPlayersPage = () => {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [leagueMenuAnchor, setLeagueMenuAnchor] = useState<null | HTMLElement>(null);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState<number>(10);
   const yearFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const seasonFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
@@ -1067,6 +1068,10 @@ const AllPlayersPage = () => {
     setAllPositionsMenuAnchor(null);
   };
 
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [searchTerm, selectedLeague, selectedSeason, selectedYear, selectedPosition]);
+
   console.log('Sorted Players:', sortedPlayers);
 
   const noLeagues = !leaguesLoading && leagues.length === 0;
@@ -1161,7 +1166,7 @@ const AllPlayersPage = () => {
             {/* Search Input */}
             <TextField
               variant="outlined"
-              placeholder={getCms('page_all_players_search_placeholder', 'Search player name and hit enter...')}
+              placeholder={getCms('page_all_players_search_placeholder', 'Player name and hit enter...')}
               value={searchQuery}
               onChange={(e) => {
                 const nextQuery = e.target.value;
@@ -1182,26 +1187,26 @@ const AllPlayersPage = () => {
                 ml: 0,
                 color: 'white',
                 '& .MuiOutlinedInput-root': {
-                  height: { xs: 38, sm: 42 },
+                  height: { xs: 42, sm: 44 },
                   color: 'white',
-                  backgroundColor: 'transparent',
-                  borderRadius: '3px',
-                  '& fieldset': { borderColor: '#e56a16', borderWidth: 1.5 },
-                  '&:hover fieldset': { borderColor: '#e56a16' },
-                  '&.Mui-focused fieldset': { borderColor: '#e56a16' }
+                  backgroundColor: '#121316',
+                  borderRadius: '14px',
+                  '& fieldset': { borderColor: '#22242a', borderWidth: 1 },
+                  '&:hover fieldset': { borderColor: '#32353e' },
+                  '&.Mui-focused fieldset': { borderColor: 'rgba(255,255,255,0.25)', borderWidth: 1 }
                 },
                 '& .MuiInputBase-input': {
                   color: 'white',
-                  fontSize: { xs: 14, sm: 16.5 },
+                  fontSize: { xs: 13, sm: 14.5 },
                   py: 0.5,
                   fontFamily: 'var(--font-woodford-bourne-pro)',
-                  '&::placeholder': { color: '#fff', opacity: 1 }
+                  '&::placeholder': { color: '#717d8f', opacity: 1 }
                 }
               }}
               InputProps={{
                 startAdornment: (
-                  <Box sx={{ mr: 3, ml: 0.5, display: 'flex', alignItems: 'center' }}>
-                    <Image src={SearchIcon} alt="Search" width={25} height={25} />
+                  <Box sx={{ mr: 1.5, ml: 0.5, display: 'flex', alignItems: 'center' }}>
+                    <Image src={SearchIcon} alt="Search" width={20} height={20} style={{ opacity: 0.7 }} />
                   </Box>
                 ),
               }}
@@ -1209,157 +1214,157 @@ const AllPlayersPage = () => {
 
             {/* Filter Buttons */}
             <Box sx={{
-              display: { xs: 'grid', md: 'flex' },
-              gridTemplateColumns: { xs: 'repeat(4, minmax(0, 1fr))', md: 'none' },
-              gap: 0.5,
+              display: 'flex',
+              gap: { xs: 0.75, sm: 1, md: 1.5 },
               flexWrap: 'nowrap',
-              justifyContent: { xs: 'center', md: 'flex-end' },
+              justifyContent: { xs: 'space-between', md: 'flex-end' },
               width: { xs: '100%', md: 'auto' },
-              overflowX: { xs: 'visible', md: 'visible' },
-              '&::-webkit-scrollbar': { display: 'none' },
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
+              alignItems: 'center',
             }}>
               {/* Year Filter */}
-              <div className={`filter-select-wrapper${yearDropdownOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
-                {isDesktop ? (
-                  <select
-                    className="filter-select"
-                    value={selectedYear}
-                    onChange={(e) => {
-                      setSelectedYear(e.target.value);
-                      setYearDropdownOpen(false);
-                    }}
-                    onMouseDown={() => setYearDropdownOpen(true)}
-                    onBlur={() => setTimeout(() => setYearDropdownOpen(false), 100)}
-                    style={{
-                      height: '39px',
-                      padding: '0 28px 0 12px',
-                      marginLeft: 0,
-                      backgroundColor: 'transparent',
-                      color: '#fff',
-                      border: '1.5px solid #e56a16',
-                      borderRadius: '24px',
-                      fontSize: '17px',
-                      cursor: 'pointer',
-                      outline: 'none',
-                      width: '100%',
-                      display: 'block',
-                      boxSizing: 'border-box',
-                      appearance: 'none',
-                      WebkitAppearance: 'none',
-                      MozAppearance: 'none',
-                      fontWeight: 400,
-                      fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                    }}
-                  >
-                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_players_year_placeholder', 'All Years')}</option>
-                    {yearOptions.map(year => (
-                      <option key={year} value={year} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{year}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <>
-                    <button
-                      ref={yearFilterButtonRef}
-                      type="button"
-                      onClick={() => setYearDropdownOpen((prev) => !prev)}
-                      style={{
-                        height: '34px',
-                        padding: '0 20px 0 7px',
-                        marginLeft: 0,
-                        backgroundColor: 'transparent',
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '146px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
+                <button
+                  ref={yearFilterButtonRef}
+                  type="button"
+                  onClick={() => setYearDropdownOpen((prev) => !prev)}
+                  style={{
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
+                    color: '#fff',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    minWidth: 0,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#32353e';
+                    e.currentTarget.style.backgroundColor = '#1e2026';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#22242a';
+                    e.currentTarget.style.backgroundColor = '#16181d';
+                  }}
+                >
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_players_year_placeholder', 'All Years')}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
+                </button>
+                <Menu
+                  anchorEl={yearFilterButtonRef.current}
+                  open={yearDropdownOpen}
+                  onClose={() => setYearDropdownOpen(false)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      minWidth: yearFilterButtonRef.current?.offsetWidth || 148,
+                      width: 'max-content',
+                      maxWidth: '90vw',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    }
+                  }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
+                >
+                  {['all', ...yearOptions].map((value) => (
+                    <MenuItem
+                      key={value}
+                      selected={(selectedYear || 'all') === value}
+                      onClick={() => {
+                        setSelectedYear(value);
+                        setYearDropdownOpen(false);
+                      }}
+                      sx={{
                         color: '#fff',
-                        border: '1.5px solid #e56a16',
-                        borderRadius: '24px',
-                        fontSize: '11px',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        width: '100%',
-                        fontWeight: 600,
-                        textAlign: 'left',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        fontSize: 13,
+                        minHeight: 34,
+                        borderRadius: '6px',
+                        mx: 0.5,
+                        '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                        '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
                       }}
                     >
-                      {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_players_year_placeholder', 'All Years')}
-                    </button>
-                    <Menu
-                      anchorEl={yearFilterButtonRef.current}
-                      open={yearDropdownOpen}
-                      onClose={() => setYearDropdownOpen(false)}
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                      PaperProps={{
-                        sx: {
-                          mt: 0.5,
-                          borderRadius: 1,
-                          border: '1px solid rgba(255,255,255,0.25)',
-                          backgroundColor: '#1a1a1a',
-                          minWidth: yearFilterButtonRef.current?.offsetWidth || 148,
-                          width: 'max-content',
-                          maxWidth: '90vw',
-                        }
-                      }}
-                      MenuListProps={{ sx: { py: 0 } }}
-                    >
-                      {['all', ...yearOptions].map((value) => (
-                        <MenuItem
-                          key={value}
-                          selected={(selectedYear || 'all') === value}
-                          onClick={() => {
-                            setSelectedYear(value);
-                            setYearDropdownOpen(false);
-                          }}
-                          sx={{
-                            color: '#fff',
-                            fontSize: 13,
-                            minHeight: 34,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                            '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                          }}
-                        >
-                          {value === 'all' ? getCms('page_all_players_year_placeholder', 'All Years') : value}
-                        </MenuItem>
-                      ))}
-                    </Menu>
-                  </>
-                )}
+                      {value === 'all' ? getCms('page_all_players_year_placeholder', 'All Years') : value}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </div>
 
               {/* League Filter */}
-              <div className={`filter-select-wrapper${leagueMenuOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '146px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
                 <button
                   onClick={handleLeagueMenuOpen}
                   type="button"
                   disabled={noLeagues || filteredLeagues.length === 0}
                   style={{
-                    height: isDesktop ? '39px' : '34px',
-                    padding: isDesktop ? '0 28px 0 12px' : '0 20px 0 7px',
-                    marginLeft: 0,
-                    backgroundColor: 'transparent',
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
                     color: '#fff',
-                    border: '1.5px solid #e56a16',
-                    borderRadius: '24px',
-                    fontSize: isDesktop ? '17px' : '11px',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
                     cursor: noLeagues || filteredLeagues.length === 0 ? 'not-allowed' : 'pointer',
                     outline: 'none',
                     width: '100%',
+                    minWidth: 0,
                     boxSizing: 'border-box',
                     opacity: noLeagues || filteredLeagues.length === 0 ? 0.6 : 1,
-                    fontWeight: isDesktop ? 400 : 600,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
                     fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                    textAlign: 'left',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.borderColor = '#32353e';
+                      e.currentTarget.style.backgroundColor = '#1e2026';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.borderColor = '#22242a';
+                      e.currentTarget.style.backgroundColor = '#16181d';
+                    }
                   }}
                 >
-                  {selectedLeagueLabel}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {selectedLeagueLabel}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
                 </button>
                 <Menu
                   anchorEl={leagueMenuAnchor}
@@ -1374,16 +1379,9 @@ const AllPlayersPage = () => {
                       overflowY: 'auto',
                       overflowX: 'hidden',
                       scrollbarWidth: 'thin',
-                      '&::-webkit-scrollbar': {
-                        width: '8px',
-                      },
-                      '&::-webkit-scrollbar-track': {
-                        background: 'rgba(255,255,255,0.08)',
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        background: 'rgba(255,255,255,0.35)',
-                        borderRadius: '999px',
-                      },
+                      '&::-webkit-scrollbar': { width: '8px' },
+                      '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.08)' },
+                      '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.35)', borderRadius: '999px' },
                     },
                   }}
                   PaperProps={{
@@ -1393,12 +1391,11 @@ const AllPlayersPage = () => {
                       minWidth: leagueMenuAnchor?.offsetWidth || 150,
                       width: 'max-content',
                       maxWidth: { xs: '92vw', sm: 'none' },
-                      bgcolor: 'rgba(15,15,15,0.92)',
+                      bgcolor: '#16181d',
                       color: '#E5E7EB',
                       borderRadius: 2.5,
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      backdropFilter: 'blur(10px)',
-                      boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
+                      border: '1px solid #22242a',
+                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
                       overflow: 'hidden',
                     }
                   }}
@@ -1416,11 +1413,9 @@ const AllPlayersPage = () => {
                       gap: 1,
                       color: '#E5E7EB',
                       transition: 'all 0.2s ease',
-                      background: selectedLeague === 'all' ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
-                      border: selectedLeague === 'all' ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                      background: selectedLeague === 'all' ? 'rgba(229,106,22,0.2)' : 'transparent',
                       '&:hover': {
-                        transform: 'translateY(-1px)',
-                        background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                        background: 'rgba(255,255,255,0.06)',
                       },
                     }}
                   >
@@ -1456,11 +1451,9 @@ const AllPlayersPage = () => {
                           gap: 1,
                           color: '#E5E7EB',
                           transition: 'all 0.2s ease',
-                          background: isActive ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
-                          border: isActive ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                          background: isActive ? 'rgba(229,106,22,0.2)' : 'transparent',
                           '&:hover': {
-                            transform: 'translateY(-1px)',
-                            background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                            background: 'rgba(255,255,255,0.06)',
                           },
                         }}
                       >
@@ -1502,149 +1495,126 @@ const AllPlayersPage = () => {
               </div>
 
               {/* Season Filter */}
-              <div className={`filter-select-wrapper${seasonDropdownOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
-                {isDesktop ? (
-                  <select
-                    className="filter-select"
-                    value={selectedSeason}
-                    onChange={(e) => {
-                      setSelectedSeason(e.target.value);
+              <div style={{
+                flex: isDesktop ? 'none' : '1 1 0px',
+                minWidth: isDesktop ? '146px' : 0,
+                width: isDesktop ? 'auto' : '100%',
+              }}>
+                <button
+                  ref={seasonFilterButtonRef}
+                  type="button"
+                  onClick={() => {
+                    if (selectedLeague !== 'all') {
+                      setSeasonDropdownOpen((prev) => !prev);
+                    }
+                  }}
+                  disabled={selectedLeague === 'all'}
+                  style={{
+                    height: isDesktop ? '42px' : '38px',
+                    padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                    backgroundColor: '#16181d',
+                    color: '#fff',
+                    border: '1px solid #22242a',
+                    borderRadius: '14px',
+                    fontSize: isDesktop ? '14.5px' : '11.5px',
+                    cursor: selectedLeague === 'all' ? 'not-allowed' : 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    minWidth: 0,
+                    opacity: selectedLeague === 'all' ? 0.6 : 1,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '4px',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    whiteSpace: 'nowrap',
+                    transition: 'border-color 0.15s, background-color 0.15s',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.borderColor = '#32353e';
+                      e.currentTarget.style.backgroundColor = '#1e2026';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      e.currentTarget.style.borderColor = '#22242a';
+                      e.currentTarget.style.backgroundColor = '#16181d';
+                    }
+                  }}
+                >
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
+                    {selectedSeason === 'all'
+                      ? getCms('page_all_players_season_placeholder', 'All Seasons')
+                      : (seasons.find((season) => season.id === selectedSeason)?.name || getCms('page_all_players_season_placeholder', 'All Seasons'))}
+                  </span>
+                  <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                  </Box>
+                </button>
+                <Menu
+                  anchorEl={seasonFilterButtonRef.current}
+                  open={seasonDropdownOpen && selectedLeague !== 'all'}
+                  onClose={() => setSeasonDropdownOpen(false)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  PaperProps={{
+                    sx: {
+                      mt: 0.5,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      minWidth: seasonFilterButtonRef.current?.offsetWidth || 148,
+                      width: 'max-content',
+                      maxWidth: '90vw',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    }
+                  }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
+                >
+                  <MenuItem
+                    selected={selectedSeason === 'all'}
+                    onClick={() => {
+                      setSelectedSeason('all');
                       setSeasonDropdownOpen(false);
                     }}
-                    onMouseDown={() => {
-                      if (selectedLeague !== 'all') {
-                        setSeasonDropdownOpen(true);
-                      }
-                    }}
-                    onBlur={() => setTimeout(() => setSeasonDropdownOpen(false), 100)}
-                    disabled={selectedLeague === 'all'}
-                    style={{
-                      height: '39px',
-                      padding: '0 29px 0 12px',
-                      marginLeft: 0,
-                      backgroundColor: 'transparent',
+                    sx={{
                       color: '#fff',
-                      border: '1.5px solid #e56a16',
-                      borderRadius: '24px',
-                      fontSize: '17px',
-                      cursor: selectedLeague === 'all' ? 'not-allowed' : 'pointer',
-                      outline: 'none',
-                      width: '100%',
-                      display: 'block',
-                      boxSizing: 'border-box',
-                      opacity: selectedLeague === 'all' ? 0.6 : 1,
-                      appearance: 'none',
-                      WebkitAppearance: 'none',
-                      MozAppearance: 'none',
-                      fontWeight: 400,
-                      fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                      fontSize: 13,
+                      minHeight: 34,
+                      borderRadius: '6px',
+                      mx: 0.5,
+                      '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                      '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                      '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
                     }}
                   >
-                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_players_season_placeholder', 'All Seasons')}</option>
-                    {seasons.map((season) => (
-                      <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
-                        {season.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <>
-                    <button
-                      ref={seasonFilterButtonRef}
-                      type="button"
+                    {getCms('page_all_players_season_placeholder', 'All Seasons')}
+                  </MenuItem>
+                  {seasons.map((season) => (
+                    <MenuItem
+                      key={season.id}
+                      selected={selectedSeason === season.id}
                       onClick={() => {
-                        if (selectedLeague !== 'all') {
-                          setSeasonDropdownOpen((prev) => !prev);
-                        }
+                        setSelectedSeason(season.id);
+                        setSeasonDropdownOpen(false);
                       }}
-                      disabled={selectedLeague === 'all'}
-                      style={{
-                        height: '34px',
-                        padding: '0 20px 0 7px',
-                        marginLeft: 0,
-                        backgroundColor: 'transparent',
+                      sx={{
                         color: '#fff',
-                        border: '1.5px solid #e56a16',
-                        borderRadius: '24px',
-                        fontSize: '11px',
-                        cursor: selectedLeague === 'all' ? 'not-allowed' : 'pointer',
-                        outline: 'none',
-                        width: '100%',
-                        opacity: selectedLeague === 'all' ? 0.6 : 1,
-                        fontWeight: 600,
-                        textAlign: 'left',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        fontSize: 13,
+                        minHeight: 34,
+                        borderRadius: '6px',
+                        mx: 0.5,
+                        '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                        '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
                       }}
                     >
-                      {selectedSeason === 'all'
-                        ? getCms('page_all_players_season_placeholder', 'All Seasons')
-                        : (seasons.find((season) => season.id === selectedSeason)?.name || getCms('page_all_players_season_placeholder', 'All Seasons'))}
-                    </button>
-                    <Menu
-                      anchorEl={seasonFilterButtonRef.current}
-                      open={seasonDropdownOpen && selectedLeague !== 'all'}
-                      onClose={() => setSeasonDropdownOpen(false)}
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                      transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                      PaperProps={{
-                        sx: {
-                          mt: 0.5,
-                          borderRadius: 1,
-                          border: '1px solid rgba(255,255,255,0.25)',
-                          backgroundColor: '#1a1a1a',
-                          minWidth: seasonFilterButtonRef.current?.offsetWidth || 148,
-                          width: 'max-content',
-                          maxWidth: '90vw',
-                        }
-                      }}
-                      MenuListProps={{ sx: { py: 0 } }}
-                    >
-                      <MenuItem
-                        selected={selectedSeason === 'all'}
-                        onClick={() => {
-                          setSelectedSeason('all');
-                          setSeasonDropdownOpen(false);
-                        }}
-                        sx={{
-                          color: '#fff',
-                          fontSize: 13,
-                          minHeight: 34,
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                          '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                        }}
-                      >
-                        {getCms('page_all_players_season_placeholder', 'All Seasons')}
-                      </MenuItem>
-                      {seasons.map((season) => (
-                        <MenuItem
-                          key={season.id}
-                          selected={selectedSeason === season.id}
-                          onClick={() => {
-                            setSelectedSeason(season.id);
-                            setSeasonDropdownOpen(false);
-                          }}
-                          sx={{
-                            color: '#fff',
-                            fontSize: 13,
-                            minHeight: 34,
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                            '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                          }}
-                        >
-                          {season.name}
-                        </MenuItem>
-                      ))}
-                    </Menu>
-                  </>
-                )}
+                      {season.name}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </div>
 
               {/* Clear Button */}
@@ -1660,22 +1630,27 @@ const AllPlayersPage = () => {
                   setSeasons([]);
                 }}
                 sx={{
-                  color: 'white',
-                  height: { xs: 34, md: 39 },
-                  borderRadius: 6,
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  borderWidth: '3px',
-                  px: 2.5, 
-                  py: 1,
-                  width: { xs: '100%', sm: 'auto' },
+                  color: '#fff',
+                  height: isDesktop ? '42px' : '38px',
+                  borderRadius: '14px',
+                  borderColor: '#22242a',
+                  borderWidth: '1px',
+                  backgroundColor: '#16181d',
+                  px: { xs: 1.25, sm: 2, md: 2.5 },
+                  py: 0.5,
+                  minWidth: 'auto',
+                  flex: isDesktop ? 'none' : '0 0 auto',
+                  flexShrink: 0,
                   fontWeight: 'bold',
                   textTransform: 'none',
-                  fontSize:{xs:'11px', md:'16px'},
-                  '&:hover': { 
-                    borderColor: 'rgba(255,255,255,0.5)',
-                    borderWidth: '3px',
-                    bgcolor: 'rgba(255,255,255,0.05)' 
-                  }
+                  fontSize: { xs: '11.5px', sm: '12.5px', md: '14.5px' },
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  whiteSpace: 'nowrap',
+                  '&:hover': {
+                    borderColor: '#32353e',
+                    borderWidth: '1px',
+                    backgroundColor: '#1e2026',
+                  },
                 }}
               >
                 {getCms('page_all_players_clear_btn', 'Clear')}
@@ -1698,9 +1673,9 @@ const AllPlayersPage = () => {
         >
           <Card
             sx={{
-              background: '#383838',
-              backdropFilter: 'blur(10px)',
-              borderRadius: { xs: 2, sm: 3 },
+              background: '#121316',
+              border: '1px solid #22242a',
+              borderRadius: '16px',
               boxShadow: 'none',
               mt: 0,
               mb: 4,
@@ -1709,16 +1684,17 @@ const AllPlayersPage = () => {
                 height: '6px',
               },
               '&::-webkit-scrollbar-track': {
-                background: '#383838',
+                background: '#121316',
               },
               '&::-webkit-scrollbar-thumb': {
-                background: '#383838',
+                background: '#22242a',
                 borderRadius: '3px',
               },
             }}
             className="text-white"
           >
             <Box
+              onScroll={(e) => e.currentTarget.classList.toggle('is-scrolled', e.currentTarget.scrollLeft > 2)}
               sx={{
                 width: '100%',
                 overflowX: 'auto',
@@ -1731,11 +1707,11 @@ const AllPlayersPage = () => {
                   width: '8px',
                 },
                 '&::-webkit-scrollbar-track': {
-                  background: 'rgba(255,255,255,0.12)',
+                  background: '#121316',
                   borderRadius: '9999px',
                 },
                 '&::-webkit-scrollbar-thumb': {
-                  background: '#F97316',
+                  background: '#22242a',
                   borderRadius: '9999px',
                 },
               }}
@@ -1747,7 +1723,7 @@ const AllPlayersPage = () => {
                 }}
               >
                 {/* Table Header */}
-                <Box className="league-header-row" sx={{
+                <Box className="league-header-row font-bold" sx={{
                   display: 'flex',
                   alignItems: 'center',
                   position: 'sticky',
@@ -1756,10 +1732,8 @@ const AllPlayersPage = () => {
                   py: 1.5,
                   pl: 0,
                   pr: { xs: 2, sm: 3 },
-                  backgroundColor: '#dddddd',
-                  borderBottom: '1px solid rgba(0,0,0,0.12)',
-                  borderTopLeftRadius: '8px',
-                  borderTopRightRadius: '8px',
+                  backgroundColor: '#121316',
+                  borderBottom: '1px solid #22242a',
                 }}>
                   {/* Rank Header */}
                   <Box
@@ -1773,12 +1747,11 @@ const AllPlayersPage = () => {
                       position: 'sticky',
                       left: 0,
                       zIndex: 4,
-                      backgroundColor: '#dddddd',
-                      borderTopLeftRadius: '8px',
+                      backgroundColor: '#121316',
                       alignSelf: 'stretch',
                     }}
                   >
-                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'center' }}>
+                    <Typography className="league-table-heading" sx={{ color: '#717d8f !important', textAlign: 'center', fontWeight: 'bold' }}>
                       #
                     </Typography>
                   </Box>
@@ -1801,24 +1774,14 @@ const AllPlayersPage = () => {
                       position: 'sticky',
                       left: { xs: 32, sm: 40 },
                       zIndex: 3,
-                      backgroundColor: '#dddddd',
+                      backgroundColor: '#121316',
                     }}>
-                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                       {selectedPosition === 'all' ? 'ALL POSITIONS' : selectedPosition.toUpperCase()}
                     </Typography>
-                    <Box
-                      sx={{
-                        ml: 1,
-                        width: 0,
-                        height: 0,
-                        borderLeft: '6px solid transparent',
-                        borderRight: '6px solid transparent',
-                        borderTop: '8px solid #000000',
-                        transform: allPositionsMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transformOrigin: 'center',
-                        transition: 'transform 0.3s ease',
-                      }}
-                    />
+                    <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', ml: 1, flexShrink: 0 }}>
+                      <ChevronDown size={11} color="#e56a16" />
+                    </Box>
                   </Box>
                   <Menu
                     anchorEl={allPositionsMenuAnchor}
@@ -1842,7 +1805,7 @@ const AllPlayersPage = () => {
                     <MenuItem
                       selected={selectedPosition === 'all'}
                       onClick={() => handlePositionChange('all')}
-                      sx={{ color: '#000000', fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'Roboto, Helvetica, Arial, sans-serif' }}
+                      sx={{ color: '#fff !important', fontWeight: 700, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}
                     >
                       All Positions
                     </MenuItem>
@@ -1851,7 +1814,7 @@ const AllPlayersPage = () => {
                         key={position}
                         selected={selectedPosition === position}
                         onClick={() => handlePositionChange(position)}
-                        sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
+                        sx={{ color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
                       >
                         {position}
                       </MenuItem>
@@ -1871,7 +1834,7 @@ const AllPlayersPage = () => {
                       display: 'flex',
                       alignItems: 'center',
                     }}>
-                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                         XP STATUS
                       </Typography>
                     </Box>
@@ -1884,7 +1847,7 @@ const AllPlayersPage = () => {
                       display: 'flex',
                       alignItems: 'center',
                     }}>
-                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                      <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                         STYLE
                       </Typography>
                     </Box>
@@ -1898,22 +1861,26 @@ const AllPlayersPage = () => {
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}>
-                      <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                      <Typography className="league-table-heading" sx={{ color: '#717d8f !important', fontWeight: 'bold' }}>
                         {isMobile ? 'STATS' : 'VIEW STATS'}
                       </Typography>
                     </Box>
 
-                    {/* XP Points Header */}
+                    {/* Career XP Header */}
                     <Box sx={{
-                      width: { xs: 75, sm: 100, md: 115 },
-                      minWidth: { xs: 75, sm: 100, md: 115 },
+                      width: { xs: 85, sm: 110, md: 125 },
+                      minWidth: { xs: 85, sm: 110, md: 125 },
                       flexShrink: 0,
                       display: 'flex',
-                      alignItems: 'center',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
                       justifyContent: 'center',
                     }}>
-                      <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
-                        CAREER xp
+                      <Typography className="league-table-heading1" sx={{ color: '#717d8f !important', fontWeight: 'bold', fontSize: { xs: 11, sm: 12 } }}>
+                        CAREER XP
+                      </Typography>
+                      <Typography sx={{ color: '#4b5563', fontSize: { xs: 9, sm: 10 }, fontWeight: 700, letterSpacing: 0.5, lineHeight: 1 }}>
+                        OF 25,000
                       </Typography>
                     </Box>
                   </Box>
@@ -1921,51 +1888,51 @@ const AllPlayersPage = () => {
 
                 {/* Player List Content */}
                 {activeSearchTerm && filteredPlayers.length === 0 && (
-                  <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', py: 4, textAlign: 'center' }}>
+                  <Box sx={{ backgroundColor: '#121316', py: 4, textAlign: 'center' }}>
                     <Typography className="empty-state-message" sx={{ color: 'white', fontWeight: 500 }}>
                       User not found
                     </Typography>
                   </Box>
                 )}
                 {loading ? (
-                  <Box sx={{ backgroundColor: 'rgba(40, 40, 40, 0.9)', p: 1.5 }}>
+                  <Box sx={{ backgroundColor: '#121316', p: 1.5 }}>
                     <AllPlayersLoadingSkeleton compact />
                   </Box>
                 ) : noLeagues ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8, backgroundColor: '#121316' }}>
                     <Box sx={{ p: 3, textAlign: 'center', color: '#fff' }}>
                       <Typography className="empty-state-message" variant="h6" sx={{ mb: 0.5 }}>No leagues found</Typography>
                       <Typography className="empty-state-message" variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>Create a new league or join an existing one to see players here.</Typography>
                     </Box>
                   </Box>
                 ) : error ? (
-                  <Typography color="error" align="center" sx={{ py: 4, backgroundColor: 'rgba(40, 40, 40, 0.9)' }}>{error}</Typography>
+                  <Typography color="error" align="center" sx={{ py: 4, backgroundColor: '#121316' }}>{error}</Typography>
                 ) : (
                   <Box sx={{
                     flex: 1,
                     overflow: 'visible',
-                    backgroundColor: '#383838',
-                    borderRadius: '0 0 8px 8px',
+                    backgroundColor: '#121316',
+                    borderRadius: '0 0 16px 16px',
                     '&::-webkit-scrollbar': { display: 'none' },
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                     px: 0,
                     pb: { xs: 0, sm: 1.5 },
-                    pt: 0.5,
+                    pt: 0,
                   }}>
                     <List sx={{ p: 0 }}>
-                      {sortedPlayers.map((player: Player, idx: number) => {
+                      {sortedPlayers.slice(0, visibleCount).map((player: Player, idx: number) => {
                         const isCurrentUser = String(player.id) === String(user?.id || '');
-                        const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
-                        const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
-                        const isLast = idx === sortedPlayers.length - 1;
+                        const isLast = idx === Math.min(sortedPlayers.length, visibleCount) - 1;
                         const playerXp = getCpPoints(player) ?? 0;
-                        const xpStatusTitle = getXPTier(playerXp).title;
+                        const xpTier = getXPTier(playerXp);
+                        const xpStatusTitle = xpTier.title;
+                        const progressPercent = Math.min(100, Math.max(3, (playerXp / 25000) * 100));
 
                         return (
                           <ListItem
                             key={player.id}
-                            className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
+                            className={`league-table-row-text league-row ${isCurrentUser ? 'league-row-current-user' : ''}`}
                             onClick={() => {
                               setSelectedPlayerId(player.id);
                               router.push(`/player/${player.id}`);
@@ -1975,53 +1942,66 @@ const AllPlayersPage = () => {
                               alignItems: 'center',
                               pl: 0,
                               pr: { xs: 2, sm: 3 },
-                              backgroundColor: rowBgColor,
-                              borderBottom: 'none',
+                              background: isCurrentUser
+                                ? 'linear-gradient(90deg, #183328 0%, #152d24 35%, #12211b 70%, #0f1616 100%) !important'
+                                : '#121316 !important',
+                              boxShadow: isCurrentUser ? 'inset 3px 0 0 #54ce91 !important' : 'none',
+                              borderBottom: '1px solid #1c1d22 !important',
                               color: '#fff',
                               cursor: 'pointer',
                               transition: 'background-color 0.2s',
-                              '&:hover': { backgroundColor: rowBgColorHover },
-                              borderBottomLeftRadius: isLast ? '8px' : 0,
-                              borderBottomRightRadius: isLast ? '8px' : 0,
+                              '&:hover': {
+                                background: isCurrentUser
+                                  ? 'linear-gradient(90deg, #1c3c2f 0%, #183329 35%, #14251e 70%, #101817 100%) !important'
+                                  : '#18191e !important',
+                              },
+                              borderBottomLeftRadius: isLast && visibleCount >= sortedPlayers.length ? '16px' : 0,
+                              borderBottomRightRadius: isLast && visibleCount >= sortedPlayers.length ? '16px' : 0,
                               minHeight: { xs: '58px', sm: '72px' },
                             }}
                           >
-                              {/* Rank Column */}
-                              <Box
+                            {/* Rank Column */}
+                            <Box
+                              className="league-table-sticky-rank"
+                              sx={{
+                                width: { xs: 32, sm: 40 },
+                                minWidth: { xs: 32, sm: 40 },
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 3,
+                                backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
+                                transition: 'background-color 0.2s',
+                                alignSelf: 'stretch',
+                                '.MuiListItem-root:hover &': {
+                                  backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
+                                },
+                                '.is-scrolled .MuiListItem-root &': {
+                                  backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
+                                },
+                                borderBottomLeftRadius: isLast && visibleCount >= sortedPlayers.length ? '16px' : 0,
+                              }}
+                            >
+                              <Typography
+                                className="league-table-heading league-table-rank"
                                 sx={{
-                                  width: { xs: 32, sm: 40 },
-                                  minWidth: { xs: 32, sm: 40 },
-                                  flexShrink: 0,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  position: 'sticky',
-                                  left: 0,
-                                  zIndex: 3,
-                                  backgroundColor: rowBgColor,
-                                  transition: 'background-color 0.2s',
-                                  alignSelf: 'stretch',
-                                  '.MuiListItem-root:hover &': {
-                                    backgroundColor: rowBgColorHover,
-                                  },
-                                  borderBottomLeftRadius: isLast ? '8px' : 0,
+                                  color: '#8a94a6',
+                                  textAlign: 'center',
+                                  fontWeight: 600,
+                                  fontSize: { xs: 12, sm: 14 },
                                 }}
                               >
-                                <Typography
-                                  className="league-table-heading league-table-rank"
-                                  sx={{
-                                    color: '#ffffff',
-                                    textAlign: 'center',
-                                    fontWeight: 'bold',
-                                    fontSize: { xs: 12, sm: 14 },
-                                  }}
-                                >
-                                  {idx + 1}
-                                </Typography>
-                              </Box>
+                                {idx + 1}
+                              </Typography>
+                            </Box>
 
-                              {/* Avatar + Name column */}
-                              <Box sx={{
+                            {/* Avatar + Name column */}
+                            <Box
+                              className="league-table-sticky-name"
+                              sx={{
                                 width: { xs: 170, sm: 230, md: 260 },
                                 minWidth: { xs: 170, sm: 230, md: 260 },
                                 flexShrink: 0,
@@ -2032,14 +2012,19 @@ const AllPlayersPage = () => {
                                 position: 'sticky',
                                 left: { xs: 32, sm: 40 },
                                 zIndex: 2,
-                                backgroundColor: rowBgColor,
-                                boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
+                                backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
+                                boxShadow: 'none',
                                 transition: 'background-color 0.2s',
                                 alignSelf: 'stretch',
                                 '.MuiListItem-root:hover &': {
-                                  backgroundColor: rowBgColorHover,
+                                  backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
                                 },
-                              }}>
+                                '.is-scrolled .MuiListItem-root &': {
+                                  backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
+                                  boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
+                                },
+                              }}
+                            >
                               <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
                                 <Box sx={{
                                   position: 'relative',
@@ -2082,19 +2067,24 @@ const AllPlayersPage = () => {
                                 </Box>
                               </ListItemAvatar>
                               <Box sx={{ minWidth: 0, flex: 1 }}>
-                                <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {getPlayerCardStyleName(player)}
-                                </Typography>
-                                <Typography className="league-player-pos" sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                                  <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 700, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {getPlayerCardStyleName(player)}
+                                  </Typography>
+                                  {(player as any).isAdmin && (
+                                    <Shield className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                                  )}
+                                </Box>
+                                <Typography className="league-player-pos" sx={{ fontSize: { xs: 13, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
                                   {getPositionLabel(player)}
                                 </Typography>
                               </Box>
                             </Box>
 
-                            {/* Flexible Spacer pushing the 4 columns to the right side */}
+                            {/* Flexible Spacer */}
                             <Box sx={{ flex: 1, minWidth: 10 }} />
 
-                            {/* Right columns container with matching clean gap */}
+                            {/* Right columns */}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.5, sm: 2.5, md: 3.5 } }}>
                               {/* XP Status column */}
                               <Box sx={{
@@ -2105,9 +2095,63 @@ const AllPlayersPage = () => {
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',
                               }}>
-                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                  {xpStatusTitle}
-                                </Typography>
+                                {(() => {
+                                  const t = xpStatusTitle.toLowerCase();
+                                  let bg = 'rgba(255, 255, 255, 0.08)';
+                                  let color = '#fff';
+                                  let border = '1px solid rgba(255, 255, 255, 0.12)';
+                                  if (t === 'pro') {
+                                    bg = 'rgba(110, 86, 207, 0.22)';
+                                    color = '#c4b5fd';
+                                    border = '1px solid rgba(139, 92, 246, 0.3)';
+                                  } else if (t === 'baller') {
+                                    bg = 'rgba(217, 119, 6, 0.2)';
+                                    color = '#fcd34d';
+                                    border = '1px solid rgba(245, 158, 11, 0.3)';
+                                  } else if (t === 'rookie') {
+                                    bg = 'rgba(148, 163, 184, 0.15)';
+                                    color = '#cbd5e1';
+                                    border = '1px solid rgba(148, 163, 184, 0.25)';
+                                  } else if (t === 'rising star') {
+                                    bg = 'rgba(56, 189, 248, 0.2)';
+                                    color = '#7dd3fc';
+                                    border = '1px solid rgba(56, 189, 248, 0.3)';
+                                  } else if (t === 'elite') {
+                                    bg = 'rgba(59, 130, 246, 0.22)';
+                                    color = '#93c5fd';
+                                    border = '1px solid rgba(59, 130, 246, 0.3)';
+                                  } else if (t.includes('champion')) {
+                                    bg = 'rgba(239, 68, 68, 0.22)';
+                                    color = '#fca5a5';
+                                    border = '1px solid rgba(239, 68, 68, 0.3)';
+                                  } else if (t === 'goat') {
+                                    bg = 'rgba(234, 179, 8, 0.22)';
+                                    color = '#fde047';
+                                    border = '1px solid rgba(234, 179, 8, 0.3)';
+                                  }
+
+                                  return (
+                                    <Box
+                                      sx={{
+                                        px: { xs: 1.25, sm: 2 },
+                                        py: 0.35,
+                                        borderRadius: '9999px',
+                                        fontSize: { xs: 11, sm: 12 },
+                                        fontWeight: 700,
+                                        backgroundColor: bg,
+                                        color: color,
+                                        border: border,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        letterSpacing: 0.2,
+                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                      }}
+                                    >
+                                      {xpStatusTitle}
+                                    </Box>
+                                  );
+                                })()}
                               </Box>
 
                               {/* Playing Style column */}
@@ -2119,7 +2163,7 @@ const AllPlayersPage = () => {
                                 alignItems: 'center',
                                 justifyContent: 'flex-start',
                               }}>
-                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                <Typography className="league-table-row-text" sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 14, md: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
                                   {getPlayingStyle(player)}
                                 </Typography>
                               </Box>
@@ -2133,27 +2177,58 @@ const AllPlayersPage = () => {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                               }}>
-                                <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
+                                <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 22 : 28} height={isMobile ? 22 : 28} style={{ objectFit: 'contain' }} />
                               </Box>
 
-                              {/* XP Points column */}
+                              {/* Career XP column with Progress Bar */}
                               <Box sx={{
-                                width: { xs: 75, sm: 100, md: 115 },
-                                minWidth: { xs: 75, sm: 100, md: 115 },
+                                width: { xs: 85, sm: 110, md: 125 },
+                                minWidth: { xs: 85, sm: 110, md: 125 },
                                 flexShrink: 0,
                                 display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'flex-end',
                                 justifyContent: 'center',
-                                alignItems: 'center',
                               }}>
-                                <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
+                                <Typography sx={{ fontWeight: 800, fontSize: { xs: 13, sm: 15, md: 16 }, color: '#22c55e', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'right', lineHeight: 1.2 }}>
                                   {playerXp.toLocaleString()}
                                 </Typography>
+                                <Box sx={{ width: '100%', mt: 0.6, display: 'flex', justifyContent: 'flex-end' }}>
+                                  <Box sx={{
+                                    width: { xs: 55, sm: 75, md: 85 },
+                                    height: 3.5,
+                                    backgroundColor: '#262930',
+                                    borderRadius: '9999px',
+                                    overflow: 'hidden',
+                                  }}>
+                                    <Box sx={{
+                                      width: `${progressPercent}%`,
+                                      height: '100%',
+                                      backgroundColor: '#22c55e',
+                                      borderRadius: '9999px',
+                                    }} />
+                                  </Box>
+                                </Box>
                               </Box>
                             </Box>
                           </ListItem>
                         );
                       })}
                     </List>
+
+                    {/* Show More Button */}
+                    {sortedPlayers.length > visibleCount && (
+                      <Box sx={{ py: 2.5, display: 'flex', justifyContent: 'center', borderTop: '1px solid #1c1d22' }}>
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount((prev) => prev + 15)}
+                          className="flex items-center justify-center gap-1.5 text-[#e56a16] hover:text-[#f97316] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer bg-transparent border-none"
+                        >
+                          <span>SHOW MORE</span>
+                          <ChevronDown size={14} />
+                        </button>
+                      </Box>
+                    )}
                   </Box>
                 )}
               </Box>

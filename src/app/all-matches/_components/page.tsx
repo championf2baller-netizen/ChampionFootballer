@@ -1,6 +1,6 @@
 'use client';
 import { getApiBaseUrl } from '@/lib/getApiBaseUrl';
-import { Box, Button, Container, Typography, Paper, MenuItem, Divider, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CircularProgress, Menu, ListItemIcon, ListItemText, Chip, Alert, useTheme, useMediaQuery, TextField, Avatar } from '@mui/material';
+import { Box, Button, ButtonBase, Container, Typography, Paper, MenuItem, Divider, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, CircularProgress, Menu, ListItemIcon, ListItemText, Chip, Alert, useTheme, useMediaQuery, TextField, Avatar } from '@mui/material';
 import { Calendar, ChevronDown, Crown, Edit, MapPin, Plus, Trash2, Trophy, Undo2, Star } from 'lucide-react';
 import { useAuth } from '@/lib/hooks';
 import React, { useEffect, useState, useCallback } from 'react';
@@ -2521,130 +2521,113 @@ export default function AllMatches() {
                             </Button>
                         </Box>
 
-                        {/* Right side: Dropdowns */}
-                        <Box
-                            sx={{
-                                display: { xs: 'grid', md: 'flex' },
-                                gridTemplateColumns: { xs: 'repeat(4, minmax(0, 1fr))', md: 'none' },
-                                gap: 0.5,
-                                flexWrap: 'nowrap',
-                                justifyContent: { xs: 'center', md: 'flex-end' },
-                                width: { xs: '100%', md: 'auto' },
-                                overflowX: { xs: 'visible', md: 'visible' },
-                                '&::-webkit-scrollbar': { display: 'none' },
-                                scrollbarWidth: 'none',
-                                msOverflowStyle: 'none',
-                            }}
-                        >
+                        {/* Right side: Filter Buttons */}
+                        <Box sx={{
+                            display: 'flex',
+                            gap: { xs: 0.75, sm: 1, md: 1.5 },
+                            flexWrap: 'nowrap',
+                            justifyContent: { xs: 'space-between', md: 'flex-end' },
+                            width: { xs: '100%', md: 'auto' },
+                            alignItems: 'center',
+                        }}>
                             {/* Year Filter */}
-                            <div className={`filter-select-wrapper${yearDropdownOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
-                            {isDesktop ? (
-                                <select
-                                    className="filter-select"
-                                    value={selectedYear || 'all'}
-                                    onChange={(e) => setSelectedYear(e.target.value)}
-                                    onMouseDown={() => setYearDropdownOpen(true)}
-                                    onBlur={() => setTimeout(() => setYearDropdownOpen(false), 100)}
+                            <div style={{
+                                flex: isDesktop ? 'none' : '1 1 0px',
+                                minWidth: isDesktop ? '146px' : 0,
+                                width: isDesktop ? 'auto' : '100%',
+                            }}>
+                                <button
+                                    ref={yearFilterButtonRef}
+                                    type="button"
+                                    onClick={() => setYearDropdownOpen((prev) => !prev)}
                                     style={{
-                                        height: '39px',
-                                        padding: '0 28px 0 12px',
-                                        marginLeft: 0,
-                                        backgroundColor: 'transparent',
+                                        height: isDesktop ? '42px' : '38px',
+                                        padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                                        backgroundColor: '#16181d',
                                         color: '#fff',
-                                        border: '1.5px solid #e56a16',
-                                        borderRadius: '24px',
-                                        fontSize: '17px',
+                                        border: '1px solid #22242a',
+                                        borderRadius: '14px',
+                                        fontSize: isDesktop ? '14.5px' : '11.5px',
                                         cursor: 'pointer',
                                         outline: 'none',
                                         width: '100%',
-                                        display: 'block',
-                                        boxSizing: 'border-box',
-                                        appearance: 'none',
-                                        WebkitAppearance: 'none',
-                                        MozAppearance: 'none',
-                                        fontWeight: 400,
+                                        minWidth: 0,
+                                        fontWeight: 600,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '4px',
+                                        whiteSpace: 'nowrap',
+                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                        transition: 'border-color 0.15s, background-color 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.borderColor = '#32353e';
+                                        e.currentTarget.style.backgroundColor = '#1e2026';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.borderColor = '#22242a';
+                                        e.currentTarget.style.backgroundColor = '#16181d';
                                     }}
                                 >
-                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_matches_year_placeholder', 'All Years')}</option>
-                                    {yearOptions.filter(y => y !== 'all').map(y => (
-                                        <option key={y} value={y} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{y}</option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <>
-                                    <button
-                                        ref={yearFilterButtonRef}
-                                        type="button"
-                                        onClick={() => setYearDropdownOpen((prev) => !prev)}
-                                        style={{
-                                            height: '34px',
-                                            padding: '0 20px 0 7px',
-                                            marginLeft: 0,
-                                            backgroundColor: 'transparent',
-                                            color: '#fff',
-                                            border: '1.5px solid #e56a16',
-                                            borderRadius: '24px',
-                                            fontSize: '11px',
-                                            cursor: 'pointer',
-                                            outline: 'none',
-                                            width: '100%',
-                                            fontWeight: 600,
-                                            textAlign: 'left',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
                                         {selectedYear && selectedYear !== 'all' ? selectedYear : getCms('page_all_matches_year_placeholder', 'All Years')}
-                                    </button>
-                                    <Menu
-                                        anchorEl={yearFilterButtonRef.current}
-                                        open={yearDropdownOpen}
-                                        onClose={() => setYearDropdownOpen(false)}
-                                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                                        PaperProps={{
-                                            sx: {
-                                                mt: 0.5,
-                                                borderRadius: 1,
-                                                border: '1px solid rgba(255,255,255,0.25)',
-                                                backgroundColor: '#1a1a1a',
-                                                minWidth: yearFilterButtonRef.current?.offsetWidth || 148,
-                                                width: 'max-content',
-                                                maxWidth: '90vw',
-                                            }
-                                        }}
-                                        MenuListProps={{ sx: { py: 0 } }}
-                                    >
-                                        {['all', ...yearOptions.filter(y => y !== 'all')].map((value) => (
-                                            <MenuItem
-                                                key={value}
-                                                selected={(selectedYear || 'all') === value}
-                                                onClick={() => {
-                                                    setSelectedYear(value);
-                                                    setYearDropdownOpen(false);
-                                                }}
-                                                sx={{
-                                                    color: '#fff',
-                                                    fontSize: 13,
-                                                    minHeight: 34,
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                                                    '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                                                }}
-                                            >
-                                                {value === 'all' ? 'All Years' : value}
-                                            </MenuItem>
-                                        ))}
-                                    </Menu>
-                                </>
-                            )}
+                                    </span>
+                                    <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                                    </Box>
+                                </button>
+                                <Menu
+                                    anchorEl={yearFilterButtonRef.current}
+                                    open={yearDropdownOpen}
+                                    onClose={() => setYearDropdownOpen(false)}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                    PaperProps={{
+                                        sx: {
+                                            mt: 0.5,
+                                            borderRadius: '12px',
+                                            border: '1px solid #22242a',
+                                            backgroundColor: '#16181d',
+                                            minWidth: yearFilterButtonRef.current?.offsetWidth || 148,
+                                            width: 'max-content',
+                                            maxWidth: '90vw',
+                                            boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                                        }
+                                    }}
+                                    MenuListProps={{ sx: { py: 0.5 } }}
+                                >
+                                    {['all', ...yearOptions.filter(y => y !== 'all')].map((value) => (
+                                        <MenuItem
+                                            key={value}
+                                            selected={(selectedYear || 'all') === value}
+                                            onClick={() => {
+                                                setSelectedYear(value);
+                                                setYearDropdownOpen(false);
+                                            }}
+                                            sx={{
+                                                color: '#fff',
+                                                fontSize: 13,
+                                                minHeight: 34,
+                                                borderRadius: '6px',
+                                                mx: 0.5,
+                                                '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                                                '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                                            }}
+                                        >
+                                            {value === 'all' ? getCms('page_all_matches_year_placeholder', 'All Years') : value}
+                                        </MenuItem>
+                                    ))}
+                                </Menu>
                             </div>
 
                             {/* League Filter */}
-                            <div className={`filter-select-wrapper${leaguesDropdownOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
+                            <div style={{
+                                flex: isDesktop ? 'none' : '1 1 0px',
+                                minWidth: isDesktop ? '146px' : 0,
+                                width: isDesktop ? 'auto' : '100%',
+                            }}>
                                 <button
                                     ref={leagueFilterButtonRef}
                                     type="button"
@@ -2655,34 +2638,49 @@ export default function AllMatches() {
                                     }}
                                     disabled={noLeagues}
                                     style={{
-                                        height: isDesktop ? '39px' : '34px',
-                                        padding: isDesktop ? '0 29px 0 12px' : '0 20px 0 7px',
-                                        marginLeft: 0,
-                                        backgroundColor: 'transparent',
+                                        height: isDesktop ? '42px' : '38px',
+                                        padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                                        backgroundColor: '#16181d',
                                         color: '#fff',
-                                        border: '1.5px solid #e56a16',
-                                        borderRadius: '24px',
-                                        fontSize: isDesktop ? '17px' : '11px',
+                                        border: '1px solid #22242a',
+                                        borderRadius: '14px',
+                                        fontSize: isDesktop ? '14.5px' : '11.5px',
                                         cursor: noLeagues ? 'not-allowed' : 'pointer',
                                         outline: 'none',
                                         width: '100%',
+                                        minWidth: 0,
+                                        boxSizing: 'border-box',
                                         opacity: noLeagues ? 0.6 : 1,
-                                        fontWeight: isDesktop ? 400 : 600,
-                                        textAlign: 'left',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
+                                        fontWeight: 600,
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
+                                        gap: '4px',
+                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'border-color 0.15s, background-color 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!e.currentTarget.disabled) {
+                                            e.currentTarget.style.borderColor = '#32353e';
+                                            e.currentTarget.style.backgroundColor = '#1e2026';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!e.currentTarget.disabled) {
+                                            e.currentTarget.style.borderColor = '#22242a';
+                                            e.currentTarget.style.backgroundColor = '#16181d';
+                                        }
                                     }}
                                 >
-                                    <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', mr: 1 }}>
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
                                         {selectedLeague && selectedLeague !== 'all'
                                             ? (formatLeagueName(sortedLeagues.find((l) => l.id === selectedLeague)?.name || '') || getCms('page_all_matches_league_placeholder', 'Select League'))
                                             : getCms('page_all_matches_league_placeholder', 'Select League')}
+                                    </span>
+                                    <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
                                     </Box>
-                                    {/* <ChevronDown size={isDesktop ? 16 : 12} style={{ flexShrink: 0, color: '#9CA3AF' }} /> */}
                                 </button>
                                 <Menu
                                     anchorEl={leagueFilterButtonRef.current}
@@ -2697,16 +2695,9 @@ export default function AllMatches() {
                                             overflowY: 'auto',
                                             overflowX: 'hidden',
                                             scrollbarWidth: 'thin',
-                                            '&::-webkit-scrollbar': {
-                                                width: '8px',
-                                            },
-                                            '&::-webkit-scrollbar-track': {
-                                                background: 'rgba(255,255,255,0.08)',
-                                            },
-                                            '&::-webkit-scrollbar-thumb': {
-                                                background: 'rgba(255,255,255,0.35)',
-                                                borderRadius: '999px',
-                                            },
+                                            '&::-webkit-scrollbar': { width: '8px' },
+                                            '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.08)' },
+                                            '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.35)', borderRadius: '999px' },
                                         },
                                     }}
                                     PaperProps={{
@@ -2716,12 +2707,11 @@ export default function AllMatches() {
                                             minWidth: leagueFilterButtonRef.current?.offsetWidth || 150,
                                             width: 'max-content',
                                             maxWidth: { xs: '92vw', sm: 'none' },
-                                            bgcolor: 'rgba(15,15,15,0.92)',
+                                            bgcolor: '#16181d',
                                             color: '#E5E7EB',
                                             borderRadius: 2.5,
-                                            border: '1px solid rgba(255,255,255,0.08)',
-                                            backdropFilter: 'blur(10px)',
-                                            boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
+                                            border: '1px solid #22242a',
+                                            boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
                                             overflow: 'hidden',
                                         }
                                     }}
@@ -2763,11 +2753,9 @@ export default function AllMatches() {
                                                     gap: 1,
                                                     color: '#E5E7EB',
                                                     transition: 'all 0.2s ease',
-                                                    background: isActive ? 'linear-gradient(90deg, rgba(3,136,227,0.25) 0%, rgba(3,136,227,0.10) 100%)' : 'transparent',
-                                                    border: isActive ? '1px solid rgba(3,136,227,0.35)' : 'none',
+                                                    background: isActive ? 'rgba(229,106,22,0.2)' : 'transparent',
                                                     '&:hover': {
-                                                        transform: 'translateY(-1px)',
-                                                        background: 'linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+                                                        background: 'rgba(255,255,255,0.06)',
                                                     },
                                                 }}
                                             >
@@ -2811,151 +2799,126 @@ export default function AllMatches() {
                             </div>
 
                             {/* Season Filter */}
-                            <div className={`filter-select-wrapper${seasonDropdownOpen ? ' open' : ''}`} style={{ width: isDesktop ? 150 : '100%' }}>
-                            {isDesktop ? (
-                                <select
-                                    className="filter-select"
-                                    value={selectedSeason}
-                                    onChange={(e) => {
-                                        handleSeasonSelect(e.target.value);
-                                        setSeasonDropdownOpen(false);
-                                    }}
-                                    onMouseDown={() => {
+                            <div style={{
+                                flex: isDesktop ? 'none' : '1 1 0px',
+                                minWidth: isDesktop ? '146px' : 0,
+                                width: isDesktop ? 'auto' : '100%',
+                            }}>
+                                <button
+                                    ref={seasonFilterButtonRef}
+                                    type="button"
+                                    onClick={() => {
                                         if (selectedLeague !== 'all' && !seasonsLoading) {
-                                            setSeasonDropdownOpen(true);
+                                            setSeasonDropdownOpen((prev) => !prev);
                                         }
                                     }}
-                                    onBlur={() => setTimeout(() => setSeasonDropdownOpen(false), 100)}
                                     disabled={selectedLeague === 'all' || seasonsLoading}
                                     style={{
-                                        height: '39px',
-                                        padding: '0 29px 0 12px',
-                                        marginLeft: 0,
-                                        backgroundColor: 'transparent',
+                                        height: isDesktop ? '42px' : '38px',
+                                        padding: isDesktop ? '0 10px 0 14px' : '0 6px 0 8px',
+                                        backgroundColor: '#16181d',
                                         color: '#fff',
-                                        border: '1.5px solid #e56a16',
-                                        borderRadius: '24px',
-                                        fontSize: '17px',
+                                        border: '1px solid #22242a',
+                                        borderRadius: '14px',
+                                        fontSize: isDesktop ? '14.5px' : '11.5px',
                                         cursor: (selectedLeague === 'all' || seasonsLoading) ? 'not-allowed' : 'pointer',
                                         outline: 'none',
                                         width: '100%',
-                                        display: 'block',
-                                        boxSizing: 'border-box',
+                                        minWidth: 0,
                                         opacity: (selectedLeague === 'all' || seasonsLoading) ? 0.6 : 1,
-                                        appearance: 'none',
-                                        WebkitAppearance: 'none',
-                                        MozAppearance: 'none',
-                                        fontWeight: 400,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
+                                        fontWeight: 600,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: '4px',
+                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                                         whiteSpace: 'nowrap',
+                                        transition: 'border-color 0.15s, background-color 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!e.currentTarget.disabled) {
+                                            e.currentTarget.style.borderColor = '#32353e';
+                                            e.currentTarget.style.backgroundColor = '#1e2026';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!e.currentTarget.disabled) {
+                                            e.currentTarget.style.borderColor = '#22242a';
+                                            e.currentTarget.style.backgroundColor = '#16181d';
+                                        }
                                     }}
                                 >
-                                    <option value="all" style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>{getCms('page_all_matches_season_placeholder', 'All Seasons')}</option>
-                                    {sortedSeasons.map((season) => (
-                                        <option key={season.id} value={season.id} style={{ backgroundColor: '#1a1a1a', color: '#fff' }}>
-                                            {season.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <>
-                                    <button
-                                        ref={seasonFilterButtonRef}
-                                        type="button"
-                                        onClick={() => {
-                                            if (selectedLeague !== 'all' && !seasonsLoading) {
-                                                setSeasonDropdownOpen((prev) => !prev);
-                                            }
-                                        }}
-                                        disabled={selectedLeague === 'all' || seasonsLoading}
-                                        style={{
-                                            height: '34px',
-                                            padding: '0 20px 0 7px',
-                                            marginLeft: 0,
-                                            backgroundColor: 'transparent',
-                                            color: '#fff',
-                                            border: '1.5px solid #e56a16',
-                                            borderRadius: '24px',
-                                            fontSize: '11px',
-                                            cursor: (selectedLeague === 'all' || seasonsLoading) ? 'not-allowed' : 'pointer',
-                                            outline: 'none',
-                                            width: '100%',
-                                            opacity: (selectedLeague === 'all' || seasonsLoading) ? 0.6 : 1,
-                                            fontWeight: 600,
-                                            textAlign: 'left',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                        }}
-                                    >
+                                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
                                         {selectedSeason === 'all'
                                             ? getCms('page_all_matches_season_placeholder', 'All Seasons')
                                             : (sortedSeasons.find((season) => season.id === selectedSeason)?.name || getCms('page_all_matches_season_placeholder', 'All Seasons'))}
-                                    </button>
-                                    <Menu
-                                        anchorEl={seasonFilterButtonRef.current}
-                                        open={seasonDropdownOpen && selectedLeague !== 'all'}
-                                        onClose={() => setSeasonDropdownOpen(false)}
-                                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                                        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                                        PaperProps={{
-                                            sx: {
-                                                mt: 0.5,
-                                                borderRadius: 1,
-                                                border: '1px solid rgba(255,255,255,0.25)',
-                                                backgroundColor: '#1a1a1a',
-                                                minWidth: seasonFilterButtonRef.current?.offsetWidth || 148,
-                                                width: 'max-content',
-                                                maxWidth: '90vw',
-                                            }
+                                    </span>
+                                    <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <ChevronDown size={isDesktop ? 12 : 10.5} color="#e56a16" />
+                                    </Box>
+                                </button>
+                                <Menu
+                                    anchorEl={seasonFilterButtonRef.current}
+                                    open={seasonDropdownOpen && selectedLeague !== 'all'}
+                                    onClose={() => setSeasonDropdownOpen(false)}
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                                    PaperProps={{
+                                        sx: {
+                                            mt: 0.5,
+                                            borderRadius: '12px',
+                                            border: '1px solid #22242a',
+                                            backgroundColor: '#16181d',
+                                            minWidth: seasonFilterButtonRef.current?.offsetWidth || 148,
+                                            width: 'max-content',
+                                            maxWidth: '90vw',
+                                            boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                                        }
+                                    }}
+                                    MenuListProps={{ sx: { py: 0.5 } }}
+                                >
+                                    <MenuItem
+                                        selected={selectedSeason === 'all'}
+                                        onClick={() => {
+                                            handleSeasonSelect('all');
+                                            setSeasonDropdownOpen(false);
                                         }}
-                                        MenuListProps={{ sx: { py: 0 } }}
+                                        sx={{
+                                            color: '#fff',
+                                            fontSize: 13,
+                                            minHeight: 34,
+                                            borderRadius: '6px',
+                                            mx: 0.5,
+                                            '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                                            '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                                            '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+                                        }}
                                     >
+                                        {getCms('page_all_matches_season_placeholder', 'All Seasons')}
+                                    </MenuItem>
+                                    {sortedSeasons.map((season) => (
                                         <MenuItem
-                                            selected={selectedSeason === 'all'}
+                                            key={season.id}
+                                            selected={selectedSeason === season.id}
                                             onClick={() => {
-                                                handleSeasonSelect('all');
+                                                handleSeasonSelect(season.id);
                                                 setSeasonDropdownOpen(false);
                                             }}
                                             sx={{
                                                 color: '#fff',
                                                 fontSize: 13,
                                                 minHeight: 34,
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                                                '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
+                                                borderRadius: '6px',
+                                                mx: 0.5,
+                                                '&.Mui-selected': { backgroundColor: 'rgba(229,106,22,0.2)', color: '#fff' },
+                                                '&.Mui-selected:hover': { backgroundColor: 'rgba(229,106,22,0.28)' },
+                                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
                                             }}
                                         >
-                                            {getCms('page_all_matches_season_placeholder', 'All Seasons')}
+                                            {season.name}
                                         </MenuItem>
-                                        {sortedSeasons.map((season) => (
-                                            <MenuItem
-                                                key={season.id}
-                                                selected={selectedSeason === season.id}
-                                                onClick={() => {
-                                                    handleSeasonSelect(season.id);
-                                                    setSeasonDropdownOpen(false);
-                                                }}
-                                                sx={{
-                                                    color: '#fff',
-                                                    fontSize: 13,
-                                                    minHeight: 34,
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    '&.Mui-selected': { backgroundColor: '#2b66bd' },
-                                                    '&.Mui-selected:hover': { backgroundColor: '#2b66bd' },
-                                                }}
-                                            >
-                                                {season.name}
-                                            </MenuItem>
-                                        ))}
-                                    </Menu>
-                                </>
-                            )}
+                                    ))}
+                                </Menu>
                             </div>
 
                             {/* Clear Button */}
@@ -2967,24 +2930,29 @@ export default function AllMatches() {
                                     setSelectedSeason('all');
                                     setMatchFilter('results');
                                 }}
-                               sx={{
-                  color: 'white',
-                  height: { xs: 34, md: 39 },
-                  borderRadius: 6,
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  borderWidth: '3px',
-                  px: 2.5, 
-                  py: 1,
-                  width: { xs: '100%', sm: 'auto' },
-                  fontWeight: 'bold',
-                  textTransform: 'none',
-                  fontSize:{xs:'11px', md:'16px'},
-                  '&:hover': { 
-                    borderColor: 'rgba(255,255,255,0.5)',
-                    borderWidth: '3px',
-                    bgcolor: 'rgba(255,255,255,0.05)' 
-                  }
-                }}
+                                sx={{
+                                    color: '#fff',
+                                    height: isDesktop ? '42px' : '38px',
+                                    borderRadius: '14px',
+                                    borderColor: '#22242a',
+                                    borderWidth: '1px',
+                                    backgroundColor: '#16181d',
+                                    px: { xs: 1.25, sm: 2, md: 2.5 },
+                                    py: 0.5,
+                                    minWidth: 'auto',
+                                    flex: isDesktop ? 'none' : '0 0 auto',
+                                    flexShrink: 0,
+                                    fontWeight: 'bold',
+                                    textTransform: 'none',
+                                    fontSize: { xs: '11.5px', sm: '12.5px', md: '14.5px' },
+                                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                    whiteSpace: 'nowrap',
+                                    '&:hover': {
+                                        borderColor: '#32353e',
+                                        borderWidth: '1px',
+                                        backgroundColor: '#1e2026',
+                                    },
+                                }}
                             >
                                 {getCms('page_all_matches_clear_btn', 'Clear')}
                             </Button>
@@ -3000,73 +2968,133 @@ export default function AllMatches() {
                         mb: { xs: 1.5, md: 0 }
                     }}>
                         <Box sx={{
+                            bgcolor: '#121316',
+                            border: '1px solid #22242a',
+                            borderRadius: '16px',
+                            p: '4px',
                             display: 'flex',
-                            bgcolor: '#3F4652',
-                            borderRadius: '12px',
-                            p: 0.5,
-                            width: { xs: '95%', sm: (archivedMatchesCount > 0 || matchFilter === 'archived' ? 480 : 360), md: (archivedMatchesCount > 0 || matchFilter === 'archived' ? 600 : 400) }
+                            alignItems: 'center',
+                            gap: '4px',
+                            width: { xs: '95%', sm: (archivedMatchesCount > 0 || matchFilter === 'archived' ? 480 : 360), md: (archivedMatchesCount > 0 || matchFilter === 'archived' ? 520 : 380) },
+                            boxSizing: 'border-box',
                         }}>
-                            <Button
+                            <ButtonBase
                                 onClick={() => setMatchFilter('results')}
                                 sx={{
                                     flex: 1,
+                                    py: { xs: 0.9, sm: 1.1 },
+                                    px: { xs: 0.6, sm: 1.5 },
+                                    borderRadius: '12px',
+                                    border: matchFilter === 'results' ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                                    bgcolor: matchFilter === 'results' ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                                    color: matchFilter === 'results' ? '#ffffff' : '#717d8f',
+                                    fontWeight: matchFilter === 'results' ? 700 : 600,
+                                    fontSize: { xs: 12, sm: 13, md: 14 },
+                                    letterSpacing: '0.8px',
                                     textTransform: 'uppercase',
-                                    borderRadius: '10px',
-                                    py: { xs: 1, md: 1.5 },
-                                    fontSize: { xs: '12px', sm: '15px', md: '16px' },
-                                    fontFamily: 'var(--font-woodford-bourne-pro)',
-                                    fontWeight: 700,
-                                    bgcolor: matchFilter === 'results' ? '#00a896' : 'transparent',
-                                    color: '#ffffff',
+                                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                    transition: 'all 0.18s ease',
+                                    cursor: 'pointer',
                                     '&:hover': {
-                                        bgcolor: matchFilter === 'results' ? '#00a896' : '#3f4652',
+                                        bgcolor: matchFilter === 'results' ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                                        color: '#ffffff',
                                     },
-                                    transition: 'all 0.3s ease',
                                 }}
                             >
-                                {getCms('page_all_matches_results_tab', 'Results')}
-                            </Button>
-                            <Button
+                                <Typography
+                                    noWrap
+                                    sx={{
+                                        fontSize: 'inherit',
+                                        fontWeight: 'inherit',
+                                        color: 'inherit',
+                                        textAlign: 'center',
+                                        fontFamily: 'inherit',
+                                        letterSpacing: 'inherit',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    {getCms('page_all_matches_results_tab', 'Results')}
+                                </Typography>
+                            </ButtonBase>
+
+                            <ButtonBase
                                 onClick={() => setMatchFilter('fixtures')}
                                 sx={{
                                     flex: 1,
+                                    py: { xs: 0.9, sm: 1.1 },
+                                    px: { xs: 0.6, sm: 1.5 },
+                                    borderRadius: '12px',
+                                    border: matchFilter === 'fixtures' ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                                    bgcolor: matchFilter === 'fixtures' ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                                    color: matchFilter === 'fixtures' ? '#ffffff' : '#717d8f',
+                                    fontWeight: matchFilter === 'fixtures' ? 700 : 600,
+                                    fontSize: { xs: 12, sm: 13, md: 14 },
+                                    letterSpacing: '0.8px',
                                     textTransform: 'uppercase',
-                                    borderRadius: '10px',
-                                    py: { xs: 1, md: 1.5 },
-                                    fontSize: { xs: '12px', sm: '15px', md: '16px' },
-                                    fontFamily: 'var(--font-woodford-bourne-pro)',
-                                    fontWeight: 700,
-                                    bgcolor: matchFilter === 'fixtures' ? '#00a896' : 'transparent',
-                                    color: '#ffffff',
+                                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                    transition: 'all 0.18s ease',
+                                    cursor: 'pointer',
                                     '&:hover': {
-                                        bgcolor: matchFilter === 'fixtures' ? '#00a896' : '#3f4652',
+                                        bgcolor: matchFilter === 'fixtures' ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                                        color: '#ffffff',
                                     },
-                                    transition: 'all 0.3s ease',
                                 }}
                             >
-                                {getCms('page_all_matches_fixtures_tab', 'Fixtures')}
-                            </Button>
+                                <Typography
+                                    noWrap
+                                    sx={{
+                                        fontSize: 'inherit',
+                                        fontWeight: 'inherit',
+                                        color: 'inherit',
+                                        textAlign: 'center',
+                                        fontFamily: 'inherit',
+                                        letterSpacing: 'inherit',
+                                        textTransform: 'uppercase',
+                                    }}
+                                >
+                                    {getCms('page_all_matches_fixtures_tab', 'Fixtures')}
+                                </Typography>
+                            </ButtonBase>
+
                             {(archivedMatchesCount > 0 || matchFilter === 'archived') && (
-                                <Button
+                                <ButtonBase
                                     onClick={() => setMatchFilter('archived')}
                                     sx={{
                                         flex: 1,
+                                        py: { xs: 0.9, sm: 1.1 },
+                                        px: { xs: 0.6, sm: 1.5 },
+                                        borderRadius: '12px',
+                                        border: matchFilter === 'archived' ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                                        bgcolor: matchFilter === 'archived' ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                                        color: matchFilter === 'archived' ? '#ffffff' : '#717d8f',
+                                        fontWeight: matchFilter === 'archived' ? 700 : 600,
+                                        fontSize: { xs: 12, sm: 13, md: 14 },
+                                        letterSpacing: '0.8px',
                                         textTransform: 'uppercase',
-                                        borderRadius: '10px',
-                                        py: { xs: 1, md: 1.5 },
-                                        fontSize: { xs: '12px', sm: '15px', md: '16px' },
-                                        fontFamily: 'var(--font-woodford-bourne-pro)',
-                                        fontWeight: 700,
-                                        bgcolor: matchFilter === 'archived' ? '#00a896' : 'transparent',
-                                        color: '#ffffff',
+                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                        transition: 'all 0.18s ease',
+                                        cursor: 'pointer',
                                         '&:hover': {
-                                            bgcolor: matchFilter === 'archived' ? '#00a896' : '#3f4652',
+                                            bgcolor: matchFilter === 'archived' ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                                            color: '#ffffff',
                                         },
-                                        transition: 'all 0.3s ease',
                                     }}
                                 >
-                                    {getCms('page_all_matches_archived_tab', 'Archived')}
-                                </Button>
+                                    <Typography
+                                        noWrap
+                                        sx={{
+                                            fontSize: 'inherit',
+                                            fontWeight: 'inherit',
+                                            color: 'inherit',
+                                            textAlign: 'center',
+                                            fontFamily: 'inherit',
+                                            letterSpacing: 'inherit',
+                                            textTransform: 'uppercase',
+                                        }}
+                                    >
+                                        {getCms('page_all_matches_archived_tab', 'Archived')}
+                                    </Typography>
+                                </ButtonBase>
                             )}
                         </Box>
                     </Box>

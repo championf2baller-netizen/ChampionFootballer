@@ -197,15 +197,16 @@ input:-webkit-autofill:active {
 /* League Table Theme (matches screenshot styling) */
 :root {
   /* Tuned to match provided screenshot */
-  --league-table-header-bg: #dddddd;
+  --league-table-header-bg: #121316;
   /* Header bar + columns header */
-  --league-table-row-even-bg: #383838;
+  --league-table-row-even-bg: #121316;
   /* First row */
-  --league-table-row-odd-bg: #2b2b2b;
+  --league-table-row-odd-bg: #121316;
   /* Second row */
-  --league-table-border: rgba(255, 255, 255, 0.18);
+  --league-table-border: #22242a;
+  --league-table-row-border: #1c1d22;
   --league-table-foreground: rgba(255, 255, 255, 0.94);
-  --league-table-muted-foreground: rgba(255, 255, 255, 0.70);
+  --league-table-muted-foreground: #717d8f;
 }
 
 /* Utility tokens used by the table markup */
@@ -235,7 +236,7 @@ input:-webkit-autofill:active {
 
 /* Provide hover style for unknown Tailwind token `hover:bg-muted/50` */
 .hover\:bg-muted\/50:hover {
-  background-color: rgba(255, 255, 255, 0.06) !important;
+  background-color: #18191e !important;
 }
 
 /* Compact, consistent font + spacing for table block */
@@ -253,7 +254,7 @@ input:-webkit-autofill:active {
 
 .league-mobile-result-font .league-header-row .league-table-heading,
 .league-header-row .league-table-heading {
-  color: #000000 !important;
+  color: #717d8f !important;
 }
 
 /* Data rows spacing to match screenshot */
@@ -261,6 +262,8 @@ input:-webkit-autofill:active {
   padding-top: 8px !important;
   padding-bottom: 8px !important;
   min-height: 50px;
+  background-color: #121316 !important;
+  border-bottom: 1px solid #1c1d22 !important;
 }
 
 /* Small left-right spacing inside the table */
@@ -411,12 +414,12 @@ input:-webkit-autofill:active {
 
 .league-standings-row.bg-table-row-even:hover> :nth-child(1),
 .league-standings-row.bg-table-row-even:hover> :nth-child(2) {
-  background-color: #424242 !important;
+  background-color: #18191e !important;
 }
 
 .league-standings-row.bg-table-row-odd:hover> :nth-child(1),
 .league-standings-row.bg-table-row-odd:hover> :nth-child(2) {
-  background-color: #353535 !important;
+  background-color: #18191e !important;
 }
 
 .league-standings-topbar-text {
@@ -458,28 +461,72 @@ input:-webkit-autofill:active {
 }
 
 /* Hover states for freeze pane columns */
+.league-row:hover,
+.league-row:hover .league-table-sticky-rank,
+.league-row:hover .league-table-sticky-name,
 .league-row.bg-table-row-even:hover,
 .league-row.bg-table-row-even:hover .league-table-sticky-rank,
-.league-row.bg-table-row-even:hover .league-table-sticky-name {
-  background-color: #444444 !important;
-}
-
+.league-row.bg-table-row-even:hover .league-table-sticky-name,
 .league-row.bg-table-row-odd:hover,
 .league-row.bg-table-row-odd:hover .league-table-sticky-rank,
 .league-row.bg-table-row-odd:hover .league-table-sticky-name {
-  background-color: #383838 !important;
+  background-color: #18191e !important;
 }
 
-.league-row-current-user,
-.league-row-current-user .league-table-sticky-rank,
+.league-row-current-user {
+  background: linear-gradient(90deg, #183328 0%, #152d24 35%, #12211b 70%, #0f1616 100%) !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
+.league-row-current-user .league-table-sticky-rank {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
 .league-row-current-user .league-table-sticky-name {
-  background-color: #114a3e !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-.league-row-current-user:hover,
-.league-row-current-user:hover .league-table-sticky-rank,
+.league-row-current-user:hover {
+  background: linear-gradient(90deg, #1c3c2f 0%, #183329 35%, #14251e 70%, #101817 100%) !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
+.league-row-current-user:hover .league-table-sticky-rank {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
 .league-row-current-user:hover .league-table-sticky-name {
-  background-color: #165b4c !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* When table is actively scrolled horizontally (on mobile/small screens):
+   give the sticky columns an opaque background to cleanly hide content sliding underneath */
+.is-scrolled .league-row-current-user .league-table-sticky-rank {
+  background-color: #183328 !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
+.is-scrolled .league-row-current-user .league-table-sticky-name {
+  background-color: #183328 !important;
+  box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6) !important;
+}
+
+.is-scrolled .league-row-current-user:hover .league-table-sticky-rank {
+  background-color: #1c3c2f !important;
+  box-shadow: inset 3px 0 0 #54ce91 !important;
+}
+
+.is-scrolled .league-row-current-user:hover .league-table-sticky-name {
+  background-color: #1c3c2f !important;
+  box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
 /* Responsive tweaks for league table (keep layout, shrink type on small screens) */

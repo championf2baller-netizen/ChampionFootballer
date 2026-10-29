@@ -17,9 +17,9 @@ export const LeagueViewToggle: React.FC<LeagueViewToggleProps> = ({
     sx,
 }) => {
     const views: Array<{ id: LeagueViewType; label: string }> = [
-        { id: 'table', label: 'Table' },
-        { id: 'leaderboard', label: 'Leaderboard' },
-        { id: 'dream-team', label: 'Dream Team' },
+        { id: 'table', label: 'TABLE' },
+        { id: 'leaderboard', label: 'LEADERBOARD' },
+        { id: 'dream-team', label: 'DREAM TEAM' },
     ];
 
     // Normalize activeView so that if section is not leaderboard or dream-team, 'table' is active
@@ -35,13 +35,14 @@ export const LeagueViewToggle: React.FC<LeagueViewToggleProps> = ({
                 mx: 'auto',
                 mb: 2.2,
                 mt: { xs: 1.5, sm: 2 },
-                bgcolor: '#2f333a',
-                borderRadius: '8px',
+                bgcolor: '#121316',
+                border: '1px solid #22242a',
+                borderRadius: '16px',
                 p: '4px',
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '4px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+                boxShadow: 'none',
                 boxSizing: 'border-box',
                 ...sx,
             }}
@@ -55,15 +56,17 @@ export const LeagueViewToggle: React.FC<LeagueViewToggleProps> = ({
                         sx={{
                             py: { xs: 0.9, sm: 1.1 },
                             px: { xs: 0.6, sm: 1.5 },
-                            borderRadius: '6px',
-                            bgcolor: isActive ? '#00a77f' : 'transparent',
-                            color: isActive ? '#ffffff' : '#c3c6cb',
-                            fontWeight: isActive ? 700 : 500,
-                            fontSize: { xs: 12.5, sm: 13, md: 13.5 },
-                            letterSpacing: '0.2px',
+                            borderRadius: '12px',
+                            border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                            bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                            color: isActive ? '#ffffff' : '#717d8f',
+                            fontWeight: isActive ? 700 : 600,
+                            fontSize: { xs: 12, sm: 13, md: 13.5 },
+                            letterSpacing: '0.8px',
+                            textTransform: 'uppercase',
                             transition: 'all 0.18s ease',
                             '&:hover': {
-                                bgcolor: isActive ? '#00b58a' : 'rgba(255, 255, 255, 0.08)',
+                                bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
                                 color: '#ffffff',
                             },
                         }}
@@ -76,6 +79,8 @@ export const LeagueViewToggle: React.FC<LeagueViewToggleProps> = ({
                                 color: 'inherit',
                                 textAlign: 'center',
                                 fontFamily: 'inherit',
+                                letterSpacing: 'inherit',
+                                textTransform: 'uppercase',
                             }}
                         >
                             {v.label}

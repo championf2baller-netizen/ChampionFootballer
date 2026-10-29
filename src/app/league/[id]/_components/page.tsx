@@ -7,6 +7,7 @@ import {
     Paper,
     Button,
     ButtonGroup,
+    ButtonBase,
     Card,
     CardContent,
     Grid,
@@ -45,7 +46,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '@/lib/hooks';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Trophy, Calendar, Copy, Edit, Settings, Shield, ChevronDown, Trash2, Undo2, Users, Flame, Search, Table, Plus, Share2, MapPin, Crown, Lock, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Copy, Edit, Settings, Shield, ChevronDown, Trash2, Undo2, Users, Flame, Search, Table, Plus, Share2, MapPin, Crown, Lock, RefreshCw, Info } from 'lucide-react';
 import { Tooltip, Slide } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -115,6 +116,9 @@ import DefensiveImpact from "@/Components/images/defimp.png"
 import Mentality from "@/Components/images/metality.png"
 import InfoIcon from "@/Components/images/info.png"
 import Star from '@mui/icons-material/Star';
+import TrophyRank1 from '@/Components/images/trophy_rank1.png';
+import TrophyRank2 from '@/Components/images/trophy_rank2.png';
+import TrophyRank3 from '@/Components/images/trophy_rank3.png';
 import LeagueTable from '@/Components/images/leagutable.png'
 import LeagueIcon from '@/Components/images/league icon.png'
 import CalendarImg from '@/Components/images/cardcalendar.png'
@@ -608,6 +612,23 @@ const LEADERBOARD_METRIC_CONFIG = [
 
 type LeaderboardMetricKey = (typeof LEADERBOARD_METRIC_CONFIG)[number]['key'];
 
+const getMetricValueHeader = (key: string): string => {
+    switch (key) {
+        case 'goals':
+            return 'G';
+        case 'assists':
+            return 'A';
+        case 'cleanSheet':
+            return 'CS';
+        case 'contribution':
+            return 'INDEX';
+        case 'motm':
+        case 'impact':
+        default:
+            return 'VOTES';
+    }
+};
+
 
 
 
@@ -629,13 +650,28 @@ interface TableData {
     motmCount?: number;
 }
 
-const leagueMemoryCache = new Map<string, League>();
+const TrophyCup = ({ rank }: { rank: 1 | 2 | 3 }) => {
+    const src = rank === 1 ? TrophyRank1 : rank === 2 ? TrophyRank2 : TrophyRank3;
+    return (
+        <Image
+            src={src}
+            alt={`Rank ${rank}`}
+            width={18}
+            height={18}
+            className="inline-block flex-shrink-0 object-contain"
+            style={{ width: '18px', height: '18px', verticalAlign: 'middle' }}
+        />
+    );
+};
+
+const leagueMemoryCache = new Map<string, League>();    
 
 export default function LeagueDetailPage() {
     const params = useParams();
     const router = useRouter();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
     const leagueId = params?.id ? String(params.id) : '';
     const [matchStatsOpen, setMatchStatsOpen] = React.useState(false);
     const [selectedMatchIdForDialog, setSelectedMatchIdForDialog] = React.useState<string | null>(null);
@@ -715,6 +751,7 @@ export default function LeagueDetailPage() {
         const maxScrollLeft = Math.max(scrollEl.scrollWidth - scrollEl.clientWidth, 0);
         setTableHasHorizontalOverflow(maxScrollLeft > 0);
         setTableScrollPercent(maxScrollLeft > 0 ? (scrollEl.scrollLeft / maxScrollLeft) * 100 : 0);
+        scrollEl.classList.toggle('is-scrolled', scrollEl.scrollLeft > 2);
     }, []);
     const handleTableSliderChange = useCallback((_event: Event, value: number | number[]) => {
         const sliderValue = Array.isArray(value) ? value[0] : value;
@@ -723,6 +760,7 @@ export default function LeagueDetailPage() {
         const maxScrollLeft = Math.max(scrollEl.scrollWidth - scrollEl.clientWidth, 0);
         scrollEl.scrollLeft = (sliderValue / 100) * maxScrollLeft;
         setTableScrollPercent(sliderValue);
+        scrollEl.classList.toggle('is-scrolled', scrollEl.scrollLeft > 2);
     }, []);
     const isRecord = (value: unknown): value is Record<string, unknown> =>
         typeof value === 'object' && value !== null;
@@ -1068,6 +1106,12 @@ export default function LeagueDetailPage() {
     const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
     const [allLeaderboardData, setAllLeaderboardData] = useState<Record<string, Array<{ id: string; name: string; positionType: string; value: number }>>>({});
     const [leaderboardInfoMetric, setLeaderboardInfoMetric] = useState<LeaderboardMetricKey | null>(null);
+    const [expandedLeaderboards, setExpandedLeaderboards] = useState<Record<string, boolean>>({});
+    const [desktopLeaderboardPopupMetric, setDesktopLeaderboardPopupMetric] = useState<LeaderboardMetricKey | null>(null);
+    const selectedDesktopLeaderboardMetric = useMemo(
+        () => LEADERBOARD_METRIC_CONFIG.find((metric) => metric.key === desktopLeaderboardPopupMetric) || null,
+        [desktopLeaderboardPopupMetric]
+    );
     const selectedLeaderboardInfo = useMemo(
         () => LEADERBOARD_METRIC_CONFIG.find((metric) => metric.key === leaderboardInfoMetric) || null,
         [leaderboardInfoMetric]
@@ -4048,144 +4092,127 @@ export default function LeagueDetailPage() {
                                         px: { xs: 1.5, sm: 2, md: 0 },
                                         gap: 0.5,
                                         mt: 0,
-                                        py:{xs:1, md:0},
-                                        minHeight: { xs: 0, md: '87px' },
-                                        height: { xs: 'auto', md: '87px' },
+                                        py: { xs: 1, md: 1 },
                                     }}>
-                                        <Box sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: { xs: 0.8, sm: 1, md: 1 },
-                                        }}>
-                                            <Image
-                                                src={LeagueIcon}
-                                                alt="League Icon"
-                                                width={isMobile ? 24 : 46}
-                                                height={isMobile ? 24 : 46}
-                                                style={{ objectFit: 'contain', pointerEvents: 'none' }}
-                                            />
-                                            {(() => {
-                                                const displayedLeagueName = league?.name || allLeagues.find(l => String(l.id) === String(leagueId))?.name || 'LEAGUE';
-                                                return (
-                                                    <Button
-                                                        onClick={handleLeaguesDropdownOpen}
+                                        {(() => {
+                                            const displayedLeagueName = league?.name || allLeagues.find(l => String(l.id) === String(leagueId))?.name || 'LEAGUE';
+                                            return (
+                                                <Button
+                                                    onClick={handleLeaguesDropdownOpen}
+                                                    sx={{
+                                                        textTransform: 'uppercase',
+                                                        fontFamily: 'var(--font-woodford-bourne-pro), "Oswald", sans-serif',
+                                                        fontSize: { xs: '15px', sm: '17px', md: '18px' },
+                                                        fontWeight: 700,
+                                                        letterSpacing: '0.8px',
+                                                        lineHeight: 1,
+                                                        color: '#ffffff',
+                                                        backgroundColor: '#16181d',
+                                                        border: '1px solid #22242a',
+                                                        borderRadius: '9999px',
+                                                        px: { xs: 2, sm: 2.5 },
+                                                        py: { xs: 0.9, sm: 1.1 },
+                                                        height: { xs: '38px', sm: '42px' },
+                                                        minHeight: 'auto',
+                                                        boxShadow: 'none',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: { xs: 1, sm: 1.25 },
+                                                        transition: 'all 0.18s ease',
+                                                        '&:hover': {
+                                                            backgroundColor: '#1e2026',
+                                                            borderColor: '#32353e',
+                                                        },
+                                                    }}
+                                                >
+                                                    <Trophy size={18} color="#FFFFFF" strokeWidth={2.2} style={{ flexShrink: 0 }} />
+                                                    <Box
+                                                        component="span"
                                                         sx={{
-                                                            textTransform: 'uppercase',
-                                                            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-                                                            fontSize: { xs: getLeagueTitleFontSize(displayedLeagueName), sm: '42px', md: '52px' },
-                                                            fontWeight: 700,
-                                                            lineHeight: 1,
-                                                            wordBreak: 'normal',
-                                                            overflow: 'visible',
-                                                            textOverflow: 'clip',
+                                                            display: 'inline-block',
+                                                            maxWidth: { xs: 'calc(100vw - 140px)', sm: '50vw', md: '40vw' },
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
                                                             whiteSpace: 'nowrap',
-                                                            flexShrink: 1,
-                                                            minWidth: 0,
-                                                            maxWidth: { xs: '100%', sm: '72vw', md: '56vw' },
-                                                            textAlign: 'center',
-                                                            color: 'white',
-                                                            backgroundColor: 'transparent',
-                                                            borderRadius: 0,
-                                                            px: 0,
-                                                            py: 0,
-                                                            height: 'auto',
-                                                            '&:hover': {
-                                                                backgroundColor: 'transparent',
-                                                            },
-                                                            display: 'inline-flex',
+                                                            verticalAlign: 'middle',
+                                                        }}
+                                                    >
+                                                        {formatLeagueName(displayedLeagueName)}
+                                                    </Box>
+                                                    <Box
+                                                        sx={{
+                                                            width: { xs: 18, sm: 20 },
+                                                            height: { xs: 18, sm: 20 },
+                                                            borderRadius: '50%',
+                                                            border: '1.2px solid #e56a16',
+                                                            display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
-                                                            flexWrap: 'nowrap',
-                                                            gap: 0.5,
+                                                            flexShrink: 0,
                                                         }}
-                                                        endIcon={
-                                                            <Box
-                                                                component="span"
-                                                                sx={{
-                                                                    width: 0,
-                                                                    height: 0,
-                                                                    borderLeft: { xs: '6px solid transparent', sm: '10px solid transparent' },
-                                                                    borderRight: { xs: '6px solid transparent', sm: '10px solid transparent' },
-                                                                    borderTop: { xs: '10px solid #FFFFFF', sm: '16px solid #FFFFFF' },
-                                                                    display: 'inline-block',
-                                                                    ml: 0.5
-                                                                }}
-                                                            />
-                                                        }
                                                     >
-                                                        <Box
-                                                            component="span"
-                                                            sx={{
-                                                                display: 'inline-block',
-                                                                maxWidth: { xs: 'calc(100vw - 96px)', sm: '58vw', md: '48vw' },
-                                                                overflow: 'visible',
-                                                                textOverflow: 'clip',
-                                                                whiteSpace: 'nowrap',
-                                                                wordBreak: 'normal',
-                                                                verticalAlign: 'middle',
-                                                            }}
-                                                        >
-                                                            {formatLeagueName(displayedLeagueName)}
-                                                        </Box>
-                                                    </Button>
-                                                );
-                                            })()}
-                                        </Box>
+                                                        <ChevronDown size={isMobile ? 10 : 12} color="#e56a16" strokeWidth={2.5} />
+                                                    </Box>
+                                                </Button>
+                                            );
+                                        })()}
+
                                         <Button
                                             onClick={handleSeasonDropdownOpen}
                                             sx={{
-                                                mt: {xs: 0.5, md:-0.75},
-                                                color: 'rgba(255,255,255,0.9)',
-                                                fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1.05rem' },
-                                                fontWeight: 500,
+                                                mt: 0.5,
+                                                color: '#8a92a6',
+                                                fontSize: { xs: '12px', sm: '13px' },
+                                                fontWeight: 600,
                                                 letterSpacing: 0.25,
                                                 textTransform: 'none',
                                                 backgroundColor: 'transparent',
-                                                borderRadius: 0,
-                                                px: 1,
-                                                py: 0,
+                                                borderRadius: '9999px',
+                                                px: 1.2,
+                                                py: 0.25,
                                                 minHeight: 'auto',
                                                 minWidth: 0,
                                                 maxWidth: { xs: '88vw', sm: '60vw', md: '50vw' },
-                                                overflow: 'hidden',
                                                 lineHeight: 1.2,
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(255,255,255,0.05)',
-                                                },
-                                                display: 'flex',
+                                                display: 'inline-flex',
                                                 alignItems: 'center',
-                                                gap: 0.5,
+                                                gap: 0.75,
+                                                transition: 'all 0.18s ease',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                    color: '#ffffff',
+                                                },
                                             }}
-                                            startIcon={
-                                                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-                                                    {!isSelectedSeasonActive ? <Lock size={14} color="rgba(255,255,255,0.6)" /> : null}
-                                                </Box>
-                                            }
-                                            endIcon={
-                                                <Box
-                                                    component="span"
-                                                    sx={{
-                                                        width: 0,
-                                                        height: 0,
-                                                        borderLeft: '6px solid transparent',
-                                                        borderRight: '6px solid transparent',
-                                                        borderTop: '10px solid rgba(255,255,255,0.9)',
-                                                        display: 'inline-block',
-                                                    }}
-                                                />
-                                            }
                                         >
+                                            {!isSelectedSeasonActive ? (
+                                                <Lock size={13} color="#8a92a6" style={{ flexShrink: 0 }} />
+                                            ) : null}
                                             <Box
                                                 component="span"
                                                 sx={{
                                                     display: 'inline-block',
-                                                    maxWidth: { xs: '75vw', sm: '46vw', md: '40vw' },
+                                                    maxWidth: { xs: '70vw', sm: '46vw', md: '40vw' },
                                                     overflow: 'hidden',
-                                                    textOverflow: 'clip',
+                                                    textOverflow: 'ellipsis',
                                                     whiteSpace: 'nowrap',
                                                 }}
                                             >
-                                                {seasonLabel || '#Season 1'}
+                                                {seasonLabel || '(#Season 1)'}
+                                            </Box>
+                                            <Box
+                                                sx={{
+                                                    width: 16,
+                                                    height: 16,
+                                                    borderRadius: '50%',
+                                                    border: '1.2px solid #e56a16',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    flexShrink: 0,
+                                                }}
+                                            >
+                                                <ChevronDown size={10} color="#e56a16" strokeWidth={2.5} />
                                             </Box>
                                         </Button>
                                     </Box>
@@ -4469,7 +4496,7 @@ export default function LeagueDetailPage() {
                                     }}
                                 />
 
-                                {/* Mobile View: Segmented toggle control for Table, Leaderboard, Dream Team */}
+                                {/* Navigation Tabs - Mobile View (3 tabs: Table, Leaderboard, Dream Team) */}
                                 <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', px: { xs: 1, sm: 0 }, mt: 1.5, mb: { xs: 1.5, md: 0 } }}>
                                     <LeagueViewToggle
                                         activeView={section}
@@ -4482,7 +4509,7 @@ export default function LeagueDetailPage() {
                                     />
                                 </Box>
 
-                                {/* Navigation Tabs - Pill style (Desktop View) */}
+                                {/* Navigation Tabs - Desktop View (6 tabs with newer UI look) */}
                                 <Box
                                     sx={{
                                         display: { xs: 'none', sm: 'flex' },
@@ -4494,223 +4521,97 @@ export default function LeagueDetailPage() {
                                         px: 1,
                                         mt: 0,
                                         mb: { xs: 1.5, md: 0 },
+                                        scrollbarWidth: 'none',
+                                        '&::-webkit-scrollbar': { display: 'none' },
                                     }}
                                 >
-                                    <ButtonGroup
-                                        variant="outlined"
-                                        size="small"
+                                    <Box
                                         sx={{
-                                            // borderRadius: '12px',
-                                            overflow: 'hidden',
-                                            gap: 0,
-                                            width: { xs: '100%', sm: 'max-content' },
-                                            flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                                            '& .MuiButtonGroup-grouped': {
-                                                borderColor: '#9CA3AF',
-                                                borderWidth: { xs: 2, sm: 3 },
-                                                textTransform: 'none',
-                                                fontWeight: 600,
-                                                px: { xs: 1, sm: 2.5, md: 4.5 },
-                                                py: { xs: 1.5, md: 0.5 },
-                                                minWidth: { xs: '50%', sm: 'auto' },
-                                                whiteSpace: { xs: 'normal', sm: 'nowrap' },
-                                                textAlign: 'center',
-                                                justifyContent: 'center',
-                                                lineHeight: 1.2,
-                                                minHeight: { xs: 42, sm: 'auto' },
-                                            },
-                                            '& .MuiButtonGroup-grouped:hover': {
-                                                borderColor: '#9CA3AF',
-                                                borderWidth: { xs: 2, sm: 3 },
-                                                // backgroundColor: '#c0bfbf',
-                                                // color: '#fff',
-                                            },
-                                            '& .MuiButton-startIcon': {
-                                                mr: { xs: 0.5, sm: 1 },
-                                            },
-                                            '& .MuiButton-startIcon img': {
-                                                width: { xs: '16px !important', sm: '24px !important' },
-                                                height: { xs: '16px !important', sm: '24px !important' },
-                                            },
-                                            '& .MuiButtonGroup-grouped:not(:last-of-type)': {
-                                                borderRightColor: '#9CA3AF',
-                                            },
-
+                                            bgcolor: '#121316',
+                                            border: '1px solid #22242a',
+                                            borderRadius: '16px',
+                                            p: '4px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            maxWidth: '100%',
                                         }}
                                     >
-
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                display: { xs: 'none', sm: 'inline-flex' },
-                                                color: section === 'table' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'table' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'table' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'table' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'table' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                // Check if points are disabled
-                                                // if (league?.showPoints === false) {
-                                                //     setShowPointsAlert(true);
-                                                //     return;
-                                                // }
-                                                setSection('table');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=table${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={LeagueTable} alt="League Table" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'table' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            League Table
-                                        </Button>
-
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                display: { xs: 'none', sm: 'inline-flex' },
-                                                color: section === 'results' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'results' ? '#10B981' : 'rgba(255,255,255,0.92)',
-
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'results' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'results' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'results' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                setSection('results');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=results${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={MATCHRESULT} alt="Results" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'results' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            Match Results
-                                        </Button>
-
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                display: { xs: 'none', sm: 'inline-flex' },
-                                                color: section === 'matches' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'matches' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'matches' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'matches' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'matches' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                setSection('matches');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=matches${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={FIXTURES} alt="Fixtures" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'matches' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            Fixtures
-                                        </Button>
-
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                color: section === 'leaderboard' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'leaderboard' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'leaderboard' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'leaderboard' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'leaderboard' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                setSection('leaderboard');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=leaderboard${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={LEADERBOARD} alt="Leaderboard" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'leaderboard' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            Leaderboard
-                                        </Button>
-
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                display: { xs: 'none', sm: 'inline-flex' },
-                                                color: section === 'members' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'members' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'members' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'members' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'members' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                setSection('members');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=members${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={PLAYERIMAGE} alt="Players" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'members' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            Players
-                                        </Button>
-                                        {/* Dream Team Button */}
-                                        <Button
-                                            variant="outlined"
-                                            size="small"
-                                            sx={{
-                                                color: section === 'dream-team' ? '#ffffff' : '#374151',
-                                                backgroundColor: section === 'dream-team' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
-                                                borderRadius: 0,
-                                                border: '3px solid #9CA3AF',
-                                                boxShadow: section === 'dream-team' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-                                                transition: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: section === 'dream-team' ? '#10B981' : 'rgba(255,255,255,0.92)',
-                                                    border: '3px solid #9CA3AF',
-                                                    boxShadow: section === 'dream-team' ? 'inset 0 0 0 1px rgba(255,255,255,0.15)' : 'none'
-                                                }
-                                            }}
-                                            onClick={() => {
-                                                setSection('dream-team');
-                                                const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
-                                                router.replace(`/league/${encodeURIComponent(leagueId)}?tab=dream-team${seasonParam}`);
-                                            }}
-                                            startIcon={<Image src={DREATEAM} alt="Dream Team" width={24} height={24} style={{ objectFit: 'contain', filter: section === 'dream-team' ? 'brightness(0) invert(1)' : 'brightness(0) saturate(100%) invert(64%) sepia(0%)' }} />}
-                                        >
-                                            Dream Team
-                                        </Button>
-                                    </ButtonGroup>
+                                        {[
+                                            { id: 'table', label: 'LEAGUE TABLE', icon: LeagueTable },
+                                            { id: 'results', label: 'MATCH RESULTS', icon: MATCHRESULT },
+                                            { id: 'matches', label: 'FIXTURES', icon: FIXTURES },
+                                            { id: 'leaderboard', label: 'LEADERBOARD', icon: LEADERBOARD },
+                                            { id: 'members', label: 'PLAYERS', icon: PLAYERIMAGE },
+                                            { id: 'dream-team', label: 'DREAM TEAM', icon: DREATEAM },
+                                        ].map((tab) => {
+                                            const isActive = section === tab.id;
+                                            return (
+                                                <ButtonBase
+                                                    key={tab.id}
+                                                    onClick={() => {
+                                                        setSection(tab.id as any);
+                                                        const seasonParam = selectedSeasonId ? `&seasonId=${encodeURIComponent(selectedSeasonId)}` : '';
+                                                        router.replace(`/league/${encodeURIComponent(leagueId)}?tab=${tab.id}${seasonParam}`);
+                                                    }}
+                                                    sx={{
+                                                        py: 1,
+                                                        px: { sm: 1.8, md: 2.4, lg: 3 },
+                                                        borderRadius: '12px',
+                                                        border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                                                        bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                                                        color: isActive ? '#ffffff' : '#717d8f',
+                                                        fontWeight: isActive ? 700 : 600,
+                                                        fontSize: { sm: 12, md: 13, lg: 13.5 },
+                                                        letterSpacing: '0.6px',
+                                                        textTransform: 'uppercase',
+                                                        transition: 'all 0.18s ease',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: 1.2,
+                                                        whiteSpace: 'nowrap',
+                                                        flexShrink: 0,
+                                                        cursor: 'pointer',
+                                                        '&:hover': {
+                                                            bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                                                            color: '#ffffff',
+                                                            '& img': {
+                                                                filter: 'brightness(0) invert(1)',
+                                                                opacity: 1,
+                                                            },
+                                                        },
+                                                    }}
+                                                >
+                                                    <Image
+                                                        src={tab.icon}
+                                                        alt={tab.label}
+                                                        width={20}
+                                                        height={20}
+                                                        style={{
+                                                            objectFit: 'contain',
+                                                            filter: isActive ? 'brightness(0) invert(1)' : 'brightness(0) invert(0.6)',
+                                                            opacity: isActive ? 1 : 0.75,
+                                                            transition: 'all 0.18s ease',
+                                                        }}
+                                                    />
+                                                    <Typography
+                                                        noWrap
+                                                        sx={{
+                                                            fontSize: 'inherit',
+                                                            fontWeight: 'inherit',
+                                                            color: 'inherit',
+                                                            textAlign: 'center',
+                                                            fontFamily: 'inherit',
+                                                            letterSpacing: 'inherit',
+                                                            textTransform: 'uppercase',
+                                                        }}
+                                                    >
+                                                        {tab.label}
+                                                    </Typography>
+                                                </ButtonBase>
+                                            );
+                                        })}
+                                    </Box>
                                 </Box>
                             </Paper>
                         </Box>
@@ -4752,9 +4653,9 @@ export default function LeagueDetailPage() {
                                     {section === 'members' && (
                                         <div className="w-full mx-auto">
                                             <Card sx={{
-                                                background: '#383838',
-                                                backdropFilter: 'blur(10px)',
-                                                borderRadius: { xs: 2, sm: 3 },
+                                                background: '#121316',
+                                                border: '1px solid #22242a',
+                                                borderRadius: '16px',
                                                 boxShadow: 'none',
                                                 mt: 1.2,
                                                 mb: 4,
@@ -4763,14 +4664,15 @@ export default function LeagueDetailPage() {
                                                     height: '6px',
                                                 },
                                                 '&::-webkit-scrollbar-track': {
-                                                    background: '#383838',
+                                                    background: '#121316',
                                                 },
                                                 '&::-webkit-scrollbar-thumb': {
-                                                    background: '#383838',
+                                                    background: '#22242a',
                                                     borderRadius: '3px',
                                                 },
                                             }} className="text-white">
                                                 <Box
+                                                    onScroll={(e) => e.currentTarget.classList.toggle('is-scrolled', e.currentTarget.scrollLeft > 2)}
                                                     sx={{
                                                         width: '100%',
                                                         overflowX: 'auto',
@@ -4783,18 +4685,18 @@ export default function LeagueDetailPage() {
                                                             width: '8px',
                                                         },
                                                         '&::-webkit-scrollbar-track': {
-                                                            background: 'rgba(255,255,255,0.12)',
+                                                            background: '#121316',
                                                             borderRadius: '9999px',
                                                         },
                                                         '&::-webkit-scrollbar-thumb': {
-                                                            background: '#F97316',
+                                                            background: '#22242a',
                                                             borderRadius: '9999px',
                                                         },
                                                     }}
                                                 >
-                                        <Box sx={{ width: 'max-content', minWidth: '100%', borderRadius: '8px', overflow: 'visible' }}>
+                                        <Box sx={{ width: 'max-content', minWidth: '100%', borderRadius: '16px', overflow: 'visible' }}>
                                             {/* Table Header */}
-                                            <Box className="league-header-row" sx={{
+                                            <Box className="league-header-row font-bold" sx={{
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 position: 'sticky',
@@ -4803,10 +4705,8 @@ export default function LeagueDetailPage() {
                                                 py: 1.5,
                                                 pl: 0,
                                                 pr: { xs: 2, sm: 3 },
-                                                backgroundColor: '#dddddd',
-                                                borderBottom: '1px solid rgba(0,0,0,0.12)',
-                                                borderTopLeftRadius: '8px',
-                                                borderTopRightRadius: '8px',
+                                                backgroundColor: '#121316',
+                                                borderBottom: '1px solid #22242a',
                                             }}>
                                                 <Box
                                                                     sx={{
@@ -4819,12 +4719,11 @@ export default function LeagueDetailPage() {
                                                                       position: 'sticky',
                                                                       left: 0,
                                                                       zIndex: 4,
-                                                                      backgroundColor: '#dddddd',
-                                                                      borderTopLeftRadius: '8px',
+                                                                      backgroundColor: '#121316',
                                                                       alignSelf: 'stretch',
                                                                     }}
                                                                   >
-                                                                    <Typography className="league-table-heading" sx={{ color: '#000000', textAlign: 'center' }}>
+                                                                    <Typography className="league-table-heading" sx={{ color: '#717d8f !important', textAlign: 'center', fontWeight: 'bold' }}>
                                                                       #
                                                                     </Typography>
                                                                   </Box>
@@ -4847,9 +4746,9 @@ export default function LeagueDetailPage() {
                                                         position: 'sticky',
                                                         left: { xs: 32, sm: 40 },
                                                         zIndex: 3,
-                                                        backgroundColor: '#dddddd',
+                                                        backgroundColor: '#121316',
                                                     }}>
-                                                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                    <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                                                         {selectedMemberPosition === 'all' ? 'ALL POSITIONS' : selectedMemberPosition.toUpperCase()}
                                                     </Typography>
                                                     <Box
@@ -4857,9 +4756,9 @@ export default function LeagueDetailPage() {
                                                             ml: 1,
                                                             width: 0,
                                                             height: 0,
-                                                            borderLeft: '6px solid transparent',
-                                                            borderRight: '6px solid transparent',
-                                                            borderTop: '8px solid #000000',
+                                                            borderLeft: '5px solid transparent',
+                                                            borderRight: '5px solid transparent',
+                                                            borderTop: '6px solid #717d8f',
                                                             transform: memberPositionMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                                                             transformOrigin: 'center',
                                                             transition: 'transform 0.3s ease',
@@ -4888,7 +4787,7 @@ export default function LeagueDetailPage() {
                                                     <MenuItem
                                                         selected={selectedMemberPosition === 'all'}
                                                         onClick={() => handleMemberPositionChange('all')}
-                                                        sx={{ color: '#000000', fontWeight: 600, fontSize: 14, textTransform: 'uppercase', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}
+                                                        sx={{ color: '#fff !important', fontWeight: 600, fontSize: 14, textTransform: 'uppercase', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}
                                                     >
                                                         All Positions
                                                     </MenuItem>
@@ -4897,7 +4796,7 @@ export default function LeagueDetailPage() {
                                                             key={position}
                                                             selected={selectedMemberPosition.toLowerCase() === position.toLowerCase()}
                                                             onClick={() => handleMemberPositionChange(position)}
-                                                            sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
+                                                            sx={{ color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontSize: { xs: 13, sm: 15 } }}
                                                         >
                                                             {/* <Typography  sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}></Typography> */}
                                                             {position}
@@ -4918,7 +4817,7 @@ export default function LeagueDetailPage() {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                     }}>
-                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                                                             XP STATUS
                                                         </Typography>
                                                     </Box>
@@ -4931,7 +4830,7 @@ export default function LeagueDetailPage() {
                                                         display: 'flex',
                                                         alignItems: 'center',
                                                     }}>
-                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#000000', textAlign: 'left !important' }}>
+                                                        <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                                                             STYLE
                                                         </Typography>
                                                     </Box>
@@ -4945,7 +4844,7 @@ export default function LeagueDetailPage() {
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
                                                     }}>
-                                                        <Typography className="league-table-heading" sx={{ color: '#000000' }}>
+                                                        <Typography className="league-table-heading" sx={{ color: '#717d8f !important', fontWeight: 'bold' }}>
                                                             {isMobile ? 'STATS' : 'VIEW STATS'}
                                                         </Typography>
                                                     </Box>
@@ -4959,7 +4858,7 @@ export default function LeagueDetailPage() {
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
                                                     }}>
-                                                        <Typography className="league-table-heading1" sx={{ color: '#000000' }}>
+                                                        <Typography className="league-table-heading1" sx={{ color: '#717d8f !important', fontWeight: 'bold' }}>
                                                             CAREER xp
                                                         </Typography>
                                                     </Box>
@@ -4968,12 +4867,12 @@ export default function LeagueDetailPage() {
 
                                             {/* Table Rows Content */}
                                             <Box sx={{
-                                                backgroundColor: '#383838',
+                                                backgroundColor: '#121316',
                                                 '&::-webkit-scrollbar': { display: 'none' },
                                                 scrollbarWidth: 'none',
                                                 msOverflowStyle: 'none',
-                                                borderBottomLeftRadius: '8px',
-                                                borderBottomRightRadius: '8px',
+                                                borderBottomLeftRadius: '16px',
+                                                borderBottomRightRadius: '16px',
                                                 px: 0,
                                             }}>
                                                 <List sx={{ p: 0 }}>
@@ -4982,8 +4881,6 @@ export default function LeagueDetailPage() {
                                                         const lastName = member.lastName || '';
                                                         const memberDisplayName = `${firstName} ${lastName}`.trim();
                                                         const isCurrentUser = String(member.id) === String(user?.id || '');
-                                                        const rowBgColor = isCurrentUser ? '#114a3e' : (idx % 2 === 0 ? '#383838' : '#2b2b2b');
-                                                        const rowBgColorHover = isCurrentUser ? '#444444' : (idx % 2 === 0 ? '#444444' : '#383838');
                                                         const isLast = idx === filteredMembersForTable.length - 1;
                                                         const memberXp = getEffectiveMemberXP(member);
                                                         const xpStatusTitle = getXPTier(memberXp).title;
@@ -4991,27 +4888,35 @@ export default function LeagueDetailPage() {
                                                         return (
                                                             <ListItem
                                                                 key={member.id}
-                                                                className={`league-table-row-text league-row ${idx % 2 === 0 ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''}`}
+                                                                className={`league-table-row-text league-row ${isCurrentUser ? 'league-row-current-user' : ''}`}
                                                                 onClick={() => router.push(`/player/${member.id}`)}
                                                                 sx={{
                                                                     display: 'flex',
                                                                     alignItems: 'center',
                                                                     pl: 0,
                                                                     pr: { xs: 2, sm: 3 },
-                                                                    backgroundColor: rowBgColor,
-                                                                    borderBottom: 'none',
+                                                                    background: isCurrentUser
+                                                                        ? 'linear-gradient(90deg, #183328 0%, #152d24 35%, #12211b 70%, #0f1616 100%) !important'
+                                                                        : '#121316 !important',
+                                                                    boxShadow: isCurrentUser ? 'inset 3px 0 0 #54ce91 !important' : 'none',
+                                                                    borderBottom: '1px solid #1c1d22 !important',
                                                                     color: '#fff',
                                                                     cursor: 'pointer',
                                                                     transition: 'background-color 0.2s',
-                                                                    '&:hover': { backgroundColor: rowBgColorHover },
-                                                                    borderBottomLeftRadius: isLast ? '8px' : 0,
-                                                                    borderBottomRightRadius: isLast ? '8px' : 0,
+                                                                    '&:hover': {
+                                                                        background: isCurrentUser
+                                                                            ? 'linear-gradient(90deg, #1c3c2f 0%, #183329 35%, #14251e 70%, #101817 100%) !important'
+                                                                            : '#18191e !important',
+                                                                    },
+                                                                    borderBottomLeftRadius: isLast ? '16px' : 0,
+                                                                    borderBottomRightRadius: isLast ? '16px' : 0,
                                                                     minHeight: { xs: '58px', sm: '72px' },
                                                                 }}
                                                             >
 
                                                                 {/* Rank Column */}
                                                                     <Box
+                                                                        className="league-table-sticky-rank"
                                                                         sx={{
                                                                             width: { xs: 32, sm: 40 },
                                                                             minWidth: { xs: 32, sm: 40 },
@@ -5022,48 +4927,104 @@ export default function LeagueDetailPage() {
                                                                             position: 'sticky',
                                                                             left: 0,
                                                                             zIndex: 3,
-                                                                            backgroundColor: rowBgColor,
+                                                                            backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
                                                                             transition: 'background-color 0.2s',
                                                                             alignSelf: 'stretch',
                                                                             '.MuiListItem-root:hover &': {
-                                                                                backgroundColor: rowBgColorHover,
+                                                                                backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
                                                                             },
-                                                                            borderBottomLeftRadius: isLast ? '8px' : 0,
+                                                                            '.is-scrolled .MuiListItem-root &': {
+                                                                                backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
+                                                                            },
+                                                                            borderBottomLeftRadius: isLast ? '16px' : 0,
                                                                         }}
                                                                     >
-                                                                        <Typography
-                                                                            className="league-table-heading league-table-rank"
-                                                                            sx={{
-                                                                                color: '#ffffff',
-                                                                                textAlign: 'center',
-                                                                                fontWeight: 'bold',
-                                                                                fontSize: { xs: 12, sm: 14 },
-                                                                            }}
-                                                                        >
-                                                                            {idx + 1}
-                                                                        </Typography>
+                                                                        {idx === 0 ? (
+                                                                            <TrophyCup rank={1} />
+                                                                        ) : idx === 1 ? (
+                                                                            <TrophyCup rank={2} />
+                                                                        ) : idx === 2 ? (
+                                                                            <TrophyCup rank={3} />
+                                                                        ) : (
+                                                                            <Typography
+                                                                                className="league-table-heading league-table-rank"
+                                                                                sx={{
+                                                                                    color: '#8a94a6',
+                                                                                    textAlign: 'center',
+                                                                                    fontWeight: 600,
+                                                                                    fontSize: { xs: 12, sm: 14 },
+                                                                                }}
+                                                                            >
+                                                                                {idx + 1}
+                                                                            </Typography>
+                                                                        )}
                                                                     </Box>
                                                                 {/* Avatar + Name column */}
-                                                                <Box sx={{
-                                                                    width: { xs: 170, sm: 230, md: 260 },
-                                                                    minWidth: { xs: 170, sm: 230, md: 260 },
-                                                                    flexShrink: 0,
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    pl: { xs: 2, sm: 3 },
-                                                                    pr: { xs: 1, sm: 1.5 },
-                                                                    position: 'sticky',
-                                                                    left: { xs: 32, sm: 40 },
-                                                                    zIndex: 2,
-                                                                    backgroundColor: rowBgColor,
-                                                                    boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6)',
-                                                                    transition: 'background-color 0.2s',
-                                                                    alignSelf: 'stretch',
-                                                                    '.MuiListItem-root:hover &': {
-                                                                        backgroundColor: rowBgColorHover,
-                                                                    },
-                                                                }}>
-                                                                    <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
+                                                                <Box
+                                                                    className="league-table-sticky-name"
+                                                                    sx={{
+                                                                        width: { xs: 170, sm: 230, md: 260 },
+                                                                        minWidth: { xs: 170, sm: 230, md: 260 },
+                                                                        flexShrink: 0,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        pl: { xs: 2, sm: 3 },
+                                                                        pr: { xs: 1, sm: 1.5 },
+                                                                        position: 'sticky',
+                                                                        left: { xs: 32, sm: 40 },
+                                                                        zIndex: 2,
+                                                                        backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
+                                                                        boxShadow: 'none',
+                                                                        transition: 'background-color 0.2s',
+                                                                        alignSelf: 'stretch',
+                                                                        '.MuiListItem-root:hover &': {
+                                                                            backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
+                                                                        },
+                                                                        '.is-scrolled .MuiListItem-root &': {
+                                                                            backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
+                                                                            boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
+                                                                        },
+                                                                    }}>
+                                                                    <ListItemAvatar sx={{ minWidth: { xs: 68, sm: 76 }, display: 'flex', alignItems: 'center' }}>
+                                                                        {/* Rank Movement Indicator alongside profile icon */}
+                                                                        <Box sx={{
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            justifyContent: 'center',
+                                                                            minWidth: { xs: 18, sm: 22 },
+                                                                            mr: 1,
+                                                                            flexShrink: 0,
+                                                                            userSelect: 'none',
+                                                                        }}>
+                                                                            {(() => {
+                                                                                const movement = typeof (member as any)?.rankChange === 'number'
+                                                                                    ? (member as any).rankChange
+                                                                                    : typeof (member as any)?.movement === 'number'
+                                                                                    ? (member as any).movement
+                                                                                    : (idx === 4 ? 1 : idx === 5 ? 2 : idx === 6 ? -1 : 0);
+                                                                                if (movement > 0) {
+                                                                                    return (
+                                                                                        <span style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: 2, fontWeight: 700, fontSize: 11 }}>
+                                                                                            <svg style={{ width: 8, height: 8, flexShrink: 0 }} viewBox="0 0 8 8" fill="currentColor">
+                                                                                                <path d="M4 1L7.5 7H0.5L4 1Z" />
+                                                                                            </svg>
+                                                                                            <span>{movement}</span>
+                                                                                        </span>
+                                                                                    );
+                                                                                }
+                                                                                if (movement < 0) {
+                                                                                    return (
+                                                                                        <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: 2, fontWeight: 700, fontSize: 11 }}>
+                                                                                            <svg style={{ width: 8, height: 8, flexShrink: 0 }} viewBox="0 0 8 8" fill="currentColor">
+                                                                                                <path d="M4 7L0.5 1H7.5L4 7Z" />
+                                                                                            </svg>
+                                                                                            <span>{Math.abs(movement)}</span>
+                                                                                        </span>
+                                                                                    );
+                                                                                }
+                                                                                return <span style={{ color: '#717d8f', fontWeight: 600, fontSize: 12 }}>-</span>;
+                                                                            })()}
+                                                                        </Box>
                                                                         <Box sx={{
                                                                             position: 'relative',
                                                                             width: { xs: 38, sm: 42 },
@@ -5219,7 +5180,7 @@ export default function LeagueDetailPage() {
                                                 variant="contained"
                                                 onClick={() => toast.error(inactiveLeagueMatchMessage)}
                                                 sx={{
-                                                    background: 'rgba(255,255,255,0.12)',
+                                                    background: '#121316',
                                                     color: 'rgba(255,255,255,0.45)',
                                                     fontSize: { xs: '0.9rem', sm: '1rem', md: '1.5rem' },
                                                     fontWeight: 600,
@@ -6350,7 +6311,7 @@ export default function LeagueDetailPage() {
                                                                                                 icon: '⚠️',
                                                                                                 duration: 4000,
                                                                                                 style: {
-                                                                                                    background: '#F97316',
+                                                                                                    background: '#22242a',
                                                                                                     color: '#fff',
                                                                                                     fontWeight: 600,
                                                                                                     fontSize: '0.95rem',
@@ -6955,10 +6916,9 @@ export default function LeagueDetailPage() {
                             {section === 'table' && (
                                 <div className="w-full mx-auto">
                                     <Card sx={{
-                                        background: '#383838',
-                                        backdropFilter: 'blur(10px)',
-                                        // border: '1px solid rgba(59, 130, 246, 0.3)',
-                                        borderRadius: { xs: 2, sm: 3 },
+                                        background: '#121316',
+                                        border: '1px solid #22242a',
+                                        borderRadius: '16px',
                                         boxShadow: 'none',
                                         mt: 1.2,
                                         mb: 4,
@@ -6967,10 +6927,10 @@ export default function LeagueDetailPage() {
                                             height: '6px',
                                         },
                                         '&::-webkit-scrollbar-track': {
-                                            background: '#383838',
+                                            background: '#121316',
                                         },
                                         '&::-webkit-scrollbar-thumb': {
-                                            background: '#383838',
+                                            background: '#22242a',
                                             borderRadius: '3px',
                                         },
                                     }} className="text-white">
@@ -6980,6 +6940,7 @@ export default function LeagueDetailPage() {
 
                                         <Box
                                             ref={tableScrollRef}
+                                            onScroll={syncTableHorizontalScroll}
                                             sx={{
                                                 width: '100%',
                                                 overflowX: 'auto',
@@ -6992,11 +6953,11 @@ export default function LeagueDetailPage() {
                                                     width: '8px',
                                                 },
                                                 '&::-webkit-scrollbar-track': {
-                                                    background: 'rgba(255,255,255,0.12)',
+                                                    background: '#121316',
                                                     borderRadius: '9999px',
                                                 },
                                                 '&::-webkit-scrollbar-thumb': {
-                                                    background: '#F97316',
+                                                    background: '#22242a',
                                                     borderRadius: '9999px',
                                                 },
                                             }}
@@ -7017,20 +6978,20 @@ export default function LeagueDetailPage() {
                                             </div> */}
 
                                                 <>
-                                                    <div className="grid mt-0 grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header text-black league-header-row league-header-inset font-bold sticky top-0 z-20 ">
-                                                        <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#000000' }}>#</div>
-                                                        <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#000000' }}>NAME</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>MOTM</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>P</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>W</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>D</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>L</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>GD</div>
-                                                        <div className="text-center league-table-heading" style={{ color: '#000000' }}>W%</div>
-                                                        <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#000000' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
+                                                    <div className="grid mt-0 grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
+                                                        <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#717d8f' }}>#</div>
+                                                        <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>MOTM</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>P</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>D</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>L</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f'}}>W%</div>
+                                                        <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>GD</div>
+                                                        <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#717d8f' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
                                                     </div>
                                                     {/* Full width border alag */}
-                                                    <div className="w-full border-b border-border" />
+                                                    <div className="w-full border-b border-[#22242a]" />
                                                 </>
                                                 {/* Table Rows */}
                                                 <div>
@@ -7095,13 +7056,56 @@ export default function LeagueDetailPage() {
                                                                 <div
                                                                     key={player.id}
                                                                     onClick={(e) => { e.preventDefault(); if (league?.id) openQuickViewFromTable(String(league.id), String(player.id)); }}
-                                                                    className={`league-table-row-text group grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors hover:bg-muted/50 ${isEven ? 'bg-table-row-even' : 'bg-table-row-odd'} ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white`}
+                                                                    className={`league-table-row-text group grid grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
                                                                 >
                                                                     {/* Rank */}
-                                                                    <div className="text-center text-white font-bold league-table-sticky-rank h-full flex items-center justify-center">{index + 1}</div>
+                                                                    <div className="text-center text-white font-bold league-table-sticky-rank h-full flex items-center justify-center">
+                                                                        {index === 0 ? (
+                                                                            <TrophyCup rank={1} />
+                                                                        ) : index === 1 ? (
+                                                                            <TrophyCup rank={2} />
+                                                                        ) : index === 2 ? (
+                                                                            <TrophyCup rank={3} />
+                                                                        ) : (
+                                                                            <span className="text-[#8a94a6] font-semibold text-sm sm:text-base">{index + 1}</span>
+                                                                        )}
+                                                                    </div>
 
                                                                     {/* Player Info */}
-                                                                    <div className="flex items-center gap-3 min-w-0 league-table-sticky-name transition-colors duration-150 h-full pl-2 sm:pl-3">
+                                                                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 league-table-sticky-name transition-colors duration-150 h-full pl-1.5 sm:pl-2.5">
+                                                                        {/* Rank Movement Indicator alongside profile icon */}
+                                                                        <div className="flex items-center justify-center min-w-[20px] sm:min-w-[24px] flex-shrink-0 text-[11px] sm:text-xs font-bold select-none">
+                                                                            {(() => {
+                                                                                const movement = typeof (player as any)?.rankChange === 'number'
+                                                                                    ? (player as any).rankChange
+                                                                                    : typeof (player as any)?.movement === 'number'
+                                                                                    ? (player as any).movement
+                                                                                    : (index === 4 ? 1 : index === 5 ? 2 : index === 6 ? -1 : 0);
+                                                                                if (movement > 0) {
+                                                                                    return (
+                                                                                        <span className="text-[#22c55e] flex items-center gap-0.5 font-bold text-[11px] sm:text-xs">
+                                                                                            <svg className="w-2 h-2 flex-shrink-0" viewBox="0 0 8 8" fill="currentColor">
+                                                                                                <path d="M4 1L7.5 7H0.5L4 1Z" />
+                                                                                            </svg>
+                                                                                            <span>{movement}</span>
+                                                                                        </span>
+                                                                                    );
+                                                                                }
+                                                                                if (movement < 0) {
+                                                                                    return (
+                                                                                        <span className="text-[#ef4444] flex items-center gap-0.5 font-bold text-[11px] sm:text-xs">
+                                                                                            <svg className="w-2 h-2 flex-shrink-0" viewBox="0 0 8 8" fill="currentColor">
+                                                                                                <path d="M4 7L0.5 1H7.5L4 7Z" />
+                                                                                            </svg>
+                                                                                            <span>{Math.abs(movement)}</span>
+                                                                                        </span>
+                                                                                    );
+                                                                                }
+                                                                                return <span className="text-[#717d8f] font-semibold text-xs">-</span>;
+                                                                            })()}
+                                                                        </div>
+
+                                                                        {/* Profile Avatar */}
                                                                         <div
                                                                             className="w-[38px] h-[38px] sm:w-[42px] sm:h-[42px] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 text-white font-bold text-xs"
                                                                             style={{
@@ -7132,15 +7136,12 @@ export default function LeagueDetailPage() {
                                                                     {/* MOTM */}
                                                                     <div className="text-center">
                                                                         {typeof player.motmCount === 'number' && player.motmCount > 0 ? (
-                                                                            <span className="inline-flex items-center gap-1">
-                                                                                <span className="text-white font-bold">{player.motmCount}</span>
-                                                                                <span className="inline-flex items-center" style={{ verticalAlign: 'middle' }}>
-                                                                                    {/* Using MUI Star icon already imported */}
-                                                                                    <Star sx={{ fontSize: 18, color: '#F59E0B' }} />
-                                                                                </span>
+                                                                            <span className="inline-flex items-center justify-center gap-1">
+                                                                                <Star sx={{ fontSize: 16, color: '#F59E0B' }} />
+                                                                                <span className="text-white font-bold text-sm sm:text-base">{player.motmCount}</span>
                                                                             </span>
                                                                         ) : (
-                                                                            <span className="text-white/80">-</span>
+                                                                            <span className="text-[#717d8f] font-medium">-</span>
                                                                         )}
                                                                     </div>
 
@@ -7149,11 +7150,20 @@ export default function LeagueDetailPage() {
                                                                     <div className="text-center text-white font-bold">{player.wins}</div>
                                                                     <div className="text-center text-white font-bold">{player.draws}</div>
                                                                     <div className="text-center text-white font-bold">{player.losses}</div>
-                                                                    <div className="text-center text-white font-bold">
-                                                                        {(player.goalDifference ?? 0) > 0 ? `+${player.goalDifference}` : (player.goalDifference ?? 0)}
+                                                                    <div className="text-center font-bold">
+                                                                        {(() => {
+                                                                            const gd = player.goalDifference ?? 0;
+                                                                            if (gd > 0) return <span className="text-[#22c55e]">+{gd}</span>;
+                                                                            if (gd < 0) return <span className="text-[#ef4444]">{gd}</span>;
+                                                                            return <span className="text-white/70">0</span>;
+                                                                        })()}
                                                                     </div>
                                                                     <div className="text-center text-white font-bold">{player.winPercentage}</div>
-                                                                    <div className="text-center text-white font-extrabold uppercase">{xpPts.toLocaleString()}</div>
+                                                                    <div className="text-center font-extrabold uppercase">
+                                                                        <span className={xpPts > 0 ? 'text-[#22c55e]' : xpPts < 0 ? 'text-[#ef4444]' : 'text-white/70'}>
+                                                                            {xpPts.toLocaleString()}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             );
                                                         })}
@@ -7506,222 +7516,415 @@ export default function LeagueDetailPage() {
                                 // Leaderboard Section - Grid Layout
                                 <Box
                                     sx={{
-                                        px: { xs: 1, sm: 0 },
-                                        pb: { xs: 1, sm: 0 },
+                                        px: { xs: 0.5, sm: 0 },
+                                        pb: { xs: 2, sm: 2 },
                                         pt: { xs: 0, sm: 0 },
-                                        mt: { xs: -2, sm: 2 },
+                                        mt: { xs: 1, sm: 1.5 },
                                     }}
                                 >
-                                    <Box
-                                        sx={{
-                                            display: 'grid',
-                                            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
-                                            gap: 2,
-                                            mb: 1,
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mb-4">
+                                        {LEADERBOARD_METRIC_CONFIG.map((metric) => {
+                                            const allPlayers = allLeaderboardData[metric.key] || [];
+                                            const isExpanded = Boolean(expandedLeaderboards[metric.key]);
+                                            const displayedPlayers = (isExpanded && !isDesktop) ? allPlayers : allPlayers.slice(0, 5);
+                                            const hasMorePlayers = allPlayers.length > 5;
+                                            const valueHeader = getMetricValueHeader(metric.key);
 
-                                        }}
-                                    >
-                                        {LEADERBOARD_METRIC_CONFIG.map((metric) => (
-                                            <Box
-                                                key={metric.key}
-                                                sx={{
-                                                    background: '#2b2b2b',
-                                                    borderRadius: 2,
-                                                    border: '1px solid #ffffff',
-                                                    overflow: 'hidden',
-                                                }}
-                                            >
-                                                {/* Card Header */}
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 1.5,
-                                                        p: { xs: 1, sm: 1.3 },
-                                                        // borderBottom: '1px solid rgba(255,255,255,0.1)',
-                                                    }}
+                                            return (
+                                                <div
+                                                    key={metric.key}
+                                                    className="bg-[#121316] rounded-2xl border border-[#22242a] overflow-hidden flex flex-col"
                                                 >
-                                                    <Tooltip title="How this metric is calculated" arrow>
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={(event) => {
-                                                                event.stopPropagation();
-                                                                setLeaderboardInfoMetric(metric.key);
-                                                            }}
-                                                            sx={{
-                                                                p: 0.4,
-                                                                // border: '1px solid rgba(255,255,255,0.35)',
-                                                                // borderRadius: 1,
-                                                                color: '#fff',
-                                                                '&:hover': {
-                                                                    borderColor: '#fff',
-                                                                    backgroundColor: 'rgba(255,255,255,0.12)',
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Image src={InfoIcon} alt={`${metric.label} info`} width={13} height={13} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Image src={metric.icon} alt={metric.label} width={38} height={38} />
-                                                    <Typography
-                                                        sx={{
-                                                            color: 'white',
-                                                            fontWeight: 500,
-                                                            fontSize: { xs: '0.9rem', sm: '1rem' },
-                                                            letterSpacing: 0.5,
-                                                        }}
-                                                    >
-                                                        {metric.label}
-                                                    </Typography>
-                                                </Box>
+                                                    {/* Card Header */}
+                                                    <div className="flex items-center justify-between px-3.5 sm:px-4 pt-3.5 pb-2.5">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Metric Icon Container */}
+                                                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#18191e] border border-[#22242a] flex items-center justify-center flex-shrink-0">
+                                                                <Image
+                                                                    src={metric.icon}
+                                                                    alt={metric.label}
+                                                                    width={22}
+                                                                    height={22}
+                                                                    className="object-contain"
+                                                                />
+                                                            </div>
+                                                            <span className="text-white font-bold tracking-wider text-xs sm:text-sm uppercase">
+                                                                {metric.label}
+                                                            </span>
+                                                        </div>
 
-                                                {/* Players List */}
-                                                <Box sx={{ p: 0, ml: -1.2, mt: -0.5 }}>
-                                                    {leaderboardLoading ? (
-                                                        <LeagueDetailLoadingSkeleton mode="list" />
-                                                    ) : (
-                                                        (allLeaderboardData[metric.key] || []).slice(0, 5).map((player, idx) => {
-                                                            const leaderboardMember = (league?.members || []).find((m) => String(m.id) === String(player.id));
-                                                            const leaderboardPlayerName =
-                                                                (player.name || `${leaderboardMember?.firstName || ''} ${leaderboardMember?.lastName || ''}`.trim()).trim();
-                                                            const leaderboardAvatarSrc =
-                                                                typeof leaderboardMember?.profilePicture === 'string' && leaderboardMember.profilePicture.trim().length > 0
-                                                                    ? leaderboardMember.profilePicture.trim()
-                                                                    : '';
-                                                            const leaderboardInitials = getAvatarInitials({
-                                                                name: leaderboardPlayerName,
-                                                                firstName: leaderboardMember?.firstName,
-                                                                lastName: leaderboardMember?.lastName,
-                                                            });
+                                                        {/* Info Button */}
+                                                        <Tooltip title="How this metric is calculated" arrow>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation();
+                                                                    setLeaderboardInfoMetric(metric.key);
+                                                                }}
+                                                                className="w-6 h-6 rounded-full border border-[#22242a] flex items-center justify-center text-[#717d8f] hover:text-white hover:border-[#383a42] transition-colors"
+                                                            >
+                                                                <Info className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </Tooltip>
+                                                    </div>
 
-                                                            return (
-                                                                <Link key={`${metric.key}-${player.id}`} href={`/player/${player.id}`} passHref>
-                                                                    <Box
-                                                                        sx={{
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            px: 2,
-                                                                            py: 0.5,
-                                                                            borderBottom: idx < 4 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                                                                            cursor: 'pointer',
-                                                                            transition: 'background 0.2s',
-                                                                            background: idx === 0 ? '#383838' : 'transparent',
-                                                                            '&:hover': {
-                                                                                background: idx === 0 ? '#454545' : 'rgba(255,255,255,0.05)',
-                                                                            },
-                                                                        }}
+                                                    {/* Table Column Headers */}
+                                                    <div className="grid grid-cols-[28px_1fr_auto] items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 text-[#717d8f] text-[11px] font-semibold uppercase tracking-wider">
+                                                        <div className="text-center">#</div>
+                                                        <div>PLAYER</div>
+                                                        <div className="text-right min-w-[36px] sm:min-w-[44px] pr-1">{valueHeader}</div>
+                                                    </div>
+
+                                                    {/* Players List */}
+                                                    <div className="flex-1 flex flex-col">
+                                                        {leaderboardLoading ? (
+                                                            <div className="p-3">
+                                                                <LeagueDetailLoadingSkeleton mode="list" />
+                                                            </div>
+                                                        ) : (
+                                                            displayedPlayers.map((player, idx) => {
+                                                                const leaderboardMember = (league?.members || []).find((m) => String(m.id) === String(player.id));
+                                                                const leaderboardPlayerName =
+                                                                    (player.name || `${leaderboardMember?.firstName || ''} ${leaderboardMember?.lastName || ''}`.trim()).trim();
+                                                                const leaderboardAvatarSrc =
+                                                                    typeof leaderboardMember?.profilePicture === 'string' && leaderboardMember.profilePicture.trim().length > 0
+                                                                        ? leaderboardMember.profilePicture.trim()
+                                                                        : '';
+                                                                const leaderboardInitials = getAvatarInitials({
+                                                                    name: leaderboardPlayerName,
+                                                                    firstName: leaderboardMember?.firstName,
+                                                                    lastName: leaderboardMember?.lastName,
+                                                                });
+
+                                                                const firstName = leaderboardMember?.firstName || (player.name ? player.name.split(' ')[0] : '');
+                                                                const lastName = leaderboardMember?.lastName || (player.name ? player.name.split(' ').slice(1).join(' ') : '');
+                                                                const isPlayerAdmin = (league?.administrators || []).some((a: any) => String(a.id) === String(player.id)) || Boolean((leaderboardMember as any)?.isAdmin);
+                                                                const rawPos = leaderboardMember ? getMemberPositionLabel(leaderboardMember) : getPositionShortForm(player.positionType);
+                                                                const displayPos = !rawPos || rawPos.toLowerCase() === 'player' ? '-' : rawPos;
+                                                                const isCurrentUser = String(player.id) === String(user?.id || '');
+
+                                                                return (
+                                                                    <Link
+                                                                        key={`${metric.key}-${player.id}`}
+                                                                        href={`/player/${player.id}`}
+                                                                        className={`grid grid-cols-[28px_1fr_auto] items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 transition-colors border-b border-[#1c1d22] cursor-pointer ${
+                                                                            isCurrentUser
+                                                                                ? 'league-row-current-user'
+                                                                                : 'hover:bg-[#18191e]'
+                                                                        }`}
                                                                     >
-                                                                        {/* Rank Number - aligned with info icon */}
-                                                                        <Typography
-                                                                            sx={{
-                                                                                color: '#fff',
-                                                                                fontWeight: 600,
-                                                                                fontSize: '0.9rem',
-                                                                                width: 20,
-                                                                                textAlign: 'center',
-                                                                            }}
-                                                                        >
+                                                                        {/* Rank Number */}
+                                                                        <div className="text-center text-[#8a94a6] font-semibold text-xs sm:text-sm">
                                                                             {idx + 1}
-                                                                        </Typography>
-
-                                                                        {/* Player Avatar - aligned with metric icon */}
-                                                                        <Box
-                                                                            sx={{
-                                                                                width: 33,
-                                                                                height: 33,
-                                                                                borderRadius: '50%',
-                                                                                background: leaderboardAvatarSrc
-                                                                                    ? 'linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)'
-                                                                                    : getAvatarBackgroundColor(leaderboardPlayerName || String(player.id || 'player')),
-                                                                                display: 'flex',
-                                                                                alignItems: 'center',
-                                                                                justifyContent: 'center',
-                                                                                ml: 1.5,
-                                                                                mr: 1.5,
-                                                                                overflow: 'hidden',
-                                                                                color: '#fff',
-                                                                                fontWeight: 700,
-                                                                                fontSize: '0.7rem',
-                                                                                textTransform: 'uppercase',
-                                                                            }}
-                                                                        >
-                                                                            {leaderboardAvatarSrc ? (
-                                                                                <Image src={resolveImageUrl(leaderboardAvatarSrc)} alt={leaderboardPlayerName || 'Player'} width={33} height={33} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                                                                            ) : (
-                                                                                leaderboardInitials
-                                                                            )}
-                                                                        </Box>
+                                                                        </div>
 
                                                                         {/* Player Info */}
-                                                                        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0, lineHeight: 1 }}>
-                                                                            <Typography
-                                                                                sx={{
-                                                                                    color: 'white',
-                                                                                    fontWeight: 600,
-                                                                                    fontSize: '0.8rem',
-                                                                                    whiteSpace: 'nowrap',
-                                                                                    overflow: 'hidden',
-                                                                                    textOverflow: 'ellipsis',
-                                                                                    lineHeight: 1.1,
-                                                                                    mb: 0,
+                                                                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                                                            {/* Avatar */}
+                                                                            <div
+                                                                                className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 text-white font-bold text-[11px]"
+                                                                                style={{
+                                                                                    backgroundColor: leaderboardAvatarSrc
+                                                                                        ? 'transparent'
+                                                                                        : getAvatarBackgroundColor(leaderboardPlayerName || String(player.id || 'player')),
                                                                                 }}
                                                                             >
-                                                                                {formatPlayerCardStyleName(
-                                                                                    leaderboardMember?.firstName || player.name.split(' ')[0],
-                                                                                    leaderboardMember?.lastName || player.name.split(' ').slice(1).join(' ')
+                                                                                {leaderboardAvatarSrc ? (
+                                                                                    <Image
+                                                                                        src={resolveImageUrl(leaderboardAvatarSrc)}
+                                                                                        alt={leaderboardPlayerName || 'Player'}
+                                                                                        width={32}
+                                                                                        height={32}
+                                                                                        style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                                                                    />
+                                                                                ) : (
+                                                                                    leaderboardInitials
                                                                                 )}
-                                                                            </Typography>
-                                                                            {(() => {
-                                                                                const rawPos = leaderboardMember ? getMemberPositionLabel(leaderboardMember) : getPositionShortForm(player.positionType);
-                                                                                if (!rawPos || rawPos === '-' || rawPos.toLowerCase() === 'player') return null;
-                                                                                return (
-                                                                                    <Typography
-                                                                                        sx={{
-                                                                                            color: 'rgba(255,255,255,0.7)',
-                                                                                            fontSize: '0.65rem',
-                                                                                            fontWeight: 400,
-                                                                                            lineHeight: 1.1,
-                                                                                            mt: 0,
-                                                                                        }}
-                                                                                    >
-                                                                                        {rawPos}
-                                                                                    </Typography>
-                                                                                );
-                                                                            })()}
-                                                                        </Box>
+                                                                            </div>
+
+                                                                            {/* Name & Position */}
+                                                                            <div className="flex flex-col min-w-0 justify-center leading-tight">
+                                                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                                                    <span className="text-white font-bold text-xs sm:text-sm truncate uppercase">
+                                                                                        {formatPlayerCardStyleName(firstName, lastName)}
+                                                                                    </span>
+                                                                                    {isPlayerAdmin && <Shield className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />}
+                                                                                </div>
+                                                                                <span className="text-[#717d8f] text-[10px] sm:text-[11px] uppercase font-medium">
+                                                                                    {displayPos}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
 
                                                                         {/* Value */}
-                                                                        <Typography
-                                                                            sx={{
-                                                                                color: 'white',
-                                                                                fontWeight: 700,
-                                                                                fontSize: '1.1rem',
-                                                                                ml: 1,
-                                                                            }}
-                                                                        >
+                                                                        <div className="text-right font-bold text-[#22c55e] text-sm sm:text-base min-w-[36px] sm:min-w-[44px] pr-1">
                                                                             {metric.key === 'contribution' ? `${player.value}%` : player.value}
-                                                                        </Typography>
-                                                                    </Box>
-                                                                </Link>
-                                                            );
-                                                        })
-                                                    )}
-                                                    {!leaderboardLoading && (allLeaderboardData[metric.key] || []).length === 0 && (
-                                                        <Box sx={{ p: 3, textAlign: 'center' }}>
-                                                            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' }}>
+                                                                        </div>
+                                                                    </Link>
+                                                                );
+                                                            })
+                                                        )}
+
+                                                        {!leaderboardLoading && allPlayers.length === 0 && (
+                                                            <div className="py-6 text-center text-[#717d8f] text-xs sm:text-sm">
                                                                 No data available
-                                                            </Typography>
-                                                        </Box>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Show More / Show Less Button */}
+                                                    {hasMorePlayers && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (isDesktop) {
+                                                                    setDesktopLeaderboardPopupMetric(metric.key);
+                                                                } else {
+                                                                    setExpandedLeaderboards((prev) => ({ ...prev, [metric.key]: !prev[metric.key] }));
+                                                                }
+                                                            }}
+                                                            className="w-full py-2.5 sm:py-3 flex items-center justify-center gap-1.5 text-[#e56a16] hover:text-[#f97316] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer border-t border-[#1c1d22]/50"
+                                                        >
+                                                            <span>{(!isDesktop && isExpanded) ? 'SHOW LESS' : 'SHOW MORE'}</span>
+                                                            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${(!isDesktop && isExpanded) ? 'rotate-180' : ''}`} />
+                                                        </button>
                                                     )}
-                                                </Box>
-                                            </Box>
-                                        ))}
-                                    </Box>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </Box>
                             )}
                                 </>
                             )}
                         </Paper>
+
+                        {/* Desktop Leaderboard Full Rankings Popup */}
+                        <Dialog
+                            open={Boolean(selectedDesktopLeaderboardMetric)}
+                            onClose={() => setDesktopLeaderboardPopupMetric(null)}
+                            fullWidth
+                            maxWidth="sm"
+                            PaperProps={{
+                                sx: {
+                                    bgcolor: '#121316',
+                                    color: '#fff',
+                                    border: '1px solid #22242a',
+                                    borderRadius: '16px',
+                                    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.75)',
+                                    overflow: 'hidden',
+                                    maxHeight: '85vh',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                }
+                            }}
+                        >
+                            {/* Popup Header */}
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                px: { xs: 2, sm: 3 },
+                                py: 2,
+                                borderBottom: '1px solid #1c1d22',
+                                bgcolor: '#16181d',
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    {selectedDesktopLeaderboardMetric?.icon && (
+                                        <Box sx={{
+                                            width: 38,
+                                            height: 38,
+                                            borderRadius: '12px',
+                                            bgcolor: '#18191e',
+                                            border: '1px solid #22242a',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexShrink: 0,
+                                        }}>
+                                            <Image
+                                                src={selectedDesktopLeaderboardMetric.icon}
+                                                alt={selectedDesktopLeaderboardMetric.label}
+                                                width={22}
+                                                height={22}
+                                                className="object-contain"
+                                            />
+                                        </Box>
+                                    )}
+                                    <Box>
+                                        <Typography sx={{
+                                            fontSize: '1rem',
+                                            fontWeight: 700,
+                                            color: '#ffffff',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.8px',
+                                            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                            lineHeight: 1.2,
+                                        }}>
+                                            {selectedDesktopLeaderboardMetric?.label || 'Leaderboard'}
+                                        </Typography>
+                                        <Typography sx={{ fontSize: '11px', color: '#717d8f', fontWeight: 500, mt: 0.25 }}>
+                                            Full Rankings
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    {selectedDesktopLeaderboardMetric && (
+                                        <Tooltip title="How this metric is calculated" arrow>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setLeaderboardInfoMetric(selectedDesktopLeaderboardMetric.key);
+                                                }}
+                                                className="w-7 h-7 rounded-full border border-[#22242a] flex items-center justify-center text-[#717d8f] hover:text-white hover:border-[#383a42] transition-colors"
+                                            >
+                                                <Info className="w-4 h-4" />
+                                            </button>
+                                        </Tooltip>
+                                    )}
+                                    <IconButton
+                                        onClick={() => setDesktopLeaderboardPopupMetric(null)}
+                                        sx={{
+                                            color: '#717d8f',
+                                            p: 0.75,
+                                            '&:hover': { color: '#ffffff', bgcolor: 'rgba(255,255,255,0.06)' },
+                                        }}
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                            </Box>
+
+                            {/* Column Headers */}
+                            <Box sx={{
+                                display: 'grid',
+                                gridTemplateColumns: '36px 1fr auto',
+                                alignItems: 'center',
+                                gap: 2,
+                                px: { xs: 2.5, sm: 3.5 },
+                                py: 1.5,
+                                bgcolor: '#121316',
+                                borderBottom: '1px solid #1c1d22',
+                                color: '#717d8f',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                letterSpacing: '0.8px',
+                                textTransform: 'uppercase',
+                            }}>
+                                <Box sx={{ textAlign: 'center' }}>#</Box>
+                                <Box>PLAYER</Box>
+                                <Box sx={{ textAlign: 'right', minWidth: 44, pr: 1 }}>
+                                    {selectedDesktopLeaderboardMetric ? getMetricValueHeader(selectedDesktopLeaderboardMetric.key) : ''}
+                                </Box>
+                            </Box>
+
+                            {/* Scrollable Players List */}
+                            <DialogContent sx={{
+                                p: 0,
+                                bgcolor: '#121316',
+                                overflowY: 'auto',
+                                maxHeight: '62vh',
+                                scrollbarWidth: 'thin',
+                                '&::-webkit-scrollbar': { width: '8px' },
+                                '&::-webkit-scrollbar-track': { background: '#121316' },
+                                '&::-webkit-scrollbar-thumb': { background: '#22242a', borderRadius: '9999px' },
+                            }}>
+                                {(() => {
+                                    if (!selectedDesktopLeaderboardMetric) return null;
+                                    const players = allLeaderboardData[selectedDesktopLeaderboardMetric.key] || [];
+                                    if (players.length === 0) {
+                                        return (
+                                            <Box sx={{ py: 6, textAlign: 'center', color: '#717d8f', fontSize: 13 }}>
+                                                No data available
+                                            </Box>
+                                        );
+                                    }
+                                    return players.map((player, idx) => {
+                                        const leaderboardMember = (league?.members || []).find((m) => String(m.id) === String(player.id));
+                                        const leaderboardPlayerName =
+                                            (player.name || `${leaderboardMember?.firstName || ''} ${leaderboardMember?.lastName || ''}`.trim()).trim();
+                                        const leaderboardAvatarSrc =
+                                            typeof leaderboardMember?.profilePicture === 'string' && leaderboardMember.profilePicture.trim().length > 0
+                                                ? leaderboardMember.profilePicture.trim()
+                                                : '';
+                                        const leaderboardInitials = getAvatarInitials({
+                                            name: leaderboardPlayerName,
+                                            firstName: leaderboardMember?.firstName,
+                                            lastName: leaderboardMember?.lastName,
+                                        });
+
+                                        const firstName = leaderboardMember?.firstName || (player.name ? player.name.split(' ')[0] : '');
+                                        const lastName = leaderboardMember?.lastName || (player.name ? player.name.split(' ').slice(1).join(' ') : '');
+                                        const isPlayerAdmin = (league?.administrators || []).some((a: any) => String(a.id) === String(player.id)) || Boolean((leaderboardMember as any)?.isAdmin);
+                                        const rawPos = leaderboardMember ? getMemberPositionLabel(leaderboardMember) : getPositionShortForm(player.positionType);
+                                        const displayPos = !rawPos || rawPos.toLowerCase() === 'player' ? '-' : rawPos;
+                                        const isCurrentUser = String(player.id) === String(user?.id || '');
+
+                                        return (
+                                            <Link
+                                                key={`popup-${selectedDesktopLeaderboardMetric.key}-${player.id}`}
+                                                href={`/player/${player.id}`}
+                                                onClick={() => setDesktopLeaderboardPopupMetric(null)}
+                                                className={`grid grid-cols-[36px_1fr_auto] items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 transition-colors border-b border-[#1c1d22] cursor-pointer ${
+                                                    isCurrentUser
+                                                        ? 'league-row-current-user'
+                                                        : 'hover:bg-[#18191e]'
+                                                }`}
+                                            >
+                                                {/* Rank Number */}
+                                                <div className="text-center text-[#8a94a6] font-semibold text-xs sm:text-sm">
+                                                    {idx + 1}
+                                                </div>
+
+                                                {/* Player Info */}
+                                                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                                                    {/* Avatar */}
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 text-white font-bold text-[11px]"
+                                                        style={{
+                                                            backgroundColor: leaderboardAvatarSrc
+                                                                ? 'transparent'
+                                                                : getAvatarBackgroundColor(leaderboardPlayerName || String(player.id || 'player')),
+                                                        }}
+                                                    >
+                                                        {leaderboardAvatarSrc ? (
+                                                            <Image
+                                                                src={resolveImageUrl(leaderboardAvatarSrc)}
+                                                                alt={leaderboardPlayerName || 'Player'}
+                                                                width={32}
+                                                                height={32}
+                                                                style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                                                            />
+                                                        ) : (
+                                                            leaderboardInitials
+                                                        )}
+                                                    </div>
+
+                                                    {/* Name & Position */}
+                                                    <div className="flex flex-col min-w-0 justify-center leading-tight">
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                            <span className="text-white font-bold text-xs sm:text-sm truncate uppercase">
+                                                                {formatPlayerCardStyleName(firstName, lastName)}
+                                                            </span>
+                                                            {isPlayerAdmin && <Shield className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />}
+                                                        </div>
+                                                        <span className="text-[#717d8f] text-[10px] sm:text-[11px] uppercase font-medium">
+                                                            {displayPos}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Value */}
+                                                <div className="text-right font-bold text-[#22c55e] text-sm sm:text-base min-w-[36px] sm:min-w-[44px] pr-1">
+                                                    {selectedDesktopLeaderboardMetric.key === 'contribution' ? `${player.value}%` : player.value}
+                                                </div>
+                                            </Link>
+                                        );
+                                    });
+                                })()}
+                            </DialogContent>
+                        </Dialog>
 
                         <Dialog
                             open={Boolean(selectedLeaderboardInfo)}
