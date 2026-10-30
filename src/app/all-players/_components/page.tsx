@@ -1667,7 +1667,7 @@ const AllPlayersPage = () => {
             maxWidth: 1280,
             mx: 'auto',
             px: { xs: 2, sm: 3, md: 7.5 },
-            pb: 4,
+            // pb: 4,
             mt: 0,
           }}
         >
@@ -1917,7 +1917,7 @@ const AllPlayersPage = () => {
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                     px: 0,
-                    pb: { xs: 0, sm: 1.5 },
+                    pb: 0,
                     pt: 0,
                   }}>
                     <List sx={{ p: 0 }}>

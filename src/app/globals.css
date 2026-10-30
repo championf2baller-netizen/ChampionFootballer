@@ -478,7 +478,7 @@ input:-webkit-autofill:active {
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
-.league-row-current-user .league-table-sticky-rank {
+.league-row-current-user .league-table-sticky-rank { background-color: transparent !important; background: transparent !important; box-shadow: none !important; border-bottom-left-radius: 0 !important; } .disabled-user-rank-rule-1 {
   background-color: transparent !important;
   background: transparent !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
@@ -495,7 +495,7 @@ input:-webkit-autofill:active {
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
-.league-row-current-user:hover .league-table-sticky-rank {
+.league-row-current-user:hover .league-table-sticky-rank { background-color: transparent !important; background: transparent !important; box-shadow: none !important; border-bottom-left-radius: 0 !important; } .disabled-user-rank-rule-2 {
   background-color: transparent !important;
   background: transparent !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
@@ -509,7 +509,7 @@ input:-webkit-autofill:active {
 
 /* When table is actively scrolled horizontally (on mobile/small screens):
    give the sticky columns an opaque background to cleanly hide content sliding underneath */
-.is-scrolled .league-row-current-user .league-table-sticky-rank {
+.is-scrolled .league-row-current-user > .league-table-sticky-rank {
   background-color: #183328 !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
@@ -519,7 +519,7 @@ input:-webkit-autofill:active {
   box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
-.is-scrolled .league-row-current-user:hover .league-table-sticky-rank {
+.is-scrolled .league-row-current-user:hover > .league-table-sticky-rank {
   background-color: #1c3c2f !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
@@ -2968,6 +2968,8 @@ input:-webkit-autofill:active {
   z-index: 10 !important;
   background-color: inherit !important;
   transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-left-radius: 0 !important;
 }
 
 .league-table-sticky-name {
@@ -2976,6 +2978,8 @@ input:-webkit-autofill:active {
   z-index: 9 !important;
   background-color: inherit !important;
   transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-left-radius: 0 !important;
 }
 
 @media (min-width: 640px) {

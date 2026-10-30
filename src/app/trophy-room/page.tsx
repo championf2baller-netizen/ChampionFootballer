@@ -3836,7 +3836,7 @@ export default function GlobalTrophyRoom() {
                 gap: { sm: 2, md: 1.5 },
                 justifyContent: 'center',
                 alignItems: 'stretch',
-                mb: { sm: 6, md: 8 },
+                // mb: { sm: 6, md: 8 },
               }}>
                 {(() => {
                   const bottomTrophyTitles = ['Golden Boot', 'King Playmaker', 'Legendary Shield', 'Dark Horse', 'Star Keeper'];

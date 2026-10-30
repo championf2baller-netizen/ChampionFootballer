@@ -3106,7 +3106,7 @@ export default function AllMatches() {
                     display: 'grid',
                     gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
                     gap: 3,
-                    mb: { xs: 1, md: 4 },
+                    // mb: { xs: 1, md: 4 },
                     mt: 0
                 }}>
                     {loading ? (

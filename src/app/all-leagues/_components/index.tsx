@@ -6216,7 +6216,7 @@ function AllLeagues() {
         <Container maxWidth={false} disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
 
         {/* Leagues List - Card Format */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mb: 7, mt: 0 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mt: 0 }}>
           {loading ? (
             <AllLeaguesLoadingSkeleton compact />
           ) : leagues.length === 0 ? (

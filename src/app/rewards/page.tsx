@@ -1155,7 +1155,7 @@ export default function RewardsPage() {
         </Box>
       </PageHeader>
 
-      <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 0.75, sm: 2, md: 3 }, pb: 5 }}>
+      <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 0.75, sm: 2, md: 3 }, }}>
 
         {loading ? (
           <RewardsLoadingSkeleton />

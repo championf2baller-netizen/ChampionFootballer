@@ -4658,7 +4658,7 @@ export default function LeagueDetailPage() {
                                                 borderRadius: '16px',
                                                 boxShadow: 'none',
                                                 mt: 1.2,
-                                                mb: 4,
+                                                // mb: 4,
                                                 overflow: 'hidden',
                                                 '&::-webkit-scrollbar': {
                                                     height: '6px',
@@ -4751,19 +4751,9 @@ export default function LeagueDetailPage() {
                                                     <Typography className="league-table-heading league-table-heading-left" sx={{ color: '#717d8f !important', textAlign: 'left !important', fontWeight: 'bold' }}>
                                                         {selectedMemberPosition === 'all' ? 'ALL POSITIONS' : selectedMemberPosition.toUpperCase()}
                                                     </Typography>
-                                                    <Box
-                                                        sx={{
-                                                            ml: 1,
-                                                            width: 0,
-                                                            height: 0,
-                                                            borderLeft: '5px solid transparent',
-                                                            borderRight: '5px solid transparent',
-                                                            borderTop: '6px solid #717d8f',
-                                                            transform: memberPositionMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                                                            transformOrigin: 'center',
-                                                            transition: 'transform 0.3s ease',
-                                                        }}
-                                                    />
+                                                    <Box sx={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', ml: 1, flexShrink: 0 }}>
+                                                        <ChevronDown size={11} color="#e56a16" />
+                                                    </Box>
                                                 </Box>
                                                 <Menu
                                                     anchorEl={memberPositionMenuAnchor}
@@ -4849,17 +4839,21 @@ export default function LeagueDetailPage() {
                                                         </Typography>
                                                     </Box>
 
-                                                    {/* XP Points Header */}
+                                                    {/* Career XP Header */}
                                                     <Box sx={{
-                                                        width: { xs: 75, sm: 100, md: 115 },
-                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                        width: { xs: 85, sm: 110, md: 125 },
+                                                        minWidth: { xs: 85, sm: 110, md: 125 },
                                                         flexShrink: 0,
                                                         display: 'flex',
-                                                        alignItems: 'center',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'flex-end',
                                                         justifyContent: 'center',
                                                     }}>
-                                                        <Typography className="league-table-heading1" sx={{ color: '#717d8f !important', fontWeight: 'bold' }}>
-                                                            CAREER xp
+                                                        <Typography className="league-table-heading1" sx={{ color: '#717d8f !important', fontWeight: 'bold', fontSize: { xs: 11, sm: 12 } }}>
+                                                            CAREER XP
+                                                        </Typography>
+                                                        <Typography sx={{ color: '#4b5563', fontSize: { xs: 9, sm: 10 }, fontWeight: 700, letterSpacing: 0.5, lineHeight: 1, display: { xs: 'none', sm: 'block' } }}>
+                                                            OF 25,000
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -4884,6 +4878,7 @@ export default function LeagueDetailPage() {
                                                         const isLast = idx === filteredMembersForTable.length - 1;
                                                         const memberXp = getEffectiveMemberXP(member);
                                                         const xpStatusTitle = getXPTier(memberXp).title;
+                                                        const progressPercent = Math.min(100, Math.max(3, (memberXp / 25000) * 100));
 
                                                         return (
                                                             <ListItem
@@ -4939,25 +4934,17 @@ export default function LeagueDetailPage() {
                                                                             borderBottomLeftRadius: isLast ? '16px' : 0,
                                                                         }}
                                                                     >
-                                                                        {idx === 0 ? (
-                                                                            <TrophyCup rank={1} />
-                                                                        ) : idx === 1 ? (
-                                                                            <TrophyCup rank={2} />
-                                                                        ) : idx === 2 ? (
-                                                                            <TrophyCup rank={3} />
-                                                                        ) : (
-                                                                            <Typography
-                                                                                className="league-table-heading league-table-rank"
-                                                                                sx={{
-                                                                                    color: '#8a94a6',
-                                                                                    textAlign: 'center',
-                                                                                    fontWeight: 600,
-                                                                                    fontSize: { xs: 12, sm: 14 },
-                                                                                }}
-                                                                            >
-                                                                                {idx + 1}
-                                                                            </Typography>
-                                                                        )}
+                                                                        <Typography
+                                                                            className="league-table-heading league-table-rank"
+                                                                            sx={{
+                                                                                color: '#8a94a6',
+                                                                                textAlign: 'center',
+                                                                                fontWeight: 600,
+                                                                                fontSize: { xs: 12, sm: 14 },
+                                                                            }}
+                                                                        >
+                                                                            {idx + 1}
+                                                                        </Typography>
                                                                     </Box>
                                                                 {/* Avatar + Name column */}
                                                                 <Box
@@ -4985,46 +4972,7 @@ export default function LeagueDetailPage() {
                                                                             boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
                                                                         },
                                                                     }}>
-                                                                    <ListItemAvatar sx={{ minWidth: { xs: 68, sm: 76 }, display: 'flex', alignItems: 'center' }}>
-                                                                        {/* Rank Movement Indicator alongside profile icon */}
-                                                                        <Box sx={{
-                                                                            display: 'flex',
-                                                                            alignItems: 'center',
-                                                                            justifyContent: 'center',
-                                                                            minWidth: { xs: 18, sm: 22 },
-                                                                            mr: 1,
-                                                                            flexShrink: 0,
-                                                                            userSelect: 'none',
-                                                                        }}>
-                                                                            {(() => {
-                                                                                const movement = typeof (member as any)?.rankChange === 'number'
-                                                                                    ? (member as any).rankChange
-                                                                                    : typeof (member as any)?.movement === 'number'
-                                                                                    ? (member as any).movement
-                                                                                    : (idx === 4 ? 1 : idx === 5 ? 2 : idx === 6 ? -1 : 0);
-                                                                                if (movement > 0) {
-                                                                                    return (
-                                                                                        <span style={{ color: '#22c55e', display: 'inline-flex', alignItems: 'center', gap: 2, fontWeight: 700, fontSize: 11 }}>
-                                                                                            <svg style={{ width: 8, height: 8, flexShrink: 0 }} viewBox="0 0 8 8" fill="currentColor">
-                                                                                                <path d="M4 1L7.5 7H0.5L4 1Z" />
-                                                                                            </svg>
-                                                                                            <span>{movement}</span>
-                                                                                        </span>
-                                                                                    );
-                                                                                }
-                                                                                if (movement < 0) {
-                                                                                    return (
-                                                                                        <span style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: 2, fontWeight: 700, fontSize: 11 }}>
-                                                                                            <svg style={{ width: 8, height: 8, flexShrink: 0 }} viewBox="0 0 8 8" fill="currentColor">
-                                                                                                <path d="M4 7L0.5 1H7.5L4 7Z" />
-                                                                                            </svg>
-                                                                                            <span>{Math.abs(movement)}</span>
-                                                                                        </span>
-                                                                                    );
-                                                                                }
-                                                                                return <span style={{ color: '#717d8f', fontWeight: 600, fontSize: 12 }}>-</span>;
-                                                                            })()}
-                                                                        </Box>
+                                                                    <ListItemAvatar sx={{ minWidth: { xs: 52, sm: 60 } }}>
                                                                         <Box sx={{
                                                                             position: 'relative',
                                                                             width: { xs: 38, sm: 42 },
@@ -5062,10 +5010,15 @@ export default function LeagueDetailPage() {
                                                                         </Box>
                                                                     </ListItemAvatar>
                                                                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                                                                        <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                                            {formatPlayerCardStyleName(firstName, lastName)}
-                                                                        </Typography>
-                                                                        <Typography className="league-player-pos" sx={{ fontSize: { xs: 14, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                                                                            <Typography className="league-table-row-text" noWrap sx={{ fontWeight: 700, fontSize: { xs: 12, sm: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                                                {formatPlayerCardStyleName(firstName, lastName)}
+                                                                            </Typography>
+                                                                            {(member as any).isAdmin && (
+                                                                                <Shield className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                                                                            )}
+                                                                        </Box>
+                                                                        <Typography className="league-player-pos" sx={{ fontSize: { xs: 13, sm: 14 }, color: 'rgba(255,255,255,0.6)', mt: 0.25, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
                                                                             {getMemberPositionLabel(member)}
                                                                         </Typography>
                                                                     </Box>
@@ -5085,9 +5038,63 @@ export default function LeagueDetailPage() {
                                                                         alignItems: 'center',
                                                                         justifyContent: 'flex-start',
                                                                     }}>
-                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                                                            {xpStatusTitle}
-                                                                        </Typography>
+                                                                        {(() => {
+                                                                            const t = xpStatusTitle.toLowerCase();
+                                                                            let bg = 'rgba(255, 255, 255, 0.08)';
+                                                                            let color = '#fff';
+                                                                            let border = '1px solid rgba(255, 255, 255, 0.12)';
+                                                                            if (t === 'pro') {
+                                                                                bg = 'rgba(110, 86, 207, 0.22)';
+                                                                                color = '#c4b5fd';
+                                                                                border = '1px solid rgba(139, 92, 246, 0.3)';
+                                                                            } else if (t === 'baller') {
+                                                                                bg = 'rgba(217, 119, 6, 0.2)';
+                                                                                color = '#fcd34d';
+                                                                                border = '1px solid rgba(245, 158, 11, 0.3)';
+                                                                            } else if (t === 'rookie') {
+                                                                                bg = 'rgba(148, 163, 184, 0.15)';
+                                                                                color = '#cbd5e1';
+                                                                                border = '1px solid rgba(148, 163, 184, 0.25)';
+                                                                            } else if (t === 'rising star') {
+                                                                                bg = 'rgba(56, 189, 248, 0.2)';
+                                                                                color = '#7dd3fc';
+                                                                                border = '1px solid rgba(56, 189, 248, 0.3)';
+                                                                            } else if (t === 'elite') {
+                                                                                bg = 'rgba(59, 130, 246, 0.22)';
+                                                                                color = '#93c5fd';
+                                                                                border = '1px solid rgba(59, 130, 246, 0.3)';
+                                                                            } else if (t.includes('champion')) {
+                                                                                bg = 'rgba(239, 68, 68, 0.22)';
+                                                                                color = '#fca5a5';
+                                                                                border = '1px solid rgba(239, 68, 68, 0.3)';
+                                                                            } else if (t === 'goat') {
+                                                                                bg = 'rgba(234, 179, 8, 0.22)';
+                                                                                color = '#fde047';
+                                                                                border = '1px solid rgba(234, 179, 8, 0.3)';
+                                                                            }
+
+                                                                            return (
+                                                                                <Box
+                                                                                    sx={{
+                                                                                        px: { xs: 1.25, sm: 2 },
+                                                                                        py: 0.35,
+                                                                                        borderRadius: '9999px',
+                                                                                        fontSize: { xs: 11, sm: 12 },
+                                                                                        fontWeight: 700,
+                                                                                        backgroundColor: bg,
+                                                                                        color: color,
+                                                                                        border: border,
+                                                                                        display: 'inline-flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                        letterSpacing: 0.2,
+                                                                                        fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                                                                                    }}
+                                                                                >
+                                                                                    {xpStatusTitle}
+                                                                                </Box>
+                                                                            );
+                                                                        })()}
                                                                     </Box>
 
                                                                     {/* Playing Style column */}
@@ -5099,8 +5106,8 @@ export default function LeagueDetailPage() {
                                                                         alignItems: 'center',
                                                                         justifyContent: 'flex-start',
                                                                     }}>
-                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 11, sm: 13, md: 16 }, color: 'rgba(255,255,255,0.9)', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
-                                                                            {member.style}
+                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 600, fontSize: { xs: 12, sm: 14, md: 15 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', whiteSpace: 'nowrap' }}>
+                                                                            {member.style || (member as any).playingStyle || '-'}
                                                                         </Typography>
                                                                     </Box>
 
@@ -5116,18 +5123,35 @@ export default function LeagueDetailPage() {
                                                                         <Image src={TableGraphIcon} alt="View Stats" width={isMobile ? 23 : 30} height={isMobile ? 23 : 30} style={{ objectFit: 'contain' }} />
                                                                     </Box>
 
-                                                                    {/* XP Points column */}
+                                                                    {/* Career XP column with Progress Bar */}
                                                                     <Box sx={{
-                                                                        width: { xs: 75, sm: 100, md: 115 },
-                                                                        minWidth: { xs: 75, sm: 100, md: 115 },
+                                                                        width: { xs: 85, sm: 110, md: 125 },
+                                                                        minWidth: { xs: 85, sm: 110, md: 125 },
                                                                         flexShrink: 0,
                                                                         display: 'flex',
+                                                                        flexDirection: 'column',
+                                                                        alignItems: 'flex-end',
                                                                         justifyContent: 'center',
-                                                                        alignItems: 'center',
                                                                     }}>
-                                                                        <Typography className="league-table-row-text" sx={{ fontWeight: 'bold', fontSize: { xs: 13, sm: 16 }, color: '#fff', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'center' }}>
+                                                                        <Typography sx={{ fontWeight: 800, fontSize: { xs: 13, sm: 15, md: 16 }, color: '#22c55e', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', textAlign: 'right', lineHeight: 1.2 }}>
                                                                             {memberXp.toLocaleString()}
                                                                         </Typography>
+                                                                        <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end' }}>
+                                                                            <Box sx={{
+                                                                                width: { xs: 55, sm: 75, md: 85 },
+                                                                                height: 3.5,
+                                                                                backgroundColor: '#262930',
+                                                                                borderRadius: '9999px',
+                                                                                overflow: 'hidden',
+                                                                            }}>
+                                                                                <Box sx={{
+                                                                                    width: `${progressPercent}%`,
+                                                                                    height: '100%',
+                                                                                    backgroundColor: '#22c55e',
+                                                                                    borderRadius: '9999px',
+                                                                                }} />
+                                                                            </Box>
+                                                                        </Box>
                                                                     </Box>
                                                                 </Box>
                                                             </ListItem>
@@ -5774,7 +5798,7 @@ export default function LeagueDetailPage() {
                                     overflowY: 'visible',
                                     scrollbarWidth: 'none',
                                     '&::-webkit-scrollbar': { display: 'none' },
-                                    pb: { xs: 2, md: 3 },
+                                    // pb: { xs: 2, md: 3 },
                                     // p: 2
                                 }}>
                                     {filteredLeague?.matches && filteredLeague.matches.length > 0 ? (
@@ -7208,7 +7232,6 @@ export default function LeagueDetailPage() {
                                     <Paper
                                         sx={{
                                             mt: 2,
-                                            mb: 4,
                                             background: '#f2f2f2',
                                             borderRadius: 2,
                                             border: '1px solid rgba(0,0,0,0.15)',
@@ -7517,7 +7540,7 @@ export default function LeagueDetailPage() {
                                 <Box
                                     sx={{
                                         px: { xs: 0.5, sm: 0 },
-                                        pb: { xs: 2, sm: 2 },
+                                        // pb: { xs: 2, sm: 2 },
                                         pt: { xs: 0, sm: 0 },
                                         mt: { xs: 1, sm: 1.5 },
                                     }}
