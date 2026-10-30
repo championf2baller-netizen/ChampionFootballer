@@ -100,7 +100,14 @@ const getHomeTeamImageSrc = (match: any) => {
     if (typeof img === 'object' && img.src) return img;
     if (typeof img === 'string') {
         const trimmed = img.trim();
-        if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || trimmed.includes('matches.png') || trimmed.includes('hometeamshirt.png')) {
+        if (
+            !trimmed ||
+            trimmed === 'null' ||
+            trimmed === 'undefined' ||
+            trimmed.includes('matches.png') ||
+            trimmed.includes('2nd champion icon') ||
+            trimmed.includes('hometeamshirt.png')
+        ) {
             return HomeTeamImage;
         }
         return resolveImageUrl(trimmed) || HomeTeamImage;
@@ -115,7 +122,14 @@ const getAwayTeamImageSrc = (match: any) => {
     if (typeof img === 'object' && img.src) return img;
     if (typeof img === 'string') {
         const trimmed = img.trim();
-        if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || trimmed.includes('2nd champion icon') || trimmed.includes('awayteamshirt.png')) {
+        if (
+            !trimmed ||
+            trimmed === 'null' ||
+            trimmed === 'undefined' ||
+            trimmed.includes('2nd champion icon') ||
+            trimmed.includes('matches.png') ||
+            trimmed.includes('awayteamshirt.png')
+        ) {
             return AwayTeamImage;
         }
         return resolveImageUrl(trimmed) || AwayTeamImage;

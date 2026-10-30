@@ -7,8 +7,6 @@ import React, { useEffect, useState, useCallback } from 'react';
 import PageHeader from '@/Components/PageHeader';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import homeTeamIcon from '@/Components/images/matches.png';
-import awayTeamIcon from '@/Components/images/2nd champion icon football.png';
 import AllMatchesLoadingSkeleton from '@/Components/loading/AllMatchesLoadingSkeleton';
 import EditMatchPopupLoadingSkeleton from '@/Components/loading/EditMatchPopupLoadingSkeleton';
 import ViewTeamPopupLoadingSkeleton from '@/Components/loading/ViewTeamPopupLoadingSkeleton';
@@ -2075,7 +2073,78 @@ export default function AllMatches() {
         }
     };
 
+    const resolveTeamImageUrl = (value: any): any => {
+        if (value == null) return null;
+        if (typeof value === 'object' && value.src) {
+            return value;
+        }
+        const raw = String(value).trim();
+        if (!raw || raw === 'null' || raw === 'undefined') return null;
 
+        if (
+            raw.startsWith('http://') ||
+            raw.startsWith('https://') ||
+            raw.startsWith('//') ||
+            raw.startsWith('data:') ||
+            raw.startsWith('blob:')
+        ) {
+            return raw;
+        }
+
+        const apiBase = String(process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+        if (!apiBase) {
+            return raw.startsWith('/') ? raw : `/${raw}`;
+        }
+
+        if (raw.startsWith('/')) {
+            return `${apiBase}${raw}`;
+        }
+        return `${apiBase}/${raw}`;
+    };
+
+    const getHomeTeamImageSrc = (match?: Match | null) => {
+        if (!match) return HomeTeamImage;
+        const img = match.homeTeamImage;
+        if (!img) return HomeTeamImage;
+        if (typeof img === 'object' && (img as any).src) return img;
+        if (typeof img === 'string') {
+            const trimmed = img.trim();
+            if (
+                !trimmed ||
+                trimmed === 'null' ||
+                trimmed === 'undefined' ||
+                trimmed.includes('matches.png') ||
+                trimmed.includes('2nd champion icon') ||
+                trimmed.includes('hometeamshirt.png')
+            ) {
+                return HomeTeamImage;
+            }
+            return resolveTeamImageUrl(trimmed) || HomeTeamImage;
+        }
+        return HomeTeamImage;
+    };
+
+    const getAwayTeamImageSrc = (match?: Match | null) => {
+        if (!match) return AwayTeamImage;
+        const img = match.awayTeamImage;
+        if (!img) return AwayTeamImage;
+        if (typeof img === 'object' && (img as any).src) return img;
+        if (typeof img === 'string') {
+            const trimmed = img.trim();
+            if (
+                !trimmed ||
+                trimmed === 'null' ||
+                trimmed === 'undefined' ||
+                trimmed.includes('2nd champion icon') ||
+                trimmed.includes('matches.png') ||
+                trimmed.includes('awayteamshirt.png')
+            ) {
+                return AwayTeamImage;
+            }
+            return resolveTeamImageUrl(trimmed) || AwayTeamImage;
+        }
+        return AwayTeamImage;
+    };
 
     const MatchDetailModal = ({ open, onClose, match, onViewFullDetails }: { open: boolean; onClose: () => void; match: Match | null; onViewFullDetails?: (matchId: string) => void }) => {
         if (!match) return null;
@@ -2144,11 +2213,11 @@ export default function AllMatches() {
                                 minWidth: 0 // Prevent overflow
                             }}>
                                 <Image
-                                    src={match.homeTeamImage || homeTeamIcon}
+                                    src={getHomeTeamImageSrc(match)}
                                     alt={match.homeTeamName || ''}
                                     width={40}
                                     height={40}
-                                    style={{ borderRadius: '6px', flexShrink: 0 }}
+                                    style={{ borderRadius: '6px', flexShrink: 0, objectFit: 'contain' }}
                                 />
                                 <Box sx={{ minWidth: 0, flex: 1 }}>
                                     <Typography
@@ -2231,11 +2300,11 @@ export default function AllMatches() {
                                 minWidth: 0
                             }}>
                                 <Image
-                                    src={match.awayTeamImage || awayTeamIcon}
+                                    src={getAwayTeamImageSrc(match)}
                                     alt={match.awayTeamName || ''}
                                     width={40}
                                     height={40}
-                                    style={{ borderRadius: '6px', flexShrink: 0 }}
+                                    style={{ borderRadius: '6px', flexShrink: 0, objectFit: 'contain' }}
                                 />
                                 <Box sx={{ minWidth: 0, flex: 1, textAlign: 'right' }}>
                                     <Typography
@@ -3276,7 +3345,7 @@ export default function AllMatches() {
                                             }}>
                                                 {/* Home Team */}
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%', maxWidth: '30%', minWidth: 0, px: 0.5, pt: 0.75 }}>
-                                                    <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={50} height={50} style={{ objectFit: 'contain' }} />
+                                                    <Image src={getHomeTeamImageSrc(match)} alt={match.homeTeamName || match.homeTeam || 'Home'} width={50} height={50} style={{ objectFit: 'contain' }} />
                                                     <Typography sx={{
                                                         color: 'white',
                                                         fontWeight: 600,
@@ -3315,7 +3384,7 @@ export default function AllMatches() {
 
                                                 {/* Away Team */}
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '30%', maxWidth: '30%', minWidth: 0, px: 0.5, pt: 0.75 }}>
-                                                    <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={50} height={50} style={{ objectFit: 'contain' }} />
+                                                    <Image src={getAwayTeamImageSrc(match)} alt={match.awayTeamName || match.awayTeam || 'Away'} width={50} height={50} style={{ objectFit: 'contain' }} />
                                                     <Typography sx={{
                                                         color: 'white',
                                                         fontWeight: 600,
@@ -3877,7 +3946,7 @@ export default function AllMatches() {
                                         }}>
                                             {/* Home Team */}
                                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32%', minWidth: 0, px: 0.5 }}>
-                                                <Image src={match.homeTeamImage || HomeTeamImage} alt={match.homeTeamName || match.homeTeam || 'Home'} width={50} height={50} style={{ objectFit: 'contain' }} />
+                                                <Image src={getHomeTeamImageSrc(match)} alt={match.homeTeamName || match.homeTeam || 'Home'} width={50} height={50} style={{ objectFit: 'contain' }} />
                                                 <Typography sx={{
                                                     color: 'white',
                                                     fontWeight: 700,
@@ -3905,7 +3974,7 @@ export default function AllMatches() {
 
                                             {/* Away Team */}
                                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '32%', minWidth: 0, px: 0.5 }}>
-                                                <Image src={match.awayTeamImage || AwayTeamImage} alt={match.awayTeamName || match.awayTeam || 'Away'} width={50} height={50} style={{ objectFit: 'contain' }} />
+                                                <Image src={getAwayTeamImageSrc(match)} alt={match.awayTeamName || match.awayTeam || 'Away'} width={50} height={50} style={{ objectFit: 'contain' }} />
                                                 <Typography sx={{
                                                     color: 'white',
                                                     fontWeight: 700,
