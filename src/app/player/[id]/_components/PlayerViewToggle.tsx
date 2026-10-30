@@ -29,7 +29,7 @@ export const PlayerViewToggle: React.FC<PlayerViewToggleProps> = ({
                 maxWidth: { xs: '100%', sm: 480, md: 520 },
                 mx: 'auto',
                 mb: 2.2,
-                mt: 0,
+                mt: -5.4,
                 bgcolor: '#121316',
                 border: '1px solid #22242a',
                 borderRadius: '16px',
