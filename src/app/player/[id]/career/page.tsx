@@ -2535,9 +2535,8 @@ export default function CareerPage(props?: any) {
     const league = availableLeagues.find(l => sameId(l.id, filters.leagueId));
     if (!league) return `League ${filters.leagueId}`;
     const name = (league as LeagueWithMatches & { name?: string })?.name || `League ${filters.leagueId}`;
-    const roleTag = getLeagueRoleTag(league, String(params?.id || ''));
-    return `${name} (${roleTag})`;
-  }, [filters.leagueId, availableLeagues, params?.id]);
+    return name;
+  }, [filters.leagueId, availableLeagues]);
 
   // Preferred league from localStorage (persisted across pages)
   const [preferredLeagueId, setPreferredLeagueId] = useState<string | null>(null);
