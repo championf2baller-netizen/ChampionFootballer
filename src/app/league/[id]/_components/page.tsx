@@ -4022,7 +4022,7 @@ export default function LeagueDetailPage() {
                 backgroundPosition: 'center',
                 overflowX: 'hidden',
                 px: { xs: 1, sm: 2, md: 3 },
-                py: { xs: 1.5, md: 0 },
+                py: 0,
             }}
         >
             {/* <Box sx={{ ml:5}}> */}

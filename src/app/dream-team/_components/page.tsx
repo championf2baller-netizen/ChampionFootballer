@@ -1,7 +1,7 @@
 'use client';
   
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { Box, Typography, Menu, MenuItem, ListItemIcon, ListItemText, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, ListItemIcon, ListItemText, Button, CircularProgress, Container } from '@mui/material';
 import { useAuth } from '@/lib/hooks';
 import fieldImg from '@/Components/images/ground.webp';
 import { Trophy, ChevronDown } from 'lucide-react';
@@ -431,38 +431,52 @@ const DreamTeamPage = () => {
   }, [token, selectedLeague, fetchDreamTeam]);
 
   return (
-    <Box sx={{ py: 4, p: 3, maxWidth: 1200, mx: 'auto' }}>
-      {/* Close Button */}
-      <CloseButton fallbackRoute="/dashboard" />
-      <PageHeader title="Dream Team" sx={{ mb: 4 }}>
+    <Box sx={{
+      position: 'relative',
+      minHeight: 'auto',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      overflowX: 'hidden',
+    }}>
+      {/* Floating Close Button */}
+      <Box sx={{ position: 'absolute', top: { xs: 10, md: 16 }, left: { xs: 12, md: 24 }, zIndex: 10 }}>
+        <CloseButton fallbackRoute="/dashboard" />
+      </Box>
+      <PageHeader title="Dream Team">
         <Box
           sx={{
             display: 'flex',
             justifyContent: { xs: 'center', sm: 'flex-end' },
-            px: { xs: 0, sm: 2, md: 6 },
-            pb: { xs: 1, sm: 1.5 },
+            maxWidth: 1200,
+            width: '100%',
+            mx: 'auto',
+            px: { xs: 2, sm: 3 },
+            py: 0,
+            pb: 0,
           }}
         >
           <Button
             onClick={handleLeaguesDropdownOpen}
-            endIcon={<ChevronDown size={20} />}
+            endIcon={<ChevronDown size={18} style={{ color: '#e56a16' }} />}
             sx={{
               textTransform: 'uppercase',
-              fontSize: { xs: '0.85rem', sm: '1rem', md: '1.2rem' },
-              fontWeight: 'bold',
+              fontSize: { xs: '12px', sm: '14px' },
+              fontWeight: 600,
               lineHeight: 1.15,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               minWidth: 0,
               maxWidth: { xs: '80vw', sm: '50%', md: '340px' },
-              textAlign: 'right',
               color: 'white',
-              backgroundColor: '#2B2B2B',
-              borderRadius: 2,
+              backgroundColor: '#16181d',
+              border: '1px solid #22242a',
+              borderRadius: '14px',
+              height: { xs: '38px', sm: '42px' },
               px: { xs: 1.5, sm: 2 },
-              py: { xs: 0.75, sm: 1 },
-              '&:hover': { backgroundColor: '#2B2B2B' },
+              '&:hover': { backgroundColor: '#1e2026', borderColor: '#32353e' },
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'flex-end',
@@ -623,7 +637,19 @@ const DreamTeamPage = () => {
         })}
       </Menu>
 
-      {loading ? (
+      {/* Main Content */}
+      <Container
+        maxWidth={false}
+        sx={{
+          width: '100%',
+          maxWidth: 1200,
+          mx: 'auto',
+          px: { xs: 2, sm: 3 },
+          pb: 4,
+          mt: 0,
+        }}
+      >
+        {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
           <CircularProgress size={40} sx={{ color: '#00ff88' }} />
         </Box>
@@ -769,7 +795,7 @@ const DreamTeamPage = () => {
           </Box>
         </>
       )}
-
+      </Container>
     </Box>
   );
 };

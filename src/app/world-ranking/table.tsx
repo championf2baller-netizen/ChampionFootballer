@@ -296,7 +296,6 @@ export default function WorldRankingTable() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: { xs: 1.5, md: 2 },
           maxWidth: '1230px',
           mx: 'auto',
           px: { xs: 1, sm: 2, md: 3 },
@@ -719,7 +718,7 @@ export default function WorldRankingTable() {
             justifyContent: 'center',
             alignItems: 'center',
             width: '100%',
-            mt: { xs: 1.5, md: 2 },
+            mt: { xs: 2, md: 3 },
           }}>
             <Box sx={{
               bgcolor: '#121316',
@@ -822,7 +821,7 @@ export default function WorldRankingTable() {
           p: { xs: 1.5, sm: 2 },
           width: { xs: '100%', sm: 440, md: 520 },
           mx: 'auto',
-          mt: 2.5,
+          mt: 0,
           mb: 2.5,
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',

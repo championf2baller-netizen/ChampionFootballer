@@ -2338,7 +2338,6 @@ export default function PlayerStatsPage() {
                         gap: { xs: 2, md: 3 },
                         px: { xs: 1, sm: 2, md: 3 },
                         py: { xs: 1.5, md: 0 },
-                        mt: { xs: 2, md: 0 },
                         maxWidth: '1230px',
                         width: '100%',
                         mx: 'auto',

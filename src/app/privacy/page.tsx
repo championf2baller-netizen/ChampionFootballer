@@ -298,8 +298,7 @@ function PrivacyPolicies() {
     }, [pageContent]);
 
     return (
-        <Box sx={{ p: 3, minHeight: '100vh' }}>
-            <main className="min-h-screen p-6">
+        <main className="min-h-screen p-6">
       <div
         className="p-6 mx-auto rounded-2xl border border-white/10 shadow-xl overflow-hidden"
         style={{ background: "#0E0E0E" }}
@@ -409,7 +408,6 @@ function PrivacyPolicies() {
             </Box>
             </div>
             </main>
-        </Box>
     );
 }
 

@@ -1086,75 +1086,76 @@ export default function RewardsPage() {
             <XPStarMilestoneCard height={isMobile ? 28 : 35} width={isMobile ? 28 : 35} xp={xp} colorOverride="#ffc000" />
           </Box>
         )}
-      />
-
-      <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 0.75, sm: 2, md: 3 }, pb: 5 }}>
+      >
         {/* View Toggle: ALL | UNLOCKED | LOCKED */}
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: { xs: '100%', sm: 440, md: 480 },
-            mx: 'auto',
-            mb: { xs: 1.8, sm: 2.5, md: 3.5 },
-            mt: { xs: 0.5, sm: 1, md: 1.5 },
-            bgcolor: '#121316',
-            border: '1px solid #22242a',
-            borderRadius: { xs: '12px', sm: '14px', md: '16px' },
-            p: { xs: '3px', sm: '4px' },
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '4px',
-            boxSizing: 'border-box',
-          }}
-        >
-          {[
-            { id: 'all', label: 'ALL' },
-            { id: 'unlocked', label: 'UNLOCKED' },
-            { id: 'locked', label: 'LOCKED' },
-          ].map((tab) => {
-            const isActive = filterTab === tab.id;
-            return (
-              <ButtonBase
-                key={tab.id}
-                onClick={() => setFilterTab(tab.id as 'all' | 'unlocked' | 'locked')}
-                sx={{
-                  py: { xs: 0.65, sm: 0.85, md: 1.1 },
-                  px: { xs: 0.4, sm: 1, md: 1.5 },
-                  borderRadius: { xs: '9px', sm: '11px', md: '12px' },
-                  border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
-                  bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
-                  color: isActive ? '#ffffff' : '#717d8f',
-                  fontWeight: isActive ? 700 : 600,
-                  fontSize: { xs: 11, sm: 12.5, md: 14 },
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                  transition: 'all 0.18s ease',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
-                    color: '#ffffff',
-                  },
-                }}
-              >
-                <Typography
-                  noWrap
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', px: { xs: 1, sm: 2 } }}>
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: { xs: '100%', sm: 440, md: 480 },
+              mx: 'auto',
+              bgcolor: '#121316',
+              border: '1px solid #22242a',
+              borderRadius: { xs: '12px', sm: '14px', md: '16px' },
+              p: '4px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '4px',
+              boxSizing: 'border-box',
+            }}
+          >
+            {[
+              { id: 'all', label: 'ALL' },
+              { id: 'unlocked', label: 'UNLOCKED' },
+              { id: 'locked', label: 'LOCKED' },
+            ].map((tab) => {
+              const isActive = filterTab === tab.id;
+              return (
+                <ButtonBase
+                  key={tab.id}
+                  onClick={() => setFilterTab(tab.id as 'all' | 'unlocked' | 'locked')}
                   sx={{
-                    fontSize: 'inherit',
-                    fontWeight: 'inherit',
-                    color: 'inherit',
-                    textAlign: 'center',
-                    fontFamily: 'inherit',
-                    letterSpacing: 'inherit',
+                    py: { xs: 0.9, sm: 1.1 },
+                    px: { xs: 0.6, sm: 1.5 },
+                    borderRadius: '12px',
+                    border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                    bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                    color: isActive ? '#ffffff' : '#717d8f',
+                    fontWeight: isActive ? 700 : 600,
+                    fontSize: { xs: 12, sm: 13, md: 14 },
+                    letterSpacing: '0.8px',
                     textTransform: 'uppercase',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    transition: 'all 0.18s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                      color: '#ffffff',
+                    },
                   }}
                 >
-                  {tab.label}
-                </Typography>
-              </ButtonBase>
-            );
-          })}
+                  <Typography
+                    noWrap
+                    sx={{
+                      fontSize: 'inherit',
+                      fontWeight: 'inherit',
+                      color: 'inherit',
+                      textAlign: 'center',
+                      fontFamily: 'inherit',
+                      letterSpacing: 'inherit',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {tab.label}
+                  </Typography>
+                </ButtonBase>
+              );
+            })}
+          </Box>
         </Box>
+      </PageHeader>
+
+      <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 0.75, sm: 2, md: 3 }, pb: 5 }}>
 
         {loading ? (
           <RewardsLoadingSkeleton />

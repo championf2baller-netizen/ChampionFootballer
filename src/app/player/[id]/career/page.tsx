@@ -3340,7 +3340,7 @@ export default function CareerPage(props?: any) {
       )}
 
           {/* Main Content */}
-          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: isEmbedded ? 0 : { xs: 2, sm: 2, md: 3 }, mt: isEmbedded ? 0 : { xs: 2, md: 0 }, position: 'relative' }}>
+          <Box sx={{ maxWidth: '1130px', mx: 'auto', px: isEmbedded ? 0 : { xs: 2, sm: 2, md: 3 }, mt: 0, position: 'relative' }}>
             {!isEmbedded && (
               <Box sx={{ display: { xs: 'block', md: 'none' } }}>
                 <PlayerViewToggle
