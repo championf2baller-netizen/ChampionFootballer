@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Typography, Paper, Button, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Typography, Paper, Button, ButtonBase, CircularProgress, Alert, useMediaQuery, useTheme } from '@mui/material';
 import PageHeader from '@/Components/PageHeader';
 import {
   Dialog,
@@ -689,178 +689,197 @@ const mergeBadges = (client: Badge[], server: Badge[] | null | undefined): Badge
 const BadgeCard = ({ id, title, description, image, color, count, unlocked, progressText, xp, onOpen }: Badge & { onOpen?: () => void }) => {
   const totalXPEarned = count * xp;
 
-
-
   return (
-    <Paper
-      elevation={4}
+    <Box
+      onClick={onOpen}
+      role="button"
       sx={{
         width: '100%',
         height: '100%',
-        minHeight: CARD_DIMENSIONS.minHeight,
-        maxWidth: CARD_DIMENSIONS.maxWidth,
-        margin: '0 auto',
-        textAlign: 'center',
-        borderRadius: '6px',
-        border: `3px solid ${unlocked ? '#fff' : '#999'}`,
+        minHeight: { xs: 135, sm: 185, md: 245 },
+        bgcolor: '#121316',
+        border: '1px solid #22242a',
+        borderRadius: { xs: '10px', sm: '14px', md: '16px' },
+        overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        overflow: 'hidden',
-        px: { xs: 1, sm: 1.5, md: 2 },
-        py: { xs: 1.5, sm: 2, md: 2 },
-        position: 'relative',
-        background: unlocked
-          ? 'linear-gradient(360deg, #00A77F -0.04%, #004131 98.75%)'
-          : '#747474',
         cursor: onOpen ? 'pointer' : 'default',
-        mt:{xs:2, md:0},
+        transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
+        '&:hover': {
+          transform: 'translateY(-3px)',
+          borderColor: unlocked ? 'rgba(34, 197, 94, 0.45)' : '#32353e',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+        },
       }}
-      onClick={onOpen}
-      role="button"
     >
       {/* Title at top */}
-      <Typography
-        variant="h6"
+      <Box sx={{ pt: { xs: 1, sm: 1.6, md: 2.2 }, px: { xs: 0.5, sm: 1.2, md: 2 }, textAlign: 'center' }}>
+        <Typography
+          sx={{
+            color: '#ffffff',
+            fontWeight: 700,
+            fontSize: { xs: '8.5px', sm: '12px', md: '15.5px' },
+            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+            letterSpacing: '0.2px',
+            textAlign: 'center',
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {title}
+        </Typography>
+      </Box>
+
+      {/* Middle: Medal + Stars */}
+      <Box
         sx={{
-          color: unlocked ? '#fff' : '#999',
-          fontWeight: 'bold',
-          fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.10rem' },
-          textAlign: 'center',
-          fontFamily: 'var(--font-woodford-bourne-pro)',
-          fontStyle: 'semibold',
-          fontWidth: 600,
-          // mb: 1,
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          py: { xs: 0.5, sm: 1, md: 1.5 },
+          position: 'relative',
         }}
       >
-        {title}
-      </Typography>
+        {/* Left 3 Stars */}
+        <Box
+          sx={{
+            width: { xs: 14, sm: 20, md: 28 },
+            height: { xs: 14, sm: 20, md: 28 },
+            mr: { xs: -0.6, sm: -0.9, md: -1.2 },
+            mt: { xs: -1.2, sm: -1.8, md: -2.5 },
+            opacity: unlocked ? 1 : 0.35,
+            filter: unlocked ? 'none' : 'grayscale(1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            zIndex: 1,
+          }}
+        >
+          <Image
+            src={LeftStar}
+            alt="Left Stars"
+            width={28}
+            height={28}
+            style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+          />
+        </Box>
 
-      {/* Medal/Badge Image in center */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Medal with XP circle */}
         <Box
           sx={{
             position: 'relative',
+            width: { xs: 54, sm: 78, md: 115 },
+            height: { xs: 54, sm: 78, md: 115 },
             display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            alignItems: 'flex-start',
-            height: CARD_DIMENSIONS.image,
-            width: '100%',
-            gap: 0,
-            mt: -1,
+            flexShrink: 0,
           }}
         >
-          {/* Left Star - Only show when unlocked */}
-          {unlocked && (
-            <Image
-              src={LeftStar}
-              alt="Left Star"
-              width={25}
-              height={25}
-              style={{
-                objectFit: 'contain',
-                filter: 'none',
-                marginTop: '23px',
-                marginRight: '-10px',
-              }}
-            />
-          )}
+          <Image
+            src={image}
+            alt={title}
+            width={115}
+            height={115}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain',
+              filter: unlocked ? 'none' : 'grayscale(0.85) opacity(0.55)',
+            }}
+          />
 
-          {/* Main Badge */}
+          {/* XP Value in center of medal */}
           <Box
             sx={{
-              position: 'relative',
+              position: 'absolute',
+              top: '72%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: { xs: 15, sm: 21, md: 28 },
+              height: { xs: 15, sm: 21, md: 28 },
+              borderRadius: '50%',
+              bgcolor: unlocked ? '#a7281d' : '#4a4a4a',
+              border: { xs: '1px solid #d4af37', sm: '1.2px solid #d4af37', md: '1.5px solid #d4af37' },
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              height: CARD_DIMENSIONS.image,
-              width: CARD_DIMENSIONS.image,
+              justifyContent: 'center',
+              color: unlocked ? '#ffc000' : '#aaa',
+              fontSize: { xs: '6.5px', sm: '8.5px', md: '11px' },
+              fontWeight: 800,
+              fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+              lineHeight: 1,
+              userSelect: 'none',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.4)',
             }}
           >
-            <Image
-              src={image}
-              alt={title}
-              height={CARD_DIMENSIONS.image.md}
-              width={CARD_DIMENSIONS.image.md}
-              style={{
-                height: '100%',
-                width: '100%',
-                objectFit: 'contain',
-                objectPosition: 'center center',
-                filter: unlocked ? 'none' : 'grayscale(1)',
-                marginTop: 17
-              }}
-            />
-            {/* XP value on medal */}
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: { xs: -3.5, sm: -3.5, md: 8 },
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'transparent',
-                color: unlocked ? '#B41E1E' : '#747474',
-                borderRadius: '50%',
-                width: 30,
-                height: 30,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: { xs: '0.6rem', sm: '0.8rem', md: '0.8rem' },
-                fontWeight: 700,
-              }}
-            >
-              {xp}
-            </Box>
+            {xp}
           </Box>
+        </Box>
 
-          {/* Right Star - Only show when unlocked */}
-          {unlocked && (
-            <Image
-              src={RightStar}
-              alt="Right Star"
-              width={25}
-              height={25}
-              style={{
-                objectFit: 'contain',
-                filter: 'none',
-                marginTop: '23px',
-                marginLeft: '-10px',
-              }}
-            />
-          )}
+        {/* Right 3 Stars */}
+        <Box
+          sx={{
+            width: { xs: 14, sm: 20, md: 28 },
+            height: { xs: 14, sm: 20, md: 28 },
+            ml: { xs: -0.6, sm: -0.9, md: -1.2 },
+            mt: { xs: -1.2, sm: -1.8, md: -2.5 },
+            opacity: unlocked ? 1 : 0.35,
+            filter: unlocked ? 'none' : 'grayscale(1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            zIndex: 1,
+          }}
+        >
+          <Image
+            src={RightStar}
+            alt="Right Stars"
+            width={28}
+            height={28}
+            style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+          />
         </Box>
       </Box>
 
-      {/* Bottom: XP Earned or UNLOCK */}
+      {/* Bottom Bar: XP Earned or LOCKED */}
       <Box
         sx={{
-          // backgroundColor: unlocked ? '#0f766e' : '#6b7280',
-          borderTop: '1px solid #fff',
-          color: unlocked ? '#fbbf24' : '#d1d5db',
-          fontFamily: 'var(--font-woodford-bourne-pro)',
-          fontWeight: 700,
-          fontStyle: 'normal',
-          fontSize: { xs: '0.9rem', sm: '1.1rem' },
-          letterSpacing: '0%',
+          width: '100%',
+          py: { xs: 0.5, sm: 0.8, md: 1.2 },
+          px: 0.5,
+          bgcolor: unlocked ? '#0f1f1a' : '#14161a',
+          borderTop: unlocked ? '1px solid rgba(34, 197, 94, 0.14)' : '1px solid #1c1d22',
           textAlign: 'center',
-          py: { xs: 1, sm: 1.2 },
-          mt: 2.5,
-          // width: '100%',
-          borderRadius: '0 0 12px 12px',
-          mx: { xs: -1, sm: -1.5, md: -2 },
-          mb: { xs: -1.5, sm: -2, md: -2 },
-          // width: { xs: 'calc(100% + 16px)', sm: 'calc(100% + 24px)', md: 'calc(100% + 32px)' },
-          // display: 'flex',
-          // alignItems: 'center',
-          // justifyContent: 'center',
         }}
       >
-        {unlocked ? `${formatNumber(totalXPEarned)} XP Earned` : 'UNLOCK'}
+        <Typography
+          sx={{
+            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+            fontWeight: 800,
+            fontSize: { xs: '7.5px', sm: '10px', md: '12.5px' },
+            letterSpacing: { xs: '0.2px', sm: '0.4px', md: '0.6px' },
+            textTransform: 'uppercase',
+            color: unlocked ? '#22c55e' : '#717d8f',
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {unlocked
+            ? `${formatNumber(totalXPEarned > 0 ? totalXPEarned : xp)} XP EARNED`
+            : '0 XP EARNED'}
+        </Typography>
       </Box>
-    </Paper>
+    </Box>
   );
-
 };
 
 // --- Main Page Component ---
@@ -878,6 +897,9 @@ export default function RewardsPage() {
   const [cmsStaticContent, setCmsStaticContent] = useState<Record<string, { title: string; content: string }>>({});
 
   const loading = leaguesLoading || achievementsLoading;
+
+  // Filter tab state ('all' | 'unlocked' | 'locked')
+  const [filterTab, setFilterTab] = useState<'all' | 'unlocked' | 'locked'>('all');
 
   // Badge detail modal state
   const [openBadgeDlg, setOpenBadgeDlg] = useState(false);
@@ -1035,11 +1057,22 @@ export default function RewardsPage() {
     };
   }, [user?.id, token, myProfileXP]);
 
+  // Filter badges by active tab
+  const filteredBadges = useMemo(() => {
+    if (filterTab === 'unlocked') {
+      return myBadges.filter((b) => b.unlocked);
+    }
+    if (filterTab === 'locked') {
+      return myBadges.filter((b) => !b.unlocked);
+    }
+    return myBadges;
+  }, [myBadges, filterTab]);
+
   // Calculate total XP from all rewards
   const totalRewardsXP = myBadges.reduce((sum, badge) => sum + (badge.count * badge.xp), 0);
 
   return (
-    <Box sx={{ minHeight: '160vh', backgroundColor: '#0E0E0E', overflowX: 'hidden' }}>
+    <Box sx={{ minHeight: 'auto', backgroundColor: 'transparent', overflowX: 'hidden' }}>
       {/* Header */}
       <PageHeader
         title="Rewards"
@@ -1055,7 +1088,74 @@ export default function RewardsPage() {
         )}
       />
 
-      <Box sx={{ px: { xs: 2, sm: 3, md: 5, lg: 11.2 }, pb: 4, mt: -0.5 }}>
+      <Box sx={{ maxWidth: 980, mx: 'auto', px: { xs: 0.75, sm: 2, md: 3 }, pb: 5 }}>
+        {/* View Toggle: ALL | UNLOCKED | LOCKED */}
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: { xs: '100%', sm: 440, md: 480 },
+            mx: 'auto',
+            mb: { xs: 1.8, sm: 2.5, md: 3.5 },
+            mt: { xs: 0.5, sm: 1, md: 1.5 },
+            bgcolor: '#121316',
+            border: '1px solid #22242a',
+            borderRadius: { xs: '12px', sm: '14px', md: '16px' },
+            p: { xs: '3px', sm: '4px' },
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '4px',
+            boxSizing: 'border-box',
+          }}
+        >
+          {[
+            { id: 'all', label: 'ALL' },
+            { id: 'unlocked', label: 'UNLOCKED' },
+            { id: 'locked', label: 'LOCKED' },
+          ].map((tab) => {
+            const isActive = filterTab === tab.id;
+            return (
+              <ButtonBase
+                key={tab.id}
+                onClick={() => setFilterTab(tab.id as 'all' | 'unlocked' | 'locked')}
+                sx={{
+                  py: { xs: 0.65, sm: 0.85, md: 1.1 },
+                  px: { xs: 0.4, sm: 1, md: 1.5 },
+                  borderRadius: { xs: '9px', sm: '11px', md: '12px' },
+                  border: isActive ? '1.5px solid #22c55e' : '1.5px solid transparent',
+                  bgcolor: isActive ? 'rgba(34, 197, 94, 0.04)' : 'transparent',
+                  color: isActive ? '#ffffff' : '#717d8f',
+                  fontWeight: isActive ? 700 : 600,
+                  fontSize: { xs: 11, sm: 12.5, md: 14 },
+                  letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                  fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  transition: 'all 0.18s ease',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: isActive ? 'rgba(34, 197, 94, 0.08)' : '#18191e',
+                    color: '#ffffff',
+                  },
+                }}
+              >
+                <Typography
+                  noWrap
+                  sx={{
+                    fontSize: 'inherit',
+                    fontWeight: 'inherit',
+                    color: 'inherit',
+                    textAlign: 'center',
+                    fontFamily: 'inherit',
+                    letterSpacing: 'inherit',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {tab.label}
+                </Typography>
+              </ButtonBase>
+            );
+          })}
+        </Box>
+
         {loading ? (
           <RewardsLoadingSkeleton />
         ) : error ? (
@@ -1063,15 +1163,27 @@ export default function RewardsPage() {
             <Alert severity="error">{error}</Alert>
           </Box>
         ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: { xs: 1, sm: 1.5, md: 1.2 }, rowGap: { xs: 2, sm: 3, md: 3 }, justifyContent: 'center', alignItems: 'stretch' }}>
-            {myBadges.length > 0 ? myBadges.map(b => (
-              <Box key={b.id} sx={{ height: '100%', width: { xs: 'calc(50% - 8px)', sm: 'calc(33.33% - 12px)', md: 'calc(20% - 8px)', lg: 'calc(20% - 8px)' } }}>
-                <BadgeCard {...b} onOpen={() => openBadgeDetail(b)} />
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: { xs: 0.75, sm: 1.5, md: 2.5 },
+            }}
+          >
+            {filteredBadges.length > 0 ? (
+              filteredBadges.map((b) => (
+                <BadgeCard key={b.id} {...b} onOpen={() => openBadgeDetail(b)} />
+              ))
+            ) : (
+              <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 8 }}>
+                <Typography sx={{ color: '#8a94a6', fontSize: 16, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                  {filterTab === 'unlocked'
+                    ? 'No unlocked rewards yet. Play matches to earn rewards!'
+                    : filterTab === 'locked'
+                    ? 'All rewards have been unlocked!'
+                    : 'No rewards available.'}
+                </Typography>
               </Box>
-            )) : (
-              <Typography sx={{ mt: 4, gridColumn: '1 / -1', textAlign: 'center' }}>
-                No badge progress yet.
-              </Typography>
             )}
           </Box>
         )}
@@ -1084,50 +1196,49 @@ export default function RewardsPage() {
           maxWidth="sm"
           PaperProps={{
             sx: {
-              borderRadius: 2,
-              background: '#2b2b2b',
-              border: '2px solid #444',
+              borderRadius: '16px',
+              bgcolor: '#121316',
+              border: '1px solid #22242a',
+              color: '#fff',
+              overflow: 'hidden',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.75)',
             }
           }}
         >
           <DialogTitle sx={{
-            background: '#0e0e0e',
+            bgcolor: '#16181d',
             color: '#fff',
-            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-            fontWeight: 700,
-            fontSize: { xs: '20px', sm: '24px', md: '28px' },
+            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+            fontWeight: 800,
+            fontSize: { xs: '18px', sm: '20px', md: '22px' },
             textTransform: 'uppercase',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            px: { xs: 2.5, md: 3.5 },
-            py: 0,
-            height: { xs: 52, sm: 58 },
+            px: { xs: 2.5, md: 3 },
+            py: 2,
             position: 'relative',
-            borderBottom: '3px solid #E56A16',
+            borderBottom: '1px solid #22242a',
             flexShrink: 0
           }}>
             {selectedBadge?.title}
             <IconButton onClick={closeBadgeDetail} aria-label="close" sx={{
-              bgcolor: '#e6e6e6',
-              color: '#000',
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: { xs: 48, sm: 56 },
-              borderRadius: 0,
-              borderTopRightRadius: 'inherit',
+              bgcolor: '#1e2026',
+              color: '#fff',
+              width: 36,
+              height: 36,
+              borderRadius: '10px',
+              border: '1px solid #2c2f38',
               transition: 'background-color 0.2s ease',
               '&:hover': {
-                bgcolor: '#d0d0d0',
-                color: '#000',
+                bgcolor: '#282b33',
+                color: '#fff',
               }
             }}>
-              <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+              <CloseIcon sx={{ fontSize: 20 }} />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{ py: 3 }}>
+          <DialogContent sx={{ py: 3, px: { xs: 2.5, md: 3.5 } }}>
             {selectedBadge && (
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 3, alignItems: 'center' }}>
                 <Box sx={{
@@ -1135,52 +1246,75 @@ export default function RewardsPage() {
                   width: 120,
                   height: 120,
                   justifySelf: 'center',
-                  p: 2,
-                  borderRadius: '50%',
-                  background: '#1f1f1f',
-                  border: '2px solid #555',
+                  p: 1.5,
+                  borderRadius: '16px',
+                  bgcolor: '#18191e',
+                  border: '1px solid #22242a',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
                   <Image src={selectedBadge.image} alt={selectedBadge.title} width={96} height={96} style={{ objectFit: 'contain' }} />
+                  <Box sx={{
+                    position: 'absolute',
+                    top: '72%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    bgcolor: selectedBadge.unlocked ? '#a7281d' : '#4a4a4a',
+                    border: selectedBadge.unlocked ? '1.5px solid #d4af37' : '1.5px solid #777',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: selectedBadge.unlocked ? '#ffc000' : '#aaa',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                  }}>
+                    {selectedBadge.xp}
+                  </Box>
                 </Box>
                 <Box>
                   <Typography sx={{
                     fontWeight: 700,
-                    mb: 1.5,
+                    mb: 1,
                     color: '#fff',
-                    fontFamily: 'var(--font-woodford-bourne-pro)',
-                    fontSize: '1.1rem',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    fontSize: '1rem',
                   }}>
                     How to earn this reward:
                   </Typography>
                   <Typography sx={{
                     mb: 2,
-                    color: '#bbb',
-                    fontSize: '0.95rem',
-                    lineHeight: 1.6,
-                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                    color: '#8a94a6',
+                    fontSize: '0.9rem',
+                    lineHeight: 1.5,
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   }}>
                     {selectedBadge.description}
                   </Typography>
-                  <Box sx={{ height: '1px', bgcolor: '#444', my: 2 }} />
+                  <Box sx={{ height: '1px', bgcolor: '#22242a', my: 2 }} />
                   <Typography sx={{
-                    color: selectedBadge.unlocked ? '#fbbf24' : '#888',
+                    color: selectedBadge.unlocked ? '#22c55e' : '#8a94a6',
                     mb: 1,
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                    fontWeight: 700,
+                    fontSize: '0.92rem',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   }}>
                     {selectedBadge.unlocked
                       ? `Earned x${selectedBadge.count} | Total XP: ${formatNumber(selectedBadge.count * selectedBadge.xp)}`
                       : `Progress: ${selectedBadge.progressText || 'Progress unavailable'}`}
                   </Typography>
                   <Typography sx={{
-                    color: '#888',
+                    color: '#656f7d',
                     display: 'block',
                     mt: 1.5,
-                    fontSize: '0.85rem',
-                    fontFamily: 'var(--font-woodford-bourne-pro)',
+                    fontSize: '0.82rem',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                   }}>
-                    Each reward earns you <span style={{ color: '#fbbf24', fontWeight: 700 }}>{selectedBadge.xp} XP</span> and can be achieved multiple times.
+                    Each reward earns you <span style={{ color: '#22c55e', fontWeight: 700 }}>{selectedBadge.xp} XP</span> and can be achieved multiple times.
                   </Typography>
                 </Box>
               </Box>
