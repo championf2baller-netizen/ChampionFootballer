@@ -3503,13 +3503,12 @@ export default function LeagueDetailPage() {
                         value: Number.isFinite(valueNum) ? valueNum : 0,
                     };
                 })
-                .filter((player) => player.value > 0)
-                .slice(0, 5);
+                .filter((player) => player.value > 0);
         };
 
         Promise.all(
             metrics.map(async (metric) => {
-                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=5&refresh=1&_t=${Date.now()}`;
+                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=100&refresh=1&_t=${Date.now()}`;
                 const urlSeason = selectedSeasonId ? `${urlAll}&seasonId=${selectedSeasonId}` : urlAll;
                 const requestInit: RequestInit = {
                     credentials: 'include',
@@ -7659,7 +7658,7 @@ export default function LeagueDetailPage() {
                                             const allPlayers = allLeaderboardData[metric.key] || [];
                                             const isExpanded = Boolean(expandedLeaderboards[metric.key]);
                                             const displayedPlayers = (isExpanded && !isDesktop) ? allPlayers : allPlayers.slice(0, 5);
-                                            const hasMorePlayers = allPlayers.length > 5;
+                                            const hasMorePlayers = isDesktop ? allPlayers.length >= 5 : allPlayers.length > 5;
                                             const valueHeader = getMetricValueHeader(metric.key);
 
                                             return (
