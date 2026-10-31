@@ -4007,7 +4007,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 open={open === true && showAdminGoalsSection === true}
                 onClose={handleAdminDialogClose}
                 fullWidth
-                maxWidth="xs"
+                maxWidth="sm"
                 BackdropProps={{
                     sx: {
                         backgroundColor: 'rgba(0, 0, 0, 0.75)',
@@ -4016,39 +4016,39 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 }}
                 PaperProps={{
                     sx: {
-                        bgcolor: '#121317',
+                        bgcolor: '#0B0D11',
                         backgroundImage: 'none',
                         color: '#ffffff',
-                        borderRadius: { xs: '20px', sm: '24px' },
-                        border: '1px solid #2d3037',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-                        width: { xs: 'calc(100% - 24px)', sm: 470, md: 490 },
-                        maxWidth: { xs: 390, sm: 470, md: 490 },
+                        borderRadius: '20px',
+                        border: '1px solid #222B38',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+                        width: { xs: 'calc(100% - 24px)', sm: 480, md: 500 },
+                        maxWidth: { xs: 440, sm: 480, md: 500 },
                         m: 'auto',
                         overflow: 'hidden',
                         fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                     }
                 }}
             >
-                {/* Header with distinct slate-charcoal color (#20252b) */}
+                {/* Header with distinct slate-charcoal color (#18202A) */}
                 <DialogTitle
                     sx={{
                         p: 0,
                         position: 'relative',
-                        bgcolor: '#20252b',
-                        borderBottom: '1px solid #2d3037',
-                        pt: { xs: 2.2, sm: 2.6 },
-                        pb: { xs: 1.8, sm: 2.2 },
-                        px: { xs: 2, sm: 4 },
+                        bgcolor: '#18202A',
+                        borderBottom: '1px solid #232C3A',
+                        pt: { xs: 2.4, sm: 2.8 },
+                        pb: { xs: 2, sm: 2.4 },
+                        px: { xs: 2.5, sm: 4 },
                     }}
                 >
-                    <Box sx={{ textAlign: 'center', pr: { xs: 3, sm: 0 } }}>
+                    <Box sx={{ textAlign: 'center', pr: 0 }}>
                         <Typography
                             sx={{
                                 fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                 fontWeight: 800,
-                                fontSize: { xs: '0.85rem', sm: '0.95rem' },
-                                color: '#c5cad5',
+                                fontSize: { xs: '0.88rem', sm: '0.96rem' },
+                                color: '#ffffff',
                                 textTransform: 'uppercase',
                                 letterSpacing: 2,
                                 lineHeight: 1.3,
@@ -4061,21 +4061,21 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             sx={{
                                 fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                 fontWeight: 700,
-                                fontSize: { xs: '0.72rem', sm: '0.78rem' },
-                                color: '#707785',
+                                fontSize: { xs: '0.74rem', sm: '0.8rem' },
+                                color: '#8A94A6',
                                 textTransform: 'uppercase',
                                 letterSpacing: 1.5,
                                 mt: 0.6,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                gap: 1,
+                                gap: 0.8,
                             }}
                         >
                             <span>MATCH {computedMatchNumber ?? ''}</span>
                             {adminHeaderDateText && (
                                 <>
-                                    <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>•</span>
+                                    <span style={{ fontSize: '0.65rem', color: '#64748B' }}>•</span>
                                     <span>{adminHeaderDateText}</span>
                                 </>
                             )}
@@ -4087,11 +4087,11 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         size="small"
                         aria-label="close"
                         sx={{
-                            color: '#707785',
+                            color: '#707A8A',
                             position: 'absolute',
-                            right: { xs: 14, sm: 18 },
-                            top: { xs: 14, sm: 18 },
-                            p: 0.75,
+                            right: { xs: 16, sm: 20 },
+                            top: { xs: 16, sm: 20 },
+                            p: 0.6,
                             transition: 'color 0.2s',
                             '&:hover': {
                                 color: '#ffffff',
@@ -4099,39 +4099,40 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             },
                         }}
                     >
-                        <CloseIcon sx={{ fontSize: { xs: 20, sm: 22 } }} />
+                        <CloseIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </DialogTitle>
 
-                {/* Below container with deep dark background (#121317, not blue) */}
+                {/* Content area with deep dark body (#0B0D11) and generous, professional top gap */}
                 <DialogContent
                     sx={{
                         p: 0,
-                        pt: { xs: 2.2, sm: 2.8 },
-                        pb: { xs: 2.2, sm: 2.8 },
-                        bgcolor: '#121317',
+                        pt: { xs: 3.2, sm: 3.8 },
+                        pb: { xs: 3, sm: 3.6 },
+                        px: { xs: 2.5, sm: 4 },
+                        bgcolor: '#0B0D11',
                         overflowY: 'visible',
                     }}
                 >
-                    {/* Title inside dark area */}
+                    {/* Title inside dark area with professional top spacing */}
                     <Typography
                         sx={{
                             fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                             textAlign: 'center',
                             fontWeight: 800,
-                            letterSpacing: 2.5,
-                            fontSize: { xs: '0.9rem', sm: '0.98rem' },
+                            letterSpacing: 2.4,
+                            fontSize: { xs: '0.92rem', sm: '1rem' },
                             color: '#ffffff',
                             textTransform: 'uppercase',
-                            mt: 0.5,
-                            mb: { xs: 2.5, sm: 3 },
+                            mt: { xs: 0.5, sm: 1 },
+                            mb: { xs: 3.2, sm: 4 },
                         }}
                     >
                         ADD MATCH SCORE
                     </Typography>
 
-                    {/* Shirts, labels, score inputs and V/S with MORE spacing to left and right than submit button */}
-                    <Box sx={{ px: { xs: 4, sm: 6 } }}>
+                    {/* Shirts, labels, score inputs and V/S */}
+                    <Box sx={{ px: { xs: 1.5, sm: 3 } }}>
                         {/* Row 1: Shirts & Team Names */}
                         <Box
                             sx={{
@@ -4146,13 +4147,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    width: { xs: 90, sm: 110 },
+                                    width: { xs: 105, sm: 125 },
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: { xs: 80, sm: 95 },
-                                        height: { xs: 80, sm: 95 },
+                                        width: { xs: 80, sm: 90 },
+                                        height: { xs: 80, sm: 90 },
                                         position: 'relative',
                                     }}
                                 >
@@ -4160,7 +4161,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         src={HomeTeamShirt}
                                         alt="Home team shirt"
                                         fill
-                                        sizes="95px"
+                                        sizes="90px"
                                         style={{ objectFit: 'contain' }}
                                     />
                                 </Box>
@@ -4168,14 +4169,14 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         fontWeight: 800,
-                                        fontSize: { xs: '0.8rem', sm: '0.88rem' },
+                                        fontSize: { xs: '0.8rem', sm: '0.86rem' },
                                         letterSpacing: 1.8,
                                         color: '#ffffff',
                                         textTransform: 'uppercase',
-                                        mt: 1.5,
-                                        mb: 1.5,
+                                        mt: 1.4,
+                                        mb: 1.6,
                                         textAlign: 'center',
-                                        maxWidth: { xs: 100, sm: 120 },
+                                        maxWidth: 125,
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
@@ -4193,13 +4194,13 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    width: { xs: 90, sm: 110 },
+                                    width: { xs: 105, sm: 125 },
                                 }}
                             >
                                 <Box
                                     sx={{
-                                        width: { xs: 80, sm: 95 },
-                                        height: { xs: 80, sm: 95 },
+                                        width: { xs: 80, sm: 90 },
+                                        height: { xs: 80, sm: 90 },
                                         position: 'relative',
                                     }}
                                 >
@@ -4207,7 +4208,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                         src={AwayTeamShirt}
                                         alt="Away team shirt"
                                         fill
-                                        sizes="95px"
+                                        sizes="90px"
                                         style={{ objectFit: 'contain' }}
                                     />
                                 </Box>
@@ -4215,14 +4216,14 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         fontWeight: 800,
-                                        fontSize: { xs: '0.8rem', sm: '0.88rem' },
+                                        fontSize: { xs: '0.8rem', sm: '0.86rem' },
                                         letterSpacing: 1.8,
                                         color: '#ffffff',
                                         textTransform: 'uppercase',
-                                        mt: 1.5,
-                                        mb: 1.5,
+                                        mt: 1.4,
+                                        mb: 1.6,
                                         textAlign: 'center',
-                                        maxWidth: { xs: 100, sm: 120 },
+                                        maxWidth: 125,
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
@@ -4245,7 +4246,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             }}
                         >
                             {/* Home Goals Input */}
-                            <Box sx={{ width: { xs: 90, sm: 110 } }}>
+                            <Box sx={{ width: { xs: 105, sm: 125 } }}>
                                 <TextField
                                     type="number"
                                     value={homeGoalsInput}
@@ -4273,30 +4274,30 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         width: '100%',
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: '#15161b',
+                                            backgroundColor: '#0a0d12',
                                             color: '#ffffff',
-                                            borderRadius: '16px',
-                                            height: { xs: 48, sm: 52 },
+                                            borderRadius: '12px',
+                                            height: { xs: 52, sm: 54 },
                                             '& fieldset': {
-                                                borderColor: '#2b2c30',
-                                                borderWidth: '1.5px',
+                                                borderColor: '#232836',
+                                                borderWidth: '1.2px',
                                             },
                                             '&:hover fieldset': {
-                                                borderColor: '#3a3c42',
+                                                borderColor: '#32394c',
                                             },
                                             '&.Mui-focused fieldset': {
-                                                borderColor: '#3293f1',
+                                                borderColor: '#2988fe',
                                                 borderWidth: '1.5px',
                                             },
                                             '& .MuiInputBase-input::placeholder': {
-                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                color: 'rgba(255, 255, 255, 0.3)',
                                                 opacity: 1,
                                             },
                                         },
                                         input: {
                                             textAlign: 'center',
                                             fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
-                                            fontSize: { xs: 20, sm: 22 },
+                                            fontSize: { xs: 23, sm: 25 },
                                             fontWeight: 800,
                                             padding: 0,
                                             height: '100%',
@@ -4320,9 +4321,9 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             <Typography
                                 sx={{
                                     fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
-                                    color: '#656b77',
+                                    color: '#6B7485',
                                     fontWeight: 800,
-                                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                                    fontSize: { xs: '0.88rem', sm: '0.96rem' },
                                     letterSpacing: 1.5,
                                     textTransform: 'uppercase',
                                 }}
@@ -4331,7 +4332,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             </Typography>
 
                             {/* Away Goals Input */}
-                            <Box sx={{ width: { xs: 90, sm: 110 } }}>
+                            <Box sx={{ width: { xs: 105, sm: 125 } }}>
                                 <TextField
                                     type="number"
                                     value={awayGoalsInput}
@@ -4359,30 +4360,30 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         width: '100%',
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: '#15161b',
+                                            backgroundColor: '#0a0d12',
                                             color: '#ffffff',
-                                            borderRadius: '16px',
-                                            height: { xs: 48, sm: 52 },
+                                            borderRadius: '12px',
+                                            height: { xs: 52, sm: 54 },
                                             '& fieldset': {
-                                                borderColor: '#2b2c30',
-                                                borderWidth: '1.5px',
+                                                borderColor: '#232836',
+                                                borderWidth: '1.2px',
                                             },
                                             '&:hover fieldset': {
-                                                borderColor: '#3a3c42',
+                                                borderColor: '#32394c',
                                             },
                                             '&.Mui-focused fieldset': {
-                                                borderColor: '#3293f1',
+                                                borderColor: '#2988fe',
                                                 borderWidth: '1.5px',
                                             },
                                             '& .MuiInputBase-input::placeholder': {
-                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                color: 'rgba(255, 255, 255, 0.3)',
                                                 opacity: 1,
                                             },
                                         },
                                         input: {
                                             textAlign: 'center',
                                             fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
-                                            fontSize: { xs: 20, sm: 22 },
+                                            fontSize: { xs: 23, sm: 25 },
                                             fontWeight: 800,
                                             padding: 0,
                                             height: '100%',
@@ -4404,8 +4405,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         </Box>
                     </Box>
 
-                    {/* Submit Button: Full width in mobile view (px: 1.5), significantly wider than shirts/inputs */}
-                    <Box sx={{ mt: { xs: 3, sm: 3.5 }, px: { xs: 1.5, sm: 2 } }}>
+                    {/* Submit Button */}
+                    <Box sx={{ mt: { xs: 3.5, sm: 4.2 }, px: { xs: 0, sm: 1 } }}>
                         <Button
                             onClick={handleSaveDetails}
                             disabled={!league?.active || savingMatchDetails}
@@ -4413,21 +4414,21 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                             fullWidth
                             sx={{
                                 height: { xs: 50, sm: 54 },
-                                borderRadius: '16px',
+                                borderRadius: '14px',
                                 fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                 fontWeight: 800,
-                                fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                                fontSize: { xs: '0.88rem', sm: '0.94rem' },
                                 letterSpacing: 2,
-                                backgroundColor: '#3293f1',
-                                boxShadow: '0 6px 20px -2px rgba(50, 147, 241, 0.45)',
+                                backgroundColor: '#2988fe',
+                                boxShadow: '0 4px 16px rgba(41, 136, 254, 0.35)',
                                 textTransform: 'uppercase',
                                 color: '#ffffff',
                                 '&:hover': {
-                                    backgroundColor: '#2085e6',
-                                    boxShadow: '0 8px 25px -2px rgba(50, 147, 241, 0.6)',
+                                    backgroundColor: '#1f7ae6',
+                                    boxShadow: '0 6px 20px rgba(41, 136, 254, 0.5)',
                                 },
                                 '&.Mui-disabled': {
-                                    backgroundColor: 'rgba(50, 147, 241, 0.35)',
+                                    backgroundColor: 'rgba(41, 136, 254, 0.35)',
                                     color: 'rgba(255, 255, 255, 0.4)',
                                 },
                             }}
