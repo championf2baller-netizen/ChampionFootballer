@@ -7,7 +7,7 @@ export interface XPAchievement {
 export const xpAchievements: XPAchievement[] = [
   {
     id: "hat_trick_3_matches",
-    definition: "Score a hat-trick in 3 consecutive matches in a season",
+    definition: "Score 3 hat-tricks within 3 matches in a season (every 3 goals in a match count as a hat-trick)",
     xp: 150,
   },
   {
