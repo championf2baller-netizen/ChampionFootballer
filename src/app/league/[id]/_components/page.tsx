@@ -648,6 +648,7 @@ interface TableData {
     isAdmin?: boolean;
     profilePicture?: string | null;
     motmCount?: number;
+    rankChange?: number;
 }
 
 const TrophyCup = ({ rank }: { rank: 1 | 2 | 3 }) => {
@@ -3036,7 +3037,17 @@ export default function LeagueDetailPage() {
         console.log('   Admin ID:', adminId);
 
         // Initialize ALL filtered members first (whether they played or not)
-        filteredLeague.members.forEach((member: User & { xp?: number }) => {
+        filteredLeague.members.forEach((member: User & { xp?: number; rankChange?: number }) => {
+            const memberRankChange = typeof (member as any)?.rankChange === 'number'
+                ? (member as any).rankChange
+                : selectedSeasonId && typeof (league as any)?.seasonRankChanges?.[member.id] === 'number'
+                ? (league as any).seasonRankChanges[member.id]
+                : selectedSeasonId && typeof (league as any)?.seasonRankChanges?.[`${selectedSeasonId}_${member.id}`] === 'number'
+                ? (league as any).seasonRankChanges[`${selectedSeasonId}_${member.id}`]
+                : typeof (league as any)?.rankChanges?.[member.id] === 'number'
+                ? (league as any).rankChanges[member.id]
+                : undefined;
+
             playerStats.set(member.id, {
                 id: member.id,
                 name: `${member.firstName} ${member.lastName}`,
@@ -3052,6 +3063,7 @@ export default function LeagueDetailPage() {
                 profilePicture: member.profilePicture || null,
                 xp: getLeagueXpForMember(member.id, member.xp),
                 motmCount: typeof motmCounts[member.id] === 'number' ? motmCounts[member.id] : 0,
+                rankChange: memberRankChange,
             });
         });
 
@@ -3097,33 +3109,130 @@ export default function LeagueDetailPage() {
             winPercentage: s.played ? `${Math.round((s.wins / s.played) * 100)}%` : '0%'
         }));
 
-        // Rank exactly like league standings (to match League Champion/Runner-Up logic):
+        // Rank exactly like league standings:
         // 1) players who actually played come first
-        // 2) points (W*3 + D)
-        // 3) goal difference
-        // 4) goals for
-        // 5) wins
-        // 6) XP as final deterministic tie-break
+        // 2) Score (XP if showPoints else PTS)
+        // 3) Wins DESC
+        // 4) Games Played ASC
+        // 5) Goal Difference DESC
+        // 6) Goals For DESC
+        // 7) Name ASC
+        const useXpScoring = filteredLeague?.showPoints === true;
         list.sort((a, b) => {
             const aPlayed = a.played > 0 ? 1 : 0;
             const bPlayed = b.played > 0 ? 1 : 0;
             if (bPlayed !== aPlayed) return bPlayed - aPlayed;
-            const aPoints = a.wins * 3 + a.draws;
-            const bPoints = b.wins * 3 + b.draws;
-            if (bPoints !== aPoints) return bPoints - aPoints;
+            const aPts = (a.wins ?? 0) * 3 + (a.draws ?? 0);
+            const bPts = (b.wins ?? 0) * 3 + (b.draws ?? 0);
+            const aScore = useXpScoring ? (a.xp ?? 0) : aPts;
+            const bScore = useXpScoring ? (b.xp ?? 0) : bPts;
+            if (bScore !== aScore) return bScore - aScore;
+            if ((b.wins ?? 0) !== (a.wins ?? 0)) return (b.wins ?? 0) - (a.wins ?? 0);
+            if ((a.played ?? 0) !== (b.played ?? 0)) return (a.played ?? 0) - (b.played ?? 0);
             if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
             if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
-            if (b.wins !== a.wins) return b.wins - a.wins;
-            return (b.xp ?? 0) - (a.xp ?? 0);
+            return (a.name || '').localeCompare(b.name || '');
         });
 
-        console.log('   Final tableData length:', list.length);
-        console.log('   Final tableData:', list.map(p => `${p.name} (xp: ${p.xp}, played: ${p.played})`));
+        // Compute fallback prior ranks if rankChange is not provided by server
+        const resultMatches = (filteredLeague.matches || [])
+            .filter(m => !m.archived || Boolean(league?.archived))
+            .filter(m => isResultMatch(m) && m.homeTeamGoals != null && m.awayTeamGoals != null);
+
+        let fallbackPriorRanks: Map<string, number> | null = null;
+        if (resultMatches.length > 0) {
+            const sortedMatches = [...resultMatches].sort((a, b) => {
+                const dateA = new Date((a as any).date || (a as any).createdAt || 0).getTime();
+                const dateB = new Date((b as any).date || (b as any).createdAt || 0).getTime();
+                return dateA - dateB;
+            });
+            const priorMatches = sortedMatches.slice(0, sortedMatches.length - 1);
+            const priorStats = new Map<string, { id: string; name: string; played: number; wins: number; draws: number; xp: number }>();
+            filteredLeague.members.forEach((m: User) => {
+                priorStats.set(m.id, {
+                    id: m.id,
+                    name: `${m.firstName} ${m.lastName}`,
+                    played: 0,
+                    wins: 0,
+                    draws: 0,
+                    xp: 0,
+                });
+            });
+            priorMatches.forEach(match => {
+                const homeWon = match.homeTeamGoals! > match.awayTeamGoals!;
+                const awayWon = match.awayTeamGoals! > match.homeTeamGoals!;
+                const isDraw = match.homeTeamGoals === match.awayTeamGoals;
+                const proc = (p: User, isHome: boolean) => {
+                    const st = priorStats.get(p.id);
+                    if (!st) return;
+                    st.played++;
+                    if ((isHome && homeWon) || (!isHome && awayWon)) st.wins++;
+                    else if (isDraw) st.draws++;
+                };
+                (match.homeTeamUsers || []).forEach(p => proc(p, true));
+                (match.awayTeamUsers || []).forEach(p => proc(p, false));
+
+                // Accumulate prior XP from match statistics
+                const pStats = (match as any).playerStats || (match as any).matchStatistics || [];
+                if (Array.isArray(pStats)) {
+                    pStats.forEach((stat: any) => {
+                        const uid = String(stat.user_id || stat.userId || '');
+                        const st = priorStats.get(uid);
+                        if (st) {
+                            st.xp += Number(stat.xpAwarded ?? stat.xp_awarded ?? stat.xp ?? 0) || 0;
+                        }
+                    });
+                }
+            });
+            const priorList = Array.from(priorStats.values());
+            const useXp = filteredLeague?.showPoints === true;
+            priorList.sort((a, b) => {
+                const aPlayed = a.played > 0 ? 1 : 0;
+                const bPlayed = b.played > 0 ? 1 : 0;
+                if (bPlayed !== aPlayed) return bPlayed - aPlayed;
+                const aScore = useXp ? (a.xp ?? 0) : ((a.wins ?? 0) * 3 + (a.draws ?? 0));
+                const bScore = useXp ? (b.xp ?? 0) : ((b.wins ?? 0) * 3 + (b.draws ?? 0));
+                if (bScore !== aScore) return bScore - aScore;
+                if ((b.wins ?? 0) !== (a.wins ?? 0)) return (b.wins ?? 0) - (a.wins ?? 0);
+                if ((a.played ?? 0) !== (b.played ?? 0)) return (a.played ?? 0) - (b.played ?? 0);
+                return (a.name || '').localeCompare(b.name || '');
+            });
+            fallbackPriorRanks = new Map<string, number>();
+            priorList.forEach((p, idx) => fallbackPriorRanks!.set(p.id, idx + 1));
+        }
+
+        const finalList = list.map((p, idx) => {
+            const currRank = idx + 1;
+            let rankChange = p.rankChange;
+            if (typeof rankChange !== 'number') {
+                if (fallbackPriorRanks && fallbackPriorRanks.has(p.id)) {
+                    const prevRank = fallbackPriorRanks.get(p.id)!;
+                    rankChange = prevRank - currRank;
+                } else {
+                    rankChange = 0;
+                }
+            }
+            // Sanity check: Player in 1st place can never have a negative rank change (drop)
+            if (currRank === 1 && typeof rankChange === 'number' && rankChange < 0) {
+                if (fallbackPriorRanks && fallbackPriorRanks.has(p.id)) {
+                    rankChange = Math.max(0, fallbackPriorRanks.get(p.id)! - currRank);
+                } else {
+                    rankChange = 0;
+                }
+            }
+            return {
+                ...p,
+                rankChange,
+            };
+        });
+
+        console.log('   Final tableData length:', finalList.length);
+        console.log('   Final tableData:', finalList.map(p => `${p.name} (xp: ${p.xp}, played: ${p.played}, rankChange: ${p.rankChange})`));
         console.log('🎯 TABLE DATA COMPUTATION END');
 
-        return list;
+        return finalList;
         // Recompute when filtered league or stats change
-    }, [filteredLeague, filteredLeague?.id, filteredLeague?.members, filteredLeague?.matches, filteredLeague?.administrators, leagueWinners, userLeagueXP, motmCounts, matchClockMs, getLeagueXpForMember, isResultMatch]);
+    }, [filteredLeague, filteredLeague?.id, filteredLeague?.members, filteredLeague?.matches, filteredLeague?.administrators, (league as any)?.rankChanges, (league as any)?.seasonRankChanges, leagueWinners, userLeagueXP, motmCounts, matchClockMs, getLeagueXpForMember, isResultMatch, selectedSeasonId]);
 
     useEffect(() => {
         if (section !== 'table') return;
@@ -7104,7 +7213,7 @@ export default function LeagueDetailPage() {
                                                                                     ? (player as any).rankChange
                                                                                     : typeof (player as any)?.movement === 'number'
                                                                                     ? (player as any).movement
-                                                                                    : (index === 4 ? 1 : index === 5 ? 2 : index === 6 ? -1 : 0);
+                                                                                    : 0;
                                                                                 if (movement > 0) {
                                                                                     return (
                                                                                         <span className="text-[#22c55e] flex items-center gap-0.5 font-bold text-[11px] sm:text-xs">
