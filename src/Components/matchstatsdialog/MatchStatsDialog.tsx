@@ -4007,469 +4007,432 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 open={open === true && showAdminGoalsSection === true}
                 onClose={handleAdminDialogClose}
                 fullWidth
-                maxWidth="lg"
+                maxWidth="xs"
+                BackdropProps={{
+                    sx: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        backdropFilter: 'blur(3px)',
+                    }
+                }}
                 PaperProps={{
                     sx: {
-                        ...dialogPaperSx,
-                        width: { xs: 'calc(100% - 12px)', sm: 'calc(100% - 32px)', md: 'calc(100% - 64px)' },
-                        maxWidth: { xs: '100%', md: 850 },
-                        height: 'auto',
-                        maxHeight: { xs: '92vh', md: 'calc(100% - 64px)' },
-                        m: { xs: 0.75, sm: 2, md: 4 },
-                        borderRadius: { xs: 2, md: 0 },
+                        bgcolor: '#121317',
+                        backgroundImage: 'none',
+                        color: '#ffffff',
+                        borderRadius: { xs: '20px', sm: '24px' },
+                        border: '1px solid #2d3037',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                        width: { xs: 'calc(100% - 24px)', sm: 470, md: 490 },
+                        maxWidth: { xs: 390, sm: 470, md: 490 },
+                        m: 'auto',
+                        overflow: 'hidden',
+                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                     }
                 }}
             >
-                {/* Top grey header bar like design screenshot */}
+                {/* Header with distinct slate-charcoal color (#20252b) */}
                 <DialogTitle
                     sx={{
                         p: 0,
-                        bgcolor: '#d9d9d9',
+                        position: 'relative',
+                        bgcolor: '#20252b',
+                        borderBottom: '1px solid #2d3037',
+                        pt: { xs: 2.2, sm: 2.6 },
+                        pb: { xs: 1.8, sm: 2.2 },
+                        px: { xs: 2, sm: 4 },
                     }}
                 >
-                    {isMobile ? (
-                        <Box
+                    <Box sx={{ textAlign: 'center', pr: { xs: 3, sm: 0 } }}>
+                        <Typography
                             sx={{
-                                display: 'flex',
-                                alignItems: 'stretch',
-                                justifyContent: 'space-between',
-                                px: 0.9,
-                                py: 0.65,
-                                pr: 5.2,
-                                position: 'relative',
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 800,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                                color: '#c5cad5',
+                                textTransform: 'uppercase',
+                                letterSpacing: 2,
+                                lineHeight: 1.3,
+                                textAlign: 'center',
                             }}
                         >
-                            <Box
-                                sx={{
-                                    width: '100%',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <Box sx={{ px: 1, py: 0.55 }}>
-                                    <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                        {adminHeaderLeagueText}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                                    <Box sx={{ px: 1, py: 0.5 }}>
-                                        <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                            MATCH {computedMatchNumber ?? ''}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ px: 1, py: 0.5 }}>
-                                        <Typography sx={{ fontWeight: 600, fontSize: { xs: 14, md: 12 }, textAlign: 'center', lineHeight: 1.2 }}>
-                                            {adminHeaderDateText}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-                            <IconButton
-                                onClick={handleAdminDialogClose}
-                                size="small"
-                                sx={{
-                                    color: '#111',
-                                    position: 'absolute',
-                                    right: 0,
-                                    top: 0,
-                                    bgcolor: '#e6e6e6',
-                                    borderRadius: 0,
-                                    width: 36,
-                                    height: 36,
-                                    '&:hover': {
-                                        bgcolor: '#e6e6e6',
-                                    }
-                                }}
-                            >
-                                <CloseIcon sx={{ fontSize: 18 }} />
-                            </IconButton>
-                        </Box>
-                    ) : (
-                        <Box
+                            {adminHeaderLeagueText}
+                        </Typography>
+                        <Typography
                             sx={{
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 700,
+                                fontSize: { xs: '0.72rem', sm: '0.78rem' },
+                                color: '#707785',
+                                textTransform: 'uppercase',
+                                letterSpacing: 1.5,
+                                mt: 0.6,
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'space-between',
-                                px: 3,
-                                py: 1.5,
-                                position: 'relative',
+                                justifyContent: 'center',
+                                gap: 1,
                             }}
                         >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0,
-                                    width: '100%',
-                                }}
-                            >
-                                <Box sx={{
-                                    flex: 1,
-                                    textAlign: 'center',
-                                    py: 1,
-                                    borderRight: '2px solid #000',
-                                }}>
-                                    <Typography sx={{
-                                        fontWeight: 700,
-                                        fontSize: 16,
-                                        color: '#000',
-                                        textTransform: 'uppercase'
-                                    }}>
-                                        {adminHeaderLeagueText}
-                                    </Typography>
-                                </Box>
+                            <span>MATCH {computedMatchNumber ?? ''}</span>
+                            {adminHeaderDateText && (
+                                <>
+                                    <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>•</span>
+                                    <span>{adminHeaderDateText}</span>
+                                </>
+                            )}
+                        </Typography>
+                    </Box>
 
-                                <Box sx={{
-                                    flex: 1,
-                                    textAlign: 'center',
-                                    py: 1,
-                                    borderRight: '2px solid #000',
-                                }}>
-                                    <Typography sx={{
-                                        fontWeight: 700,
-                                        fontSize: 16,
-                                        color: '#000',
-                                        textTransform: 'uppercase'
-                                    }}>
-                                        MATCH {computedMatchNumber ?? ''}
-                                    </Typography>
-                                </Box>
-
-                                <Box sx={{
-                                    flex: 1,
-                                    textAlign: 'center',
-                                    py: 1,
-                                }}>
-                                    <Typography sx={{
-                                        fontWeight: 600,
-                                        fontSize: 16,
-                                        color: '#000'
-                                    }}>
-                                        {adminHeaderDateText}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <IconButton
-                                onClick={handleAdminDialogClose}
-                                size="small"
-                                sx={{
-                                    color: 'black',
-                                    position: 'absolute',
-                                    right: 0,
-                                    top: 0,
-                                    bgcolor: '#e6e6e6',
-                                    borderRadius: 0,
-                                    width: 63.5,
-                                    height: 63.5,
-                                    '&:hover': {
-                                        bgcolor: '#d0d0d0',
-                                        color: '#000'
-                                    }
-                                }}
-                            >
-                                <CloseIcon sx={{ fontSize: 24 }} />
-                            </IconButton>
-                        </Box>
-                    )}
+                    <IconButton
+                        onClick={handleAdminDialogClose}
+                        size="small"
+                        aria-label="close"
+                        sx={{
+                            color: '#707785',
+                            position: 'absolute',
+                            right: { xs: 14, sm: 18 },
+                            top: { xs: 14, sm: 18 },
+                            p: 0.75,
+                            transition: 'color 0.2s',
+                            '&:hover': {
+                                color: '#ffffff',
+                                bgcolor: 'transparent',
+                            },
+                        }}
+                    >
+                        <CloseIcon sx={{ fontSize: { xs: 20, sm: 22 } }} />
+                    </IconButton>
                 </DialogTitle>
+
+                {/* Below container with deep dark background (#121317, not blue) */}
                 <DialogContent
                     sx={{
-                        ...dialogContentSx,
-                        pt: { xs: 1.5, sm: 2.5, md: 3 },
-                        pb: { xs: 1.5, sm: 2.5, md: 3 },
-                        border: { xs: '2px solid #bfbfbf', sm: '5px solid #bfbfbf' },
-                        overflowY: 'auto',
+                        p: 0,
+                        pt: { xs: 2.2, sm: 2.8 },
+                        pb: { xs: 2.2, sm: 2.8 },
+                        bgcolor: '#121317',
+                        overflowY: 'visible',
                     }}
                 >
                     {/* Title inside dark area */}
                     <Typography
                         sx={{
+                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                             textAlign: 'center',
-                            fontWeight: 600,
-                            letterSpacing: { xs: 1.2, sm: 2.4, md: 3 },
-                            mt: { xs: 0.5, sm: 1 },
-                            fontSize: { xs: 13, sm: 16, md: 19 },
+                            fontWeight: 800,
+                            letterSpacing: 2.5,
+                            fontSize: { xs: '0.9rem', sm: '0.98rem' },
+                            color: '#ffffff',
+                            textTransform: 'uppercase',
+                            mt: 0.5,
+                            mb: { xs: 2.5, sm: 3 },
                         }}
                     >
                         ADD MATCH SCORE
                     </Typography>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            alignItems: 'flex-end',
-                            justifyContent: 'center',
-                            gap: { xs: 2, sm: 4, md: 10 },
-                            color: 'white',
-                            px: { xs: 1, sm: 3, md: 6 },
-                            // mt: 4,
-                        }}
-                    >
-                        {/* Home side */}
+
+                    {/* Shirts, labels, score inputs and V/S with MORE spacing to left and right than submit button */}
+                    <Box sx={{ px: { xs: 4, sm: 6 } }}>
+                        {/* Row 1: Shirts & Team Names */}
                         <Box
                             sx={{
                                 display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                // flex: 1,
-                                textAlign: 'center',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
                             }}
                         >
-                            {/* Home team shirt image */}
+                            {/* Home Side Header */}
                             <Box
                                 sx={{
-                                    width: { xs: 96, sm: 120, md: 150 },
-                                    height: { xs: 96, sm: 120, md: 150 },
-                                    // mb: 1.5,
-                                    position: 'relative',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: { xs: 90, sm: 110 },
                                 }}
                             >
-                                <Image
-                                    src={HomeTeamShirt}
-                                    alt="Home team shirt"
-                                    fill
-                                    sizes="(max-width: 600px) 96px, (max-width: 900px) 120px, 150px"
-                                    style={{ objectFit: 'contain' }}
-                                />
+                                <Box
+                                    sx={{
+                                        width: { xs: 80, sm: 95 },
+                                        height: { xs: 80, sm: 95 },
+                                        position: 'relative',
+                                    }}
+                                >
+                                    <Image
+                                        src={HomeTeamShirt}
+                                        alt="Home team shirt"
+                                        fill
+                                        sizes="95px"
+                                        style={{ objectFit: 'contain' }}
+                                    />
+                                </Box>
+                                <Typography
+                                    sx={{
+                                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                        fontWeight: 800,
+                                        fontSize: { xs: '0.8rem', sm: '0.88rem' },
+                                        letterSpacing: 1.8,
+                                        color: '#ffffff',
+                                        textTransform: 'uppercase',
+                                        mt: 1.5,
+                                        mb: 1.5,
+                                        textAlign: 'center',
+                                        maxWidth: { xs: 100, sm: 120 },
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {match?.homeTeamName && match.homeTeamName !== 'Home Team'
+                                        ? match.homeTeamName.toUpperCase()
+                                        : 'HOME'}
+                                </Typography>
                             </Box>
-                            {/* <Typography
+
+                            {/* Away Side Header */}
+                            <Box
                                 sx={{
-                                    fontSize: 12,
-                                    letterSpacing: 2,
-                                    textTransform: 'uppercase',
-                                    opacity: 0.9,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: { xs: 90, sm: 110 },
                                 }}
                             >
-                                Home 
-                            </Typography> */}
-                            <Typography
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: { xs: 14, sm: 16, md: 18 },
-                                    // mt: 0.5,
-                                }}
-                            >
-                                {match?.homeTeamName || 'Home Team'}
-                            </Typography>
-                            <TextField
-                                type="number"
-                                value={homeGoalsInput}
-                                placeholder="0"
-                                onFocus={e => {
-                                    if (e.target.value === '0') {
-                                        setHomeGoalsInput('');
-                                    } else {
-                                        e.target.select();
-                                    }
-                                }}
-                                onChange={e => {
-                                    const raw = e.target.value;
-                                    if (raw === '') {
-                                        setHomeGoalsInput('');
-                                        setHomeGoals(0);
-                                        return;
-                                    }
-                                    const n = Math.max(0, parseInt(raw, 10));
-                                    const str = Number.isFinite(n) ? String(n) : '';
-                                    setHomeGoalsInput(str);
-                                    setHomeGoals(Number.isFinite(n) ? n : 0);
-                                }}
-                                variant="outlined"
-                                sx={{
-                                    mt: 0.5,
-                                    width: { xs: 72, sm: 80 },
-                                    border: '1px solid #fff',
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: '#262626',
-                                        color: '#fff',
+                                <Box
+                                    sx={{
+                                        width: { xs: 80, sm: 95 },
+                                        height: { xs: 80, sm: 95 },
+                                        position: 'relative',
+                                    }}
+                                >
+                                    <Image
+                                        src={AwayTeamShirt}
+                                        alt="Away team shirt"
+                                        fill
+                                        sizes="95px"
+                                        style={{ objectFit: 'contain' }}
+                                    />
+                                </Box>
+                                <Typography
+                                    sx={{
+                                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                        fontWeight: 800,
+                                        fontSize: { xs: '0.8rem', sm: '0.88rem' },
+                                        letterSpacing: 1.8,
+                                        color: '#ffffff',
+                                        textTransform: 'uppercase',
+                                        mt: 1.5,
+                                        mb: 1.5,
                                         textAlign: 'center',
-                                        '& fieldset': { borderColor: '#444' },
-                                        '&:hover fieldset': { borderColor: '#777' },
-                                        '&.Mui-focused fieldset': { borderColor: '#fff' },
-                                        '& .MuiInputBase-input::placeholder': {
-                                            color: 'rgba(255, 255, 255, 0.45)',
-                                            opacity: 1,
-                                        },
-                                    },
-                                    input: {
-                                        textAlign: 'center',
-                                        fontSize: { xs: 18, sm: 20 },
-                                        fontWeight: 700,
-                                        paddingY: 0.75,
-                                        MozAppearance: 'textfield',
-                                        '&::-webkit-outer-spin-button': {
-                                            WebkitAppearance: 'none',
-                                            margin: 0,
-                                        },
-                                        '&::-webkit-inner-spin-button': {
-                                            WebkitAppearance: 'none',
-                                            margin: 0,
-                                        },
-                                    },
-                                }}
-                                inputProps={{ min: 0 }}
-                                disabled={!league?.active}
-                            />
+                                        maxWidth: { xs: 100, sm: 120 },
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {match?.awayTeamName && match.awayTeamName !== 'Away Team'
+                                        ? match.awayTeamName.toUpperCase()
+                                        : 'AWAY'}
+                                </Typography>
+                            </Box>
                         </Box>
 
-                        {/* VS in centre */}
+                        {/* Row 2: Score Inputs & V/S */}
                         <Box
                             sx={{
                                 display: 'flex',
+                                justifyContent: 'space-between',
                                 alignItems: 'center',
-                                pb: { xs: 0.3, sm: 2 },
+                                mt: 0,
                             }}
                         >
+                            {/* Home Goals Input */}
+                            <Box sx={{ width: { xs: 90, sm: 110 } }}>
+                                <TextField
+                                    type="number"
+                                    value={homeGoalsInput}
+                                    placeholder="0"
+                                    onFocus={e => {
+                                        if (e.target.value === '0') {
+                                            setHomeGoalsInput('');
+                                        } else {
+                                            e.target.select();
+                                        }
+                                    }}
+                                    onChange={e => {
+                                        const raw = e.target.value;
+                                        if (raw === '') {
+                                            setHomeGoalsInput('');
+                                            setHomeGoals(0);
+                                            return;
+                                        }
+                                        const n = Math.max(0, parseInt(raw, 10));
+                                        const str = Number.isFinite(n) ? String(n) : '';
+                                        setHomeGoalsInput(str);
+                                        setHomeGoals(Number.isFinite(n) ? n : 0);
+                                    }}
+                                    variant="outlined"
+                                    sx={{
+                                        width: '100%',
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: '#15161b',
+                                            color: '#ffffff',
+                                            borderRadius: '16px',
+                                            height: { xs: 48, sm: 52 },
+                                            '& fieldset': {
+                                                borderColor: '#2b2c30',
+                                                borderWidth: '1.5px',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: '#3a3c42',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#3293f1',
+                                                borderWidth: '1.5px',
+                                            },
+                                            '& .MuiInputBase-input::placeholder': {
+                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                opacity: 1,
+                                            },
+                                        },
+                                        input: {
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                            fontSize: { xs: 20, sm: 22 },
+                                            fontWeight: 800,
+                                            padding: 0,
+                                            height: '100%',
+                                            MozAppearance: 'textfield',
+                                            '&::-webkit-outer-spin-button': {
+                                                WebkitAppearance: 'none',
+                                                margin: 0,
+                                            },
+                                            '&::-webkit-inner-spin-button': {
+                                                WebkitAppearance: 'none',
+                                                margin: 0,
+                                            },
+                                        },
+                                    }}
+                                    inputProps={{ min: 0 }}
+                                    disabled={!league?.active}
+                                />
+                            </Box>
+
+                            {/* V/S in center */}
                             <Typography
                                 sx={{
-                                    fontSize: { xs: 22, sm: 30, md: 40 },
+                                    fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                    color: '#656b77',
                                     fontWeight: 800,
-                                    letterSpacing: { xs: 1.5, sm: 3, md: 4 },
+                                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                                    letterSpacing: 1.5,
+                                    textTransform: 'uppercase',
                                 }}
                             >
                                 V/S
                             </Typography>
-                        </Box>
 
-                        {/* Away side */}
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                // flex: 1,
-                                textAlign: 'center',
-                            }}
-                        >
-                            {/* Away team shirt image */}
-                            <Box
-                                sx={{
-                                    width: { xs: 96, sm: 120, md: 150 },
-                                    height: { xs: 96, sm: 120, md: 150 },
-                                    // mb: 1.5,
-                                    position: 'relative',
-                                }}
-                            >
-                                <Image
-                                    src={AwayTeamShirt}
-                                    alt="Away team shirt"
-                                    fill
-                                    sizes="(max-width: 600px) 96px, (max-width: 900px) 120px, 150px"
-                                    style={{ objectFit: 'contain' }}
+                            {/* Away Goals Input */}
+                            <Box sx={{ width: { xs: 90, sm: 110 } }}>
+                                <TextField
+                                    type="number"
+                                    value={awayGoalsInput}
+                                    placeholder="0"
+                                    onFocus={e => {
+                                        if (e.target.value === '0') {
+                                            setAwayGoalsInput('');
+                                        } else {
+                                            e.target.select();
+                                        }
+                                    }}
+                                    onChange={e => {
+                                        const raw = e.target.value;
+                                        if (raw === '') {
+                                            setAwayGoalsInput('');
+                                            setAwayGoals(0);
+                                            return;
+                                        }
+                                        const n = Math.max(0, parseInt(raw, 10));
+                                        const str = Number.isFinite(n) ? String(n) : '';
+                                        setAwayGoalsInput(str);
+                                        setAwayGoals(Number.isFinite(n) ? n : 0);
+                                    }}
+                                    variant="outlined"
+                                    sx={{
+                                        width: '100%',
+                                        '& .MuiOutlinedInput-root': {
+                                            backgroundColor: '#15161b',
+                                            color: '#ffffff',
+                                            borderRadius: '16px',
+                                            height: { xs: 48, sm: 52 },
+                                            '& fieldset': {
+                                                borderColor: '#2b2c30',
+                                                borderWidth: '1.5px',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: '#3a3c42',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#3293f1',
+                                                borderWidth: '1.5px',
+                                            },
+                                            '& .MuiInputBase-input::placeholder': {
+                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                opacity: 1,
+                                            },
+                                        },
+                                        input: {
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                            fontSize: { xs: 20, sm: 22 },
+                                            fontWeight: 800,
+                                            padding: 0,
+                                            height: '100%',
+                                            MozAppearance: 'textfield',
+                                            '&::-webkit-outer-spin-button': {
+                                                WebkitAppearance: 'none',
+                                                margin: 0,
+                                            },
+                                            '&::-webkit-inner-spin-button': {
+                                                WebkitAppearance: 'none',
+                                                margin: 0,
+                                            },
+                                        },
+                                    }}
+                                    inputProps={{ min: 0 }}
+                                    disabled={!league?.active}
                                 />
                             </Box>
-                            <Typography
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: { xs: 14, sm: 16, md: 18 },
-                                    // mt: 0.5,
-                                }}
-                            >
-                                {match?.awayTeamName || 'Away Team'}
-                            </Typography>
-                            <TextField
-                                type="number"
-                                value={awayGoalsInput}
-                                placeholder="0"
-                                onFocus={e => {
-                                    if (e.target.value === '0') {
-                                        setAwayGoalsInput('');
-                                    } else {
-                                        e.target.select();
-                                    }
-                                }}
-                                onChange={e => {
-                                    const raw = e.target.value;
-                                    if (raw === '') {
-                                        setAwayGoalsInput('');
-                                        setAwayGoals(0);
-                                        return;
-                                    }
-                                    const n = Math.max(0, parseInt(raw, 10));
-                                    const str = Number.isFinite(n) ? String(n) : '';
-                                    setAwayGoalsInput(str);
-                                    setAwayGoals(Number.isFinite(n) ? n : 0);
-                                }}
-                                variant="outlined"
-                                sx={{
-                                    mt: 0.5,
-                                    width: { xs: 72, sm: 80 },
-                                    border: '1px solid #fff',
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: '#262626',
-                                        color: '#fff',
-                                        textAlign: 'center',
-                                        '& fieldset': { borderColor: '#444' },
-                                        '&:hover fieldset': { borderColor: '#777' },
-                                        '&.Mui-focused fieldset': { borderColor: '#fff' },
-                                        '& .MuiInputBase-input::placeholder': {
-                                            color: 'rgba(255, 255, 255, 0.45)',
-                                            opacity: 1,
-                                        },
-                                    },
-                                    input: {
-                                        textAlign: 'center',
-                                        fontSize: { xs: 18, sm: 20 },
-                                        fontWeight: 700,
-                                        paddingY: 0.75,
-                                        MozAppearance: 'textfield',
-                                        '&::-webkit-outer-spin-button': {
-                                            WebkitAppearance: 'none',
-                                            margin: 0,
-                                        },
-                                        '&::-webkit-inner-spin-button': {
-                                            WebkitAppearance: 'none',
-                                            margin: 0,
-                                        },
-                                    },
-                                }}
-                                inputProps={{ min: 0 }}
-                                disabled={!league?.active}
-                            />
                         </Box>
                     </Box>
 
-                    {/* <Box sx={{ mt: 4 }}>
-                        <TextField
-                            label="Match Note"
-                            multiline
-                            rows={3}
-                            value={note}
-                            onChange={e => setNote(e.target.value)}
-                            fullWidth
-                            variant="outlined"
-                            disabled={!league?.active}
-                            sx={{
-                                // border : '1px solid #fff',
-                                '& .MuiOutlinedInput-root': {
-                                    backgroundColor: '#262626',
-                                    color: '#fff',
-                                    '& fieldset': { borderColor: '#fff' },
-                                    '&:hover fieldset': { borderColor: '#fff' },
-                                    '&.Mui-focused fieldset': { borderColor: '#fff' },
-                                },
-                                '& .MuiInputLabel-root': { color: '#E5E7EB' },
-                            }}
-                        />
-                    </Box> */}
-
-                    <Box sx={{ mt: { xs: 2.2, sm: 3.2, md: 4 }, px: { xs: 1.5, sm: 4, md: 6 }, display: 'flex', justifyContent: 'center' }}>
+                    {/* Submit Button: Full width in mobile view (px: 1.5), significantly wider than shirts/inputs */}
+                    <Box sx={{ mt: { xs: 3, sm: 3.5 }, px: { xs: 1.5, sm: 2 } }}>
                         <Button
                             onClick={handleSaveDetails}
                             disabled={!league?.active || savingMatchDetails}
                             variant="contained"
+                            fullWidth
                             sx={{
-                                py: 1.5,
-                                borderRadius: '12px',
-                                fontWeight: 700,
-                                letterSpacing: 1,
-                                backgroundColor: '#2196f3',
-                                '&:hover': { backgroundColor: '#1e88e5' },
-                                width: '100%',
-                                minWidth: 0,
-                                maxWidth: { xs: '100%', sm: 420, md: 630 },
+                                height: { xs: 50, sm: 54 },
+                                borderRadius: '16px',
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 800,
+                                fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                                letterSpacing: 2,
+                                backgroundColor: '#3293f1',
+                                boxShadow: '0 6px 20px -2px rgba(50, 147, 241, 0.45)',
+                                textTransform: 'uppercase',
+                                color: '#ffffff',
+                                '&:hover': {
+                                    backgroundColor: '#2085e6',
+                                    boxShadow: '0 8px 25px -2px rgba(50, 147, 241, 0.6)',
+                                },
+                                '&.Mui-disabled': {
+                                    backgroundColor: 'rgba(50, 147, 241, 0.35)',
+                                    color: 'rgba(255, 255, 255, 0.4)',
+                                },
                             }}
                         >
-                            {savingMatchDetails ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'SUBMIT'}
+                            {savingMatchDetails ? <CircularProgress size={22} sx={{ color: '#ffffff' }} /> : 'SUBMIT'}
                         </Button>
                     </Box>
                 </DialogContent>
