@@ -899,12 +899,12 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
   const badges: Badge[] = [
     {
       id: 'hat_trick_3_matches',
-      title: 'Hat-Trick x3',
-      description: 'Scoring 3+ goals in 3 separate matches (Within a single league)',
+      title: 'Triple Treat',
+      description: 'Score 3 hat-tricks within 3 matches in a single season (every 3 goals in a match count as a hat-trick)',
       image: HatTrickBadge,
       color: medalGold, // changed
       count: Math.floor(hatTricks / 3),
-      xp: 100,
+      xp: 150,
       unlocked: hatTricks >= 3,
       progressText: hatTricks >= 3 ? `x${Math.floor(hatTricks / 3)}` : `${3 - Math.min(hatTricks, 3)} hat-trick(s) to go`,
     },
@@ -1035,8 +1035,8 @@ const BADGE_META: Record<string, { title: string; description: string; image: St
     color: BLUE_HEX,
   },
   hat_trick_3_matches: {
-    title: 'Hat-Trick x3',
-    description: 'Score a hat-trick in 3 consecutive matches in a single season',
+    title: 'Triple Treat',
+    description: 'Score 3 hat-tricks within 3 matches in a single season (every 3 goals in a match count as a hat-trick)',
     image: HatTrickBadge,
     color: medalGold,
   },

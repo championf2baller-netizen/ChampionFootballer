@@ -7,7 +7,7 @@ Base & Stats XP,Assist Made,XP earned for making an assist,Individual assists re
 Base & Stats XP,MOTM Vote Received,XP earned for each Man of the Match vote received,Total votes received in manOfTheMatchVotes,120 XP per vote,No Limit
 Badges & Streaks,Goal Rush,Scoring in consecutive matches,Scoring at least 1 goal in 5 consecutive matches in a league,100 XP per streak,Target: 5 consecutive matches
 Badges & Streaks,Pure Magic,Assisting in consecutive matches,Making at least 1 assist in 5 consecutive matches in a league,100 XP per streak,Target: 5 consecutive matches
-Badges & Streaks,Triple Treat,Scoring hat-tricks in consecutive matches,Scoring 3 or more goals in 3 consecutive matches in a league,150 XP per streak,Target: 3 consecutive matches
+Badges & Streaks,Triple Treat,Score 3 hat-tricks within 3 matches in a season,Score 3 hat-tricks within 3 matches in a single season (every 3 goals in a match count as 1 hat-trick),150 XP per 3 hat-tricks,Target: 3 hat-tricks within 3 matches (re-earnable)
 Badges & Streaks,Leader of Legends,Wins as team Captain,Winning a match while assigned as Home or Away Captain (3 times in a league),200 XP per 3 wins,Target: 3 Captain wins (re-earnable)
 Badges & Streaks,The X-Factor,Voted impact player in matches,Voted as Mentality and/or Defensive Impact player in 5 matches in a league,200 XP per 5 matches,Target: 5 matches (re-earnable)
 Badges & Streaks,Spotlight Star,Winning the overall MOTM award,Top vote-getter in match votes (earned 3 times in a league),250 XP per 3 awards,Target: 3 MOTM awards (re-earnable)

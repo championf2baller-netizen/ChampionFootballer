@@ -388,6 +388,45 @@ const countStreakCompletions = (
   return awards;
 };
 
+const computeTripleTreatForMatches = (
+  arr: UserMatchSummary[]
+): { count: number; best: number } => {
+  let awards = 0;
+  let best = 0;
+  let window: Array<{ matchIndex: number; hatTricks: number }> = [];
+
+  for (let i = 0; i < arr.length; i++) {
+    const m = arr[i];
+    const h = Math.floor((m.goals || 0) / 3);
+
+    // Keep only active matches within the last 3 matches (i-2, i-1, i)
+    window = window.filter((entry) => entry.matchIndex >= i - 2 && entry.hatTricks > 0);
+
+    if (h > 0) {
+      window.push({ matchIndex: i, hatTricks: h });
+    }
+
+    const windowSum = window.reduce((sum, entry) => sum + entry.hatTricks, 0);
+    best = Math.max(best, windowSum);
+
+    if (windowSum >= 3) {
+      const newAwards = Math.floor(windowSum / 3);
+      awards += newAwards;
+
+      let toConsume = newAwards * 3;
+      for (const entry of window) {
+        if (toConsume <= 0) break;
+        const take = Math.min(entry.hatTricks, toConsume);
+        entry.hatTricks -= take;
+        toConsume -= take;
+      }
+      window = window.filter((entry) => entry.hatTricks > 0);
+    }
+  }
+
+  return { count: awards, best: Math.min(best, 3) };
+};
+
 // --- XP computation ---
 const computeXPFromStats = (s?: PlayerStats): number => {
   if (!s) return 0;
@@ -424,8 +463,9 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
     pureMagicBest = Math.max(pureMagicBest, longestStreak(arr, (m) => m.assists > 0));
     pureMagicCount += countStreakCompletions(arr, (m) => m.assists > 0, 5);
 
-    tripleTreatBest = Math.max(tripleTreatBest, longestStreak(arr, (m) => m.goals >= 3));
-    tripleTreatCount += countStreakCompletions(arr, (m) => m.goals >= 3, 3);
+    const tripleTreat = computeTripleTreatForMatches(arr);
+    tripleTreatBest = Math.max(tripleTreatBest, tripleTreat.best);
+    tripleTreatCount += tripleTreat.count;
 
     const captainWinsInSeason = arr.filter((m) => m.isCaptainWin).length;
     leaderOfLegendsBest = Math.max(leaderOfLegendsBest, captainWinsInSeason);
@@ -510,13 +550,13 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
     {
       id: 'hat_trick_3_matches',
       title: 'Triple Treat',
-      description: 'Score a hat-trick in 3 consecutive matches in a single season',
+      description: 'Score 3 hat-tricks within 3 matches in a single season (every 3 goals in a match count as a hat-trick)',
       image: HatTrickBadge,
       color: medalGold,
       count: tripleTreatCount,
       xp: 150,
       unlocked: tripleTreatCount > 0,
-      progressText: `Best hat-trick streak in a season: ${tripleTreatBest}/3`,
+      progressText: `Hat-tricks within 3 matches: ${tripleTreatBest}/3`,
     },
     {
       id: 'captain_5_wins',
@@ -595,7 +635,7 @@ const computeBadges = (user: User, leagues: League[], backendTotalXP?: number): 
 const BADGE_META: Record<string, { title: string; description: string; image: StaticImageData; color: string }> = {
   hat_trick_3_matches: {
     title: 'Triple Treat',
-    description: 'Score a hat-trick in 3 consecutive matches in a single season',
+    description: 'Score 3 hat-tricks within 3 matches in a single season (every 3 goals in a match count as a hat-trick)',
     image: HatTrickBadge,
     color: medalGold,
   },
