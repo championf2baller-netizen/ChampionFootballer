@@ -4587,20 +4587,6 @@ export default function LeagueDetailPage() {
                                     </Menu>
                                 </Box>
 
-                                {/* Orange divider under header */}
-                                <Box
-                                    sx={{
-                                        height: 'var(--header-divider-height, 3px)',
-                                        minHeight: '3px',
-                                        bgcolor: 'var(--header-divider-color, #e16419)',
-                                        mt: { xs: 0, md: 3 },
-                                        mb: { xs: 0, md: 2 },
-                                        width: '100vw',
-                                        position: 'relative',
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                    }}
-                                />
 
                                 {/* Navigation Tabs - Mobile View (3 tabs: Table, Leaderboard, Dream Team) */}
                                 <Box sx={{ display: { xs: 'block', sm: 'none' }, width: '100%', px: { xs: 1, sm: 0 }, mt: 1.5, mb: { xs: 1.5, md: 0 } }}>
@@ -4625,7 +4611,7 @@ export default function LeagueDetailPage() {
                                         overflowX: { xs: 'visible', sm: 'auto' },
                                         overflowY: 'hidden',
                                         px: 1,
-                                        mt: 0,
+                                        mt: { xs: 1.5, sm: 2 },
                                         mb: { xs: 1.5, md: 0 },
                                         scrollbarWidth: 'none',
                                         '&::-webkit-scrollbar': { display: 'none' },
