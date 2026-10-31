@@ -2751,6 +2751,7 @@ export default function GlobalTrophyRoom() {
                   onClose={() => setYearDropdownOpen(false)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  marginThreshold={null}
                   PaperProps={{
                     sx: {
                       mt: 0.5,
@@ -2856,33 +2857,32 @@ export default function GlobalTrophyRoom() {
                   onClose={() => setLeagueDropdownOpen(false)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                  marginThreshold={0}
-                  MenuListProps={{
+                  marginThreshold={null}
+                  PaperProps={{
                     sx: {
-                      maxHeight: { xs: 260, sm: 320 },
+                      mt: 0.5,
+                      maxHeight: { xs: 240, sm: 280, md: 320 },
                       overflowY: 'auto',
                       overflowX: 'hidden',
                       scrollbarWidth: 'thin',
+                      scrollbarColor: 'rgba(255,255,255,0.35) rgba(255,255,255,0.08)',
                       '&::-webkit-scrollbar': { width: '8px' },
                       '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.08)' },
                       '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.35)', borderRadius: '999px' },
-                    },
-                  }}
-                  PaperProps={{
-                    sx: {
-                      p: 0.5,
-                      mt: 1,
-                      minWidth: leagueFilterButtonRef.current?.offsetWidth || 150,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      color: '#E5E7EB',
+                      minWidth: leagueFilterButtonRef.current?.offsetWidth || 148,
                       width: 'max-content',
                       maxWidth: { xs: '92vw', sm: 'none' },
-                      bgcolor: '#16181d',
-                      color: '#E5E7EB',
-                      borderRadius: 2.5,
-                      border: '1px solid #22242a',
-                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-                      overflow: 'hidden',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    },
+                    style: {
+                      maxHeight: 'min(300px, calc(100vh - 160px))',
                     }
                   }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
                 >
                   {[...filteredLeagues].sort((a, b) => {
                     const getCreatedTs = (l: any): number => {
@@ -3037,6 +3037,7 @@ export default function GlobalTrophyRoom() {
                   onClose={() => setSeasonDropdownOpen(false)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  marginThreshold={null}
                   PaperProps={{
                     sx: {
                       mt: 0.5,

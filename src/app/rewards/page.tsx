@@ -1241,7 +1241,7 @@ export default function RewardsPage() {
           </DialogTitle>
           <DialogContent sx={{ py: 3, px: { xs: 2.5, md: 3.5 } }}>
             {selectedBadge && (
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 3, alignItems: 'center' }}>
+              <Box sx={{pt:1.5, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'auto 1fr' }, gap: 3, alignItems: 'center' }}>
                 <Box sx={{
                   position: 'relative',
                   width: 120,

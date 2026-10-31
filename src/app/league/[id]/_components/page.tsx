@@ -4200,46 +4200,48 @@ export default function LeagueDetailPage() {
                                         px: { xs: 1.5, sm: 2, md: 0 },
                                         gap: 0.5,
                                         mt: 0,
-                                        py: { xs: 1, md: 1 },
+                                        minHeight: { xs: 0, md: '87px' },
+                                        height: { xs: 'auto', md: '87px' },
+                                        py: { xs: 1, md: 0 },
                                     }}>
                                         {(() => {
                                             const displayedLeagueName = league?.name || allLeagues.find(l => String(l.id) === String(leagueId))?.name || 'LEAGUE';
                                             return (
                                                 <Button
                                                     onClick={handleLeaguesDropdownOpen}
+                                                    disableRipple
                                                     sx={{
                                                         textTransform: 'uppercase',
-                                                        fontFamily: 'var(--font-woodford-bourne-pro), "Oswald", sans-serif',
-                                                        fontSize: { xs: '15px', sm: '17px', md: '18px' },
+                                                        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+                                                        fontSize: { xs: '32px', sm: '42px', md: '55px' },
                                                         fontWeight: 700,
-                                                        letterSpacing: '0.8px',
+                                                        letterSpacing: '0px',
                                                         lineHeight: 1,
                                                         color: '#ffffff',
-                                                        backgroundColor: '#16181d',
-                                                        border: '1px solid #22242a',
-                                                        borderRadius: '9999px',
-                                                        px: { xs: 2, sm: 2.5 },
-                                                        py: { xs: 0.9, sm: 1.1 },
-                                                        height: { xs: '38px', sm: '42px' },
-                                                        minHeight: 'auto',
+                                                        backgroundColor: 'transparent',
+                                                        border: 'none',
+                                                        borderRadius: 0,
                                                         boxShadow: 'none',
+                                                        p: 0,
+                                                        minWidth: 0,
+                                                        minHeight: 'auto',
+                                                        height: 'auto',
                                                         display: 'inline-flex',
                                                         alignItems: 'center',
                                                         justifyContent: 'center',
-                                                        gap: { xs: 1, sm: 1.25 },
-                                                        transition: 'all 0.18s ease',
+                                                        gap: { xs: 1, sm: 1.25, md: 1.5 },
+                                                        transition: 'opacity 0.18s ease',
                                                         '&:hover': {
-                                                            backgroundColor: '#1e2026',
-                                                            borderColor: '#32353e',
+                                                            backgroundColor: 'transparent',
+                                                            opacity: 0.88,
                                                         },
                                                     }}
                                                 >
-                                                    <Trophy size={18} color="#FFFFFF" strokeWidth={2.2} style={{ flexShrink: 0 }} />
                                                     <Box
                                                         component="span"
                                                         sx={{
                                                             display: 'inline-block',
-                                                            maxWidth: { xs: 'calc(100vw - 140px)', sm: '50vw', md: '40vw' },
+                                                            maxWidth: { xs: 'calc(100vw - 100px)', sm: '65vw', md: '55vw' },
                                                             overflow: 'hidden',
                                                             textOverflow: 'ellipsis',
                                                             whiteSpace: 'nowrap',
@@ -4250,14 +4252,16 @@ export default function LeagueDetailPage() {
                                                     </Box>
                                                     <Box
                                                         sx={{
-                                                            width: { xs: 18, sm: 20 },
-                                                            height: { xs: 18, sm: 20 },
+                                                            width: { xs: 18, sm: 20, md: 22 },
+                                                            height: { xs: 18, sm: 20, md: 22 },
                                                             borderRadius: '50%',
                                                             border: '1.2px solid #e56a16',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
                                                             flexShrink: 0,
+                                                            transition: 'transform 0.2s ease',
+                                                            transform: leaguesDropdownOpen ? 'rotate(180deg)' : 'none',
                                                         }}
                                                     >
                                                         <ChevronDown size={isMobile ? 10 : 12} color="#e56a16" strokeWidth={2.5} />
@@ -4268,17 +4272,19 @@ export default function LeagueDetailPage() {
 
                                         <Button
                                             onClick={handleSeasonDropdownOpen}
+                                            disableRipple
                                             sx={{
                                                 mt: 0.5,
                                                 color: '#8a92a6',
-                                                fontSize: { xs: '12px', sm: '13px' },
+                                                fontSize: { xs: '12px', sm: '13px', md: '14px' },
                                                 fontWeight: 600,
                                                 letterSpacing: 0.25,
                                                 textTransform: 'none',
                                                 backgroundColor: 'transparent',
-                                                borderRadius: '9999px',
-                                                px: 1.2,
-                                                py: 0.25,
+                                                border: 'none',
+                                                borderRadius: 0,
+                                                boxShadow: 'none',
+                                                p: 0,
                                                 minHeight: 'auto',
                                                 minWidth: 0,
                                                 maxWidth: { xs: '88vw', sm: '60vw', md: '50vw' },
@@ -4286,9 +4292,9 @@ export default function LeagueDetailPage() {
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
                                                 gap: 0.75,
-                                                transition: 'all 0.18s ease',
+                                                transition: 'color 0.18s ease',
                                                 '&:hover': {
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                                    backgroundColor: 'transparent',
                                                     color: '#ffffff',
                                                 },
                                             }}
@@ -4318,6 +4324,8 @@ export default function LeagueDetailPage() {
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     flexShrink: 0,
+                                                    transition: 'transform 0.2s ease',
+                                                    transform: seasonDropdownOpen ? 'rotate(180deg)' : 'none',
                                                 }}
                                             >
                                                 <ChevronDown size={10} color="#e56a16" strokeWidth={2.5} />
@@ -4489,42 +4497,32 @@ export default function LeagueDetailPage() {
                                         onClose={handleLeaguesDropdownClose}
                                         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                                         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                                        marginThreshold={0}
-                                        MenuListProps={{
+                                        marginThreshold={null}
+                                        PaperProps={{
                                             sx: {
-                                                maxHeight: { xs: 260, sm: 320 },
+                                                mt: 0.5,
+                                                maxHeight: { xs: 240, sm: 280, md: 320 },
                                                 overflowY: 'auto',
                                                 overflowX: 'hidden',
                                                 scrollbarWidth: 'thin',
-                                                '&::-webkit-scrollbar': {
-                                                    width: '8px',
-                                                },
-                                                '&::-webkit-scrollbar-track': {
-                                                    background: 'rgba(255,255,255,0.08)',
-                                                },
-                                                '&::-webkit-scrollbar-thumb': {
-                                                    background: 'rgba(255,255,255,0.35)',
-                                                    borderRadius: '999px',
-                                                },
-                                            },
-                                        }}
-                                        PaperProps={{
-                                            sx: {
-                                                p: 0.5,
-                                                mt: 1,
+                                                scrollbarColor: 'rgba(255,255,255,0.35) rgba(255,255,255,0.08)',
+                                                '&::-webkit-scrollbar': { width: '8px' },
+                                                '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.08)' },
+                                                '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.35)', borderRadius: '999px' },
+                                                borderRadius: '12px',
+                                                border: '1px solid #22242a',
+                                                backgroundColor: '#16181d',
+                                                color: '#E5E7EB',
                                                 minWidth: 240,
                                                 ml: { xs: -1.5, sm: -1.5 },
                                                 maxWidth: { xs: '92vw', sm: 'none' },
-                                                bgcolor: 'rgba(15,15,15,0.92)',
-                                                color: '#E5E7EB',
-                                                borderRadius: 2.5,
-                                                border: '1px solid rgba(255,255,255,0.08)',
-                                                backdropFilter: 'blur(10px)',
-                                                boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.03)',
-                                                overflow: 'hidden',
-
+                                                boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                                            },
+                                            style: {
+                                                maxHeight: 'min(300px, calc(100vh - 160px))',
                                             }
                                         }}
+                                        MenuListProps={{ sx: { py: 0.5 } }}
                                     >
                                         {allLeagues.map((leagueItem) => (
                                             <MenuItem

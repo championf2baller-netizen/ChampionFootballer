@@ -2798,7 +2798,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         position="fixed"
         sx={{
           background: '#0e0e0e',
-          boxShadow: 3,
+          boxShadow: '0 4px 20px 0 rgba(229, 106, 22, 0.45), 0 1px 6px 0 rgba(229, 106, 22, 0.35)',
           // px: { xs: 1, sm: 2, md: 2 }
           //  px: { xs: 1, sm: 2, md: 2 },
           top: 0,
