@@ -208,6 +208,8 @@ const AllPlayersPage = () => {
   const [seasons, setSeasons] = useState<SeasonOption[]>([]);
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [leagueMenuAnchor, setLeagueMenuAnchor] = useState<null | HTMLElement>(null);
+    const [leagueDropdownOpen, setLeagueDropdownOpen] = useState(false);
+    const leagueFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const [seasonDropdownOpen, setSeasonDropdownOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState<number>(10);
   const yearFilterButtonRef = React.useRef<HTMLButtonElement | null>(null);
@@ -1089,6 +1091,7 @@ const AllPlayersPage = () => {
 
   const handleLeagueMenuClose = () => {
     setLeagueMenuAnchor(null);
+    setLeagueDropdownOpen(false);
   };
 
   const handleLeagueMenuSelect = (leagueId: string) => {
@@ -1274,6 +1277,7 @@ const AllPlayersPage = () => {
                   onClose={() => setYearDropdownOpen(false)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  marginThreshold={null}
                   PaperProps={{
                     sx: {
                       mt: 0.5,
@@ -1320,7 +1324,12 @@ const AllPlayersPage = () => {
                 width: isDesktop ? 'auto' : '100%',
               }}>
                 <button
-                  onClick={handleLeagueMenuOpen}
+                  ref={leagueFilterButtonRef}
+                  onClick={() => {
+                    if (!noLeagues && filteredLeagues.length > 0) {
+                      setLeagueDropdownOpen((prev) => !prev);
+                    }
+                  }}
                   type="button"
                   disabled={noLeagues || filteredLeagues.length === 0}
                   style={{
@@ -1367,38 +1376,37 @@ const AllPlayersPage = () => {
                   </Box>
                 </button>
                 <Menu
-                  anchorEl={leagueMenuAnchor}
-                  open={leagueMenuOpen}
+                  anchorEl={leagueFilterButtonRef.current}
+                  open={leagueDropdownOpen && !noLeagues && filteredLeagues.length > 0}
                   onClose={handleLeagueMenuClose}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-                  marginThreshold={0}
-                  MenuListProps={{
+                  marginThreshold={null}
+                  PaperProps={{
                     sx: {
-                      maxHeight: { xs: 260, sm: 320 },
+                      mt: 0.5,
+                      maxHeight: { xs: 240, sm: 280, md: 320 },
                       overflowY: 'auto',
                       overflowX: 'hidden',
                       scrollbarWidth: 'thin',
+                      scrollbarColor: 'rgba(255,255,255,0.35) rgba(255,255,255,0.08)',
                       '&::-webkit-scrollbar': { width: '8px' },
                       '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.08)' },
                       '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.35)', borderRadius: '999px' },
-                    },
-                  }}
-                  PaperProps={{
-                    sx: {
-                      p: 0.5,
-                      mt: 1,
-                      minWidth: leagueMenuAnchor?.offsetWidth || 150,
+                      borderRadius: '12px',
+                      border: '1px solid #22242a',
+                      backgroundColor: '#16181d',
+                      color: '#E5E7EB',
+                      minWidth: leagueFilterButtonRef.current?.offsetWidth || 148,
                       width: 'max-content',
                       maxWidth: { xs: '92vw', sm: 'none' },
-                      bgcolor: '#16181d',
-                      color: '#E5E7EB',
-                      borderRadius: 2.5,
-                      border: '1px solid #22242a',
-                      boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-                      overflow: 'hidden',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.6)',
+                    },
+                    style: {
+                      maxHeight: 'min(300px, calc(100vh - 160px))',
                     }
                   }}
+                  MenuListProps={{ sx: { py: 0.5 } }}
                 >
                   <MenuItem
                     onClick={() => handleLeagueMenuSelect('all')}
@@ -1559,6 +1567,7 @@ const AllPlayersPage = () => {
                   onClose={() => setSeasonDropdownOpen(false)}
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                   transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                  marginThreshold={null}
                   PaperProps={{
                     sx: {
                       mt: 0.5,
