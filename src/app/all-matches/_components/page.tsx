@@ -2509,7 +2509,7 @@ export default function AllMatches() {
                 // background: 'linear-gradient(135deg, #0f2027 0%, #2c5364 100%)',
                 // backgroundColor:'white',
                 py: 0,
-                pb: { xs: '84px', sm: 0 },
+                pb: 0,
                 overflowX: 'hidden',
             }}
         >
