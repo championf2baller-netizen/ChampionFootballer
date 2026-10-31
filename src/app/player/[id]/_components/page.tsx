@@ -2337,13 +2337,14 @@ export default function PlayerStatsPage() {
                         justifyContent: 'space-between',
                         gap: { xs: 2, md: 3 },
                         px: { xs: 1, sm: 2, md: 3 },
-                        py: { xs: 3.5, md: 0 },
+                        pb: { xs: 1.5, md: 0 },
+                        pt:{xs:3.5, md:0},
                         maxWidth: '1230px',
                         width: '100%',
                         mx: 'auto',
                         position: 'relative',
                         zIndex: 10,
-                        mb: { xs: 1.5, md: 0 },
+                        mb: { xs: 2, md: 0 },
                     }}>
                         {/* Search Input */}
                         <Box
@@ -2693,12 +2694,7 @@ export default function PlayerStatsPage() {
                                 >
                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flex: 1, textAlign: 'left' }}>
                                         {leagueId && leagueId !== 'all'
-                                            ? (() => {
-                                                const sel = leagues.find((l) => sameId(l.id, leagueId));
-                                                if (!sel) return getCms('page_player_stats_league_placeholder', 'Select League');
-                                                const tag = getLeagueRoleTag(sel, playerId);
-                                                return `${sel.name || 'League'} (${tag})`;
-                                              })()
+                                            ? (leagues.find((l) => sameId(l.id, leagueId))?.name || getCms('page_player_stats_league_placeholder', 'Select League'))
                                             : getCms('page_all_leagues_select_placeholder', 'All Leagues')}
                                     </span>
                                     <Box sx={{ width: { xs: 17, sm: 19 }, height: { xs: 17, sm: 19 }, borderRadius: '50%', border: '1px solid rgba(229,106,22,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -3040,17 +3036,30 @@ export default function PlayerStatsPage() {
                             </Button>
                         </Box>
                     </Box>
-            </PageHeader>
 
-            {/* Main 3-View Toggle (Overview | Performance | Stats / Season) - Mobile only */}
-            <Box sx={{ maxWidth: 1165, mx: 'auto', px: { xs: 1.3, sm: 2, md: 3.5 }, pt: 0, display: { xs: 'block', md: 'none' } }}>
-                <PlayerViewToggle
-                    activeView={selectedView}
-                    onSelectView={(view) => {
-                        setSelectedView(view);
-                    }}
-                />
-            </Box>
+                    {/* Main 3-View Toggle (Overview | Performance | Stats / Season) - Mobile only */}
+                    <Box
+                        sx={{
+                            display: { xs: 'flex', md: 'none' },
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            mt: { xs: 2, md: 3 },
+                            mb: { xs: 1.5, md: 0 },
+                            px: { xs: 1, sm: 3, md: 9.3 },
+                            width: '100%',
+                            position: 'relative',
+                            zIndex: 5,
+                        }}
+                    >
+                        <PlayerViewToggle
+                            activeView={selectedView}
+                            onSelectView={(view) => {
+                                setSelectedView(view);
+                            }}
+                            sx={{ mt: 0, mb: 0 }}
+                        />
+                    </Box>
+            </PageHeader>
 
             {/* View 1: Overview (Always visible on desktop, or when selectedView === 'overview' on mobile) */}
             {(isDesktop || selectedView === 'overview') && (
