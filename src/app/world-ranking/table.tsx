@@ -1011,7 +1011,36 @@ export default function WorldRankingTable() {
                       zIndex: 20,
                     }}
                   >
-                    {filters.mode === 'avg' ? 'AVG / MATCH' : 'TOTAL XP'}
+                    {filters.mode === 'avg' ? (
+                      'AVG / MATCH'
+                    ) : (
+                      <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        justifyContent: 'center',
+                      }}>
+                        <Typography sx={{
+                          color: '#717d8f !important',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          lineHeight: 1.2,
+                        }}>
+                          TOTAL XP
+                        </Typography>
+                        <Typography sx={{
+                          color: '#4b5563',
+                          fontSize: { xs: 9, sm: 10 },
+                          fontWeight: 700,
+                          letterSpacing: 0.5,
+                          lineHeight: 1,
+                          mt: 0.3,
+                          display: { xs: 'none', sm: 'block' },
+                        }}>
+                          OF 25,000
+                        </Typography>
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -1242,9 +1271,43 @@ export default function WorldRankingTable() {
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
                         }}>
-                          {filters.mode === 'avg'
-                            ? formatNum(p.avgXP, { decimals: 2 })
-                            : formatNum(p.totalXP)}
+                          <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            justifyContent: 'center',
+                          }}>
+                            <Typography sx={{
+                              fontWeight: 800,
+                              fontSize: { xs: 13, sm: 15 },
+                              color: '#22c55e',
+                              fontFamily: 'var(--font-woodford-bourne-pro)',
+                              textAlign: 'right',
+                              lineHeight: 1.2,
+                            }}>
+                              {filters.mode === 'avg'
+                                ? formatNum(p.avgXP, { decimals: 2 })
+                                : formatNum(p.totalXP)}
+                            </Typography>
+                            {filters.mode !== 'avg' && (
+                              <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end' }}>
+                                <Box sx={{
+                                  width: { xs: 55, sm: 75, md: 85 },
+                                  height: 3.5,
+                                  backgroundColor: '#262930',
+                                  borderRadius: '9999px',
+                                  overflow: 'hidden',
+                                }}>
+                                  <Box sx={{
+                                    width: `${Math.min(100, Math.max(3, ((Number(p.totalXP) || 0) / 25000) * 100))}%`,
+                                    height: '100%',
+                                    backgroundColor: '#22c55e',
+                                    borderRadius: '9999px',
+                                  }} />
+                                </Box>
+                              </Box>
+                            )}
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );
