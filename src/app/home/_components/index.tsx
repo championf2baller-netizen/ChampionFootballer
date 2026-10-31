@@ -2562,19 +2562,110 @@ export default function PlayerDashboard() {
         }}>
           <Box component="div" sx={{
             fontFamily: 'var(--font-oswald), "Oswald", sans-serif',
-            fontSize: { xs: '24px', sm: '26px', md: '28px' },
-            fontWeight: 300,
+            fontSize: { xs: '18px', sm: '22px', md: '28px' },
+            fontWeight: { xs: 700, md: 300 },
             lineHeight: '100%',
-            letterSpacing: '0%',
+            letterSpacing: { xs: '1.5px', md: '0%' },
             textAlign: 'center',
             textTransform: 'uppercase',
-            mb: { xs: 0.5, md: 0.3 },
+            color: '#FFFFFF',
+            mb: { xs: 1.25, md: 0.3 },
           }}>
-            {homeCmsContent.home_live_stats_heading?.content || 'your LIVE stats'}
+            {homeCmsContent.home_live_stats_heading?.content || 'YOUR LIVE STATS'}
           </Box>
 
+          {/* Mobile View: 3x2 Grid Cards (per user design) */}
+          <Box
+            sx={{
+              display: { xs: 'grid', md: 'none' },
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: { xs: '6px', sm: '8px' },
+              width: '100%',
+              maxWidth: { xs: '100%', sm: 460 },
+              mt: 0.5,
+            }}
+          >
+            {[
+              {
+                label: 'MATCHES PLAYED',
+                value: statsLoading ? '...' : userStats.matchesPlayed,
+                color: '#FFFFFF',
+              },
+              {
+                label: 'MOTM VOTES',
+                value: statsLoading ? '...' : userStats.motmVotes,
+                color: '#E5B842',
+              },
+              {
+                label: 'GOALS',
+                value: statsLoading ? '...' : userStats.goals,
+                color: '#FFFFFF',
+              },
+              {
+                label: 'ASSISTS',
+                value: statsLoading ? '...' : userStats.assists,
+                color: '#FFFFFF',
+              },
+              {
+                label: 'CLEAN SHEETS',
+                value: statsLoading ? '...' : userStats.cleanSheets,
+                color: '#FFFFFF',
+              },
+              {
+                label: 'DEFENSIVE IMPACT',
+                value: statsLoading ? '...' : userStats.defensiveImpact,
+                color: '#FFFFFF',
+              },
+            ].map((stat, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  bgcolor: '#101115',
+                  border: '1px solid #1E2026',
+                  borderRadius: '8px',
+                  py: { xs: 1.25, sm: 1.5 },
+                  px: { xs: 0.5, sm: 1 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: { xs: '64px', sm: '72px' },
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    color: stat.color,
+                    fontSize: { xs: '20px', sm: '22px' },
+                    fontWeight: 700,
+                    lineHeight: 1.1,
+                    mb: '3px',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {stat.value}
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    color: '#8E95A2',
+                    fontSize: { xs: '9px', sm: '10px' },
+                    fontWeight: 700,
+                    letterSpacing: '0.6px',
+                    textTransform: 'uppercase',
+                    textAlign: 'center',
+                    lineHeight: 1.15,
+                  }}
+                >
+                  {stat.label}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+
+          {/* Desktop View: Keep previous inline layout */}
           <Box sx={{
-            display: 'flex',
+            display: { xs: 'none', md: 'flex' },
             flexDirection: 'column',
             gap: { xs: 0.2, md: 0.4 },
             alignItems: 'center'
