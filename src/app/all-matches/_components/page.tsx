@@ -3784,9 +3784,10 @@ export default function AllMatches() {
                                                                 <Box sx={{
                                                                     display: 'flex',
                                                                     alignItems: 'center',
-                                                                    gap: { xs: '5px', sm: '7px' },
-                                                                    flexWrap: 'nowrap',
-                                                                    minWidth: 0
+                                                                    gap: { xs: '6px', sm: '8px' },
+                                                                        flexWrap: 'nowrap',
+                                                                        minWidth: 0,
+                                                                        justifyContent: 'flex-end'
                                                                 }}>
                                                                     <Button
                                                                         onClick={(e) => {
@@ -3803,9 +3804,9 @@ export default function AllMatches() {
                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '6px', sm: '8px' },
-                                                                            py: { xs: '5.5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                            px: { xs: '7px', sm: '10px' },
+                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
@@ -3855,9 +3856,9 @@ export default function AllMatches() {
                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '6px', sm: '8px' },
-                                                                            py: { xs: '5.5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                            px: { xs: '7px', sm: '10px' },
+                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
@@ -3903,9 +3904,9 @@ export default function AllMatches() {
                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '6px', sm: '8px' },
-                                                                            py: { xs: '5.5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                            px: { xs: '7px', sm: '10px' },
+                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',

@@ -3899,8 +3899,8 @@ export default function GlobalTrophyRoom() {
           sx: {
             borderRadius: { xs: 1.5, sm: 2 },
             overflow: 'visible',
-            width: { xs: 'min(335px, calc(100vw - 12px))', sm: 'min(490px, calc(100vw - 40px))' },
-            maxWidth: { xs: '335px', sm: '490px' },
+            width: { xs: 'min(352px, calc(100vw - 16px))', sm: 'min(542px, calc(100vw - 40px))' },
+            maxWidth: { xs: '352px', sm: '510px' },
             m: { xs: 'auto', sm: 2 },
           }
         }}
@@ -3947,7 +3947,7 @@ export default function GlobalTrophyRoom() {
         <DialogContent
           sx={{
             py: { xs: 0.65, sm: 2.5 },
-            px: { xs: 0.3, sm: 1.5 },
+            px: { xs: 0.8, sm: 1.5 },
             pb: { xs: 2.8, sm: 5 },
             position: 'relative',
             overflowX: 'visible',
@@ -3970,15 +3970,19 @@ export default function GlobalTrophyRoom() {
               ref={quickViewCardRef}
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '64px 160px 64px', sm: '100px 260px 100px' },
-                gap: { xs: 0.2, sm: 1 },
+                gridTemplateColumns: { xs: '66px 160px 66px', sm: '100px 260px 100px' },
+                gap: { xs: 0.75, sm: 1.5 },
                 alignItems: 'start',
                 justifyContent: 'center',
                 minHeight: { xs: '308px', sm: '438px' },
                 bgcolor: '#ffffff',
-                p: { xs: 0.4, sm: 1 },
+                p: { xs: 1, sm: 1.5 },
+                px: { xs: 1, sm: 1.5 },
                 borderRadius: 2,
                 overflow: 'hidden',
+                mx: 'auto',
+                width: 'fit-content',
+                maxWidth: '100%',
               }}
             >
               {/* Left: Stats Icons */}
@@ -4244,13 +4248,7 @@ export default function GlobalTrophyRoom() {
                 sx={{
                   display: 'grid',
                   gridTemplateColumns: '100px 260px 100px',
-                  gap: 1,
-                  alignItems: 'start',
-                  justifyContent: 'center',
-                  width: '480px',
-                  minHeight: '438px',
-                  bgcolor: '#ffffff',
-                  p: 1,
+                  gap: 1.5, alignItems: 'start', justifyContent: 'center', width: '508px', minHeight: '438px', bgcolor: '#ffffff', p: 1.5, px: 1.5,
                   borderRadius: 2,
                   overflow: 'hidden',
                 }}

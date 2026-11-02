@@ -5678,7 +5678,7 @@ export default function LeagueDetailPage() {
                                                                                 mt: 'auto',
                                                                                 pt: { xs: 1, sm: 1.2 },
                                                                                 pb: { xs: 1.2, sm: 1.4 },
-                                                                                px: { xs: '10px', sm: '12px' },
+                                                                                px: { xs: '8px', sm: '12px' },
                                                                                 borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
                                                                                 display: 'flex',
                                                                                 alignItems: 'center',
@@ -5701,9 +5701,10 @@ export default function LeagueDetailPage() {
                                                                                 <Box sx={{
                                                                                     display: 'flex',
                                                                                     alignItems: 'center',
-                                                                                    gap: { xs: '5px', sm: '7px' },
-                                                                                    flexWrap: 'nowrap',
-                                                                                    minWidth: 0
+                                                                                    gap: { xs: '6px', sm: '8px' },
+                                                                                                flexWrap: 'nowrap',
+                                                                                                minWidth: 0,
+                                                                                                justifyContent: 'flex-end'
                                                                                 }}>
                                                                                     <Button
                                                                                         onClick={(e) => {
@@ -5718,9 +5719,9 @@ export default function LeagueDetailPage() {
                                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '6px', sm: '8px' },
-                                                                                            py: { xs: '5.5px', sm: '6.5px' },
-                                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                                            px: { xs: '7px', sm: '10px' },
+                                                                                                        py: { xs: '5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
@@ -5762,9 +5763,9 @@ export default function LeagueDetailPage() {
                                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '6px', sm: '8px' },
-                                                                                            py: { xs: '5.5px', sm: '6.5px' },
-                                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                                            px: { xs: '7px', sm: '10px' },
+                                                                                                        py: { xs: '5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
@@ -6385,12 +6386,12 @@ export default function LeagueDetailPage() {
                                                                                             mt: 'auto',
                                                                                             pt: { xs: 1, sm: 1.2 },
                                                                                             pb: { xs: 1.2, sm: 1.4 },
-                                                                                            px: { xs: '10px', sm: '12px' },
-                                                                                            borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
-                                                                                            display: 'flex',
-                                                                                            alignItems: 'center',
-                                                                                            justifyContent: 'space-between',
-                                                                                            gap: { xs: '6px', sm: '8px' },
+                                                                                            px: { xs: '8px', sm: '12px' },
+                                                                                borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
+                                                                                display: 'flex',
+                                                                                alignItems: 'center',
+                                                                                justifyContent: 'space-between',
+                                                                                gap: { xs: '6px', sm: '8px' },
                                                                                             width: '100%',
                                                                                             boxSizing: 'border-box'
                                                                                         }}>
@@ -6408,9 +6409,10 @@ export default function LeagueDetailPage() {
                                                                                             <Box sx={{
                                                                                                 display: 'flex',
                                                                                                 alignItems: 'center',
-                                                                                                gap: { xs: '5px', sm: '7px' },
+                                                                                                gap: { xs: '6px', sm: '8px' },
                                                                                                 flexWrap: 'nowrap',
-                                                                                                minWidth: 0
+                                                                                                minWidth: 0,
+                                                                                                justifyContent: 'flex-end'
                                                                                             }}>
                                                                                                 <Button
                                                                                                     onClick={(e) => {
@@ -6426,9 +6428,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '6px', sm: '8px' },
-                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                                                        px: { xs: '7px', sm: '10px' },
+                                                                                                        py: { xs: '5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
@@ -6478,9 +6480,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '6px', sm: '8px' },
-                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                                                        px: { xs: '7px', sm: '10px' },
+                                                                                                        py: { xs: '5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
@@ -6522,9 +6524,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                                         border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '6px', sm: '8px' },
-                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
+                                                                                                        px: { xs: '7px', sm: '10px' },
+                                                                                                        py: { xs: '5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
@@ -7020,8 +7022,8 @@ export default function LeagueDetailPage() {
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>D</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>L</div>
-                                                                <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W%</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>GD</div>
+                                                                <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W%</div>
                                                                 <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#717d8f' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
                                                             </div>
                                                             {/* Full width border alag */}
@@ -8382,8 +8384,8 @@ export default function LeagueDetailPage() {
                     sx: {
                         borderRadius: { xs: 1.5, sm: 2 },
                         overflow: 'visible',
-                        width: { xs: 'min(335px, calc(100vw - 12px))', sm: 'min(490px, calc(100vw - 40px))' },
-                        maxWidth: { xs: '335px', sm: '490px' },
+                        width: { xs: 'min(352px, calc(100vw - 16px))', sm: 'min(542px, calc(100vw - 40px))' },
+                        maxWidth: { xs: '352px', sm: '510px' },
                         m: { xs: 'auto', sm: 2 },
                     }
                 }}
@@ -8430,7 +8432,7 @@ export default function LeagueDetailPage() {
                 <DialogContent
                     sx={{
                         py: { xs: 0.65, sm: 2.5 },
-                        px: { xs: 0.3, sm: 1.5 },
+                        px: { xs: 0.8, sm: 1.5 },
                         pb: { xs: 2.8, sm: 5 },
                         position: 'relative',
                         overflowX: 'visible',
@@ -8453,15 +8455,19 @@ export default function LeagueDetailPage() {
                             ref={quickViewCardRef}
                             sx={{
                                 display: 'grid',
-                                gridTemplateColumns: { xs: '64px 160px 64px', sm: '100px 260px 100px' },
-                                gap: { xs: 0.2, sm: 1 },
+                                gridTemplateColumns: { xs: '66px 160px 66px', sm: '100px 260px 100px' },
+                                gap: { xs: 0.75, sm: 1.5 },
                                 alignItems: 'start',
                                 justifyContent: 'center',
                                 minHeight: { xs: '308px', sm: '438px' },
                                 bgcolor: '#ffffff',
-                                p: { xs: 0.4, sm: 1 },
+                                p: { xs: 1, sm: 1.5 },
+                                px: { xs: 1, sm: 1.5 },
                                 borderRadius: 2,
                                 overflow: 'hidden',
+                                mx: 'auto',
+                                width: 'fit-content',
+                                maxWidth: '100%',
                             }}
                         >
                             {/* Left: Stats Icons */}
@@ -8733,13 +8739,7 @@ export default function LeagueDetailPage() {
                                 sx={{
                                     display: 'grid',
                                     gridTemplateColumns: '100px 260px 100px',
-                                    gap: 1,
-                                    alignItems: 'start',
-                                    justifyContent: 'center',
-                                    width: '480px',
-                                    minHeight: '438px',
-                                    bgcolor: '#ffffff',
-                                    p: 1,
+                                    gap: 1.5, alignItems: 'start', justifyContent: 'center', width: '508px', minHeight: '438px', bgcolor: '#ffffff', p: 1.5, px: 1.5,
                                     borderRadius: 2,
                                     overflow: 'hidden',
                                 }}
