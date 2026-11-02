@@ -29,7 +29,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import PersonIcon from '@mui/icons-material/Person';
 import { useAuth } from '@/lib/hooks';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, ChevronDown } from 'lucide-react';
 import { Add, Remove } from '@mui/icons-material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -308,14 +308,63 @@ const JerseyAvatar = ({
     </Box>
 );
 
+const DropdownChevron = (props: any) => (
+    <Box
+        {...props}
+        sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            border: '1.5px solid #6b3d1f',
+            backgroundColor: 'rgba(107, 61, 31, 0.12)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            right: '12px !important',
+            top: 'calc(50% - 11px) !important',
+            pointerEvents: 'none',
+            position: 'absolute',
+            flexShrink: 0,
+            ...(props?.sx || {}),
+        }}
+    >
+        <ChevronDown size={13} strokeWidth={2.6} color="#c27038" />
+    </Box>
+);
+
 const VotedPlayerAvatar = ({
     player,
-    borderColor = '#00C48C',
+    borderColor = '#249782',
 }: {
     player?: { firstName?: string | null; lastName?: string | null; profilePicture?: string | null } | null;
     borderColor?: string;
 }) => {
     const fullName = formatGuestAwarePlayerName(player);
+    const hasPlayer = Boolean(player && (player.firstName || player.lastName || player.profilePicture));
+
+    if (!hasPlayer) {
+        return (
+            <Box
+                sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    border: '1.5px dashed #404652',
+                    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#68707d',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    letterSpacing: 0.5,
+                }}
+            >
+                PL
+            </Box>
+        );
+    }
+
     const profilePicture = String(player?.profilePicture || '').trim();
     const initials = getAvatarInitials({
         name: fullName,
@@ -331,10 +380,11 @@ const VotedPlayerAvatar = ({
                 src={profilePicture}
                 alt={fullName}
                 sx={{
-                    width: { xs: 40, md: 48 },
-                    height: { xs: 40, md: 48 },
+                    width: 44,
+                    height: 44,
                     borderRadius: '50%',
                     border: `2px solid ${borderColor}`,
+                    boxShadow: '0 0 10px rgba(36, 151, 130, 0.35)',
                     objectFit: 'cover',
                 }}
             />
@@ -344,10 +394,11 @@ const VotedPlayerAvatar = ({
     return (
         <Box
             sx={{
-                width: { xs: 40, md: 48 },
-                height: { xs: 40, md: 48 },
+                width: 44,
+                height: 44,
                 borderRadius: '50%',
                 border: `2px solid ${borderColor}`,
+                boxShadow: '0 0 10px rgba(36, 151, 130, 0.35)',
                 backgroundColor: bg,
                 display: 'flex',
                 alignItems: 'center',
@@ -360,7 +411,7 @@ const VotedPlayerAvatar = ({
             aria-label={fullName || 'Player initials'}
             title={fullName || 'Player'}
         >
-            {initials}
+            {initials || 'PL'}
         </Box>
     );
 };
@@ -2707,79 +2758,83 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             )}
 
             {!showAdminGoalsSection && (
-                <Paper
+                <Box
                     sx={{
-                        p: { xs: 1, sm: 2, md: 3 },
-                        backgroundColor: '#262626',
-                        color: 'white',
-                        border: { xs: '2px solid #bfbfbf', md: '5px solid #bfbfbf' },
-                        borderRadius: 0,
-                        // boxShadow: 3,
-                        // display: selectedLeagueHasNoMatches ? 'none' : 'block',
-                        // mt:-0.1,
+                        p: { xs: 2, sm: 2.5 },
+                        backgroundColor: '#111317',
+                        color: '#ffffff',
+                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
                     }}
                 >
                     {/* Header */}
-                    <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 3 } }}>
+                    <Box sx={{ textAlign: 'center', mb: 0.2 }}>
                         <Typography
-                            variant="h5"
                             sx={{
-                                fontWeight: 600,
-                                fontSize: { xs: '1rem', sm: '1.25rem', md: '2rem' },
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 800,
+                                fontSize: { xs: '0.88rem', sm: '0.96rem' },
+                                color: '#ffffff',
                                 textTransform: 'uppercase',
-                                letterSpacing: 1,
+                                letterSpacing: 2,
+                                textAlign: 'center',
+                                mt: { xs: 0.5, sm: 0.8 },
+                                mb: { xs: 0.5, sm: 0.8 },
                             }}
                         >
                             Add your stats and match votes
                         </Typography>
                     </Box>
 
-                    {/* Stats (left) + Votes (right) */}
-                    <Box
-                        sx={{
-                            display: 'grid',
-                            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                            gap: { xs: 2, md: 3 },
-                            alignItems: 'stretch',
-                        }}
-                    >
-                        {/* Stats panel */}
+                    {/* Stats Section */}
+                    <Box>
+                        <Typography
+                            sx={{
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 700,
+                                fontSize: '0.72rem',
+                                color: '#656d7a',
+                                textTransform: 'uppercase',
+                                letterSpacing: 1.5,
+                                mb: 0.8,
+                                ml: 0.5,
+                            }}
+                        >
+                            STATS
+                        </Typography>
                         <Box
                             sx={{
-                                p: { xs: 1, sm: 1.5, md: 3 },
-                                backgroundColor: '#262626',
-                                borderRadius: 0,
-                                border: '1px solid #d9d9d9',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                                p: { xs: 1.4, sm: 1.6 },
+                                backgroundColor: '#181b21',
+                                borderRadius: '16px',
+                                border: '1px solid #2a2e36',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 gap: 1.25,
                             }}
                         >
-                            <Typography
-                                variant="subtitle1"
-                                sx={{
-                                    fontWeight: 500,
-                                    // mb: 0.5,
-                                    fontSize: { xs: '1.25rem', md: '2rem' },
-                                    mt: { xs: 0, md: -3 },
-                                }}
-                            >
-                                Stats
-                            </Typography>
-                            {/* Stats rows - grid layout so columns align perfectly */}
-                            <Box sx={{
-                                display: 'grid',
-                                gridTemplateColumns: 'auto 1fr',
-                                rowGap: { xs: 1.25, md: 2 },
-                                columnGap: { xs: 1, md: 2 },
-                                alignItems: 'center',
-                            }}>
-                                {/* Goals Row */}
-                                <img src={Goals.src} alt="Goals" style={{ width: isMobile ? 34 : 48, height: isMobile ? 34 : 48, justifySelf: 'center' }} />
+                            {/* Goals Row */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={Goals.src} alt="Goals" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     type="text"
-                                    placeholder="Add Goals"
+                                    placeholder="ADD GOALS"
                                     value={stats.goals === 0 ? '' : stats.goals}
                                     onChange={(e) => {
                                         if (teamGoalsSafe === 0) return;
@@ -2788,7 +2843,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             setStats(prev => ({ ...prev, goals: 0 }));
                                             return;
                                         }
-                                        // Only allow numbers
                                         if (!/^\d+$/.test(val)) return;
 
                                         const numVal = parseInt(val, 10);
@@ -2811,10 +2865,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                 <IconButton
                                                     disabled={teamGoalsSafe === 0 || (stats.goals || 0) <= 0}
                                                     onClick={() => setStats(prev => ({ ...prev, goals: Math.max(0, (prev.goals || 0) - 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' }, '&.Mui-disabled': { color: 'rgba(120, 125, 133, 0.25)' } }}
                                                     size="small"
                                                 >
-                                                    <Remove fontSize="small" />
+                                                    <Remove sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -2830,47 +2884,66 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                         }
                                                         setStats(prev => ({ ...prev, goals: Math.min(teamGoalsSafe, (prev.goals || 0) + 1) }));
                                                     }}
-                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' }, '&.Mui-disabled': { color: 'rgba(120, 125, 133, 0.25)' } }}
                                                     size="small"
                                                 >
-                                                    <Add fontSize="small" />
+                                                    <Add sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
                                     }}
                                     sx={{
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            color: '#fff',
-                                            '& fieldset': { borderColor: '#d9d9d9' },
-                                            '&:hover fieldset': { borderColor: '#d9d9d9' },
-                                            '&.Mui-focused fieldset': { borderColor: teamGoalsSafe === 0 ? '#d9d9d9' : '#00C48C' },
+                                            color: '#ffffff',
+                                            backgroundColor: '#202328',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa', borderWidth: 1 },
                                         },
                                         '& .MuiInputBase-input': {
-                                            fontSize: { xs: '1rem', md: '1.25rem' },
-                                            fontWeight: 600,
-                                            py: 0.75,
+                                            fontSize: '0.95rem',
+                                            fontWeight: 700,
+                                            textAlign: 'center',
+                                            py: 0,
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
                                         '& .MuiInputBase-input::placeholder': {
-                                            color: '#fff',
+                                            color: '#787d85',
                                             opacity: 1,
-                                            fontWeight: 500,
-                                            textAlign: 'center'
+                                            fontWeight: 700,
+                                            fontSize: '0.78rem',
+                                            letterSpacing: 1.2,
+                                            textTransform: 'uppercase',
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
-                                        '& .MuiInputBase-input:focus::placeholder': {
-                                            color: '#fff',
-                                            opacity: 1,
-                                        },
-                                        '& input[type=number]': { MozAppearance: 'textfield' },
-                                        '& input[type=number]::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
-                                        '& input[type=number]::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 },
                                     }}
                                 />
+                            </Box>
 
-                                {/* Assists Row */}
-                                <img src={Assist.src} alt="Assists" style={{ width: isMobile ? 34 : 48, height: isMobile ? 34 : 48, justifySelf: 'center' }} />
+                            {/* Assists Row */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={Assist.src} alt="Assists" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     type="text"
-                                    placeholder="Add Assists"
+                                    placeholder="ADD ASSISTS"
                                     value={stats.assists === 0 ? '' : stats.assists}
                                     onChange={(e) => {
                                         if (teamGoalsSafe === 0) return;
@@ -2879,7 +2952,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             setStats(prev => ({ ...prev, assists: 0 }));
                                             return;
                                         }
-                                        // Only allow numbers
                                         if (!/^\d+$/.test(val)) return;
 
                                         const numVal = parseInt(val, 10);
@@ -2899,10 +2971,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                 <IconButton
                                                     disabled={teamGoalsSafe === 0 || (stats.assists || 0) <= 0}
                                                     onClick={() => setStats(prev => ({ ...prev, assists: Math.max(0, (prev.assists || 0) - 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' }, '&.Mui-disabled': { color: 'rgba(120, 125, 133, 0.25)' } }}
                                                     size="small"
                                                 >
-                                                    <Remove fontSize="small" />
+                                                    <Remove sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -2911,47 +2983,66 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                 <IconButton
                                                     disabled={teamGoalsSafe === 0 || (stats.assists || 0) >= teamGoalsSafe}
                                                     onClick={() => setStats(prev => ({ ...prev, assists: Math.min(teamGoalsSafe, (prev.assists || 0) + 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5, '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)' } }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' }, '&.Mui-disabled': { color: 'rgba(120, 125, 133, 0.25)' } }}
                                                     size="small"
                                                 >
-                                                    <Add fontSize="small" />
+                                                    <Add sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
                                     }}
                                     sx={{
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            color: '#fff',
-                                            '& fieldset': { borderColor: '#d9d9d9' },
-                                            '&:hover fieldset': { borderColor: '#d9d9d9' },
-                                            '&.Mui-focused fieldset': { borderColor: teamGoalsSafe === 0 ? '#d9d9d9' : '#00C48C' },
+                                            color: '#ffffff',
+                                            backgroundColor: '#202328',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa', borderWidth: 1 },
                                         },
                                         '& .MuiInputBase-input': {
-                                            fontSize: { xs: '1rem', md: '1.25rem' },
-                                            fontWeight: 600,
-                                            py: 0.75,
+                                            fontSize: '0.95rem',
+                                            fontWeight: 700,
+                                            textAlign: 'center',
+                                            py: 0,
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
                                         '& .MuiInputBase-input::placeholder': {
-                                            color: '#fff',
+                                            color: '#787d85',
                                             opacity: 1,
-                                            fontWeight: 500,
-                                            textAlign: 'center'
+                                            fontWeight: 700,
+                                            fontSize: '0.78rem',
+                                            letterSpacing: 1.2,
+                                            textTransform: 'uppercase',
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
-                                        '& .MuiInputBase-input:focus::placeholder': {
-                                            color: '#fff',
-                                            opacity: 1,
-                                        },
-                                        '& input[type=number]': { MozAppearance: 'textfield' },
-                                        '& input[type=number]::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
-                                        '& input[type=number]::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 },
                                     }}
                                 />
+                            </Box>
 
-                                {/* Clean Sheet Row */}
-                                <img src={CleanSheet.src} alt="Clean Sheets" style={{ width: isMobile ? 34 : 48, height: isMobile ? 34 : 48, justifySelf: 'center' }} />
+                            {/* Clean Sheet Row */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={CleanSheet.src} alt="Clean Sheets" style={{ width: 26, height: 26, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     type="text"
-                                    placeholder="Add Clean Sheet"
+                                    placeholder="ADD CLEAN SHEET"
                                     value={stats.cleanSheets === 0 ? '' : stats.cleanSheets}
                                     onChange={(e) => {
                                         const val = e.target.value;
@@ -2959,7 +3050,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             setStats(prev => ({ ...prev, cleanSheets: 0 }));
                                             return;
                                         }
-                                        // Only allow numbers
                                         if (!/^\d+$/.test(val)) return;
 
                                         const numVal = parseInt(val, 10);
@@ -2970,18 +3060,18 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }}
                                     onFocus={(e) => e.target.select()}
                                     inputProps={{
-                                        readOnly: isMobile,
-                                        style: { textAlign: 'center', pointerEvents: isMobile ? 'none' : 'auto' }
+                                        readOnly: true,
+                                        style: { textAlign: 'center', pointerEvents: 'none' }
                                     }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
                                                 <IconButton
                                                     onClick={() => setStats(prev => ({ ...prev, cleanSheets: Math.max(0, (prev.cleanSheets || 0) - 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' } }}
                                                     size="small"
                                                 >
-                                                    <Remove fontSize="small" />
+                                                    <Remove sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
@@ -2989,78 +3079,92 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             <InputAdornment position="end">
                                                 <IconButton
                                                     onClick={() => setStats(prev => ({ ...prev, cleanSheets: Math.min(1, (prev.cleanSheets || 0) + 1) }))}
-                                                    sx={{ color: '#fff', p: 0.5 }}
+                                                    sx={{ color: '#787d85', p: 0.6, '&:hover': { color: '#ffffff', bgcolor: 'transparent' } }}
                                                     size="small"
                                                 >
-                                                    <Add fontSize="small" />
+                                                    <Add sx={{ fontSize: 18 }} />
                                                 </IconButton>
                                             </InputAdornment>
                                         ),
                                     }}
                                     sx={{
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            color: '#fff',
-                                            '& fieldset': { borderColor: '#d9d9d9' },
-                                            '&:hover fieldset': { borderColor: '#d9d9d9' },
-                                            '&.Mui-focused fieldset': { borderColor: '#00C48C' },
+                                            color: '#ffffff',
+                                            backgroundColor: '#202328',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa', borderWidth: 1 },
                                         },
                                         '& .MuiInputBase-input': {
-                                            fontSize: { xs: '1rem', md: '1.25rem' },
-                                            fontWeight: 600,
-                                            py: 0.75,
+                                            fontSize: '0.95rem',
+                                            fontWeight: 700,
+                                            textAlign: 'center',
+                                            py: 0,
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
                                         '& .MuiInputBase-input::placeholder': {
-                                            color: '#fff',
+                                            color: '#787d85',
                                             opacity: 1,
-                                            fontWeight: 500,
-                                            textAlign: 'center'
+                                            fontWeight: 700,
+                                            fontSize: '0.78rem',
+                                            letterSpacing: 1.2,
+                                            textTransform: 'uppercase',
+                                            textAlign: 'center',
+                                            fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                         },
-                                        '& .MuiInputBase-input:focus::placeholder': {
-                                            color: 'transparent',
-                                            opacity: 0,
-                                        },
-                                        '& input[type=number]': { MozAppearance: 'textfield' },
-                                        '& input[type=number]::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
-                                        '& input[type=number]::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 },
                                     }}
                                 />
                             </Box>
-                            {/* ) : (
-                                <Typography variant="body2" sx={{ color: '#D1D5DB' }}>
-                                    Stats submission is not available for this match.
-                                </Typography>
-                            )} */}
                         </Box>
+                    </Box>
 
-                        {/* Votes panel */}
-                        <Box
+                    {/* Votes Section */}
+                    <Box>
+                        <Typography
                             sx={{
-                                p: { xs: 1, sm: 1.5, md: 3 },
-                                backgroundColor: '#262626',
-                                borderRadius: 0,
-                                border: '1px solid #d9d9d9',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: 1.5,
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 700,
+                                fontSize: '0.72rem',
+                                color: '#656d7a',
+                                textTransform: 'uppercase',
+                                letterSpacing: 1.5,
+                                mb: 0.8,
+                                ml: 0.5,
                             }}
                         >
-                            <Typography
-                                variant="subtitle1"
-                                sx={{
-                                    fontWeight: 500,
-                                    // mb: 0.5,
-                                    fontSize: { xs: '1.25rem', md: '2rem' },
-                                    mt: { xs: 0, md: -3 },
-                                }}
-                            >
-                                Votes
-                            </Typography>
-                            {/* <Divider sx={{ borderColor: 'rgba(255,255,255,0.2)' }} /> */}
-
+                            VOTES
+                        </Typography>
+                        <Box
+                            sx={{
+                                p: { xs: 1.4, sm: 1.6 },
+                                backgroundColor: '#181b21',
+                                borderRadius: '16px',
+                                border: '1px solid #2a2e36',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 1.25,
+                            }}
+                        >
                             {/* MOTM select */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, md: 1 } }}>
-                                <img src={MOMT.src} alt="MOTM" style={{ width: isMobile ? 28 : 35, height: isMobile ? 28 : 35 }} />
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={MOMT.src} alt="MOTM" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     select
                                     size="small"
@@ -3074,11 +3178,28 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }
                                     SelectProps={{
                                         displayEmpty: true,
+                                        IconComponent: DropdownChevron,
                                         renderValue: (selected) => {
                                             const selectedPlayer = allPlayersForVoting.find(p => p.id === selected);
-                                            return selectedPlayer
-                                                ? formatGuestAwarePlayerName(selectedPlayer)
-                                                : 'Select Man Of The Match Player';
+                                            return (
+                                                <Typography
+                                                    sx={{
+                                                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.76rem',
+                                                        letterSpacing: 0.8,
+                                                        textTransform: 'uppercase',
+                                                        color: selectedPlayer ? '#ffffff' : '#787d85',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    {selectedPlayer
+                                                        ? formatGuestAwarePlayerName(selectedPlayer)
+                                                        : 'Select Man Of The Match Player'}
+                                                </Typography>
+                                            );
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
@@ -3086,45 +3207,44 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
-                                                    bgcolor: 'black',
+                                                    bgcolor: '#111317',
+                                                    border: '1px solid #282c34',
+                                                    borderRadius: '14px',
+                                                    boxShadow: '0 20px 40px rgba(0,0,0,0.85)',
                                                     '& .MuiList-root': {
                                                         display: 'grid',
                                                         gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
                                                         gap: 1,
-                                                        p: 1,
+                                                        p: 1.2,
                                                     }
                                                 }
                                             }
                                         }
                                     }}
                                     sx={{
-                                        minWidth: { xs: 0, md: 290 },
-                                        width: { xs: '100%', md: 290 },
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'transparent',
-                                            color: '#fff',
-                                            borderRadius: 1,
-                                            border: '1px solid #d9d9d9',
-                                            py: 0.4,
-                                            px: 0,
-                                            fontSize: '0.85rem',
+                                            backgroundColor: '#202328',
+                                            color: '#ffffff',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa' },
+                                            pr: 3.5,
+                                        },
+                                        '& .MuiSelect-select': {
+                                            py: 0,
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
                                         },
                                         '& .MuiOutlinedInput-root.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                            opacity: 1,
-                                        },
-                                        '& .MuiSelect-select.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                        },
-                                        '& .MuiInputBase-input.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
+                                            color: '#787d85',
+                                            WebkitTextFillColor: '#787d85',
+                                            opacity: 0.7,
                                         },
                                         '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                                        '& .MuiSvgIcon-root': { color: '#fff' },
-                                        '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
                                     <MenuItem
@@ -3162,7 +3282,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     {allPlayersForVoting.map((p) => {
                                         const selected = votedForId === p.id;
                                         const isSelf = String(p.id) === currentUserId;
-                                        console.log(`ًںژ¯ Player ${p.firstName} ${p.lastName} (${p.id}):`, { selected, votedForId, playerVotesForThisPlayer: playerVotes[p.id] });
                                         return (
                                             <MenuItem
                                                 key={p.id}
@@ -3176,7 +3295,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     position: 'relative',
                                                     bgcolor: '#000',
                                                     border: '1px solid',
-                                                    borderColor: selected ? '#00C48C' : '#d9d9d9',
+                                                    borderColor: selected ? '#249782' : '#2A3649',
                                                     borderRadius: 1,
                                                     transition: 'background-color .2s ease, border-color .2s ease, transform .08s ease',
                                                     '&:hover': {
@@ -3191,7 +3310,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     <PlayerInitialsAvatar
                                                         player={p}
                                                         size={40}
-                                                        borderColor={selected ? '#00C48C' : '#fff'}
+                                                        borderColor={selected ? '#249782' : '#fff'}
                                                     />
                                                 </Box>
                                                 <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: '#fff' }}>
@@ -3203,7 +3322,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     </Typography>
                                                 )}
                                                 {selected && (
-                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C48C', border: '1px solid', borderColor: '#00C48C' }}>
+                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#249782', border: '1px solid', borderColor: '#249782' }}>
                                                         <Check size={12} />
                                                     </Box>
                                                 )}
@@ -3213,9 +3332,23 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                 </TextField>
                             </Box>
 
-                            {/* Defensive Impact dropdown (like MOTM) */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, md: 1 } }}>
-                                <img src={DEFIMP.src} alt="Defensive" style={{ width: isMobile ? 28 : 35, height: isMobile ? 28 : 35 }} />
+                            {/* Defensive Impact dropdown */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={DEFIMP.src} alt="Defensive" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     select
                                     size="small"
@@ -3229,10 +3362,26 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }
                                     SelectProps={{
                                         displayEmpty: true,
+                                        IconComponent: DropdownChevron,
                                         renderValue: (selected) => {
-                                            if (!selected) return 'Select Defensive Impact Player';
-                                            const label = playerNameById(selected as string);
-                                            return label || 'Select Defensive Impact Player';
+                                            const label = selected ? playerNameById(selected as string) : '';
+                                            return (
+                                                <Typography
+                                                    sx={{
+                                                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.76rem',
+                                                        letterSpacing: 0.8,
+                                                        textTransform: 'uppercase',
+                                                        color: label ? '#ffffff' : '#787d85',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    {label ? label : 'Select Defensive Impact Player'}
+                                                </Typography>
+                                            );
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
@@ -3240,45 +3389,44 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
-                                                    bgcolor: '#000',
+                                                    bgcolor: '#111317',
+                                                    border: '1px solid #282c34',
+                                                    borderRadius: '14px',
+                                                    boxShadow: '0 20px 40px rgba(0,0,0,0.85)',
                                                     '& .MuiList-root': {
                                                         display: 'grid',
                                                         gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
                                                         gap: 1,
-                                                        p: 1,
+                                                        p: 1.2,
                                                     }
                                                 }
                                             }
                                         }
                                     }}
                                     sx={{
-                                        minWidth: { xs: 0, md: 290 },
-                                        width: { xs: '100%', md: 290 },
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'transparent',
-                                            color: '#fff',
-                                            borderRadius: 1,
-                                            border: '1px solid #d9d9d9',
-                                            py: 0.5,
-                                            px: 0,
-                                            fontSize: '0.85rem',
+                                            backgroundColor: '#202328',
+                                            color: '#ffffff',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa' },
+                                            pr: 3.5,
+                                        },
+                                        '& .MuiSelect-select': {
+                                            py: 0,
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
                                         },
                                         '& .MuiOutlinedInput-root.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                            opacity: 1,
-                                        },
-                                        '& .MuiSelect-select.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                        },
-                                        '& .MuiInputBase-input.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
+                                            color: '#787d85',
+                                            WebkitTextFillColor: '#787d85',
+                                            opacity: 0.7,
                                         },
                                         '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                                        '& .MuiSvgIcon-root': { color: '#fff' },
-                                        '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
                                     <MenuItem
@@ -3329,7 +3477,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     position: 'relative',
                                                     bgcolor: '#000',
                                                     border: '1px solid',
-                                                    borderColor: selected ? '#00C48C' : '#fff',
+                                                    borderColor: selected ? '#249782' : '#2A3649',
                                                     borderRadius: 1,
                                                     transition: 'background-color .2s ease, border-color .2s ease, transform .08s ease',
                                                     '&:hover': {
@@ -3343,7 +3491,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                 <PlayerInitialsAvatar
                                                     player={p}
                                                     size={40}
-                                                    borderColor={selected ? '#00C48C' : '#fff'}
+                                                    borderColor={selected ? '#249782' : '#fff'}
                                                 />
                                                 <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: '#fff' }}>
                                                     {formatGuestAwarePlayerName(p)}
@@ -3354,7 +3502,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     </Typography>
                                                 )}
                                                 {selected && (
-                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C48C', border: '1px solid', borderColor: '#00C48C' }}>
+                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#249782', border: '1px solid', borderColor: '#249782' }}>
                                                         <Check size={12} />
                                                     </Box>
                                                 )}
@@ -3364,9 +3512,23 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                 </TextField>
                             </Box>
 
-                            {/* + Mentality dropdown (like MOTM) */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, md: 1 } }}>
-                                <img src={MENTALITY.src} alt="Mentality" style={{ width: isMobile ? 28 : 35, height: isMobile ? 28 : 35 }} />
+                            {/* + Mentality dropdown */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                                <Box
+                                    sx={{
+                                        width: 44,
+                                        height: 44,
+                                        minWidth: 44,
+                                        borderRadius: '10px',
+                                        bgcolor: '#1d2127',
+                                        border: '1px solid #2b3038',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <img src={MENTALITY.src} alt="Mentality" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                                </Box>
                                 <TextField
                                     select
                                     size="small"
@@ -3380,10 +3542,26 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     }
                                     SelectProps={{
                                         displayEmpty: true,
+                                        IconComponent: DropdownChevron,
                                         renderValue: (selected) => {
-                                            if (!selected) return 'Select + Mentality Player';
-                                            const label = playerNameById(selected as string);
-                                            return label || 'Select + Mentality Player';
+                                            const label = selected ? playerNameById(selected as string) : '';
+                                            return (
+                                                <Typography
+                                                    sx={{
+                                                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.76rem',
+                                                        letterSpacing: 0.8,
+                                                        textTransform: 'uppercase',
+                                                        color: label ? '#ffffff' : '#787d85',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    {label ? label : 'Select + Mentality Player'}
+                                                </Typography>
+                                            );
                                         },
                                         MenuProps: {
                                             ...dropdownMenuBaseProps,
@@ -3391,45 +3569,44 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                             PaperProps: {
                                                 sx: {
                                                     ...dropdownPaperBaseSx,
-                                                    bgcolor: '#000',
+                                                    bgcolor: '#111317',
+                                                    border: '1px solid #282c34',
+                                                    borderRadius: '14px',
+                                                    boxShadow: '0 20px 40px rgba(0,0,0,0.85)',
                                                     '& .MuiList-root': {
                                                         display: 'grid',
                                                         gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
                                                         gap: 1,
-                                                        p: 1,
+                                                        p: 1.2,
                                                     }
                                                 }
                                             }
                                         }
                                     }}
                                     sx={{
-                                        minWidth: { xs: 0, md: 290 },
-                                        width: { xs: '100%', md: 290 },
+                                        flex: 1,
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: 'transparent',
-                                            color: '#fff',
-                                            borderRadius: 1,
-                                            border: '1px solid #d9d9d9',
-                                            py: 0.5,
-                                            px: 0,
-                                            fontSize: '0.85rem',
+                                            backgroundColor: '#202328',
+                                            color: '#ffffff',
+                                            borderRadius: '12px',
+                                            height: 44,
+                                            '& fieldset': { borderColor: '#30353c', borderWidth: 1 },
+                                            '&:hover fieldset': { borderColor: '#424852' },
+                                            '&.Mui-focused fieldset': { borderColor: '#3576fa' },
+                                            pr: 3.5,
+                                        },
+                                        '& .MuiSelect-select': {
+                                            py: 0,
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
                                         },
                                         '& .MuiOutlinedInput-root.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                            opacity: 1,
-                                        },
-                                        '& .MuiSelect-select.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
-                                        },
-                                        '& .MuiInputBase-input.Mui-disabled': {
-                                            color: '#fff',
-                                            WebkitTextFillColor: '#fff',
+                                            color: '#787d85',
+                                            WebkitTextFillColor: '#787d85',
+                                            opacity: 0.7,
                                         },
                                         '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                                        '& .MuiSvgIcon-root': { color: '#fff' },
-                                        '& .MuiSvgIcon-root.Mui-disabled': { color: '#fff' },
                                     }}
                                 >
                                     <MenuItem
@@ -3480,7 +3657,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     position: 'relative',
                                                     bgcolor: '#000',
                                                     border: '1px solid',
-                                                    borderColor: selected ? '#00C48C' : 'rgba(255,255,255,0.15)',
+                                                    borderColor: selected ? '#249782' : '#2A3649',
                                                     borderRadius: 1,
                                                     transition: 'background-color .2s ease, border-color .2s ease, transform .08s ease',
                                                     '&:hover': {
@@ -3494,7 +3671,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                 <PlayerInitialsAvatar
                                                     player={p}
                                                     size={40}
-                                                    borderColor="#00C48C"
+                                                    borderColor="#249782"
                                                 />
                                                 <Typography variant="caption" sx={{ textAlign: 'center', lineHeight: 1.1, color: '#fff' }}>
                                                     {formatGuestAwarePlayerName(p)}
@@ -3505,7 +3682,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                                     </Typography>
                                                 )}
                                                 {selected && (
-                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00C48C', border: '1px solid', borderColor: '#00C48C' }}>
+                                                    <Box sx={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#249782', border: '1px solid', borderColor: '#249782' }}>
                                                         <Check size={12} />
                                                     </Box>
                                                 )}
@@ -3514,147 +3691,184 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     })}
                                 </TextField>
                             </Box>
-
-                            {/* {!isCaptainUser && (
-                                <Typography variant="caption" sx={{ mt: 0.5, color: 'rgba(255,255,255,0.7)' }}>
-                                    Only the captain from each team can select Defensive Impact and + Mentality players.
-                                </Typography>
-                            )} */}
                         </Box>
                     </Box>
 
-                    {/* Voted summary row */}
+                    {/* Voted summary card */}
                     <Box
                         sx={{
-                            mt: { xs: 3, md: 4 },
-                            p: { xs: 1.1, sm: 1, md: 2 },
-                            borderRadius: 0,
-                            border: '1px solid #d9d9d9',
-                            backgroundColor: '#262626',
+                            p: { xs: 2, sm: 2.2 },
+                            borderRadius: '16px',
+                            border: '1px solid #2a2e36',
+                            backgroundColor: '#15181d',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
                         }}
                     >
-                        {/* Voted + Three columns in same row */}
-                        <Box
+                        {/* Voted title */}
+                        <Typography
                             sx={{
-                                display: { xs: 'grid', md: 'flex' },
-                                gridTemplateColumns: { xs: 'repeat(2, minmax(0, 1fr))', md: 'none' },
-                                alignItems: { xs: 'stretch', md: 'flex-start' },
-                                columnGap: { xs: 1.2, md: 0 },
-                                rowGap: { xs: 1.3, md: 0 },
-                                gap: { md: 10 },
-                                flexWrap: { md: 'wrap' },
-                                '& > :first-of-type': {
-                                    gridColumn: { xs: '1 / -1', md: 'auto' },
-                                },
+                                fontWeight: 800,
+                                color: '#00C48C',
+                                fontSize: '0.88rem',
+                                letterSpacing: 2,
+                                textTransform: 'uppercase',
+                                textAlign: 'center',
+                                mb: 2,
                             }}
                         >
-                            {/* Voted title */}
+                            VOTED
+                        </Typography>
+
+                        {/* MOTM */}
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2.4, width: '100%' }}>
                             <Typography
                                 sx={{
-                                    fontWeight: 500,
-                                    color: '#00C48C',
-                                    // pt: 1,
-                                    fontSize: { xs: '1.2rem', md: '2rem' },
-                                    mt: { xs: 0, md: -1.5 },
-                                    textAlign: { xs: 'center', md: 'left' },
+                                    color: '#707784',
+                                    mb: 1.2,
+                                    fontSize: '0.68rem',
+                                    fontWeight: 700,
+                                    letterSpacing: 1.2,
+                                    textTransform: 'uppercase',
+                                    textAlign: 'center',
                                 }}
                             >
-                                Voted
+                                MAN OF THE MATCH
                             </Typography>
+                            <VotedPlayerAvatar player={motmPlayer} />
+                            <Typography
+                                sx={{
+                                    fontWeight: 700,
+                                    color: motmPlayer ? '#ffffff' : '#707784',
+                                    maxWidth: 200,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    fontSize: motmPlayer ? '0.78rem' : '0.72rem',
+                                    letterSpacing: 0.8,
+                                    textTransform: 'uppercase',
+                                    mt: 1,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                {motmPlayer ? formatGuestAwarePlayerName(motmPlayer).toUpperCase() : 'NOT SELECTED'}
+                            </Typography>
+                        </Box>
 
-                            {/* MOTM */}
-                            <Box sx={{ textAlign: 'center', minWidth: 0 }}>
-                                <Typography variant="caption" sx={{ color: '#E5E7EB', mb: 1, display: 'block', fontSize: { xs: '0.72rem', md: '1.1rem' }, fontWeight: 500 }}>
-                                    Man Of The Match
-                                </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                                    <VotedPlayerAvatar player={motmPlayer} />
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: 600,
-                                            maxWidth: { xs: 110, md: 140 },
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            fontSize: { xs: '0.72rem', md: '0.875rem' },
-                                        }}
-                                    >
-                                        {motmPlayer ? formatGuestAwarePlayerName(motmPlayer) : 'Not selected'}
-                                    </Typography>
-                                </Box>
-                            </Box>
-
+                        {/* Defensive Impact and + Mentality columns */}
+                        <Box
+                            sx={{
+                                display: 'grid',
+                                gridTemplateColumns: '1fr 1fr',
+                                width: '100%',
+                                gap: 2,
+                            }}
+                        >
                             {/* Defensive Impact */}
-                            <Box sx={{ textAlign: 'center', minWidth: 0 }}>
-                                <Typography variant="caption" sx={{ color: '#E5E7EB', mb: 1, display: 'block', fontSize: { xs: '0.72rem', md: '1.1rem' }, fontWeight: 500 }}>
-                                    Defensive Impact
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <Typography
+                                    sx={{
+                                        color: '#707784',
+                                        mb: 1.2,
+                                        fontSize: '0.68rem',
+                                        fontWeight: 700,
+                                        letterSpacing: 1.2,
+                                        textTransform: 'uppercase',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    DEFENSIVE IMPACT
                                 </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                                    <VotedPlayerAvatar player={defensivePlayer} />
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: 600,
-                                            maxWidth: { xs: 110, md: 140 },
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            fontSize: { xs: '0.72rem', md: '0.875rem' },
-                                        }}
-                                    >
-                                        {defensivePlayer ? formatGuestAwarePlayerName(defensivePlayer) : 'Not selected'}
-                                    </Typography>
-                                </Box>
+                                <VotedPlayerAvatar player={defensivePlayer} />
+                                <Typography
+                                    sx={{
+                                        fontWeight: 700,
+                                        color: defensivePlayer ? '#ffffff' : '#707784',
+                                        maxWidth: 150,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        fontSize: defensivePlayer ? '0.78rem' : '0.72rem',
+                                        letterSpacing: 0.8,
+                                        textTransform: 'uppercase',
+                                        mt: 1,
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    {defensivePlayer ? formatGuestAwarePlayerName(defensivePlayer).toUpperCase() : 'NOT SELECTED'}
+                                </Typography>
                             </Box>
 
                             {/* + Mentality */}
-                            <Box sx={{ textAlign: 'center', minWidth: 0 }}>
-                                <Typography variant="caption" sx={{ color: '#E5E7EB', mb: 1, display: 'block', fontSize: { xs: '0.72rem', md: '1.1rem' }, fontWeight: 500 }}>
-                                    + Mentality
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <Typography
+                                    sx={{
+                                        color: '#707784',
+                                        mb: 1.2,
+                                        fontSize: '0.68rem',
+                                        fontWeight: 700,
+                                        letterSpacing: 1.2,
+                                        textTransform: 'uppercase',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    + MENTALITY
                                 </Typography>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-                                    <VotedPlayerAvatar player={mentalityPlayer} />
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            fontWeight: 600,
-                                            maxWidth: { xs: 110, md: 140 },
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            fontSize: { xs: '0.72rem', md: '0.875rem' },
-                                        }}
-                                    >
-                                        {mentalityPlayer ? formatGuestAwarePlayerName(mentalityPlayer) : 'Not selected'}
-                                    </Typography>
-                                </Box>
+                                <VotedPlayerAvatar player={mentalityPlayer} />
+                                <Typography
+                                    sx={{
+                                        fontWeight: 700,
+                                        color: mentalityPlayer ? '#ffffff' : '#707784',
+                                        maxWidth: 150,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        fontSize: mentalityPlayer ? '0.78rem' : '0.72rem',
+                                        letterSpacing: 0.8,
+                                        textTransform: 'uppercase',
+                                        mt: 1,
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    {mentalityPlayer ? formatGuestAwarePlayerName(mentalityPlayer).toUpperCase() : 'NOT SELECTED'}
+                                </Typography>
                             </Box>
                         </Box>
                     </Box>
 
                     {/* Submit button */}
-                    <Box sx={{ mt: { xs: 3, md: 4 } }}>
+                    <Box sx={{ mt: 0.5 }}>
                         <Button
                             onClick={handleSaveStats}
                             variant="contained"
                             disabled={isSubmittingStats}
                             fullWidth
                             sx={{
-                                py: 1.25,
-                                fontWeight: 700,
-                                letterSpacing: 1,
-                                borderRadius: '11px',
-                                background: 'linear-gradient(90deg, #4A8DFF 0%, #0062FF 100%)',
+                                height: 48,
+                                fontWeight: 800,
+                                letterSpacing: 2,
+                                borderRadius: '14px',
+                                fontSize: '0.88rem',
+                                textTransform: 'uppercase',
+                                backgroundColor: '#3576f6',
+                                boxShadow: '0 4px 18px rgba(53, 118, 246, 0.35)',
+                                color: '#ffffff',
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                 '&:hover': {
-                                    background: 'linear-gradient(90deg, #0062FF 0%, #4A8DFF 100%)',
+                                    backgroundColor: '#2b6ee8',
+                                    boxShadow: '0 6px 22px rgba(53, 118, 246, 0.5)',
+                                },
+                                '&.Mui-disabled': {
+                                    backgroundColor: 'rgba(53, 118, 246, 0.35)',
+                                    color: 'rgba(255, 255, 255, 0.4)',
                                 },
                             }}
                         >
-                            {isSubmittingStats ? <CircularProgress size={22} sx={{ color: 'white' }} /> : 'Submit'}
+                            {isSubmittingStats ? <CircularProgress size={22} sx={{ color: 'white' }} /> : 'SUBMIT'}
                         </Button>
                     </Box>
-                </Paper>
+                </Box>
             )}
 
             {/* --- NEW: Player selection dialog (team-restricted) --- */}
@@ -4016,11 +4230,11 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 }}
                 PaperProps={{
                     sx: {
-                        bgcolor: '#0B0D11',
+                        bgcolor: '#111317',
                         backgroundImage: 'none',
                         color: '#ffffff',
                         borderRadius: '20px',
-                        border: '1px solid #222B38',
+                        border: '1px solid #282c34',
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.04)',
                         width: { xs: 'calc(100% - 24px)', sm: 480, md: 500 },
                         maxWidth: { xs: 440, sm: 480, md: 500 },
@@ -4035,8 +4249,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     sx={{
                         p: 0,
                         position: 'relative',
-                        bgcolor: '#18202A',
-                        borderBottom: '1px solid #232C3A',
+                        bgcolor: '#1a1d24',
+                        borderBottom: '1px solid #252a32',
                         pt: { xs: 2.4, sm: 2.8 },
                         pb: { xs: 2, sm: 2.4 },
                         px: { xs: 2.5, sm: 4 },
@@ -4062,7 +4276,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                 fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
                                 fontWeight: 700,
                                 fontSize: { xs: '0.74rem', sm: '0.8rem' },
-                                color: '#8A94A6',
+                                color: '#7e8694',
                                 textTransform: 'uppercase',
                                 letterSpacing: 1.5,
                                 mt: 0.6,
@@ -4087,10 +4301,11 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         size="small"
                         aria-label="close"
                         sx={{
-                            color: '#707A8A',
+                            color: '#7e8694',
                             position: 'absolute',
-                            right: { xs: 16, sm: 20 },
-                            top: { xs: 16, sm: 20 },
+                            right: { xs: 14, sm: 18 },
+                            top: '50%',
+                            transform: 'translateY(-50%)',
                             p: 0.6,
                             transition: 'color 0.2s',
                             '&:hover': {
@@ -4274,30 +4489,30 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         width: '100%',
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: '#0a0d12',
+                                            backgroundColor: '#161922',
                                             color: '#ffffff',
                                             borderRadius: '12px',
-                                            height: { xs: 52, sm: 54 },
+                                            height: { xs: 44, sm: 46 },
                                             '& fieldset': {
-                                                borderColor: '#232836',
-                                                borderWidth: '1.2px',
+                                                borderColor: '#3e4759',
+                                                borderWidth: '1px',
                                             },
                                             '&:hover fieldset': {
-                                                borderColor: '#32394c',
+                                                borderColor: '#5a6682',
                                             },
                                             '&.Mui-focused fieldset': {
                                                 borderColor: '#2988fe',
-                                                borderWidth: '1.5px',
+                                                borderWidth: '1px',
                                             },
                                             '& .MuiInputBase-input::placeholder': {
-                                                color: 'rgba(255, 255, 255, 0.3)',
+                                                color: 'rgba(255, 255, 255, 0.35)',
                                                 opacity: 1,
                                             },
                                         },
                                         input: {
                                             textAlign: 'center',
                                             fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
-                                            fontSize: { xs: 23, sm: 25 },
+                                            fontSize: { xs: 20, sm: 22 },
                                             fontWeight: 800,
                                             padding: 0,
                                             height: '100%',
@@ -4360,30 +4575,30 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     sx={{
                                         width: '100%',
                                         '& .MuiOutlinedInput-root': {
-                                            backgroundColor: '#0a0d12',
+                                            backgroundColor: '#161922',
                                             color: '#ffffff',
                                             borderRadius: '12px',
-                                            height: { xs: 52, sm: 54 },
+                                            height: { xs: 44, sm: 46 },
                                             '& fieldset': {
-                                                borderColor: '#232836',
-                                                borderWidth: '1.2px',
+                                                borderColor: '#3e4759',
+                                                borderWidth: '1px',
                                             },
                                             '&:hover fieldset': {
-                                                borderColor: '#32394c',
+                                                borderColor: '#5a6682',
                                             },
                                             '&.Mui-focused fieldset': {
                                                 borderColor: '#2988fe',
-                                                borderWidth: '1.5px',
+                                                borderWidth: '1px',
                                             },
                                             '& .MuiInputBase-input::placeholder': {
-                                                color: 'rgba(255, 255, 255, 0.3)',
+                                                color: 'rgba(255, 255, 255, 0.35)',
                                                 opacity: 1,
                                             },
                                         },
                                         input: {
                                             textAlign: 'center',
                                             fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
-                                            fontSize: { xs: 23, sm: 25 },
+                                            fontSize: { xs: 20, sm: 22 },
                                             fontWeight: 800,
                                             padding: 0,
                                             height: '100%',
@@ -4473,114 +4688,117 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             : '';
 
         return (
-            <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" scroll="paper" keepMounted>
-                <DialogTitle sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    backgroundColor: '#d9d9d9',
-                    color: '#1f1f1f',
-                    p: 0,
-                }}>
-                    {isMobile ? (
-                        <Box
+            <Dialog
+                open={open}
+                onClose={onClose}
+                fullWidth
+                maxWidth="sm"
+                scroll="paper"
+                keepMounted
+                BackdropProps={{
+                    sx: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        backdropFilter: 'blur(3px)',
+                    }
+                }}
+                PaperProps={{
+                    sx: {
+                        bgcolor: '#111317',
+                        backgroundImage: 'none',
+                        color: '#ffffff',
+                        borderRadius: '20px',
+                        border: '1px solid #282c34',
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+                        width: { xs: 'calc(100% - 24px)', sm: 480, md: 500 },
+                        maxWidth: { xs: 440, sm: 480, md: 500 },
+                        m: 'auto',
+                        overflow: 'hidden',
+                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                    }
+                }}
+            >
+                <DialogTitle
+                    sx={{
+                        p: 0,
+                        position: 'relative',
+                        bgcolor: '#1a1d24',
+                        borderBottom: '1px solid #252a32',
+                        pt: { xs: 2.2, sm: 2.6 },
+                        pb: { xs: 1.8, sm: 2.2 },
+                        px: { xs: 2.5, sm: 4 },
+                    }}
+                >
+                    <Box sx={{ textAlign: 'center', pr: 0 }}>
+                        <Typography
                             sx={{
-                                display: 'flex',
-                                alignItems: 'stretch',
-                                justifyContent: 'space-between',
-                                px: 0.9,
-                                py: 0.65,
-                                pr: 5.2,
-                                position: 'relative',
-                                width: '100%',
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 800,
+                                fontSize: { xs: '0.88rem', sm: '0.96rem' },
+                                color: '#ffffff',
+                                textTransform: 'uppercase',
+                                letterSpacing: 2,
+                                lineHeight: 1.3,
+                                textAlign: 'center',
                             }}
                         >
-                            <Box
-                                sx={{
-                                    width: '100%',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <Box sx={{ px: 1, py: 0.55 }}>
-                                    <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                        {dialogLeagueTitle}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                                    <Box sx={{ px: 1, py: 0.5 }}>
-                                        <Typography sx={{ fontWeight: 700, fontSize: { xs: 14, md: 12 }, textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.2 }}>
-                                            Match {computedMatchNumber || ''}
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ px: 1, py: 0.5 }}>
-                                        <Typography sx={{ fontWeight: 600, fontSize: { xs: 14, md: 12 }, textAlign: 'center', lineHeight: 1.2 }}>
-                                            {dialogDateTitle}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-                            <IconButton
-                                onClick={onClose}
-                                sx={{
-                                    color: '#111',
-                                    position: 'absolute',
-                                    right: 0,
-                                    top: 0,
-                                    backgroundColor: '#e6e6e6',
-                                    borderRadius: 0,
-                                    width: 36,
-                                    height: 36,
-                                    '&:hover': { backgroundColor: '#e6e6e6' },
-                                }}
-                            >
-                                <CloseIcon sx={{ fontSize: 18 }} />
-                            </IconButton>
-                        </Box>
-                    ) : (
-                        <>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, py: 1.5, borderRight: '1px solid #888' }}>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', textTransform: 'uppercase' }}>
-                                        {dialogLeagueTitle}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, py: 1.5, borderRight: '1px solid #888' }}>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', textTransform: 'uppercase' }}>
-                                        Match {computedMatchNumber || ''}
-                                    </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, py: 1.5 }}>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '0.95rem' }}>
-                                        {dialogDateTitle}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <IconButton
-                                onClick={onClose}
-                                sx={{
-                                    color: 'black',
-                                    backgroundColor: '#e6e6e6',
-                                    borderRadius: 0,
-                                    width: 56,
-                                    height: 56,
-                                    '&:hover': { backgroundColor: '#d0d0d0', color: '#000' },
-                                }}
-                            >
-                                <CloseIcon />
-                            </IconButton>
-                        </>
-                    )}
+                            {dialogLeagueTitle}
+                        </Typography>
+                        <Typography
+                            sx={{
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontWeight: 700,
+                                fontSize: { xs: '0.74rem', sm: '0.8rem' },
+                                color: '#8A94A6',
+                                textTransform: 'uppercase',
+                                letterSpacing: 1.5,
+                                mt: 0.5,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 0.8,
+                            }}
+                        >
+                            <span>MATCH {computedMatchNumber || ''}</span>
+                            {dialogDateTitle && (
+                                <>
+                                    <span style={{ fontSize: '0.65rem', color: '#64748B' }}>•</span>
+                                    <span>{dialogDateTitle}</span>
+                                </>
+                            )}
+                        </Typography>
+                    </Box>
+
+                    <IconButton
+                        onClick={onClose}
+                        size="small"
+                        aria-label="close"
+                        sx={{
+                            color: '#707A8A',
+                            position: 'absolute',
+                            right: { xs: 14, sm: 18 },
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            p: 0.6,
+                            transition: 'color 0.2s',
+                            '&:hover': {
+                                color: '#ffffff',
+                                bgcolor: 'transparent',
+                            },
+                        }}
+                    >
+                        <CloseIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
                 </DialogTitle>
                 <DialogContent
                     sx={{
                         p: 0,
-                        background: '#262626',
-                        overflow: 'auto',
+                        bgcolor: '#0B0D11',
+                        overflowY: 'auto',
                         '&::-webkit-scrollbar': {
                             display: 'none'
                         },
                         msOverflowStyle: 'none',
-                        scrollbarWidth: 'none'
+                        scrollbarWidth: 'none',
                     }}
                 >
                     {content}
