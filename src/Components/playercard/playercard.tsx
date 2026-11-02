@@ -499,16 +499,21 @@ const PlayerCard = ({
         }}
       >
         {/* Background Image */}
-        <Image
-          src={vectorImg}
+        <img
+          src={typeof vectorImg === 'string' ? vectorImg : (vectorImg as any)?.src || ''}
           alt="Card Background"
-          layout="fill"
-          objectFit="cover"
-          objectPosition="top center"
-          unoptimized
-          priority
           crossOrigin="anonymous"
-          className="z-0"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'top center',
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
         />
 
         {/* Overlay Content */}
@@ -575,15 +580,19 @@ const PlayerCard = ({
             >
               {displaySrc ? (
                 <Box sx={{ position: 'relative', width: '100%', height: '100%' }}>
-                  <Image
+                  <img
                     src={displaySrc}
                     alt="Profile"
-                    fill
-                    sizes="105px"
-                    unoptimized
-                    priority={false}
                     crossOrigin="anonymous"
-                    style={{ objectFit: 'cover', imageRendering: 'auto' }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '50%',
+                    }}
                   />
                 </Box>
               ) : (
@@ -621,14 +630,14 @@ const PlayerCard = ({
 
           {/* Foot - RIGHT */}
           <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.3 }}>
-            <Image
-              src={Foot}
+            <img
+              src={typeof Foot === 'string' ? Foot : (Foot as any)?.src || ''}
               alt="Foot"
-              unoptimized
               crossOrigin="anonymous"
               width={29}
               height={12}
               style={{
+                display: 'inline-block',
                 filter: 'brightness(0) saturate(100%)',
                 transform: isRightFoot ? 'scaleX(-1)' : 'scaleX(1)',
               }}

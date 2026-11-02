@@ -229,10 +229,33 @@ export async function shareContent(options: ShareOptions): Promise<void> {
 }
 
 /**
+ * Converts an image URL (relative, blob, or remote) to a base64 Data URL
+ * to prevent CORS restrictions, network failures, or tainted canvas errors on mobile devices.
+ */
+async function toDataUrl(src: string): Promise<string> {
+  if (!src || src.startsWith('data:')) return src;
+  try {
+    const res = await fetch(src, { mode: 'cors' });
+    if (!res.ok) return src;
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve((reader.result as string) || src);
+      };
+      reader.onerror = () => resolve(src);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return src;
+  }
+}
+
+/**
  * Capture an HTMLElement as an image File ready for sharing.
  * Uses html2canvas as primary engine to render directly onto HTML5 Canvas,
  * completely avoiding mobile browser SVG foreignObject security restrictions.
- * Automatically unscales and expands mobile dialog cards to crisp desktop layout during capture.
+ * Automatically unscales and inlines images as Base64 to ensure 100% reliable capture on mobile.
  */
 export async function captureElementAsFile(
   element: HTMLElement,
@@ -241,38 +264,52 @@ export async function captureElementAsFile(
   if (!element || typeof window === 'undefined') return null;
 
   try {
-    // 1. Wait for any pending images in element to finish loading
+    // 1. Wait for any pending images to finish loading and convert to Base64
     const images = Array.from(element.querySelectorAll('img'));
     await Promise.all(
-      images.map((img) => {
-        if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-          setTimeout(resolve, 800);
-        });
+      images.map(async (img) => {
+        if (!img.complete || img.naturalHeight === 0) {
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            setTimeout(resolve, 600);
+          });
+        }
+        try {
+          const current = img.currentSrc || img.src;
+          if (current && !current.startsWith('data:')) {
+            const dataUrl = await toDataUrl(current);
+            if (dataUrl && dataUrl.startsWith('data:')) {
+              img.src = dataUrl;
+            }
+          }
+        } catch { }
       })
     );
 
     // 2. Render using html2canvas directly to HTML5 canvas
+    const width = element.offsetWidth || 480;
+    const height = element.offsetHeight || 445;
+
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
       scale: 2,
       useCORS: true,
-      allowTaint: false,
+      allowTaint: true,
       logging: false,
+      width,
+      height,
       ignoreElements: (node) => {
         return (node as HTMLElement)?.dataset?.shareExclude === 'true';
       },
       onclone: (_clonedDoc, clonedEl) => {
-        // Find player quick view card to unscale on mobile devices
+        // Find player quick view card to unscale on mobile devices if needed
         const target =
           clonedEl.id === 'player-quick-view-card'
             ? clonedEl
             : (clonedEl.querySelector('#player-quick-view-card') as HTMLElement | null);
 
         if (target) {
-          // Force root to full 480px width
           target.style.width = '480px';
           target.style.minWidth = '480px';
           target.style.maxWidth = '480px';
@@ -331,7 +368,7 @@ export async function captureElementAsFile(
             children[2].style.padding = '6px';
 
             children[2].querySelectorAll('div').forEach((b) => {
-              const text = (b as HTMLElement).innerText?.trim();
+              const text = (b as HTMLElement).textContent?.trim();
               if (text === 'W' || text === 'L' || text === 'D') {
                 b.style.width = '28px';
                 b.style.height = '24px';

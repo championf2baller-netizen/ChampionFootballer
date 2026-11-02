@@ -1729,6 +1729,7 @@ export default function GlobalTrophyRoom() {
 
   // Quick-view modal state
   const quickViewCardRef = useRef<HTMLDivElement | null>(null);
+  const shareExportCardRef = useRef<HTMLDivElement | null>(null);
 
   const [openQuickView, setOpenQuickView] = useState(false);
   const [quickView, setQuickView] = useState<{
@@ -4023,7 +4024,17 @@ export default function GlobalTrophyRoom() {
                       }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
-                        <Image src={it.img} alt={it.label} width={isMobile ? 10 : 18} height={isMobile ? 10 : 18} unoptimized crossOrigin="anonymous" style={{ objectFit: 'contain' }} />
+                        <img
+                          src={typeof it.img === 'string' ? it.img : (it.img as any)?.src || ''}
+                          alt={it.label}
+                          crossOrigin="anonymous"
+                          style={{
+                            width: isMobile ? 10 : 18,
+                            height: isMobile ? 10 : 18,
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
                         <Typography variant="body2" sx={{ fontWeight: 700, fontSize: { xs: '0.58rem', sm: '0.85rem' }, lineHeight: 1 }}>
                           {it.value}
                         </Typography>
@@ -4212,6 +4223,216 @@ export default function GlobalTrophyRoom() {
               </Paper>
             </Box>
           )}
+          {/* Dedicated off-screen 480px Desktop card for sharing (unscaled, crisp, clean white background, mobile & desktop compatible) */}
+          {quickView.player && (
+            <div
+              ref={shareExportCardRef}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '480px',
+                height: '445px',
+                zIndex: -9999,
+                pointerEvents: 'none',
+                opacity: 1,
+                backgroundColor: '#ffffff',
+                overflow: 'hidden',
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: '100px 260px 100px',
+                  gap: 1,
+                  alignItems: 'start',
+                  justifyContent: 'center',
+                  width: '480px',
+                  minHeight: '438px',
+                  bgcolor: '#ffffff',
+                  p: 1,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Left: Stats Icons (Desktop 100px, 18px icons, no "More Stats") */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 0.6,
+                    pb: 0.6,
+                    border: '1px solid rgba(15, 23, 42, 0.2)',
+                    backgroundColor: '#fff',
+                    minWidth: 0,
+                    width: '100%',
+                    minHeight: '280px',
+                    height: 'auto',
+                    borderRadius: 2,
+                    position: 'relative',
+                    mt: 6,
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.75rem', letterSpacing: 0, mb: 0.15, lineHeight: 1.05, textAlign: 'center' }}>
+                    Current Stats
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {[
+                      { img: Goals, label: 'Goals', value: quickView.stats?.goals ?? 0 },
+                      { img: Assist, label: 'Assists', value: quickView.stats?.assists ?? 0 },
+                      { img: Cleansheet, label: 'Clean Sheets', value: quickView.cleanSheets ?? 0 },
+                      { img: Momt, label: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                      { img: DefImp, label: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
+                      { img: Mentality, label: 'Mental Impact', value: quickView.mentality ?? 0 },
+                    ].map((it, i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: 0.5,
+                          p: 0.3,
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
+                          <img
+                            src={typeof it.img === 'string' ? it.img : (it.img as any)?.src || ''}
+                            alt={it.label}
+                            crossOrigin="anonymous"
+                            style={{ width: 18, height: 18, objectFit: 'contain', display: 'block' }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.85rem', lineHeight: 1 }}>
+                            {it.value}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: '#64748b',
+                            fontSize: '0.6rem',
+                            textAlign: 'left',
+                            lineHeight: 1.05,
+                            letterSpacing: 0,
+                            width: '100%',
+                          }}
+                        >
+                          {it.label}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+
+                {/* Center: Full-size Desktop PlayerCard */}
+                <Box
+                  sx={{
+                    width: 260,
+                    height: 430,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    position: 'relative',
+                    overflow: 'visible',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 260,
+                      height: 410,
+                      position: 'relative',
+                    }}
+                  >
+                    {(() => {
+                      const p = quickView.player as User & PlayerProfileLike;
+                      const fullName = [p.firstName, p.lastName]
+                        .map((part) => (typeof part === 'string' ? part.trim() : ''))
+                        .filter(Boolean)
+                        .join(' ')
+                        .trim();
+                      return (
+                        <PlayerCard
+                          name={fullName}
+                          number={getShirtNumber(p)}
+                          points={Number(quickView.profileXP ?? quickView.xp ?? 0)}
+                          stats={{
+                            DRI: String(quickView.skills?.dribbling ?? 0),
+                            SHO: String(quickView.skills?.shooting ?? 0),
+                            PAS: String(quickView.skills?.passing ?? 0),
+                            PAC: String(quickView.skills?.pace ?? 0),
+                            DEF: String(quickView.skills?.defending ?? 0),
+                            PHY: String(quickView.skills?.physical ?? 0),
+                          }}
+                          foot={getPreferredFoot(p)}
+                          profileImage={getProfileImage(p)}
+                          shirtIcon=""
+                          width={260}
+                          height={410}
+                          hideShareIcon={true}
+                          disableImagePopup={true}
+                          position={p.position ?? ''}
+                        />
+                      );
+                    })()}
+                  </Box>
+                </Box>
+
+                {/* Right: Last 10 games (Desktop 100px, 28x24 badges, "Latest" tag) */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 0.6,
+                    pb: 0.6,
+                    border: '1px solid rgba(15, 23, 42, 0.2)',
+                    backgroundColor: '#fff',
+                    borderRadius: 2,
+                    minWidth: 0,
+                    width: '100%',
+                    position: 'relative',
+                    mt: 6,
+                    minHeight: 290,
+                    height: 'auto',
+                  }}
+                >
+                  <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: '0.75rem', letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>
+                    Last 10 games
+                  </Typography>
+                  <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: 0.4 }}>
+                    {(quickView.lastFive ?? []).slice(0, 10).map((m, idx) => (
+                      <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 24,
+                            borderRadius: 0.5,
+                            backgroundColor: resultColor(m.result),
+                            color: '#fff',
+                            fontWeight: 800,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.6rem',
+                            lineHeight: 1,
+                          }}
+                        >
+                          {m.result}
+                        </Box>
+                        {idx === 0 && (
+                          <Typography variant="body2" sx={{ color: '#94a3b8', fontSize: '0.55rem' }}>
+                            Latest
+                          </Typography>
+                        )}
+                      </Box>
+                    ))}
+                    {(quickView.lastFive ?? []).length === 0 && (
+                      <Typography variant="body2" sx={{ color: '#64748b', fontSize: '0.875rem' }}>
+                        No recent matches.
+                      </Typography>
+                    )}
+                  </Stack>
+                </Paper>
+              </Box>
+            </div>
+          )}
           {quickView.player && (
             <Box data-share-exclude="true" sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
               <IconButton
@@ -4253,8 +4474,9 @@ export default function GlobalTrophyRoom() {
 
                   const shareWhatsApp = async () => {
                     let fileToShare: File | null = null;
-                    if (quickViewCardRef.current) {
-                      fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                    const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                    if (targetEl) {
+                      fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
                     }
 
                     await shareToWhatsApp({
@@ -4267,8 +4489,9 @@ export default function GlobalTrophyRoom() {
 
                   const shareNative = async () => {
                     let fileToShare: File | null = null;
-                    if (quickViewCardRef.current) {
-                      fileToShare = await captureElementAsFile(quickViewCardRef.current, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                    const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                    if (targetEl) {
+                      fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
                     }
                     shareContent({
                       title: `${playerName} | Champion Footballer`,
