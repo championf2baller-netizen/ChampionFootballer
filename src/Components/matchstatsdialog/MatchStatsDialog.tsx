@@ -644,47 +644,56 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
     // Unified dialog paper styling to match app theme
     const dialogPaperSx = {
         p: 0,
-        bgcolor: '#d9d9d9',
-        color: 'black',
-        borderRadius: 3,
-        border: '1px solid rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05)'
+        bgcolor: '#111317',
+        backgroundImage: 'none',
+        color: '#ffffff',
+        borderRadius: '20px',
+        border: '1px solid #282c34',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.04)',
+        width: { xs: 'calc(100% - 24px)', sm: 480, md: 500 },
+        maxWidth: { xs: 440, sm: 480, md: 500 },
+        m: 'auto',
+        overflow: 'hidden',
+        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
     } as const;
     const dialogTitleSx = {
-        background: '#0e0e0e',
+        p: 0,
+        position: 'relative',
+        bgcolor: '#1a1d24',
+        borderBottom: '1px solid #252a32',
         color: '#fff',
-        fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-        fontWeight: 700,
-        fontSize: { xs: '18px', sm: '22px', md: '26px' },
+        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif !important',
+        fontWeight: 800,
+        fontSize: { xs: '0.88rem', sm: '0.96rem' },
+        letterSpacing: 2,
         textTransform: 'uppercase',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         alignItems: 'center',
-        px: { xs: 2.5, md: 3.5 },
-        py: 0,
-        height: { xs: 52, sm: 58 },
-        position: 'relative',
-        borderBottom: '3px solid #E56A16',
+        px: { xs: 2.5, sm: 4 },
+        py: { xs: 2.2, sm: 2.6 },
+        minHeight: { xs: 56, sm: 62 },
         flexShrink: 0
     } as const;
     const dialogCloseBtnSx = {
-        bgcolor: '#e6e6e6',
-        color: '#000',
+        color: '#7e8694',
         position: 'absolute',
-        right: 0,
-        top: 0,
-        bottom: 0,
-        width: { xs: 48, sm: 56 },
-        borderRadius: 0,
-        borderTopRightRadius: 'inherit',
-        transition: 'background-color 0.2s ease',
+        right: { xs: 14, sm: 18 },
+        top: '50%',
+        transform: 'translateY(-50%)',
+        p: 0.6,
+        borderRadius: '50%',
+        transition: 'color 0.2s',
         '&:hover': {
-            bgcolor: '#d0d0d0',
-            color: '#000',
+            color: '#ffffff',
+            bgcolor: 'transparent',
         }
     } as const;
-    const dialogContentSx = { color: '#E5E7EB', bgcolor: '#262626' } as const;
+    const dialogContentSx = {
+        color: '#ffffff',
+        bgcolor: '#0B0D11',
+        borderColor: '#252a32',
+    } as const;
 
     // --- NEW: handlers to fetch leagues and matches ---
     const openLeagueSelector = useCallback(async () => {
@@ -2491,36 +2500,171 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     onClose={onClose}
                     fullWidth
                     maxWidth="sm"
+                    BackdropProps={{
+                        sx: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            backdropFilter: 'blur(3px)',
+                        }
+                    }}
                     PaperProps={{ sx: dialogPaperSx }}
                 >
                     <DialogTitle sx={dialogTitleSx}>
-                        ADD MATCH SCORES
-                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}>
-                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                        <Box sx={{ textAlign: 'center', width: '100%', pr: 0 }}>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                    fontWeight: 800,
+                                    fontSize: { xs: '0.88rem', sm: '0.96rem' },
+                                    color: '#ffffff',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 2,
+                                    lineHeight: 1.3,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                ADD MATCH SCORES
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                    fontWeight: 700,
+                                    fontSize: { xs: '0.74rem', sm: '0.8rem' },
+                                    color: '#7e8694',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 1.5,
+                                    mt: 0.6,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                LOADING MATCH DETAILS...
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            onClick={onClose}
+                            size="small"
+                            aria-label="close"
+                            sx={dialogCloseBtnSx}
+                        >
+                            <CloseIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                     </DialogTitle>
-                    <DialogContent sx={{ ...dialogContentSx, minHeight: '200px' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                            <CircularProgress size={36} sx={{ color: '#00ff88' }} />
-                        </Box>
+                    <DialogContent
+                        sx={{
+                            p: 0,
+                            pt: { xs: 4, sm: 5 },
+                            pb: { xs: 4, sm: 5 },
+                            px: { xs: 2.5, sm: 4 },
+                            bgcolor: '#0B0D11',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: '220px',
+                        }}
+                    >
+                        <CircularProgress size={36} sx={{ color: '#2884FE', mb: 2 }} />
+                        <Typography
+                            sx={{
+                                fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                letterSpacing: 1.5,
+                                color: '#7e8694',
+                                textTransform: 'uppercase',
+                            }}
+                        >
+                            Loading Scores...
+                        </Typography>
                     </DialogContent>
                 </Dialog>
             );
         }
 
         const inner = (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 6 }}>
+                <CircularProgress size={36} sx={{ color: '#2884FE', mb: 2 }} />
+                <Typography
+                    sx={{
+                        fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        letterSpacing: 1.5,
+                        color: '#7e8694',
+                        textTransform: 'uppercase',
+                    }}
+                >
+                    Loading Stats & Votes...
+                </Typography>
             </Box>
         );
         if (typeof open === 'boolean') {
             return (
-                <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg" scroll="paper" keepMounted PaperProps={{ sx: dialogPaperSx }}>
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    fullWidth
+                    maxWidth="sm"
+                    scroll="paper"
+                    keepMounted
+                    BackdropProps={{
+                        sx: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            backdropFilter: 'blur(3px)',
+                        }
+                    }}
+                    PaperProps={{ sx: dialogPaperSx }}
+                >
                     <DialogTitle sx={dialogTitleSx}>
-                        Match Stats
-                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
+                        <Box sx={{ textAlign: 'center', width: '100%', pr: 0 }}>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                    fontWeight: 800,
+                                    fontSize: { xs: '0.88rem', sm: '0.96rem' },
+                                    color: '#ffffff',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 2,
+                                    lineHeight: 1.3,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                MATCH STATS & VOTES
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    fontFamily: 'var(--font-woodford-family), Arial, Helvetica, sans-serif',
+                                    fontWeight: 700,
+                                    fontSize: { xs: '0.74rem', sm: '0.8rem' },
+                                    color: '#7e8694',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: 1.5,
+                                    mt: 0.6,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                LOADING DETAILS...
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            onClick={onClose}
+                            size="small"
+                            aria-label="close"
+                            sx={dialogCloseBtnSx}
+                        >
+                            <CloseIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
                     </DialogTitle>
-                    <DialogContent dividers sx={dialogContentSx}>
+                    <DialogContent
+                        sx={{
+                            p: 0,
+                            bgcolor: '#0B0D11',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: '260px',
+                        }}
+                    >
                         {inner}
                     </DialogContent>
                 </Dialog>
@@ -2533,10 +2677,25 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         // Embedded: if opened specifically for Admin Goals, don't show league selector fallback.
         if (typeof open === 'boolean' && showAdminGoalsSection) {
             return (
-                <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    fullWidth
+                    maxWidth="sm"
+                    keepMounted
+                    BackdropProps={{
+                        sx: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            backdropFilter: 'blur(3px)',
+                        }
+                    }}
+                    PaperProps={{ sx: dialogPaperSx }}
+                >
                     <DialogTitle sx={dialogTitleSx}>
                         ADD MATCH SCORES
-                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
+                        <IconButton onClick={onClose} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={{ ...dialogContentSx }}>
                         {error ? (
@@ -2546,7 +2705,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                         )}
                         {!error && (
                             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                                <CircularProgress size={36} sx={{ color: '#00ff88' }} />
+                                <CircularProgress size={36} sx={{ color: '#2884FE' }} />
                             </Box>
                         )}
                     </DialogContent>
@@ -2557,10 +2716,25 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
         // Embedded: show a simple starter UI that lets the user select a league instead of a hard error
         if (typeof open === 'boolean') {
             return (
-                <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    fullWidth
+                    maxWidth="sm"
+                    keepMounted
+                    BackdropProps={{
+                        sx: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            backdropFilter: 'blur(3px)',
+                        }
+                    }}
+                    PaperProps={{ sx: dialogPaperSx }}
+                >
                     <DialogTitle sx={dialogTitleSx}>
                         Match Stats
-                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
+                        <IconButton onClick={onClose} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={dialogContentSx}>
                         <Box sx={{ display: 'grid', gap: 2 }}>
@@ -2601,16 +2775,31 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
     if (!user) {
         const inner = (
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: 3, textAlign: 'center', color: '#ffffff' }}>
                 <Typography variant="body1">Please sign in to add or view match stats.</Typography>
             </Box>
         );
         if (typeof open === 'boolean') {
             return (
-                <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" keepMounted PaperProps={{ sx: dialogPaperSx }}>
+                <Dialog
+                    open={open}
+                    onClose={onClose}
+                    fullWidth
+                    maxWidth="sm"
+                    keepMounted
+                    BackdropProps={{
+                        sx: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            backdropFilter: 'blur(3px)',
+                        }
+                    }}
+                    PaperProps={{ sx: dialogPaperSx }}
+                >
                     <DialogTitle sx={dialogTitleSx}>
                         Match Stats
-                        <IconButton onClick={onClose} aria-label="close" sx={dialogCloseBtnSx}><CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} /></IconButton>
+                        <IconButton onClick={onClose} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
                     </DialogTitle>
                     <DialogContent dividers sx={dialogContentSx}>
                         {inner}
@@ -3875,8 +4064,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={isPickDialogOpen} onClose={() => setIsPickDialogOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     {pickCategory === 'defence' ? 'Select player for Defensive Impact' : 'Select player for + Mentality'}
-                    <IconButton onClick={() => setIsPickDialogOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
-                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                    <IconButton onClick={() => setIsPickDialogOpen(false)} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -3911,8 +4100,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={leagueSelectOpen} onClose={() => setLeagueSelectOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     Select a League
-                    <IconButton onClick={() => setLeagueSelectOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
-                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                    <IconButton onClick={() => setLeagueSelectOpen(false)} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -3981,8 +4170,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={isStatsModalOpen} onClose={handleCloseStatsModal} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         Your Stats for the Match
-                        <IconButton onClick={handleCloseStatsModal} aria-label="close" sx={dialogCloseBtnSx}>
-                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                        <IconButton onClick={handleCloseStatsModal} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                     </DialogTitle>
                     <DialogContent sx={dialogContentSx}>
@@ -4023,8 +4212,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             <Dialog open={matchesDialogOpen} onClose={() => setMatchesDialogOpen(false)} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
                 <DialogTitle sx={dialogTitleSx}>
                     Select a Match
-                    <IconButton onClick={() => setMatchesDialogOpen(false)} aria-label="close" sx={dialogCloseBtnSx}>
-                        <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                    <IconButton onClick={() => setMatchesDialogOpen(false)} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                        <CloseIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                 </DialogTitle>
                 <DialogContent dividers sx={dialogContentSx}>
@@ -4114,8 +4303,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 <Dialog open={isAdminStatsModalOpen} onClose={handleCloseAdminStatsModal} fullWidth maxWidth="sm" PaperProps={{ sx: dialogPaperSx }}>
                     <DialogTitle sx={dialogTitleSx}>
                         Admin Add Stats for {formatGuestAwarePlayerName(selectedPlayerForAdmin)}
-                        <IconButton onClick={handleCloseAdminStatsModal} aria-label="close" sx={dialogCloseBtnSx}>
-                            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+                        <IconButton onClick={handleCloseAdminStatsModal} size="small" aria-label="close" sx={dialogCloseBtnSx}>
+                            <CloseIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                     </DialogTitle>
                     <DialogContent sx={dialogContentSx}>
