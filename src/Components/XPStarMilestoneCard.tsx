@@ -111,6 +111,7 @@ export default function XPStarMilestoneCard({
   const tier = getXPTier(parsedXP);
   const resolvedWidth = width ?? size;
   const resolvedHeight = height ?? size;
+  const starFill = colorOverride ?? tier.starColor;
 
   return (
     <Box
@@ -118,19 +119,22 @@ export default function XPStarMilestoneCard({
       sx={{
         width: resolvedWidth,
         height: resolvedHeight,
-        display: 'inline-block',
-        bgcolor: colorOverride ?? tier.starColor,
-        WebkitMaskImage: `url(${starrImg.src})`,
-        WebkitMaskRepeat: 'no-repeat',
-        WebkitMaskPosition: 'center',
-        WebkitMaskSize: 'contain',
-        maskImage: `url(${starrImg.src})`,
-        maskRepeat: 'no-repeat',
-        maskPosition: 'center',
-        maskSize: 'contain',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         flexShrink: 0,
       }}
-    />
+    >
+      <svg
+        width={resolvedWidth}
+        height={resolvedHeight}
+        viewBox="0 0 24 24"
+        fill={starFill}
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: 'block', width: '100%', height: '100%' }}
+      >
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+      </svg>
+    </Box>
   );
 }
-

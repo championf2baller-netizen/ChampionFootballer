@@ -8501,7 +8501,7 @@ export default function LeagueDetailPage() {
                                             }}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
-                                                <Image src={it.img} alt={it.label} width={isMobile ? 10 : 18} height={isMobile ? 10 : 18} style={{ objectFit: 'contain' }} />
+                                                <Image src={it.img} alt={it.label} width={isMobile ? 10 : 18} height={isMobile ? 10 : 18} unoptimized crossOrigin="anonymous" style={{ objectFit: 'contain' }} />
                                                 <Typography variant="body2" sx={{ fontWeight: 700, fontSize: { xs: '0.58rem', sm: '0.85rem' }, lineHeight: 1 }}>
                                                     {it.value}
                                                 </Typography>
@@ -8525,6 +8525,7 @@ export default function LeagueDetailPage() {
                                     ))}
                                 </Box>
                                 <Button
+                                    data-share-exclude="true"
                                     variant="text"
                                     disableRipple
                                     disableFocusRipple

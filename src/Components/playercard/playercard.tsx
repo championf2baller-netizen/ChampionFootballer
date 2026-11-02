@@ -491,6 +491,7 @@ const PlayerCard = ({
           position: 'relative',
           width: '100%',
           height: '100%',
+          
           backgroundImage: `url(${typeof vectorImg === 'string' ? vectorImg : (vectorImg as any)?.src || ''})`,
           backgroundSize: 'cover',
           backgroundPosition: 'top center',
@@ -504,6 +505,9 @@ const PlayerCard = ({
           layout="fill"
           objectFit="cover"
           objectPosition="top center"
+          unoptimized
+          priority
+          crossOrigin="anonymous"
           className="z-0"
         />
 
@@ -560,7 +564,7 @@ const PlayerCard = ({
                 width: 105,
                 height: 105,
                 p: 0,
-                bgcolor: hasUserImage ? 'transparent' : avatarBg,
+                bgcolor: avatarBg || '#00a77f',
                 color: '#fff',
                 fontWeight: 800,
                 fontSize: 30,
@@ -620,6 +624,8 @@ const PlayerCard = ({
             <Image
               src={Foot}
               alt="Foot"
+              unoptimized
+              crossOrigin="anonymous"
               width={29}
               height={12}
               style={{

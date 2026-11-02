@@ -228,15 +228,141 @@ export async function shareContent(options: ShareOptions): Promise<void> {
 }
 
 /**
+ * Safely converts an HTMLImageElement to a base64 Data URL.
+ * Uses 3-tier fallback (canvas decode -> CORS fetch -> offscreen Image with anonymous crossOrigin)
+ * to ensure images are fully rasterized without network dependency.
+ */
+async function imageElementToDataUrl(img: HTMLImageElement): Promise<string | null> {
+  if (!img || !img.src) return null;
+  if (img.src.startsWith('data:')) return img.src;
+
+  // 1. Direct canvas extraction from decoded image in DOM
+  if (img.complete && (img.naturalWidth || img.width)) {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width || 1;
+      canvas.height = img.naturalHeight || img.height || 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const data = canvas.toDataURL('image/png');
+        if (data && data.startsWith('data:image/png')) {
+          return data;
+        }
+      }
+    } catch {
+      // Tainted canvas; continue to fallbacks
+    }
+  }
+
+  // 2. Try fetching the src as a blob
+  try {
+    const res = await fetch(img.src, { mode: 'cors' });
+    if (res.ok) {
+      const blob = await res.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      if (dataUrl && dataUrl.startsWith('data:image/')) {
+        return dataUrl;
+      }
+    }
+  } catch { }
+
+  // 3. Fallback: new offscreen Image with crossOrigin
+  try {
+    const tempImg = new window.Image();
+    tempImg.crossOrigin = 'anonymous';
+    const loaded = await new Promise<boolean>((resolve) => {
+      tempImg.onload = () => resolve(true);
+      tempImg.onerror = () => resolve(false);
+      tempImg.src = img.src;
+    });
+    if (loaded && (tempImg.naturalWidth || tempImg.width)) {
+      const canvas = document.createElement('canvas');
+      canvas.width = tempImg.naturalWidth || tempImg.width || 1;
+      canvas.height = tempImg.naturalHeight || tempImg.height || 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+        const data = canvas.toDataURL('image/png');
+        if (data && data.startsWith('data:image/png')) {
+          return data;
+        }
+      }
+    }
+  } catch { }
+
+  return null;
+}
+
+/**
+ * Safely converts any image URL (e.g. from CSS background-image) into a Data URL.
+ */
+async function urlToDataUrl(rawUrl: string): Promise<string | null> {
+  if (!rawUrl) return null;
+  const cleanUrl = rawUrl.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '').trim();
+  if (!cleanUrl) return null;
+  if (cleanUrl.startsWith('data:')) return cleanUrl;
+
+  try {
+    const tempImg = new window.Image();
+    tempImg.crossOrigin = 'anonymous';
+    const loaded = await new Promise<boolean>((resolve) => {
+      tempImg.onload = () => resolve(true);
+      tempImg.onerror = () => resolve(false);
+      tempImg.src = cleanUrl;
+    });
+    if (loaded && (tempImg.naturalWidth || tempImg.width)) {
+      const canvas = document.createElement('canvas');
+      canvas.width = tempImg.naturalWidth || tempImg.width || 1;
+      canvas.height = tempImg.naturalHeight || tempImg.height || 1;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+        const data = canvas.toDataURL('image/png');
+        if (data && data.startsWith('data:image/png')) {
+          return data;
+        }
+      }
+    }
+  } catch { }
+
+  try {
+    const res = await fetch(cleanUrl, { mode: 'cors' });
+    if (res.ok) {
+      const blob = await res.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+  } catch { }
+
+  return null;
+}
+
+/**
  * Capture an HTMLElement as an image File ready for sharing.
- * Uses skipFonts: true and cacheBust: false for high-speed reliable rendering.
+ * Pre-inlines all images and background-images as base64 Data URLs so html-to-image
+ * never drops images due to CORS, network latency, or Next.js optimizer query restrictions.
  */
 export async function captureElementAsFile(
   element: HTMLElement,
   fileName: string = 'player-card.png'
 ): Promise<File | null> {
+  if (!element || typeof window === 'undefined') return null;
+
+  const originalImgSrcs = new Map<HTMLImageElement, string>();
+  const originalBgStyles = new Map<HTMLElement, string>();
+
   try {
-    // Wait for any pending images in element to finish loading
+    // 1. Wait for any pending <img> elements in element to finish loading
     const images = Array.from(element.querySelectorAll('img'));
     await Promise.all(
       images.map((img) => {
@@ -244,15 +370,43 @@ export async function captureElementAsFile(
         return new Promise((resolve) => {
           img.onload = resolve;
           img.onerror = resolve;
-          setTimeout(resolve, 800);
+          setTimeout(resolve, 700);
         });
       })
     );
 
+    // 2. Pre-inline all <img> elements as data URLs
+    for (const img of images) {
+      if (img.src && !img.src.startsWith('data:')) {
+        originalImgSrcs.set(img, img.src);
+        const dataUrl = await imageElementToDataUrl(img);
+        if (dataUrl) {
+          img.src = dataUrl;
+        }
+      }
+    }
+
+    // 3. Pre-inline all background-images as data URLs
+    const allDescendants = [element, ...Array.from(element.querySelectorAll('*'))] as HTMLElement[];
+    for (const el of allDescendants) {
+      const bg = el.style?.backgroundImage || (typeof window !== 'undefined' ? window.getComputedStyle(el).backgroundImage : '');
+      if (bg && bg.includes('url(') && !bg.includes('data:image')) {
+        originalBgStyles.set(el, el.style.backgroundImage || '');
+        const match = bg.match(/url\((['"]?)(.*?)\1\)/);
+        if (match && match[2] && !match[2].startsWith('data:')) {
+          const dataUrl = await urlToDataUrl(match[2]);
+          if (dataUrl) {
+            el.style.backgroundImage = `url("${dataUrl}")`;
+          }
+        }
+      }
+    }
+
+    // 4. Render to Blob with cacheBust: false
     const blob = await toBlob(element, {
       backgroundColor: '#ffffff',
       pixelRatio: 2,
-      cacheBust: true,
+      cacheBust: false,
       skipFonts: true,
       filter: (node) => {
         if ((node as HTMLElement)?.dataset?.shareExclude === 'true') {
@@ -268,6 +422,18 @@ export async function captureElementAsFile(
   } catch (err) {
     console.warn('Failed to capture element as file:', err);
     return null;
+  } finally {
+    // 5. Always restore the original sources and styles so live DOM is unaffected
+    for (const [img, src] of originalImgSrcs) {
+      try {
+        img.src = src;
+      } catch { }
+    }
+    for (const [el, bg] of originalBgStyles) {
+      try {
+        el.style.backgroundImage = bg;
+      } catch { }
+    }
   }
 }
 
