@@ -321,7 +321,7 @@ function PrivacyPolicies() {
             <Typography variant="h6" sx={{ mb: 4, color: 'white', textAlign: 'center' }}>
                 Last updated August 22, 2022
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 1200, mx: 'auto' }}>
+            <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
                 {cmsSections ? (
                     cmsSections.map((sec, index) => (
                         <Accordion
