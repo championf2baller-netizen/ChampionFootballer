@@ -2338,7 +2338,6 @@ export default function PlayerStatsPage() {
                         gap: { xs: 2, md: 3 },
                         px: { xs: 1, sm: 2, md: 3 },
                         pb: { xs: 1.5, md: 0 },
-                        pt:{xs:3.5, md:0},
                         maxWidth: '1230px',
                         width: '100%',
                         mx: 'auto',
@@ -2356,7 +2355,7 @@ export default function PlayerStatsPage() {
                                 ml: 0,
                                 position: 'relative',
                                 zIndex: 20,
-                                mt: { xs: -2, md: 0 }
+                                mt: 0
                             }}
                         >
                             <TextField

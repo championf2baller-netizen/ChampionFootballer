@@ -4173,8 +4173,8 @@ export default function LeagueDetailPage() {
                             )}
                             <Paper sx={{
                                 px: 0,
-                                pt: { xs: 0, md: 3 },
-                                pb: { xs: 2, md: 3 },
+                                pt: { xs: 2.5, sm: 2.5, md: 3 },
+                                pb: { xs: 1.5, sm: 2, md: 3 },
                                 background: '#0e0e0e',
                                 color: 'white',
                                 minHeight: 'auto',
@@ -4203,7 +4203,7 @@ export default function LeagueDetailPage() {
                                         mt: 0,
                                         minHeight: { xs: 0, md: '87px' },
                                         height: { xs: 'auto', md: '87px' },
-                                        py: { xs: 1, md: 0 },
+                                        pb: { xs: 1, md: 0 },
                                     }}>
                                         {(() => {
                                             const displayedLeagueName = league?.name || allLeagues.find(l => String(l.id) === String(leagueId))?.name || 'LEAGUE';

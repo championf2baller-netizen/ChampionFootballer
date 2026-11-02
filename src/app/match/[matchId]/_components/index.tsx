@@ -887,7 +887,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
   return (
     <Box
       sx={{
-        p: isEmbeddedInDialog ? { xs: 0.75, sm: 2.5 } : { xs: 1, sm: 4 },
+        p: isEmbeddedInDialog ? { xs: 0.75, sm: 2.5 } : { xs: 2, sm: 4 },
         pb: isEmbeddedInDialog ? { xs: 1.5, sm: 3 } : undefined,
         minHeight: isEmbeddedInDialog ? 'auto' : '100vh',
       }}
