@@ -1730,7 +1730,6 @@ export default function GlobalTrophyRoom() {
   // Quick-view modal state
   const quickViewCardRef = useRef<HTMLDivElement | null>(null);
   const shareExportCardRef = useRef<HTMLDivElement | null>(null);
-  const [isPreparingShare, setIsPreparingShare] = useState(false);
 
   const [openQuickView, setOpenQuickView] = useState(false);
   const [quickView, setQuickView] = useState<{
@@ -4187,8 +4186,8 @@ export default function GlobalTrophyRoom() {
                 minHeight: { xs: 0, sm: 290 },
                 height: 'auto',
               }}>
-                <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: { xs: '0.48rem', sm: '0.75rem' }, letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>Last 10 games</Typography>
-                <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: { xs: 0.2, sm: 0.4 } }}>
+                <Typography sx={{ fontWeight: 800, mb: { xs: 0.8, sm: 1.2 }, fontSize: { xs: '0.48rem', sm: '0.72rem' }, letterSpacing: 0, lineHeight: 1.25, textAlign: 'left' }}>Last 10 games</Typography>
+                <Stack direction="column" spacing={{ xs: 0.2, sm: 0.4 }} alignItems="flex-start" sx={{ pl: { xs: 0.2, sm: 0.4 } }}>
                   {(quickView.lastFive ?? []).slice(0, 10).map((m, idx) => (
                     <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <Box
@@ -4224,40 +4223,23 @@ export default function GlobalTrophyRoom() {
               </Paper>
             </Box>
           )}
-          {/* Dedicated off-screen 480px Desktop card for sharing (ONLY mounted while sharing, invisible on UI) */}
-          {quickView.player && isPreparingShare && (
-            <Box
-              sx={{
+          {/* Dedicated off-screen 480px Desktop card for sharing: 100% off-screen (left: -9999px) so it is NEVER visible on UI */}
+          {quickView.player && (
+            <div
+              ref={shareExportCardRef}
+              style={{
                 position: 'fixed',
-                inset: 0,
-                zIndex: 99999,
-                bgcolor: 'rgba(0, 0, 0, 0.75)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
+                left: '-9999px',
+                top: 0,
+                width: '480px',
+                height: '445px',
+                zIndex: -9999,
+                pointerEvents: 'none',
+                opacity: 1,
+                backgroundColor: '#ffffff',
+                overflow: 'hidden',
               }}
             >
-              <CircularProgress sx={{ color: '#00a77f' }} />
-              <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.95rem' }}>
-                Preparing card for share...
-              </Typography>
-              <div
-                ref={shareExportCardRef}
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  width: '480px',
-                  height: '445px',
-                  zIndex: -1,
-                  pointerEvents: 'none',
-                  opacity: 1,
-                  backgroundColor: '#ffffff',
-                  overflow: 'hidden',
-                }}
-              >
               <Box
                 sx={{
                   display: 'grid',
@@ -4411,10 +4393,10 @@ export default function GlobalTrophyRoom() {
                     height: 'auto',
                   }}
                 >
-                  <Typography sx={{ fontWeight: 800, mb: 0.2, fontSize: '0.75rem', letterSpacing: 0, lineHeight: 1.05, textAlign: 'left' }}>
+                  <Typography sx={{ fontWeight: 800, mb: 1.2, fontSize: '0.72rem', letterSpacing: 0, lineHeight: 1.25, textAlign: 'left' }}>
                     Last 10 games
                   </Typography>
-                  <Stack direction="column" spacing={0.2} alignItems="flex-start" sx={{ pl: 0.4 }}>
+                  <Stack direction="column" spacing={0.4} alignItems="flex-start" sx={{ pl: 0.4 }}>
                     {(quickView.lastFive ?? []).slice(0, 10).map((m, idx) => (
                       <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Box
@@ -4450,7 +4432,6 @@ export default function GlobalTrophyRoom() {
                 </Paper>
               </Box>
             </div>
-            </Box>
           )}
           {quickView.player && (
             <Box data-share-exclude="true" sx={{ position: 'absolute', right: { xs: 8, sm: 12 }, bottom: { xs: 8, sm: 10 }, zIndex: 10 }}>
@@ -4493,49 +4474,33 @@ export default function GlobalTrophyRoom() {
 
                   const shareWhatsApp = async () => {
                     setPlayerShareAnchorEl(null);
-                    setIsPreparingShare(true);
-                    await new Promise((r) => setTimeout(r, 150));
-                    try {
-                      let fileToShare: File | null = null;
-                      const targetEl = shareExportCardRef.current || quickViewCardRef.current;
-                      if (targetEl) {
-                        fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
-                      }
-
-                      await shareToWhatsApp({
-                        title: `${playerName} | Champion Footballer`,
-                        message: shareMessage,
-                        file: fileToShare,
-                        fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
-                      });
-                    } catch (err) {
-                      console.error('Share WhatsApp error:', err);
-                    } finally {
-                      setIsPreparingShare(false);
+                    let fileToShare: File | null = null;
+                    const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                    if (targetEl) {
+                      fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
                     }
+
+                    await shareToWhatsApp({
+                      title: `${playerName} | Champion Footballer`,
+                      message: shareMessage,
+                      file: fileToShare,
+                      fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
+                    });
                   };
 
                   const shareNative = async () => {
                     setPlayerShareAnchorEl(null);
-                    setIsPreparingShare(true);
-                    await new Promise((r) => setTimeout(r, 150));
-                    try {
-                      let fileToShare: File | null = null;
-                      const targetEl = shareExportCardRef.current || quickViewCardRef.current;
-                      if (targetEl) {
-                        fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
-                      }
-                      shareContent({
-                        title: `${playerName} | Champion Footballer`,
-                        customFullText: shareMessage,
-                        url: 'https://www.championfootballer.co.uk',
-                        files: fileToShare ? [fileToShare] : undefined,
-                      });
-                    } catch (err) {
-                      console.error('Share native error:', err);
-                    } finally {
-                      setIsPreparingShare(false);
+                    let fileToShare: File | null = null;
+                    const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                    if (targetEl) {
+                      fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
                     }
+                    shareContent({
+                      title: `${playerName} | Champion Footballer`,
+                      customFullText: shareMessage,
+                      url: 'https://www.championfootballer.co.uk',
+                      files: fileToShare ? [fileToShare] : undefined,
+                    });
                   };
 
                   return [

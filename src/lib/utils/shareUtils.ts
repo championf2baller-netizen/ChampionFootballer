@@ -303,6 +303,14 @@ export async function captureElementAsFile(
         return (node as HTMLElement)?.dataset?.shareExclude === 'true';
       },
       onclone: (_clonedDoc, clonedEl) => {
+        // Normalize position to (0, 0) inside the headless iframe so off-screen elements render at origin
+        clonedEl.style.position = 'fixed';
+        clonedEl.style.left = '0px';
+        clonedEl.style.top = '0px';
+        clonedEl.style.zIndex = '1';
+        clonedEl.style.opacity = '1';
+        clonedEl.style.visibility = 'visible';
+
         // Find player quick view card to unscale on mobile devices if needed
         const target =
           clonedEl.id === 'player-quick-view-card'
@@ -366,6 +374,12 @@ export async function captureElementAsFile(
             children[2].style.minHeight = '290px';
             children[2].style.marginTop = '48px';
             children[2].style.padding = '6px';
+
+            const titleEl = children[2].querySelector('p, span') as HTMLElement | null;
+            if (titleEl) {
+              titleEl.style.marginBottom = '10px';
+              titleEl.style.lineHeight = '1.25';
+            }
 
             children[2].querySelectorAll('div').forEach((b) => {
               const text = (b as HTMLElement).textContent?.trim();
