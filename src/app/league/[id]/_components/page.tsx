@@ -5676,22 +5676,22 @@ export default function LeagueDetailPage() {
                                                                         {isAdmin && (
                                                                             <Box sx={{
                                                                                 mt: 'auto',
-                                                                                pt: 0.8,
-                                                                                pb: 1.1,
-                                                                                px: { xs: '14px', sm: '16px' },
+                                                                                pt: { xs: 1, sm: 1.2 },
+                                                                                pb: { xs: 1.2, sm: 1.4 },
+                                                                                px: { xs: '10px', sm: '12px' },
                                                                                 borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
                                                                                 display: 'flex',
                                                                                 alignItems: 'center',
                                                                                 justifyContent: 'space-between',
-                                                                                gap: { xs: 0.5, sm: 1 },
+                                                                                gap: { xs: '6px', sm: '8px' },
                                                                                 width: '100%',
                                                                                 boxSizing: 'border-box'
                                                                             }}>
                                                                                 <Typography sx={{
                                                                                     color: '#5d6272',
                                                                                     fontSize: { xs: '9px', sm: '10px' },
+                                                                                    letterSpacing: '0.06em',
                                                                                     fontWeight: 700,
-                                                                                    letterSpacing: '0.12em',
                                                                                     textTransform: 'uppercase',
                                                                                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                     flexShrink: 0
@@ -5701,7 +5701,7 @@ export default function LeagueDetailPage() {
                                                                                 <Box sx={{
                                                                                     display: 'flex',
                                                                                     alignItems: 'center',
-                                                                                    gap: { xs: 0.5, sm: 0.75 },
+                                                                                    gap: { xs: '5px', sm: '7px' },
                                                                                     flexWrap: 'nowrap',
                                                                                     minWidth: 0
                                                                                 }}>
@@ -5712,20 +5712,21 @@ export default function LeagueDetailPage() {
                                                                                             setEditMatchDialogOpen(true);
                                                                                         }}
                                                                                         disabled={!league?.active || match.archived}
-                                                                                        startIcon={<Edit size={11} color="#22c55e" strokeWidth={2.2} />}
+                                                                                        startIcon={<Edit size={12} color="#22c55e" strokeWidth={2.4} />}
                                                                                         sx={{
                                                                                             color: '#ffffff',
                                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '10px', sm: '14px' },
-                                                                                            py: { xs: '5px', sm: '6px' },
-                                                                                            fontSize: { xs: '9.5px', sm: '11px' },
+                                                                                            px: { xs: '6px', sm: '8px' },
+                                                                                            py: { xs: '5.5px', sm: '6.5px' },
+                                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                             minWidth: 0,
+                                                                                            flexShrink: 0,
                                                                                             whiteSpace: 'nowrap',
                                                                                             display: 'inline-flex',
                                                                                             alignItems: 'center',
@@ -5736,7 +5737,7 @@ export default function LeagueDetailPage() {
                                                                                                 display: 'inline-flex',
                                                                                                 alignItems: 'center',
                                                                                                 justifyContent: 'center',
-                                                                                                mr: { xs: 0.35, sm: 0.5 },
+                                                                                                mr: { xs: 0.35, sm: 0.45 },
                                                                                                 ml: 0,
                                                                                                 my: 0,
                                                                                                 '& svg': { display: 'block' }
@@ -5755,20 +5756,21 @@ export default function LeagueDetailPage() {
                                                                                             e.stopPropagation();
                                                                                             handleRequestDeleteMatch(match);
                                                                                         }}
-                                                                                        startIcon={match.archived ? <Undo2 size={11} color="#f5b301" strokeWidth={2.2} /> : <Trash2 size={11} color="#ef4444" strokeWidth={2.2} />}
+                                                                                        startIcon={match.archived ? <Undo2 size={12} color="#f5b301" strokeWidth={2.4} /> : <Trash2 size={12} color="#ef4444" strokeWidth={2.4} />}
                                                                                         sx={{
                                                                                             color: match.archived ? '#f5b301' : '#ef4444',
                                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '10px', sm: '14px' },
-                                                                                            py: { xs: '5px', sm: '6px' },
-                                                                                            fontSize: { xs: '9.5px', sm: '11px' },
+                                                                                            px: { xs: '6px', sm: '8px' },
+                                                                                            py: { xs: '5.5px', sm: '6.5px' },
+                                                                                            fontSize: { xs: '9.5px', sm: '10.5px' },
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                             minWidth: 0,
+                                                                                            flexShrink: 0,
                                                                                             whiteSpace: 'nowrap',
                                                                                             display: 'inline-flex',
                                                                                             alignItems: 'center',
@@ -5779,7 +5781,7 @@ export default function LeagueDetailPage() {
                                                                                                 display: 'inline-flex',
                                                                                                 alignItems: 'center',
                                                                                                 justifyContent: 'center',
-                                                                                                mr: { xs: 0.35, sm: 0.5 },
+                                                                                                mr: { xs: 0.35, sm: 0.45 },
                                                                                                 ml: 0,
                                                                                                 my: 0,
                                                                                                 '& svg': { display: 'block' }
@@ -6381,22 +6383,22 @@ export default function LeagueDetailPage() {
                                                                                     {isAdmin && (
                                                                                         <Box sx={{
                                                                                             mt: 'auto',
-                                                                                            pt: 0.8,
-                                                                                            pb: 1.1,
-                                                                                            px: { xs: '14px', sm: '16px' },
+                                                                                            pt: { xs: 1, sm: 1.2 },
+                                                                                            pb: { xs: 1.2, sm: 1.4 },
+                                                                                            px: { xs: '10px', sm: '12px' },
                                                                                             borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
                                                                                             display: 'flex',
                                                                                             alignItems: 'center',
                                                                                             justifyContent: 'space-between',
-                                                                                            gap: { xs: 0.5, sm: 1 },
+                                                                                            gap: { xs: '6px', sm: '8px' },
                                                                                             width: '100%',
                                                                                             boxSizing: 'border-box'
                                                                                         }}>
                                                                                             <Typography sx={{
                                                                                                 color: '#5d6272',
                                                                                                 fontSize: { xs: '9px', sm: '10px' },
+                                                                                                letterSpacing: '0.06em',
                                                                                                 fontWeight: 700,
-                                                                                                letterSpacing: '0.12em',
                                                                                                 textTransform: 'uppercase',
                                                                                                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                                 flexShrink: 0
@@ -6406,7 +6408,7 @@ export default function LeagueDetailPage() {
                                                                                             <Box sx={{
                                                                                                 display: 'flex',
                                                                                                 alignItems: 'center',
-                                                                                                gap: { xs: 0.5, sm: 0.75 },
+                                                                                                gap: { xs: '5px', sm: '7px' },
                                                                                                 flexWrap: 'nowrap',
                                                                                                 minWidth: 0
                                                                                             }}>
@@ -6418,20 +6420,21 @@ export default function LeagueDetailPage() {
                                                                                                         setMatchStatsOpen(true);
                                                                                                     }}
                                                                                                     disabled={match.archived || !league?.active || !matchSeasonActiveForStats}
-                                                                                                    startIcon={<Plus size={11} color="#3b6ff5" strokeWidth={2.5} />}
+                                                                                                    startIcon={<Plus size={12} color="#3b6ff5" strokeWidth={2.5} />}
                                                                                                     sx={{
                                                                                                         color: '#ffffff',
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '10px', sm: '14px' },
-                                                                                                        py: { xs: '5px', sm: '6px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '11px' },
+                                                                                                        px: { xs: '6px', sm: '8px' },
+                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
                                                                                                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                                         minWidth: 0,
+                                                                                                        flexShrink: 0,
                                                                                                         whiteSpace: 'nowrap',
                                                                                                         display: 'inline-flex',
                                                                                                         alignItems: 'center',
@@ -6442,7 +6445,7 @@ export default function LeagueDetailPage() {
                                                                                                             display: 'inline-flex',
                                                                                                             alignItems: 'center',
                                                                                                             justifyContent: 'center',
-                                                                                                            mr: { xs: 0.35, sm: 0.5 },
+                                                                                                            mr: { xs: 0.35, sm: 0.45 },
                                                                                                             ml: 0,
                                                                                                             my: 0,
                                                                                                             '& svg': { display: 'block' }
@@ -6469,20 +6472,21 @@ export default function LeagueDetailPage() {
                                                                                                         setEditMatchDialogOpen(true);
                                                                                                     }}
                                                                                                     disabled={!league?.active || match.archived}
-                                                                                                    startIcon={<Edit size={11} color="#22c55e" strokeWidth={2.2} />}
+                                                                                                    startIcon={<Edit size={12} color="#22c55e" strokeWidth={2.4} />}
                                                                                                     sx={{
                                                                                                         color: '#ffffff',
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '10px', sm: '14px' },
-                                                                                                        py: { xs: '5px', sm: '6px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '11px' },
+                                                                                                        px: { xs: '6px', sm: '8px' },
+                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
                                                                                                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                                         minWidth: 0,
+                                                                                                        flexShrink: 0,
                                                                                                         whiteSpace: 'nowrap',
                                                                                                         display: 'inline-flex',
                                                                                                         alignItems: 'center',
@@ -6493,7 +6497,7 @@ export default function LeagueDetailPage() {
                                                                                                             display: 'inline-flex',
                                                                                                             alignItems: 'center',
                                                                                                             justifyContent: 'center',
-                                                                                                            mr: { xs: 0.35, sm: 0.5 },
+                                                                                                            mr: { xs: 0.35, sm: 0.45 },
                                                                                                             ml: 0,
                                                                                                             my: 0,
                                                                                                             '& svg': { display: 'block' }
@@ -6512,20 +6516,21 @@ export default function LeagueDetailPage() {
                                                                                                         e.stopPropagation();
                                                                                                         handleRequestDeleteMatch(match);
                                                                                                     }}
-                                                                                                    startIcon={match.archived ? <Undo2 size={11} color="#f5b301" strokeWidth={2.2} /> : <Trash2 size={11} color="#ef4444" strokeWidth={2.2} />}
+                                                                                                    startIcon={match.archived ? <Undo2 size={12} color="#f5b301" strokeWidth={2.4} /> : <Trash2 size={12} color="#ef4444" strokeWidth={2.4} />}
                                                                                                     sx={{
                                                                                                         color: match.archived ? '#f5b301' : '#ef4444',
                                                                                                         bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                                         border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '10px', sm: '14px' },
-                                                                                                        py: { xs: '5px', sm: '6px' },
-                                                                                                        fontSize: { xs: '9.5px', sm: '11px' },
+                                                                                                        px: { xs: '6px', sm: '8px' },
+                                                                                                        py: { xs: '5.5px', sm: '6.5px' },
+                                                                                                        fontSize: { xs: '9.5px', sm: '10.5px' },
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
                                                                                                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                                         minWidth: 0,
+                                                                                                        flexShrink: 0,
                                                                                                         whiteSpace: 'nowrap',
                                                                                                         display: 'inline-flex',
                                                                                                         alignItems: 'center',
@@ -6536,7 +6541,7 @@ export default function LeagueDetailPage() {
                                                                                                             display: 'inline-flex',
                                                                                                             alignItems: 'center',
                                                                                                             justifyContent: 'center',
-                                                                                                            mr: { xs: 0.35, sm: 0.5 },
+                                                                                                            mr: { xs: 0.35, sm: 0.45 },
                                                                                                             ml: 0,
                                                                                                             my: 0,
                                                                                                             '& svg': { display: 'block' }

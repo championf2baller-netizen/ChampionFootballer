@@ -1028,13 +1028,13 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
                   transition: 'all 0.2s',
                 }}
               >
-                <Typography sx={{ color: '#fff', m: 0, fontWeight: 500, fontSize: { xs: 12, sm: 14, md: 18 }, lineHeight: 1 }}>
+                <Typography sx={{ color: '#fff', m: 0, fontWeight: 500, fontSize: { xs: 13.5, sm: 15, md: 18 }, lineHeight: 1 }}>
                   Admin Only Edits
                 </Typography>
                 <Box
                   sx={{
-                    width: { xs: 20, sm: 24, md: 28 },
-                    height: { xs: 20, sm: 24, md: 28 },
+                    width: { xs: 22, sm: 26, md: 28 },
+                    height: { xs: 22, sm: 26, md: 28 },
                     backgroundColor: '#00a77f',
                     mask: `url(${EditImg.src}) no-repeat center / contain`,
                     WebkitMask: `url(${EditImg.src}) no-repeat center / contain`,
