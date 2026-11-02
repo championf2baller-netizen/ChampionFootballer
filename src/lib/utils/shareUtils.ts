@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 import { toBlob } from 'html-to-image';
+import html2canvas from 'html2canvas';
 
 export const CHAMPION_SLOGAN = "Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com";
 
@@ -228,129 +229,10 @@ export async function shareContent(options: ShareOptions): Promise<void> {
 }
 
 /**
- * Safely converts an HTMLImageElement to a base64 Data URL.
- * Uses 3-tier fallback (canvas decode -> CORS fetch -> offscreen Image with anonymous crossOrigin)
- * to ensure images are fully rasterized without network dependency.
- */
-async function imageElementToDataUrl(img: HTMLImageElement): Promise<string | null> {
-  if (!img || !img.src) return null;
-  if (img.src.startsWith('data:')) return img.src;
-
-  // 1. Direct canvas extraction from decoded image in DOM
-  if (img.complete && (img.naturalWidth || img.width)) {
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth || img.width || 1;
-      canvas.height = img.naturalHeight || img.height || 1;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const data = canvas.toDataURL('image/png');
-        if (data && data.startsWith('data:image/png')) {
-          return data;
-        }
-      }
-    } catch {
-      // Tainted canvas; continue to fallbacks
-    }
-  }
-
-  // 2. Try fetching the src as a blob
-  try {
-    const res = await fetch(img.src, { mode: 'cors' });
-    if (res.ok) {
-      const blob = await res.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      if (dataUrl && dataUrl.startsWith('data:image/')) {
-        return dataUrl;
-      }
-    }
-  } catch { }
-
-  // 3. Fallback: new offscreen Image with crossOrigin
-  try {
-    const tempImg = new window.Image();
-    tempImg.crossOrigin = 'anonymous';
-    const loaded = await new Promise<boolean>((resolve) => {
-      tempImg.onload = () => resolve(true);
-      tempImg.onerror = () => resolve(false);
-      tempImg.src = img.src;
-    });
-    if (loaded && (tempImg.naturalWidth || tempImg.width)) {
-      const canvas = document.createElement('canvas');
-      canvas.width = tempImg.naturalWidth || tempImg.width || 1;
-      canvas.height = tempImg.naturalHeight || tempImg.height || 1;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
-        const data = canvas.toDataURL('image/png');
-        if (data && data.startsWith('data:image/png')) {
-          return data;
-        }
-      }
-    }
-  } catch { }
-
-  return null;
-}
-
-/**
- * Safely converts any image URL (e.g. from CSS background-image) into a Data URL.
- */
-async function urlToDataUrl(rawUrl: string): Promise<string | null> {
-  if (!rawUrl) return null;
-  const cleanUrl = rawUrl.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '').trim();
-  if (!cleanUrl) return null;
-  if (cleanUrl.startsWith('data:')) return cleanUrl;
-
-  try {
-    const tempImg = new window.Image();
-    tempImg.crossOrigin = 'anonymous';
-    const loaded = await new Promise<boolean>((resolve) => {
-      tempImg.onload = () => resolve(true);
-      tempImg.onerror = () => resolve(false);
-      tempImg.src = cleanUrl;
-    });
-    if (loaded && (tempImg.naturalWidth || tempImg.width)) {
-      const canvas = document.createElement('canvas');
-      canvas.width = tempImg.naturalWidth || tempImg.width || 1;
-      canvas.height = tempImg.naturalHeight || tempImg.height || 1;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
-        const data = canvas.toDataURL('image/png');
-        if (data && data.startsWith('data:image/png')) {
-          return data;
-        }
-      }
-    }
-  } catch { }
-
-  try {
-    const res = await fetch(cleanUrl, { mode: 'cors' });
-    if (res.ok) {
-      const blob = await res.blob();
-      return await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-  } catch { }
-
-  return null;
-}
-
-/**
  * Capture an HTMLElement as an image File ready for sharing.
- * Pre-inlines all images and background-images as base64 Data URLs so html-to-image
- * never drops images due to CORS, network latency, or Next.js optimizer query restrictions.
+ * Uses html2canvas as primary engine to render directly onto HTML5 Canvas,
+ * completely avoiding mobile browser SVG foreignObject security restrictions.
+ * Automatically unscales and expands mobile dialog cards to crisp desktop layout during capture.
  */
 export async function captureElementAsFile(
   element: HTMLElement,
@@ -358,11 +240,8 @@ export async function captureElementAsFile(
 ): Promise<File | null> {
   if (!element || typeof window === 'undefined') return null;
 
-  const originalImgSrcs = new Map<HTMLImageElement, string>();
-  const originalBgStyles = new Map<HTMLElement, string>();
-
   try {
-    // 1. Wait for any pending <img> elements in element to finish loading
+    // 1. Wait for any pending images in element to finish loading
     const images = Array.from(element.querySelectorAll('img'));
     await Promise.all(
       images.map((img) => {
@@ -370,70 +249,127 @@ export async function captureElementAsFile(
         return new Promise((resolve) => {
           img.onload = resolve;
           img.onerror = resolve;
-          setTimeout(resolve, 700);
+          setTimeout(resolve, 800);
         });
       })
     );
 
-    // 2. Pre-inline all <img> elements as data URLs
-    for (const img of images) {
-      if (img.src && !img.src.startsWith('data:')) {
-        originalImgSrcs.set(img, img.src);
-        const dataUrl = await imageElementToDataUrl(img);
-        if (dataUrl) {
-          img.src = dataUrl;
-        }
-      }
-    }
+    // 2. Render using html2canvas directly to HTML5 canvas
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      ignoreElements: (node) => {
+        return (node as HTMLElement)?.dataset?.shareExclude === 'true';
+      },
+      onclone: (_clonedDoc, clonedEl) => {
+        // Find player quick view card to unscale on mobile devices
+        const target =
+          clonedEl.id === 'player-quick-view-card'
+            ? clonedEl
+            : (clonedEl.querySelector('#player-quick-view-card') as HTMLElement | null);
 
-    // 3. Pre-inline all background-images as data URLs
-    const allDescendants = [element, ...Array.from(element.querySelectorAll('*'))] as HTMLElement[];
-    for (const el of allDescendants) {
-      const bg = el.style?.backgroundImage || (typeof window !== 'undefined' ? window.getComputedStyle(el).backgroundImage : '');
-      if (bg && bg.includes('url(') && !bg.includes('data:image')) {
-        originalBgStyles.set(el, el.style.backgroundImage || '');
-        const match = bg.match(/url\((['"]?)(.*?)\1\)/);
-        if (match && match[2] && !match[2].startsWith('data:')) {
-          const dataUrl = await urlToDataUrl(match[2]);
-          if (dataUrl) {
-            el.style.backgroundImage = `url("${dataUrl}")`;
+        if (target) {
+          // Force root to full 480px width
+          target.style.width = '480px';
+          target.style.minWidth = '480px';
+          target.style.maxWidth = '480px';
+          target.style.height = 'auto';
+          target.style.minHeight = '438px';
+          target.style.gridTemplateColumns = '100px 260px 100px';
+          target.style.gap = '8px';
+          target.style.padding = '8px';
+          target.style.overflow = 'visible';
+
+          const children = Array.from(target.children) as HTMLElement[];
+          // 1. Left Column (Current Stats)
+          if (children[0]) {
+            children[0].style.width = '100%';
+            children[0].style.minWidth = '100px';
+            children[0].style.minHeight = '280px';
+            children[0].style.marginTop = '48px';
+            children[0].style.padding = '6px';
+            children[0].querySelectorAll('img').forEach((img) => {
+              img.style.width = '18px';
+              img.style.height = '18px';
+            });
+          }
+
+          // 2. Center Column (Player Card)
+          if (children[1]) {
+            children[1].style.width = '260px';
+            children[1].style.minWidth = '260px';
+            children[1].style.height = '430px';
+            children[1].style.overflow = 'visible';
+
+            const innerDivs = children[1].querySelectorAll('div');
+            innerDivs.forEach((b) => {
+              const s = (b as HTMLElement).style;
+              if (s.transform && s.transform.includes('scale')) {
+                s.transform = 'none';
+                s.position = 'relative';
+                s.left = 'auto';
+                s.top = '0';
+                s.width = '260px';
+                s.height = '410px';
+              }
+              if (s.width === '160px') {
+                s.width = '260px';
+                s.height = '430px';
+              }
+            });
+          }
+
+          // 3. Right Column (Last 10 games)
+          if (children[2]) {
+            children[2].style.width = '100%';
+            children[2].style.minWidth = '100px';
+            children[2].style.minHeight = '290px';
+            children[2].style.marginTop = '48px';
+            children[2].style.padding = '6px';
+
+            children[2].querySelectorAll('div').forEach((b) => {
+              const text = (b as HTMLElement).innerText?.trim();
+              if (text === 'W' || text === 'L' || text === 'D') {
+                b.style.width = '28px';
+                b.style.height = '24px';
+                b.style.fontSize = '0.6rem';
+              }
+            });
           }
         }
-      }
-    }
+      },
+    });
 
-    // 4. Render to Blob with cacheBust: false
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), 'image/png');
+    });
+
+    if (blob) {
+      const safeName = fileName.endsWith('.png') ? fileName : `${fileName}.png`;
+      return new File([blob], safeName, { type: 'image/png' });
+    }
+  } catch (err) {
+    console.warn('html2canvas capture error, trying toBlob fallback:', err);
+  }
+
+  // Fallback to toBlob (html-to-image) if html2canvas fails
+  try {
     const blob = await toBlob(element, {
       backgroundColor: '#ffffff',
       pixelRatio: 2,
       cacheBust: false,
       skipFonts: true,
-      filter: (node) => {
-        if ((node as HTMLElement)?.dataset?.shareExclude === 'true') {
-          return false;
-        }
-        return true;
-      },
+      filter: (node) => (node as HTMLElement)?.dataset?.shareExclude !== 'true',
     });
-
     if (!blob) return null;
     const safeName = fileName.endsWith('.png') ? fileName : `${fileName}.png`;
     return new File([blob], safeName, { type: 'image/png' });
-  } catch (err) {
-    console.warn('Failed to capture element as file:', err);
+  } catch (fallbackErr) {
+    console.warn('toBlob fallback error:', fallbackErr);
     return null;
-  } finally {
-    // 5. Always restore the original sources and styles so live DOM is unaffected
-    for (const [img, src] of originalImgSrcs) {
-      try {
-        img.src = src;
-      } catch { }
-    }
-    for (const [el, bg] of originalBgStyles) {
-      try {
-        el.style.backgroundImage = bg;
-      } catch { }
-    }
   }
 }
 
