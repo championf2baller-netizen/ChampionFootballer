@@ -3830,7 +3830,13 @@ export default function AllMatches() {
                                                                                 bgcolor: 'rgba(59, 111, 245, 0.15)',
                                                                                 borderColor: '#3b6ff5'
                                                                             },
-                                                                            '&.Mui-disabled': { opacity: 0.4 }
+                                                                            '&.Mui-disabled': {
+                                                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                                                borderColor: 'rgba(255, 255, 255, 0.05)',
+                                                                                '& .MuiButton-startIcon': {
+                                                                                    opacity: 0.4
+                                                                                }
+                                                                            }
                                                                         }}
                                                                     >
                                                                         Add Score
