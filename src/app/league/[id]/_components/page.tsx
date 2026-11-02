@@ -708,6 +708,7 @@ export default function LeagueDetailPage() {
     const tableScrollRef = React.useRef<HTMLDivElement | null>(null);
     const quickViewCardRef = React.useRef<HTMLDivElement | null>(null);
     const shareExportCardRef = React.useRef<HTMLDivElement | null>(null);
+    const [isPreparingShare, setIsPreparingShare] = useState(false);
     const [tableScrollPercent, setTableScrollPercent] = useState(0);
     const [tableHasHorizontalOverflow, setTableHasHorizontalOverflow] = useState(false);
     const searchParams = useSearchParams();
@@ -8707,23 +8708,40 @@ export default function LeagueDetailPage() {
                             </Paper>
                         </Box>
                     )}
-                    {/* Dedicated off-screen 480px Desktop card for sharing (unscaled, crisp, clean white background, mobile & desktop compatible) */}
-                    {quickView.player && (
-                        <div
-                            ref={shareExportCardRef}
-                            style={{
+                    {/* Dedicated off-screen 480px Desktop card for sharing (ONLY mounted while sharing, invisible on UI) */}
+                    {quickView.player && isPreparingShare && (
+                        <Box
+                            sx={{
                                 position: 'fixed',
-                                top: 0,
-                                left: 0,
-                                width: '480px',
-                                height: '445px',
-                                zIndex: -9999,
-                                pointerEvents: 'none',
-                                opacity: 1,
-                                backgroundColor: '#ffffff',
-                                overflow: 'hidden',
+                                inset: 0,
+                                zIndex: 99999,
+                                bgcolor: 'rgba(0, 0, 0, 0.75)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 2,
                             }}
                         >
+                            <CircularProgress sx={{ color: '#00a77f' }} />
+                            <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '0.95rem' }}>
+                                Preparing card for share...
+                            </Typography>
+                            <div
+                                ref={shareExportCardRef}
+                                style={{
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    width: '480px',
+                                    height: '445px',
+                                    zIndex: -1,
+                                    pointerEvents: 'none',
+                                    opacity: 1,
+                                    backgroundColor: '#ffffff',
+                                    overflow: 'hidden',
+                                }}
+                            >
                             <Box
                                 sx={{
                                     display: 'grid',
@@ -8916,6 +8934,7 @@ export default function LeagueDetailPage() {
                                 </Paper>
                             </Box>
                         </div>
+                        </Box>
                     )}
                     {quickView.player && (() => {
                         const playerName = [quickView.player?.firstName, quickView.player?.lastName]
@@ -8926,32 +8945,50 @@ export default function LeagueDetailPage() {
                         const shareMessage = `*Champion Footballer*\nWhere Champions Are Made!\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.co.uk`;
 
                         const shareWhatsApp = async () => {
-                            let fileToShare: File | null = null;
-                            const targetEl = shareExportCardRef.current || quickViewCardRef.current;
-                            if (targetEl) {
-                                fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
-                            }
+                            setPlayerShareAnchorEl(null);
+                            setIsPreparingShare(true);
+                            await new Promise((r) => setTimeout(r, 150));
+                            try {
+                                let fileToShare: File | null = null;
+                                const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                                if (targetEl) {
+                                    fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                                }
 
-                            await shareToWhatsApp({
-                                title: `${playerName} | Champion Footballer`,
-                                message: shareMessage,
-                                file: fileToShare,
-                                fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
-                            });
+                                await shareToWhatsApp({
+                                    title: `${playerName} | Champion Footballer`,
+                                    message: shareMessage,
+                                    file: fileToShare,
+                                    fileName: `${playerName.replace(/\s+/g, '_')}_card.png`,
+                                });
+                            } catch (err) {
+                                console.error('Share WhatsApp error:', err);
+                            } finally {
+                                setIsPreparingShare(false);
+                            }
                         };
 
                         const shareNative = async () => {
-                            let fileToShare: File | null = null;
-                            const targetEl = shareExportCardRef.current || quickViewCardRef.current;
-                            if (targetEl) {
-                                fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                            setPlayerShareAnchorEl(null);
+                            setIsPreparingShare(true);
+                            await new Promise((r) => setTimeout(r, 150));
+                            try {
+                                let fileToShare: File | null = null;
+                                const targetEl = shareExportCardRef.current || quickViewCardRef.current;
+                                if (targetEl) {
+                                    fileToShare = await captureElementAsFile(targetEl, `${playerName.replace(/\s+/g, '_')}_card.png`);
+                                }
+                                shareContent({
+                                    title: `${playerName} | Champion Footballer`,
+                                    customFullText: shareMessage,
+                                    url: 'https://www.championfootballer.co.uk',
+                                    files: fileToShare ? [fileToShare] : undefined,
+                                });
+                            } catch (err) {
+                                console.error('Native share error:', err);
+                            } finally {
+                                setIsPreparingShare(false);
                             }
-                            shareContent({
-                                title: `${playerName} | Champion Footballer`,
-                                customFullText: shareMessage,
-                                url: 'https://www.championfootballer.co.uk',
-                                files: fileToShare ? [fileToShare] : undefined,
-                            });
                         };
 
                         return (
