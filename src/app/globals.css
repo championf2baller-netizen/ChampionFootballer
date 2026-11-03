@@ -481,15 +481,16 @@ input:-webkit-autofill:active {
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
-.league-row-current-user .league-table-sticky-rank { background-color: transparent !important; background: transparent !important; box-shadow: none !important; border-bottom-left-radius: 0 !important; } .disabled-user-rank-rule-1 {
-  background-color: transparent !important;
-  background: transparent !important;
+.league-row-current-user .league-table-sticky-rank {
+  background-color: #183328 !important;
+  background: #183328 !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
 .league-row-current-user .league-table-sticky-name {
-  background-color: transparent !important;
-  background: transparent !important;
+  background-color: #163026 !important;
+  background: linear-gradient(90deg, #183328 0%, #152d24 100%) !important;
   box-shadow: none !important;
 }
 
@@ -498,37 +499,42 @@ input:-webkit-autofill:active {
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
-.league-row-current-user:hover .league-table-sticky-rank { background-color: transparent !important; background: transparent !important; box-shadow: none !important; border-bottom-left-radius: 0 !important; } .disabled-user-rank-rule-2 {
-  background-color: transparent !important;
-  background: transparent !important;
+.league-row-current-user:hover .league-table-sticky-rank {
+  background-color: #1c3c2f !important;
+  background: #1c3c2f !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
 .league-row-current-user:hover .league-table-sticky-name {
-  background-color: transparent !important;
-  background: transparent !important;
+  background-color: #1a372c !important;
+  background: linear-gradient(90deg, #1c3c2f 0%, #183329 100%) !important;
   box-shadow: none !important;
 }
 
-/* When table is actively scrolled horizontally (on mobile/small screens):
-   give the sticky columns an opaque background to cleanly hide content sliding underneath */
+/* When table is actively scrolled horizontally:
+   keep opaque background and add the edge shadow */
 .is-scrolled .league-row-current-user > .league-table-sticky-rank {
   background-color: #183328 !important;
+  background: #183328 !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
 .is-scrolled .league-row-current-user .league-table-sticky-name {
-  background-color: #183328 !important;
+  background-color: #163026 !important;
+  background: linear-gradient(90deg, #183328 0%, #152d24 100%) !important;
   box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
 .is-scrolled .league-row-current-user:hover > .league-table-sticky-rank {
   background-color: #1c3c2f !important;
+  background: #1c3c2f !important;
   box-shadow: inset 3px 0 0 #54ce91 !important;
 }
 
 .is-scrolled .league-row-current-user:hover .league-table-sticky-name {
-  background-color: #1c3c2f !important;
+  background-color: #1a372c !important;
+  background: linear-gradient(90deg, #1c3c2f 0%, #183329 100%) !important;
   box-shadow: 8px 0 12px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
@@ -2970,7 +2976,6 @@ input:-webkit-autofill:active {
   left: 0 !important;
   z-index: 10 !important;
   background-color: inherit !important;
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   border-bottom-left-radius: 0 !important;
   border-top-left-radius: 0 !important;
 }
@@ -2980,7 +2985,6 @@ input:-webkit-autofill:active {
   left: 28px !important;
   z-index: 9 !important;
   background-color: inherit !important;
-  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   border-bottom-left-radius: 0 !important;
   border-top-left-radius: 0 !important;
 }

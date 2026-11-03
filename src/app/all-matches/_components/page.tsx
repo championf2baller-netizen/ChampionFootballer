@@ -3758,7 +3758,7 @@ export default function AllMatches() {
                                                         {/* 8. ADMIN ROW */}
                                                         {isAdmin && (
                                                             <Box sx={{
-                                                                mt: 'auto',
+                                                                my: 'auto',
                                                                 pt: { xs: 1, sm: 1.2 },
                                                                 pb: { xs: 1.2, sm: 1.4 },
                                                                 px: { xs: '10px', sm: '12px' },
@@ -3766,7 +3766,7 @@ export default function AllMatches() {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'space-between',
-                                                                gap: { xs: '6px', sm: '8px' },
+                                                                gap: { xs: '10px', sm: '8px' },
                                                                 width: '100%',
                                                                 boxSizing: 'border-box'
                                                             }}>
@@ -3784,10 +3784,11 @@ export default function AllMatches() {
                                                                 <Box sx={{
                                                                     display: 'flex',
                                                                     alignItems: 'center',
-                                                                    gap: { xs: '6px', sm: '8px' },
-                                                                        flexWrap: 'nowrap',
-                                                                        minWidth: 0,
-                                                                        justifyContent: 'flex-end'
+                                                                    gap: { xs: '6px', sm: '5px' },
+                                                                    flexWrap: 'nowrap',
+                                                                    minWidth: 0,
+                                                                    width: { xs: '100%', sm: 'auto' },
+                                                                    justifyContent: { xs: 'stretch', sm: 'flex-end' }
                                                                 }}>
                                                                     <Button
                                                                         onClick={(e) => {
@@ -3805,13 +3806,14 @@ export default function AllMatches() {
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
                                                                             px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            py: { xs: '6px', sm: '6.5px' },
                                                                             fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -3857,13 +3859,14 @@ export default function AllMatches() {
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
                                                                             px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            py: { xs: '6px', sm: '6.5px' },
                                                                             fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -3905,13 +3908,14 @@ export default function AllMatches() {
                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                             borderRadius: '8px',
                                                                             px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
+                                                                            py: { xs: '6px', sm: '6.5px' },
                                                                             fontSize: { xs: '9px', sm: '10.5px' },
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -4354,9 +4358,11 @@ export default function AllMatches() {
                                                 <Box sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: { xs: '8px', sm: '10px' },
+                                                    gap: { xs: '6px', sm: '5px' },
                                                     flexWrap: 'nowrap',
-                                                    minWidth: 0
+                                                    minWidth: 0,
+                                                    width: { xs: '100%', sm: 'auto' },
+                                                    justifyContent: { xs: 'stretch', sm: 'flex-end' }
                                                 }}>
                                                     <Button
                                                         onClick={(e) => { e.stopPropagation(); setEditMatchLeagueId(String(match.leagueId)); setEditMatchId(match.id); setEditMatchOpen(true); }}
@@ -4368,11 +4374,12 @@ export default function AllMatches() {
                                                             border: '1px solid rgba(255, 255, 255, 0.1)',
                                                             borderRadius: '8px',
                                                             px: { xs: 0.6, sm: 1.2 },
-                                                            py: 0.4,
+                                                            py: { xs: '6px', sm: '6.5px' },
                                                             fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                             fontWeight: 600,
                                                             textTransform: 'none',
                                                             minWidth: 0,
+                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                             whiteSpace: 'nowrap',
                                                             '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                             '&:hover': {
@@ -4401,11 +4408,12 @@ export default function AllMatches() {
                                                             border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
                                                             borderRadius: '8px',
                                                             px: { xs: 0.6, sm: 1.2 },
-                                                            py: 0.4,
+                                                            py: { xs: '6px', sm: '6.5px' },
                                                             fontSize: { xs: '0.65rem', sm: '0.75rem' },
                                                             fontWeight: 600,
                                                             textTransform: 'none',
                                                             minWidth: 0,
+                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                             whiteSpace: 'nowrap',
                                                             '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
                                                             '&:hover': {

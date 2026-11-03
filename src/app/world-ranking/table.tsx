@@ -310,6 +310,10 @@ export default function WorldRankingTable() {
             justifyContent: 'space-between',
             gap: { xs: 1.5, md: 2 },
             width: '100%',
+            // px: { xs: 1, sm: 2, md: 3 },
+                        // pb: { xs: 1.5, md: 0 },
+                        mx:'auto',
+                        mb: { xs: 2, md: 0 },
           }}>
             {/* Search Input */}
             <TextField
