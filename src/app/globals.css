@@ -252,6 +252,12 @@ input:-webkit-autofill:active {
   padding-bottom: 12px !important;
 }
 
+.league-header-row th,
+.league-header-row .MuiTableCell-head {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
 .league-mobile-result-font .league-header-row .league-table-heading,
 .league-header-row .league-table-heading {
   color: #717d8f !important;
@@ -364,6 +370,11 @@ input:-webkit-autofill:active {
 /* Use on specific header cells that must align left with player-name text start */
 .league-table-heading.league-table-heading-left {
   text-align: left !important;
+}
+
+/* Use on specific header cells that must align right with stat numbers */
+.league-table-heading.league-table-heading-right {
+  text-align: right !important;
 }
 
 /* Body row typography should match table heading typography */

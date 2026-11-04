@@ -892,8 +892,11 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: 12,
-                      py: 1.8,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
                       px: 0,
                       textAlign: 'center',
                       width: { xs: 32, sm: 40 },
@@ -918,8 +921,11 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: 12,
-                      py: 1.8,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
                       pl: { xs: 2, sm: 3 },
                       pr: { xs: 1, sm: 1.5 },
                       textAlign: 'left',
@@ -942,59 +948,78 @@ export default function WorldRankingTable() {
                   </TableCell>
 
                   {/* Position Header */}
-                  <TableCell sx={{
-                    position: 'sticky',
-                    top: 0,
-                    bgcolor: '#121316 !important',
-                    color: '#717d8f !important',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    py: 1.8,
-                    textAlign: 'center',
-                    minWidth: { xs: 75, sm: 100 },
-                    borderBottom: '1px solid #22242a',
-                    zIndex: 20,
-                  }}>
+                  <TableCell
+                    className="league-table-heading"
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
+                      textAlign: 'center',
+                      minWidth: { xs: 75, sm: 100 },
+                      borderBottom: '1px solid #22242a',
+                      zIndex: 20,
+                    }}
+                  >
                     POSITION
                   </TableCell>
 
                   {/* Country Header */}
-                  <TableCell sx={{
-                    position: 'sticky',
-                    top: 0,
-                    bgcolor: '#121316 !important',
-                    color: '#717d8f !important',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    py: 1.8,
-                    textAlign: 'center',
-                    minWidth: { xs: 90, sm: 120 },
-                    borderBottom: '1px solid #22242a',
-                    zIndex: 20,
-                  }}>
+                  <TableCell
+                    className="league-table-heading"
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
+                      textAlign: 'center',
+                      minWidth: { xs: 90, sm: 120 },
+                      borderBottom: '1px solid #22242a',
+                      zIndex: 20,
+                    }}
+                  >
                     COUNTRY
                   </TableCell>
 
                   {/* XP Status Header */}
-                  <TableCell sx={{
-                    position: 'sticky',
-                    top: 0,
-                    bgcolor: '#121316 !important',
-                    color: '#717d8f !important',
-                    fontWeight: 700,
-                    fontSize: 12,
-                    py: 1.8,
-                    textAlign: 'center',
-                    minWidth: { xs: 85, sm: 110 },
-                    borderBottom: '1px solid #22242a',
-                    zIndex: 20,
-                  }}>
+                  <TableCell
+                    className="league-table-heading"
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      bgcolor: '#121316 !important',
+                      color: '#717d8f !important',
+                      fontWeight: 700,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
+                      textAlign: 'center',
+                      minWidth: { xs: 85, sm: 110 },
+                      borderBottom: '1px solid #22242a',
+                      zIndex: 20,
+                    }}
+                  >
                     XP STATUS
                   </TableCell>
 
                   {/* Total / Avg XP Header */}
                   <TableCell
                     onClick={() => toggleSort(filters.mode === 'avg' ? 'avgXP' : 'totalXP')}
+                    className="league-table-heading league-table-heading-right"
                     sx={{
                       cursor: 'pointer',
                       position: 'sticky',
@@ -1002,45 +1027,19 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: 12,
-                      py: 1.8,
+                      fontSize: { xs: 16, sm: 15 },
+                      fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
+                      textTransform: 'uppercase',
+                      paddingTop: '12px !important',
+                      paddingBottom: '12px !important',
                       pr: { xs: 2, sm: 3 },
-                      textAlign: 'right',
+                      textAlign: 'right !important',
                       minWidth: { xs: 90, sm: 120 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
                   >
-                    {filters.mode === 'avg' ? (
-                      'AVG / MATCH'
-                    ) : (
-                      <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        justifyContent: 'center',
-                      }}>
-                        <Typography sx={{
-                          color: '#717d8f !important',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          lineHeight: 1.2,
-                        }}>
-                          TOTAL XP
-                        </Typography>
-                        <Typography sx={{
-                          color: '#4b5563',
-                          fontSize: { xs: 9, sm: 10 },
-                          fontWeight: 700,
-                          letterSpacing: 0.5,
-                          lineHeight: 1,
-                          mt: 0.3,
-                          display: { xs: 'none', sm: 'block' },
-                        }}>
-                          OF 25,000
-                        </Typography>
-                      </Box>
-                    )}
+                    {filters.mode === 'avg' ? 'AVG / MATCH' : 'TOTAL XP'}
                   </TableCell>
                 </TableRow>
               </TableHead>

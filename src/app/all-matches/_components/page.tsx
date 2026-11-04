@@ -31,6 +31,7 @@ import { useRouter } from 'next/navigation';
 import CloseIcon from '@mui/icons-material/Close';
 import { optimizedFetch } from '@/lib/utils/optimizedFetch';
 import { mutateWithRefresh } from '@/lib/utils/cacheManager';
+import MatchDetailModal from '@/Components/MatchDetailModal';
 
 // Lazy load heavy components
 const PlayerCard = dynamic(() => import('@/Components/playercard/playercard'), {
@@ -2146,335 +2147,6 @@ export default function AllMatches() {
         return AwayTeamImage;
     };
 
-    const MatchDetailModal = ({ open, onClose, match, onViewFullDetails }: { open: boolean; onClose: () => void; match: Match | null; onViewFullDetails?: (matchId: string) => void }) => {
-        if (!match) return null;
-
-        return (
-            <Dialog
-                open={open}
-                onClose={onClose}
-                fullWidth
-                maxWidth="md" // Changed to md for more width
-                fullScreen={isMobile}
-                PaperProps={{
-                    sx: {
-                        bgcolor: 'rgba(15,15,15,0.95)',
-                        color: '#E5E7EB',
-                        borderRadius: isMobile ? 0 : 3,
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        backdropFilter: 'blur(20px)',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.7)',
-                        overflow: 'hidden',
-                    },
-                }}
-            >
-                <DialogTitle
-                    sx={{
-                        fontWeight: 'bold',
-                        position: 'relative',
-                        color: '#E5E7EB',
-                        background: 'linear-gradient(90deg, #767676 0%, #000000 100%)',
-                        borderBottom: '1px solid rgba(255,255,255,0.1)',
-                        py: { xs: 2, sm: 2.5 },
-                        pr: { xs: 6, sm: 8 }
-                    }}
-                >
-                    Match Details
-                    <IconButton
-                        aria-label="close"
-                        onClick={onClose}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: '#9CA3AF',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-
-                <DialogContent sx={{ p: 0 }}>
-                    {/* Match Header - Teams Side by Side */}
-                    <Box sx={{
-                        p: { xs: 2, sm: 3 },
-                        // background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
-                        color: 'white'
-                    }}>
-                        {/* Teams in a row layout */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: { xs: 1, sm: 2 }, width: '100%', flexDirection: 'row' }}>
-                            {/* Home Team */}
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: { xs: 1, sm: 1.5 },
-                                flex: 1,
-                                minWidth: 0 // Prevent overflow
-                            }}>
-                                <Image
-                                    src={getHomeTeamImageSrc(match)}
-                                    alt={match.homeTeamName || ''}
-                                    width={40}
-                                    height={40}
-                                    style={{ borderRadius: '6px', flexShrink: 0, objectFit: 'contain' }}
-                                />
-                                <Box sx={{ minWidth: 0, flex: 1 }}>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            fontWeight: 'bold',
-                                            fontSize: { xs: '0.85rem', sm: '1.15rem' },
-                                            lineHeight: 1.2,
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        {formatMatchName(match.homeTeamName || '')}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            opacity: 0.8,
-                                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                                            lineHeight: 1.2
-                                        }}
-                                    >
-                                        Home
-                                    </Typography>
-                                </Box>
-                            </Box>
-
-                            {/* Score Section */}
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: { xs: 0.5, sm: 1 },
-                                justifyContent: 'center',
-                                flexShrink: 0,
-                                px: { xs: 0.5, sm: 1 }
-                            }}>
-                                {match.status === 'RESULT_PUBLISHED' && (
-                                    <Box sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 1,
-                                        backgroundColor: 'rgba(255,255,255,0.15)',
-                                        px: { xs: 1.5, sm: 2 },
-                                        py: { xs: 0.5, sm: 1 },
-                                        borderRadius: 2
-                                    }}>
-                                        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '2rem' } }}>
-                                            {match.homeTeamGoals || 0}
-                                        </Typography>
-                                        <Typography variant="h6" sx={{ opacity: 0.7, fontSize: { xs: '0.9rem', sm: '1.25rem' } }}>
-                                            -
-                                        </Typography>
-                                        <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '2rem' } }}>
-                                            {match.awayTeamGoals || 0}
-                                        </Typography>
-                                    </Box>
-                                )}
-                                {match.status === 'SCHEDULED' && (
-                                    <Box sx={{
-                                        backgroundColor: 'rgba(255,255,255,0.2)',
-                                        px: { xs: 1.5, sm: 2 },
-                                        py: { xs: 0.5, sm: 0.75 },
-                                        borderRadius: 2
-                                    }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
-                                            VS
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Box>
-
-                            {/* Away Team */}
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: { xs: 1, sm: 1.5 },
-                                flex: 1,
-                                flexDirection: 'row-reverse', // Reverse order for visual balance
-                                minWidth: 0
-                            }}>
-                                <Image
-                                    src={getAwayTeamImageSrc(match)}
-                                    alt={match.awayTeamName || ''}
-                                    width={40}
-                                    height={40}
-                                    style={{ borderRadius: '6px', flexShrink: 0, objectFit: 'contain' }}
-                                />
-                                <Box sx={{ minWidth: 0, flex: 1, textAlign: 'right' }}>
-                                    <Typography
-                                        variant="h6"
-                                        sx={{
-                                            fontWeight: 'bold',
-                                            fontSize: { xs: '0.85rem', sm: '1.15rem' },
-                                            lineHeight: 1.2,
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        {formatMatchName(match.awayTeamName || '')}
-                                    </Typography>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            opacity: 0.8,
-                                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                                            lineHeight: 1.2
-                                        }}
-                                    >
-                                        Away
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                    </Box>
-
-                    {/* Match Info */}
-                    <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                        {/* Date & Time */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Calendar size={20} color="#E5E7EB" />
-                            <Box>
-                                <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem' }}>
-                                    Date & Time
-                                </Typography>
-                                <Typography variant="body1" sx={{ color: '#E5E7EB', fontWeight: 'bold' }}>
-                                    {formatMatchDate(match.date)} at {formatMatchTime(match.date)}
-                                </Typography>
-                            </Box>
-                        </Box>
-
-                        {/* Location */}
-                        {match?.location && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Box sx={{
-                                    width: 20,
-                                    height: 20,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    📍
-                                </Box>
-                                <Box>
-                                    <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem' }}>
-                                        Location
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ color: '#E5E7EB', fontWeight: 'bold' }}>
-                                        {match?.location}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        )}
-
-                        {/* Status */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{
-                                width: 20,
-                                height: 20,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {match.status === 'RESULT_PUBLISHED' ? '✅' : match.status === 'RESULT_UPLOADED' ? '⌛' : '⏰'}
-                            </Box>
-                            <Box>
-                                <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem' }}>
-                                    Status
-                                </Typography>
-                                <Chip
-                                    label={match.status === 'RESULT_PUBLISHED' ? 'RESULT_PUBLISHED' : match.status === 'RESULT_UPLOADED' ? 'Awaiting Confirmation' : 'SCHEDULED'}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: match.status === 'RESULT_PUBLISHED' ? '#16a34a' : match.status === 'RESULT_UPLOADED' ? '#ea580c' : '#0388E3',
-                                        color: 'white',
-                                        fontWeight: 'bold',
-                                        fontSize: '0.75rem'
-                                    }}
-                                />
-                            </Box>
-                        </Box>
-
-                        {/* Availability Info for Scheduled Matches */}
-                        {match.status === 'SCHEDULED' && (
-                            <Box sx={{
-                                mt: 2,
-                                p: 2,
-                                backgroundColor: 'rgba(255,255,255,0.05)',
-                                borderRadius: 2,
-                                border: '1px solid rgba(255,255,255,0.1)'
-                            }}>
-                                <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem', mb: 1 }}>
-                                    Player Availability
-                                </Typography>
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: (match.availableUsers && match.availableUsers.length > 0) ? 2 : 0 }}>
-                                    <Chip
-                                        label={`Available: ${getAvailabilityCounts(match).availableCount}`}
-                                        size="small"
-                                        sx={{ backgroundColor: '#16a34a', color: 'white', fontWeight: 'bold' }}
-                                    />
-                                    <Chip
-                                        label={`Pending: ${getAvailabilityCounts(match).pendingCount}`}
-                                        size="small"
-                                        sx={{ backgroundColor: '#dc2626', color: 'white', fontWeight: 'bold' }}
-                                    />
-                                </Box>
-
-                                {match.availableUsers && match.availableUsers.length > 0 && (
-                                    <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                        <Typography variant="body2" sx={{ color: '#9CA3AF', fontSize: '0.8rem', mb: 1.5, fontWeight: 'bold' }}>
-                                            Order of acceptance:
-                                        </Typography>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                                            {match.availableUsers.map((player, index) => (
-                                                <Box key={player.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                                    <Image
-                                                        src={HomeTeamImage}
-                                                        alt="Green Shirt"
-                                                        width={22}
-                                                        height={22}
-                                                        style={{ objectFit: 'contain' }}
-                                                    />
-                                                    <Typography variant="body2" sx={{ color: '#E5E7EB', fontWeight: 500, fontSize: '0.9rem' }}>
-                                                        {index + 1}. {player.firstName} {player.lastName}
-                                                    </Typography>
-                                                </Box>
-                                            ))}
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Box>
-                        )}
-                    </Box>
-                </DialogContent>
-
-                <DialogActions sx={{ p: { xs: 2, sm: 3 }, gap: 1, borderTop: '1px solid rgba(255,255,255,0.1)', justifyContent: 'flex-end' }}>
-                    <Button
-                        onClick={onClose}
-                        variant="outlined"
-                        sx={{
-                            color: '#E5E7EB',
-                            borderColor: 'rgba(255,255,255,0.2)',
-                            width: { xs: '100%', sm: 'auto' },
-                            '&:hover': {
-                                backgroundColor: 'rgba(255,255,255,0.05)',
-                                borderColor: 'rgba(255,255,255,0.3)'
-                            }
-                        }}
-                    >
-                        Close
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    };
-
     const handleMatchCardClick = (match: Match, event: React.MouseEvent) => {
         // Prevent opening modal if clicking on buttons
         const target = event.target as HTMLElement;
@@ -3442,63 +3114,66 @@ export default function AllMatches() {
                                                 return (
                                                     <>
                                                         <Box sx={{
-                                                            display: 'grid',
-                                                            gridTemplateColumns: '1fr auto 1fr',
+                                                            display: 'flex',
                                                             alignItems: 'center',
-                                                            gap: 1,
+                                                            justifyContent: 'space-between',
+                                                            gap: { xs: 0.75, sm: 1 },
                                                             px: { xs: '14px', sm: '16px' },
                                                             py: '10px',
                                                             borderTop: '1px solid rgba(255, 255, 255, 0.07)',
                                                             borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
                                                             width: '100%',
-                                                            boxSizing: 'border-box'
+                                                            boxSizing: 'border-box',
+                                                            minWidth: 0,
                                                         }}>
                                                             {/* Left: Date & Time */}
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                                                                 <Typography sx={{
                                                                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                     color: '#8b90a0',
                                                                     fontSize: '12px',
                                                                     fontWeight: 500,
                                                                     whiteSpace: 'nowrap',
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis'
                                                                 }}>
                                                                     {formatFixtureDateTime(match.date || match.start)}
                                                                 </Typography>
                                                             </Box>
 
-                                                            {/* Center: Location */}
-                                                            <Box sx={{
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                gap: 0.5,
-                                                                minWidth: 0,
-                                                                textAlign: 'center'
-                                                            }}>
-                                                                {match.location ? (
-                                                                    <>
-                                                                        <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
-                                                                        <Typography sx={{
-                                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                            color: '#8b90a0',
-                                                                            fontSize: '12px',
-                                                                            fontWeight: 500,
-                                                                            overflow: 'hidden',
-                                                                            textOverflow: 'ellipsis',
-                                                                            whiteSpace: 'nowrap'
-                                                                        }}>
-                                                                            {formatLocationForCard(match.location)}
-                                                                        </Typography>
-                                                                    </>
-                                                                ) : null}
-                                                            </Box>
+                                                            {/* Center: Location (Ellipsis on overflow, never overlaps) */}
+                                                            {match.location ? (
+                                                                <Box sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                    gap: 0.5,
+                                                                    flex: 1,
+                                                                    minWidth: 0,
+                                                                    overflow: 'hidden',
+                                                                    px: 0.5,
+                                                                }}>
+                                                                    <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
+                                                                    <Typography sx={{
+                                                                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                                        color: '#8b90a0',
+                                                                        fontSize: '12px',
+                                                                        fontWeight: 500,
+                                                                        overflow: 'hidden',
+                                                                        textOverflow: 'ellipsis',
+                                                                        whiteSpace: 'nowrap',
+                                                                        minWidth: 0,
+                                                                    }}>
+                                                                        {formatLocationForCard(match.location)}
+                                                                    </Typography>
+                                                                </Box>
+                                                            ) : (
+                                                                <Box sx={{ flex: 1 }} />
+                                                            )}
 
                                                             {/* Right: Played Indicator */}
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                                                                 {hasPlayed ? (
                                                                     <Box sx={{
+                                                                        flexShrink: 0,
                                                                         px: 1.2,
                                                                         py: '2px',
                                                                         borderRadius: '9999px',
@@ -3772,7 +3447,7 @@ export default function AllMatches() {
                                                             }}>
                                                                 <Typography sx={{
                                                                     color: '#5d6272',
-                                                                    fontSize: { xs: '9px', sm: '10px' },
+                                                                    fontSize: '10px',
                                                                     letterSpacing: '0.06em',
                                                                     fontWeight: 700,
                                                                     textTransform: 'uppercase',
@@ -3804,9 +3479,9 @@ export default function AllMatches() {
                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9px', sm: '10.5px' },
+                                                                            px: { xs: '8.5px', sm: '10px' },
+                                                                            py: '6.5px',
+                                                                            fontSize: '10.5px',
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
@@ -3856,9 +3531,9 @@ export default function AllMatches() {
                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9px', sm: '10.5px' },
+                                                                            px: { xs: '8.5px', sm: '10px' },
+                                                                            py: '6.5px',
+                                                                            fontSize: '10.5px',
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
@@ -3904,9 +3579,9 @@ export default function AllMatches() {
                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                             borderRadius: '8px',
-                                                                            px: { xs: '7px', sm: '10px' },
-                                                                            py: { xs: '5px', sm: '6.5px' },
-                                                                            fontSize: { xs: '9px', sm: '10.5px' },
+                                                                            px: { xs: '8.5px', sm: '10px' },
+                                                                            py: '6.5px',
+                                                                            fontSize: '10.5px',
                                                                             fontWeight: 700,
                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                             textTransform: 'uppercase',
@@ -4119,72 +3794,83 @@ export default function AllMatches() {
                                             </Box>
                                         </Box>
 
-                                        {/* Match Details Row: Date/Time, Location (Centered), Kick-off Countdown */}
+                                        {/* Details Row: Date/Time (Left), Location (Center with ellipsis), Kick-off Countdown (Right) - Single Line */}
                                         <Box sx={{
-                                            display: 'grid',
-                                            gridTemplateColumns: '1fr auto 1fr',
+                                            display: 'flex',
                                             alignItems: 'center',
-                                            gap: 1,
-                                            px: 1.5,
-                                            pt: 1.25,
-                                            pb: 0.5,
-                                            width: '100%'
+                                            justifyContent: 'space-between',
+                                            gap: { xs: 0.75, sm: 1 },
+                                            px: { xs: '14px', sm: '16px' },
+                                            py: '10px',
+                                            borderTop: '1px solid rgba(255, 255, 255, 0.07)',
+                                            borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
+                                            width: '100%',
+                                            boxSizing: 'border-box',
+                                            minWidth: 0,
                                         }}>
                                             {/* Left: Date & Time */}
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                                                 <Typography sx={{
-                                                    color: '#d1d5db',
-                                                    fontSize: { xs: '0.72rem', sm: '0.8rem' },
-                                                    fontWeight: 600,
+                                                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                    color: '#8b90a0',
+                                                    fontSize: '12px',
+                                                    fontWeight: 500,
                                                     whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis'
                                                 }}>
                                                     {formatFixtureDateTime(match.date || match.start)}
                                                 </Typography>
                                             </Box>
 
-                                            {/* Center: Location */}
-                                            <Box sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                gap: 0.5,
-                                                minWidth: 0,
-                                                textAlign: 'center'
-                                            }}>
-                                                {match.location ? (
-                                                    <>
-                                                        <MapPin size={15} color="#d1d5db" style={{ flexShrink: 0 }} />
-                                                        <Typography sx={{
-                                                            color: '#d1d5db',
-                                                            fontSize: { xs: '0.72rem', sm: '0.8rem' },
-                                                            fontWeight: 500,
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap'
-                                                        }}>
-                                                            {formatLocationForCard(match.location)}
-                                                        </Typography>
-                                                    </>
-                                                ) : null}
-                                            </Box>
+                                            {/* Center: Location (Ellipsis on overflow, never overlaps) */}
+                                            {match.location ? (
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 0.5,
+                                                    flex: 1,
+                                                    minWidth: 0,
+                                                    overflow: 'hidden',
+                                                    px: 0.5,
+                                                }}>
+                                                    <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
+                                                    <Typography sx={{
+                                                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                        color: '#8b90a0',
+                                                        fontSize: '12px',
+                                                        fontWeight: 500,
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        minWidth: 0,
+                                                    }}>
+                                                        {formatLocationForCard(match.location)}
+                                                    </Typography>
+                                                </Box>
+                                            ) : (
+                                                <Box sx={{ flex: 1 }} />
+                                            )}
 
                                             {/* Right: Kick-off Countdown Badge */}
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                                                 {getKickoffCountdown(match.date || match.start) ? (
                                                     <Box sx={{
-                                                        bgcolor: 'rgba(255, 255, 255, 0.06)',
-                                                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                                                        borderRadius: '6px',
-                                                        px: { xs: 0.75, sm: 1 },
-                                                        py: 0.4,
-                                                        fontSize: { xs: '0.68rem', sm: '0.75rem' },
-                                                        color: '#adb5bd',
-                                                        fontWeight: 500,
+                                                        flexShrink: 0,
+                                                        px: 1.2,
+                                                        py: '2px',
+                                                        borderRadius: '9999px',
+                                                        bgcolor: 'rgba(59, 111, 245, 0.12)',
+                                                        border: '1px solid rgba(59, 111, 245, 0.35)',
+                                                        color: '#3b6ff5',
+                                                        fontWeight: 700,
+                                                        fontSize: '10px',
+                                                        letterSpacing: '0.08em',
+                                                        textTransform: 'uppercase',
                                                         whiteSpace: 'nowrap',
                                                         display: 'inline-flex',
-                                                        alignItems: 'center'
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                     }}>
                                                         {getKickoffCountdown(match.date || match.start)}
                                                     </Box>
@@ -4331,22 +4017,24 @@ export default function AllMatches() {
                                         {isAdmin && (
                                             <Box sx={{
                                                 mt: 'auto',
-                                                pt: 1,
-                                                pb: 1,
-                                                px: { xs: 0.75, sm: 1.5 },
-                                                borderTop: '1px dashed #e56a16',
+                                                pt: { xs: 1, sm: 1.2 },
+                                                pb: { xs: 1.2, sm: 1.4 },
+                                                px: { xs: '8px', sm: '12px' },
+                                                borderTop: '1px dashed rgba(249, 115, 22, 0.45)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
-                                                gap: { xs: 0.5, sm: 1 },
-                                                bgcolor: 'rgba(255,255,255,0.05)',
+                                                gap: { xs: '6px', sm: '8px' },
                                                 width: '100%',
                                                 boxSizing: 'border-box'
                                             }}>
                                                 <Typography sx={{
-                                                    color: '#888',
-                                                    fontSize: { xs: '9.5px', sm: '11px' },
-                                                    fontWeight: 600,
+                                                    color: '#5d6272',
+                                                    fontSize: '10px',
+                                                    letterSpacing: '0.06em',
+                                                    fontWeight: 700,
+                                                    textTransform: 'uppercase',
+                                                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                     flexShrink: 0
                                                 }}>
                                                     Admin
@@ -4354,27 +4042,43 @@ export default function AllMatches() {
                                                 <Box sx={{
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: { xs: '8px', sm: '10px' },
+                                                    gap: { xs: '6px', sm: '8px' },
                                                     flexWrap: 'nowrap',
-                                                    minWidth: 0
+                                                    minWidth: 0,
+                                                    justifyContent: 'flex-end'
                                                 }}>
                                                     <Button
                                                         onClick={(e) => { e.stopPropagation(); setEditMatchLeagueId(String(match.leagueId)); setEditMatchId(match.id); setEditMatchOpen(true); }}
-                                                        disabled={!league?.active || match.archived}
-                                                        startIcon={<Edit size={12} color="#00D09E" />}
+                                                        disabled={!leagueForMatch?.active || match.archived}
+                                                        startIcon={<Edit size={12} color="#00D09E" strokeWidth={2.4} />}
                                                         sx={{
-                                                            color: 'white',
-                                                            bgcolor: 'transparent',
-                                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                            color: '#ffffff',
+                                                            bgcolor: 'rgba(255, 255, 255, 0.035)',
+                                                            border: '1px solid rgba(255, 255, 255, 0.08)',
                                                             borderRadius: '8px',
-                                                            px: { xs: 0.6, sm: 1.2 },
-                                                            py: 0.4,
-                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                                                            fontWeight: 600,
-                                                            textTransform: 'none',
+                                                            px: { xs: '8.5px', sm: '10px' },
+                                                            py: '6.5px',
+                                                            fontSize: '10.5px',
+                                                            fontWeight: 700,
+                                                            letterSpacing: { xs: '0.02em', sm: '0.04em' },
+                                                            textTransform: 'uppercase',
+                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                             minWidth: 0,
                                                             whiteSpace: 'nowrap',
-                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            lineHeight: 1,
+                                                            verticalAlign: 'middle',
+                                                            '& .MuiButton-startIcon': {
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                mr: 0.45,
+                                                                ml: 0,
+                                                                my: 0,
+                                                                '& svg': { display: 'block' }
+                                                            },
                                                             '&:hover': {
                                                                 bgcolor: 'rgba(0, 208, 158, 0.15)',
                                                                 borderColor: '#00D09E'
@@ -4394,23 +4098,38 @@ export default function AllMatches() {
                                                                 handleRequestDeleteMatch(match);
                                                             }
                                                         }}
-                                                        startIcon={match.archived ? <Undo2 size={12} color="#f97316" /> : <Trash2 size={12} color="#ff4d4f" />}
+                                                        startIcon={match.archived ? <Undo2 size={12} color="#f5b301" strokeWidth={2.4} /> : <Trash2 size={12} color="#ef4444" strokeWidth={2.4} />}
                                                         sx={{
-                                                            color: match.archived ? '#f97316' : '#ff4d4f',
-                                                            bgcolor: 'transparent',
-                                                            border: match.archived ? '1px solid rgba(249, 115, 22, 0.4)' : '1px solid rgba(255, 77, 79, 0.4)',
+                                                            color: match.archived ? '#f5b301' : '#ef4444',
+                                                            bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
+                                                            border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                             borderRadius: '8px',
-                                                            px: { xs: 0.6, sm: 1.2 },
-                                                            py: 0.4,
-                                                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                                                            fontWeight: 600,
-                                                            textTransform: 'none',
+                                                            px: { xs: '8.5px', sm: '10px' },
+                                                            py: '6.5px',
+                                                            fontSize: '10.5px',
+                                                            fontWeight: 700,
+                                                            letterSpacing: { xs: '0.02em', sm: '0.04em' },
+                                                            textTransform: 'uppercase',
+                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                             minWidth: 0,
                                                             whiteSpace: 'nowrap',
-                                                            '& .MuiButton-startIcon': { mr: { xs: 0.3, sm: 0.5 }, ml: 0 },
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            lineHeight: 1,
+                                                            verticalAlign: 'middle',
+                                                            '& .MuiButton-startIcon': {
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                mr: 0.45,
+                                                                ml: 0,
+                                                                my: 0,
+                                                                '& svg': { display: 'block' }
+                                                            },
                                                             '&:hover': {
-                                                                bgcolor: match.archived ? 'rgba(249, 115, 22, 0.15)' : 'rgba(255, 77, 79, 0.15)',
-                                                                borderColor: match.archived ? '#f97316' : '#ff4d4f'
+                                                                bgcolor: match.archived ? 'rgba(245, 179, 1, 0.18)' : 'rgba(239, 68, 68, 0.18)',
+                                                                borderColor: match.archived ? '#f5b301' : '#ef4444'
                                                             }
                                                         }}
                                                     >
@@ -4486,6 +4205,7 @@ export default function AllMatches() {
                     open={matchDetailModalOpen}
                     onClose={() => setMatchDetailModalOpen(false)}
                     match={selectedMatchDetail}
+                    leagueMembersCount={leagues.find(l => l.id === selectedMatchDetail?.leagueId)?.members?.length || 0}
                     onViewFullDetails={(matchId) => {
                         setResultsMatchId(matchId);
                         setResultsDialogOpen(true);

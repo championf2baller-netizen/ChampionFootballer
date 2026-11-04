@@ -112,7 +112,7 @@ export default function LeagueDetailLoadingSkeleton({ mode = 'table' }: LeagueDe
         >
           <div className="w-full min-w-[640px] sm:min-w-[820px] rounded-lg league-table league-mobile-result-font">
             {/* Table Header Shell */}
-            <div className="grid mt-0 grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header text-black league-header-row league-header-inset font-bold sticky top-0 z-20">
+            <div className="grid mt-0 grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header text-black league-header-row league-header-inset font-bold sticky top-0 z-20">
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>#</div>
               <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left" style={{ color: '#000000' }}>NAME</div>
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>MOTM</div>
@@ -120,8 +120,8 @@ export default function LeagueDetailLoadingSkeleton({ mode = 'table' }: LeagueDe
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>W</div>
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>D</div>
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>L</div>
-              <div className="text-center league-table-heading" style={{ color: '#000000' }}>GD</div>
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>W%</div>
+              <div className="text-center league-table-heading" style={{ color: '#000000' }}>GD</div>
               <div className="text-center league-table-heading" style={{ color: '#000000' }}>PTS</div>
             </div>
             <div className="w-full border-b border-border" />
@@ -132,7 +132,7 @@ export default function LeagueDetailLoadingSkeleton({ mode = 'table' }: LeagueDe
               return (
                 <div
                   key={i}
-                  className={`grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-2.5 ${isEven ? 'bg-table-row-even' : 'bg-table-row-odd'} league-row font-bold text-white`}
+                  className={`grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-2.5 ${isEven ? 'bg-table-row-even' : 'bg-table-row-odd'} league-row font-bold text-white`}
                 >
                   <div className="text-center flex items-center justify-center">
                     <Skeleton variant="text" width={14} height={20} sx={{ bgcolor: 'rgba(255,255,255,0.12)' }} />

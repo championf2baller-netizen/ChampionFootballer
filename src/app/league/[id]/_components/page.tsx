@@ -5490,68 +5490,71 @@ export default function LeagueDetailPage() {
                                                                             </Box>
                                                                         </Box>
 
-                                                                        {/* Details Row: Date/Time, Location, Kick-off Countdown with borders above and below */}
+                                                                        {/* Details Row: Date/Time (Left), Location (Center with ellipsis), Kick-off Countdown (Right) - Single Line */}
                                                                         <Box sx={{
-                                                                            display: 'grid',
-                                                                            gridTemplateColumns: '1fr auto 1fr',
+                                                                            display: 'flex',
                                                                             alignItems: 'center',
-                                                                            gap: 1,
+                                                                            justifyContent: 'space-between',
+                                                                            gap: { xs: 0.75, sm: 1 },
                                                                             px: { xs: '14px', sm: '16px' },
                                                                             py: '10px',
                                                                             borderTop: '1px solid rgba(255, 255, 255, 0.07)',
                                                                             borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
                                                                             width: '100%',
-                                                                            boxSizing: 'border-box'
+                                                                            boxSizing: 'border-box',
+                                                                            minWidth: 0,
                                                                         }}>
                                                                             {/* Left: Date & Time */}
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                                                                                 <Typography sx={{
                                                                                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                     color: '#8b90a0',
                                                                                     fontSize: '12px',
                                                                                     fontWeight: 500,
                                                                                     whiteSpace: 'nowrap',
-                                                                                    overflow: 'hidden',
-                                                                                    textOverflow: 'ellipsis'
                                                                                 }}>
                                                                                     {formatFixtureDateTime(match.date || match.start)}
                                                                                 </Typography>
                                                                             </Box>
 
-                                                                            {/* Center: Location */}
-                                                                            <Box sx={{
-                                                                                display: 'flex',
-                                                                                alignItems: 'center',
-                                                                                justifyContent: 'center',
-                                                                                gap: 0.5,
-                                                                                minWidth: 0,
-                                                                                textAlign: 'center'
-                                                                            }}>
-                                                                                {match.location ? (
-                                                                                    <>
-                                                                                        <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
-                                                                                        <Typography sx={{
-                                                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                                            color: '#8b90a0',
-                                                                                            fontSize: '12px',
-                                                                                            fontWeight: 500,
-                                                                                            overflow: 'hidden',
-                                                                                            textOverflow: 'ellipsis',
-                                                                                            whiteSpace: 'nowrap'
-                                                                                        }}>
-                                                                                            {formatLocationForCard(match.location)}
-                                                                                        </Typography>
-                                                                                    </>
-                                                                                ) : null}
-                                                                            </Box>
+                                                                            {/* Center: Location (Truncates with ellipsis on overflow, never overlaps) */}
+                                                                            {match.location ? (
+                                                                                <Box sx={{
+                                                                                    display: 'flex',
+                                                                                    alignItems: 'center',
+                                                                                    justifyContent: 'center',
+                                                                                    gap: 0.5,
+                                                                                    flex: 1,
+                                                                                    minWidth: 0,
+                                                                                    overflow: 'hidden',
+                                                                                    px: 0.5,
+                                                                                }}>
+                                                                                    <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
+                                                                                    <Typography sx={{
+                                                                                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                                                        color: '#8b90a0',
+                                                                                        fontSize: '12px',
+                                                                                        fontWeight: 500,
+                                                                                        overflow: 'hidden',
+                                                                                        textOverflow: 'ellipsis',
+                                                                                        whiteSpace: 'nowrap',
+                                                                                        minWidth: 0,
+                                                                                    }}>
+                                                                                        {formatLocationForCard(match.location)}
+                                                                                    </Typography>
+                                                                                </Box>
+                                                                            ) : (
+                                                                                <Box sx={{ flex: 1 }} />
+                                                                            )}
 
                                                                             {/* Right: Kick-off Countdown Badge */}
-                                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                                                                                 {(() => {
                                                                                     const countdown = getKickoffCountdown(match.date || match.start);
                                                                                     if (!countdown) return null;
                                                                                     return (
                                                                                         <Box sx={{
+                                                                                            flexShrink: 0,
                                                                                             px: 1.2,
                                                                                             py: '2px',
                                                                                             borderRadius: '9999px',
@@ -5689,7 +5692,7 @@ export default function LeagueDetailPage() {
                                                                             }}>
                                                                                 <Typography sx={{
                                                                                     color: '#5d6272',
-                                                                                    fontSize: { xs: '9px', sm: '10px' },
+                                                                                    fontSize: '10px',
                                                                                     letterSpacing: '0.06em',
                                                                                     fontWeight: 700,
                                                                                     textTransform: 'uppercase',
@@ -5719,9 +5722,9 @@ export default function LeagueDetailPage() {
                                                                                             bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                             border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '7px', sm: '10px' },
-                                                                                                        py: { xs: '5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
+                                                                                            px: { xs: '8.5px', sm: '10px' },
+                                                                                                        py: '6.5px',
+                                                                                                        fontSize: '10.5px',
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
@@ -5763,9 +5766,9 @@ export default function LeagueDetailPage() {
                                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                             border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                             borderRadius: '8px',
-                                                                                            px: { xs: '7px', sm: '10px' },
-                                                                                                        py: { xs: '5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
+                                                                                            px: { xs: '8.5px', sm: '10px' },
+                                                                                                        py: '6.5px',
+                                                                                                        fontSize: '10.5px',
                                                                                             fontWeight: 700,
                                                                                             letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                             textTransform: 'uppercase',
@@ -6066,63 +6069,66 @@ export default function LeagueDetailPage() {
                                                                             return (
                                                                                 <>
                                                                                     <Box sx={{
-                                                                                        display: 'grid',
-                                                                                        gridTemplateColumns: '1fr auto 1fr',
+                                                                                        display: 'flex',
                                                                                         alignItems: 'center',
-                                                                                        gap: 1,
+                                                                                        justifyContent: 'space-between',
+                                                                                        gap: { xs: 0.75, sm: 1 },
                                                                                         px: { xs: '14px', sm: '16px' },
                                                                                         py: '10px',
                                                                                         borderTop: '1px solid rgba(255, 255, 255, 0.07)',
                                                                                         borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
                                                                                         width: '100%',
-                                                                                        boxSizing: 'border-box'
+                                                                                        boxSizing: 'border-box',
+                                                                                        minWidth: 0,
                                                                                     }}>
                                                                                         {/* Left: Date & Time */}
-                                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', minWidth: 0 }}>
+                                                                                        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                                                                                             <Typography sx={{
                                                                                                 fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                                 color: '#8b90a0',
                                                                                                 fontSize: '12px',
                                                                                                 fontWeight: 500,
                                                                                                 whiteSpace: 'nowrap',
-                                                                                                overflow: 'hidden',
-                                                                                                textOverflow: 'ellipsis'
                                                                                             }}>
                                                                                                 {formatFixtureDateTime(match.date || match.start)}
                                                                                             </Typography>
                                                                                         </Box>
 
-                                                                                        {/* Center: Location */}
-                                                                                        <Box sx={{
-                                                                                            display: 'flex',
-                                                                                            alignItems: 'center',
-                                                                                            justifyContent: 'center',
-                                                                                            gap: 0.5,
-                                                                                            minWidth: 0,
-                                                                                            textAlign: 'center'
-                                                                                        }}>
-                                                                                            {match.location ? (
-                                                                                                <>
-                                                                                                    <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
-                                                                                                    <Typography sx={{
-                                                                                                        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                                                        color: '#8b90a0',
-                                                                                                        fontSize: '12px',
-                                                                                                        fontWeight: 500,
-                                                                                                        overflow: 'hidden',
-                                                                                                        textOverflow: 'ellipsis',
-                                                                                                        whiteSpace: 'nowrap'
-                                                                                                    }}>
-                                                                                                        {formatLocationForCard(match.location)}
-                                                                                                    </Typography>
-                                                                                                </>
-                                                                                            ) : null}
-                                                                                        </Box>
+                                                                                        {/* Center: Location (Truncates with ellipsis on overflow, never overlaps) */}
+                                                                                        {match.location ? (
+                                                                                            <Box sx={{
+                                                                                                display: 'flex',
+                                                                                                alignItems: 'center',
+                                                                                                justifyContent: 'center',
+                                                                                                gap: 0.5,
+                                                                                                flex: 1,
+                                                                                                minWidth: 0,
+                                                                                                overflow: 'hidden',
+                                                                                                px: 0.5,
+                                                                                            }}>
+                                                                                                <MapPin size={13} color="#8b90a0" style={{ flexShrink: 0 }} />
+                                                                                                <Typography sx={{
+                                                                                                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                                                                    color: '#8b90a0',
+                                                                                                    fontSize: '12px',
+                                                                                                    fontWeight: 500,
+                                                                                                    overflow: 'hidden',
+                                                                                                    textOverflow: 'ellipsis',
+                                                                                                    whiteSpace: 'nowrap',
+                                                                                                    minWidth: 0,
+                                                                                                }}>
+                                                                                                    {formatLocationForCard(match.location)}
+                                                                                                </Typography>
+                                                                                            </Box>
+                                                                                        ) : (
+                                                                                            <Box sx={{ flex: 1 }} />
+                                                                                        )}
 
                                                                                         {/* Right: Played Indicator */}
-                                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', minWidth: 0 }}>
+                                                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 0 }}>
                                                                                             {hasPlayed ? (
                                                                                                 <Box sx={{
+                                                                                                    flexShrink: 0,
                                                                                                     px: 1.2,
                                                                                                     py: '2px',
                                                                                                     borderRadius: '9999px',
@@ -6145,7 +6151,7 @@ export default function LeagueDetailPage() {
                                                                                         </Box>
                                                                                     </Box>
 
-                                                                                    {/* 5. MOTM ROW inside sleek enclosed container */}
+                                                                                        {/* 5. MOTM ROW inside sleek enclosed container */}
                                                                                     <Box sx={{
                                                                                         mx: { xs: '14px', sm: '16px' },
                                                                                         my: 1,
@@ -6397,7 +6403,7 @@ export default function LeagueDetailPage() {
                                                                                         }}>
                                                                                             <Typography sx={{
                                                                                                 color: '#5d6272',
-                                                                                                fontSize: { xs: '9px', sm: '10px' },
+                                                                                                fontSize: '10px',
                                                                                                 letterSpacing: '0.06em',
                                                                                                 fontWeight: 700,
                                                                                                 textTransform: 'uppercase',
@@ -6428,9 +6434,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '7px', sm: '10px' },
-                                                                                                        py: { xs: '5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
+                                                                                                        px: { xs: '8.5px', sm: '10px' },
+                                                                                                        py: '6.5px',
+                                                                                                        fontSize: '10.5px',
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
@@ -6480,9 +6486,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: 'rgba(255, 255, 255, 0.035)',
                                                                                                         border: '1px solid rgba(255, 255, 255, 0.08)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '7px', sm: '10px' },
-                                                                                                        py: { xs: '5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
+                                                                                                        px: { xs: '8.5px', sm: '10px' },
+                                                                                                        py: '6.5px',
+                                                                                                        fontSize: '10.5px',
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
@@ -6524,9 +6530,9 @@ export default function LeagueDetailPage() {
                                                                                                         bgcolor: match.archived ? 'rgba(245, 179, 1, 0.08)' : 'rgba(239, 68, 68, 0.06)',
                                                                                                         border: match.archived ? '1px solid rgba(245, 179, 1, 0.35)' : '1px solid rgba(239, 68, 68, 0.35)',
                                                                                                         borderRadius: '8px',
-                                                                                                        px: { xs: '7px', sm: '10px' },
-                                                                                                        py: { xs: '5px', sm: '6.5px' },
-                                                                                                        fontSize: { xs: '9px', sm: '10.5px' },
+                                                                                                        px: { xs: '8.5px', sm: '10px' },
+                                                                                                        py: '6.5px',
+                                                                                                        fontSize: '10.5px',
                                                                                                         fontWeight: 700,
                                                                                                         letterSpacing: { xs: '0.02em', sm: '0.04em' },
                                                                                                         textTransform: 'uppercase',
