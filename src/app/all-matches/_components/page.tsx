@@ -3433,7 +3433,7 @@ export default function AllMatches() {
                                                         {/* 8. ADMIN ROW */}
                                                         {isAdmin && (
                                                             <Box sx={{
-                                                                mt: 'auto',
+                                                                my: 'auto',
                                                                 pt: { xs: 1, sm: 1.2 },
                                                                 pb: { xs: 1.2, sm: 1.4 },
                                                                 px: { xs: '10px', sm: '12px' },
@@ -3441,7 +3441,7 @@ export default function AllMatches() {
                                                                 display: 'flex',
                                                                 alignItems: 'center',
                                                                 justifyContent: 'space-between',
-                                                                gap: { xs: '6px', sm: '8px' },
+                                                                gap: { xs: '10px', sm: '8px' },
                                                                 width: '100%',
                                                                 boxSizing: 'border-box'
                                                             }}>
@@ -3459,10 +3459,11 @@ export default function AllMatches() {
                                                                 <Box sx={{
                                                                     display: 'flex',
                                                                     alignItems: 'center',
-                                                                    gap: { xs: '6px', sm: '8px' },
-                                                                        flexWrap: 'nowrap',
-                                                                        minWidth: 0,
-                                                                        justifyContent: 'flex-end'
+                                                                    gap: { xs: '6px', sm: '5px' },
+                                                                    flexWrap: 'nowrap',
+                                                                    minWidth: 0,
+                                                                    width: { xs: '100%', sm: 'auto' },
+                                                                    justifyContent: { xs: 'stretch', sm: 'flex-end' }
                                                                 }}>
                                                                     <Button
                                                                         onClick={(e) => {
@@ -3487,6 +3488,7 @@ export default function AllMatches() {
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -3539,6 +3541,7 @@ export default function AllMatches() {
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -3587,6 +3590,7 @@ export default function AllMatches() {
                                                                             textTransform: 'uppercase',
                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                             minWidth: 0,
+                                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                                             whiteSpace: 'nowrap',
                                                                             display: 'inline-flex',
                                                                             alignItems: 'center',
@@ -4064,6 +4068,7 @@ export default function AllMatches() {
                                                             textTransform: 'uppercase',
                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                             minWidth: 0,
+                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                             whiteSpace: 'nowrap',
                                                             display: 'inline-flex',
                                                             alignItems: 'center',
@@ -4112,6 +4117,7 @@ export default function AllMatches() {
                                                             textTransform: 'uppercase',
                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                             minWidth: 0,
+                                                            flex: { xs: 1, sm: '0 0 auto' },
                                                             whiteSpace: 'nowrap',
                                                             display: 'inline-flex',
                                                             alignItems: 'center',

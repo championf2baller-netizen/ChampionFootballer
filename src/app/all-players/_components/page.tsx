@@ -1982,11 +1982,10 @@ const AllPlayersPage = () => {
                                 position: 'sticky',
                                 left: 0,
                                 zIndex: 3,
-                                backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
-                                transition: 'background-color 0.2s',
+                                backgroundColor: isCurrentUser ? '#183328 !important' : '#121316',
                                 alignSelf: 'stretch',
                                 '.MuiListItem-root:hover &': {
-                                  backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
+                                  backgroundColor: isCurrentUser ? '#1c3c2f !important' : '#18191e',
                                 },
                                 '.is-scrolled .MuiListItem-root &': {
                                   backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
@@ -2021,15 +2020,17 @@ const AllPlayersPage = () => {
                                 position: 'sticky',
                                 left: { xs: 32, sm: 40 },
                                 zIndex: 2,
-                                backgroundColor: isCurrentUser ? 'transparent !important' : '#121316',
+                                backgroundColor: isCurrentUser ? '#163026 !important' : '#121316',
+                                background: isCurrentUser ? 'linear-gradient(90deg, #183328 0%, #152d24 100%) !important' : undefined,
                                 boxShadow: 'none',
-                                transition: 'background-color 0.2s',
                                 alignSelf: 'stretch',
                                 '.MuiListItem-root:hover &': {
-                                  backgroundColor: isCurrentUser ? 'transparent !important' : '#18191e',
+                                  backgroundColor: isCurrentUser ? '#1a372c !important' : '#18191e',
+                                  background: isCurrentUser ? 'linear-gradient(90deg, #1c3c2f 0%, #183329 100%) !important' : undefined,
                                 },
                                 '.is-scrolled .MuiListItem-root &': {
-                                  backgroundColor: isCurrentUser ? '#183328 !important' : '#121316 !important',
+                                  backgroundColor: isCurrentUser ? '#163026 !important' : '#121316 !important',
+                                  background: isCurrentUser ? 'linear-gradient(90deg, #183328 0%, #152d24 100%) !important' : undefined,
                                   boxShadow: '8px 0 12px -12px rgba(0, 0, 0, 0.6) !important',
                                 },
                               }}
