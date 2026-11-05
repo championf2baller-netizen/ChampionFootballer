@@ -2803,7 +2803,9 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           boxShadow: '0 4px 20px 0 rgba(229, 106, 22, 0.45), 0 1px 6px 0 rgba(229, 106, 22, 0.35)',
           top: 0,
           zIndex: (theme) => theme.zIndex.drawer + 2,
-          borderBottom: '3px solid #E56A16'
+          borderBottom: '3px solid #E56A16',
+            // mb: isMainPage ? {  md : -5.5} : undefined
+
         }}
       >
         <Toolbar
@@ -2812,11 +2814,12 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             justifyContent: isMainPage ? 'flex-start' : 'space-between',
             width: '100%',
             minWidth: 0,
-            minHeight: isMainPage ? { xs: '46px', sm: '54px', md: '64px', lg: '74px' } : { xs: '60px', md: '70px' },
-            py: isMainPage ? { xs: 0.5, sm: 0.6, md: 0.8 } : 0,
+            minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
             px: isMainPage ? { xs: 2, sm: 3, md: 5 } : undefined,
             overflowX: 'hidden',
             position: 'relative',
+            mt: isMainPage ? {  md : -2} : undefined ,
+            // mb: isMainPage ? {  md : -4.5} : undefined
           }}
         >
           {isMainPage ? (
@@ -2833,24 +2836,24 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             >
               <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                 <Box sx={{
-                  width: { xs: 240, sm: 320, md: 520, lg: 620 },
-                  height: 'auto',
+                  width: { xs: 250, sm: 340, md: 700},
+                  maxWidth: '100%',
+                  // height: { xs: 36, sm: 52, md: 82, lg: 110 },
                   display: 'flex',
                   alignItems: 'center',
                 }}>
                   <Image
                     src={Layer}
                     alt="Champion Footballer Logo"
-                    width={700}
-                    height={130}
+                    width={1000}
+                    height={115}
                     priority
                     fetchPriority="high"
                     quality={95}
-                    sizes="(max-width: 600px) 340px, 700px"
+                    sizes="(max-width: 600px) 320px, (max-width: 900px) 470px, (max-width: 1200px) 745px, 1000px"
                     style={{
-                      height: 'auto',
+                      height: '100%',
                       width: '100%',
-                      maxHeight: '68px',
                       objectFit: 'contain',
                       objectPosition: 'left center',
                       display: 'block'
@@ -3176,8 +3179,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         </Toolbar>
       </AppBar>
       <Toolbar sx={{ 
-        minHeight: isMainPage ? { xs: '46px', sm: '54px', md: '64px', lg: '74px' } : { xs: '60px', md: '70px' },
-        py: isMainPage ? { xs: 0.5, sm: 0.6, md: 0.8 } : 0,
+        minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
+        py: isMainPage ? { xs: 0.5, sm: 0.6, md: 0.75 } : 0,
       }} />
 
       {isAuthenticated && (
