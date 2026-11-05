@@ -2117,7 +2117,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                 </span>
               </Typography>
               {!!predictionReason && !teamInsights && !insightsLoading && (
-                <Typography sx={{ mt: 0.5, fontSize: 12, color: 'text.secondary' }}>
+                <Typography sx={{ mt: 0.5, fontSize: 12, color: '#fff' }}>
                   {predictionReason === 'FIRST_MATCH_NO_STATS'
                     ? 'Predictions are unavailable for the first match without prior stats.'
                     : predictionReason === 'NO_SELECTED_PLAYERS'
