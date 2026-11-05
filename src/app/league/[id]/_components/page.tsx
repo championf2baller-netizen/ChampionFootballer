@@ -2445,6 +2445,35 @@ export default function LeagueDetailPage() {
             }
         }
 
+        // ⚡ OPTIMISTIC UPDATE: Instantly update local state so UI updates immediately
+        if (currentUserId) {
+            const currentUserObj: any = {
+                id: String(currentUserId),
+                _id: String(currentUserId),
+                email: user?.email || '',
+                firstName: user?.firstName || '',
+                lastName: user?.lastName || '',
+                positionType: (user as any)?.positionType || 'Player',
+                profilePicture: user?.profilePicture || null,
+            };
+            const updateMatches = (matchList: any[]) => (matchList || []).map((m: any) => {
+                if (m.id !== matchId) return m;
+                const filteredAvail = (m.availableUsers || []).filter((u: any) => String(u?.id || u?._id) !== String(currentUserId));
+                const filteredUnavail = (m.unavailableUsers || []).filter((u: any) => String(u?.id || u?._id) !== String(currentUserId));
+                return markAvailable ? {
+                    ...m,
+                    availableUsers: [...filteredAvail, currentUserObj],
+                    unavailableUsers: filteredUnavail
+                } : {
+                    ...m,
+                    availableUsers: filteredAvail,
+                    unavailableUsers: [...filteredUnavail, currentUserObj]
+                };
+            });
+            setLeague((prev: any) => prev ? { ...prev, matches: updateMatches(prev.matches) } : prev);
+            
+        }
+
         setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
 
         try {
@@ -5352,8 +5381,8 @@ export default function LeagueDetailPage() {
                                                         .filter((match) => isFixtureMatch(match))
                                                         .sort(compareMatchesDesc)
                                                         .map((match, idx) => {
-                                                            const isUserAvailable = !!match.availableUsers?.some(u => u?.id === user?.id);
-                                                            const isUserUnavailable = !!match.unavailableUsers?.some((u: { id: string | undefined; }) => u?.id === user?.id);
+                                                            const isUserAvailable = !!match.availableUsers?.some((u: any) => String(u?.id || u?._id) === String(user?.id || (user as any)?._id));
+                                                            const isUserUnavailable = !!match.unavailableUsers?.some((u: any) => String(u?.id || u?._id) === String(user?.id || (user as any)?._id));
                                                             const seasonMatchNumberRaw = (match as unknown as { seasonMatchNumber?: unknown })?.seasonMatchNumber;
                                                             const seasonMatchNumber =
                                                                 typeof seasonMatchNumberRaw === 'number'
@@ -5595,7 +5624,7 @@ export default function LeagueDetailPage() {
                                                                                         onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, true); }}
                                                                                         disabled={league?.active === false || match.archived}
                                                                                         sx={{
-                                                                                            background: isUserAvailable ? '#00b074' : 'rgba(255, 255, 255, 0.04)',
+                                                                                            background: isUserUnavailable ? '#23272f' : '#00b074',
                                                                                             color: '#ffffff',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                                                                                             fontWeight: 700,
@@ -5607,10 +5636,13 @@ export default function LeagueDetailPage() {
                                                                                             flex: 1,
                                                                                             minWidth: 0,
                                                                                             lineHeight: 1.2,
+                                                                                            position: 'relative',
+                                                                                            zIndex: isUserAvailable ? 2 : 1,
+                                                                                            boxShadow: isUserAvailable ? '0 0 14px 4px rgba(0, 255, 170, 0.8), 0 0 22px rgba(0, 255, 170, 0.5)' : 'none',
                                                                                             border: isUserAvailable ? '1.5px solid #00ffaa' : '1px solid rgba(255, 255, 255, 0.08)',
-                                                                                            '&:hover': { background: '#008f6a' },
+                                                                                            '&:hover': { background: isUserUnavailable ? '#2e333d' : '#008f6a' },
                                                                                             '&.Mui-disabled': { opacity: 0.5 },
-                                                                                            textTransform: 'uppercase',
+                                                                                            textTransform: 'none',
                                                                                         }}
                                                                                     >
                                                                                         {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : "I'm in"}
@@ -5621,10 +5653,10 @@ export default function LeagueDetailPage() {
                                                                                         onClick={(e) => { e.stopPropagation(); handleToggleAvailability(match.id, false); }}
                                                                                         disabled={league?.active === false || match.archived}
                                                                                         sx={{
-                                                                                            background: isUserUnavailable ? '#c62828' : 'rgba(255, 255, 255, 0.04)',
+                                                                                            background: isUserUnavailable ? '#c62828' : '#23272f',
                                                                                             color: '#ffffff',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                                            textTransform: 'uppercase',
+                                                                                            textTransform: 'none',
                                                                                             fontWeight: 700,
                                                                                             fontSize: '12px',
                                                                                             py: '8px',
@@ -5634,10 +5666,12 @@ export default function LeagueDetailPage() {
                                                                                             flex: 1,
                                                                                             minWidth: 0,
                                                                                             lineHeight: 1.2,
+                                                                                            position: 'relative',
+                                                                                            zIndex: isUserUnavailable ? 2 : 1,
+                                                                                            boxShadow: isUserUnavailable ? '0 0 14px 4px rgba(255, 75, 75, 0.8), 0 0 22px rgba(255, 100, 100, 0.5)' : 'none',
                                                                                             border: isUserUnavailable ? '1.5px solid #ff6b6b' : '1px solid rgba(255, 255, 255, 0.08)',
-                                                                                            '&:hover': { background: isUserUnavailable ? '#b71c1c' : 'rgba(255, 255, 255, 0.08)' },
+                                                                                            '&:hover': { background: isUserUnavailable ? '#b71c1c' : '#2e333d' },
                                                                                             '&.Mui-disabled': { opacity: 0.5 },
-
                                                                                         }}
                                                                                     >
                                                                                         Can't make it
