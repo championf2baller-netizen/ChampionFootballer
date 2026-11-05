@@ -2914,7 +2914,7 @@ export default function PlayerDashboard() {
                   >
                     +
                   </Box>
-                  Create New League
+                  CREATE NEW LEAGUE
                 </Button>
 
                 {/* Invite Code Join Section */}
@@ -2979,7 +2979,7 @@ export default function PlayerDashboard() {
                     }}
                     onClick={handleJoinLeague}
                   >
-                    Join League
+                    JOIN LEAGUE
                   </Button>
                 </Box>
               </Box>
@@ -3048,7 +3048,7 @@ export default function PlayerDashboard() {
               }}
             >
               <img src={wordImg.src} alt="World Ranking" width="18" height="18" />
-              World Ranking
+              WORLD RANKING
             </Button>
           </Box>
         </Box>

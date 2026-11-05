@@ -20,7 +20,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         className="mobile-hide-bg-img"
         role="main"
         style={{
-          backgroundImage: (isMainPage || isAdminPage) ? 'none' : `url(${Mainbg.src})`,
+          // backgroundImage: (isMainPage || isAdminPage) ? 'none' : `url(${Mainbg.src})`,
           backgroundPosition: 'center',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
@@ -34,7 +34,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           flexDirection: 'column',
         }}
       >
-        {!isMainPage && !isAdminPage && <Navbar />}
+        {!isAdminPage && <Navbar />}
         {children}
         {/* {!isMainPage && <Footer />} */}
       </main>

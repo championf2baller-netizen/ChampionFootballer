@@ -2171,34 +2171,47 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       <Box sx={{ p: isDialog ? 0 : { xs: 1, sm: 2, md: 3 }, minHeight: isDialog ? 'auto' : '100vh', color: '#E5E7EB', bgcolor: '#000', overflowX: 'hidden' }}>
         {/* Close Button - hide in dialog mode since dialog has its own close */}
         {/* {!isDialog && <CloseButton fallbackRoute="/dashboard" />} */}
-        <Box sx={{ display: 'flex', gap: { xs: 1, md: 0 }, flexDirection: { xs: 'column', md: 'row' }, alignItems: 'stretch' }}>
-          {/* LEFT PANEL */}
-          <Box sx={{ width: { xs: '100%', md: '55%' }, display: 'flex', flexDirection: 'column' }}>
-            {/* EDIT MATCH Tab Header */}
-            <Box sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1.5, sm: 3 }, background: '#00a77f', textAlign: 'center', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              <Typography sx={{ color: 'white', fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1.4rem', md: '1.6rem' }, fontFamily: 'var(--font-geist-anton), "Anton", sans-serif', textTransform: 'uppercase', letterSpacing: { xs: 1, sm: 2 } }}>
-                Edit Match
-              </Typography>
-              <IconButton
-                onClick={() => { if (isDialog && onClose) onClose(); else router.push(`/league/${leagueId}`); }}
-                sx={{
-                  display: { xs: 'inline-flex', md: 'none' },
-                  bgcolor: '#e6e6e6',
-                  color: '#000',
-                  position: 'absolute',
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 46,
-                  borderRadius: 0,
-                  '&:hover': { bgcolor: '#d0d0d0' }
-                }}
-              >
-                <X size={26} />
-              </IconButton>
-            </Box>
-            <form id="edit-match-form" ref={formRef} onSubmit={handleUpdateMatch} style={{ width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <Paper sx={{ p: { xs: 2, sm: 3, md: 4 }, bgcolor: '#1a1a1a', color: '#E5E7EB', borderRadius: 0, border: '1px solid white', borderTop: 'none', mb: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', gap: { xs: 2, md: 0 }, flexDirection: { xs: 'column', md: 'row' }, alignItems: 'stretch' }}>
+          {/* LEFT PANEL - On mobile, display: contents allows flex reordering with Team Preview */}
+          <Box sx={{ width: { xs: '100%', md: '55%' }, display: { xs: 'contents', md: 'flex' }, flexDirection: 'column' }}>
+            <Box
+              component="form"
+              id="edit-match-form"
+              ref={formRef}
+              onSubmit={handleUpdateMatch}
+              sx={{
+                width: '100%',
+                display: { xs: 'contents', md: 'flex' },
+                flexDirection: 'column',
+                flex: 1
+              }}
+            >
+              {/* SECTION 1: EDIT MATCH HEADER + SELECT TEAM (Mobile Order: 1) */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', order: { xs: 1, md: 'unset' } }}>
+                {/* EDIT MATCH Tab Header */}
+                <Box sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1.5, sm: 3 }, background: '#00a77f', textAlign: 'center', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <Typography sx={{ color: 'white', fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1.4rem', md: '1.6rem' }, fontFamily: 'var(--font-geist-anton), "Anton", sans-serif', textTransform: 'uppercase', letterSpacing: { xs: 1, sm: 2 } }}>
+                    Edit Match
+                  </Typography>
+                  <IconButton
+                    onClick={() => { if (isDialog && onClose) onClose(); else router.push(`/league/${leagueId}`); }}
+                    sx={{
+                      display: { xs: 'inline-flex', md: 'none' },
+                      bgcolor: '#e6e6e6',
+                      color: '#000',
+                      position: 'absolute',
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: 46,
+                      borderRadius: 0,
+                      '&:hover': { bgcolor: '#d0d0d0' }
+                    }}
+                  >
+                    <X size={26} />
+                  </IconButton>
+                </Box>
+                <Paper sx={{ p: { xs: 2, sm: 3, md: 4 }, bgcolor: '#1a1a1a', color: '#E5E7EB', borderRadius: 0, border: '1px solid white', borderTop: 'none', mb: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
                 {/* SELECT TEAM Section */}
                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', fontSize: { xs: '0.95rem', sm: '1.3rem', md: '1.5rem' }, textTransform: 'uppercase', mb: 1 }}>
                   Select Team
@@ -3048,9 +3061,21 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   </Grid>
                 </Grid>
               </Paper>
+            </Box>
 
-              {/* MATCH DETAIL */}
-              <Paper sx={{ mt: 0, mb: 0, p: { xs: 2, sm: 3, md: 4 }, bgcolor: '#1a1a1a', color: '#E5E7EB', borderRadius: 0, border: '1px solid white', borderTop: 'none' }}>
+            {/* SECTION 3: MATCH DETAIL (Mobile Order: 3 - below Team Preview) */}
+            <Paper sx={{
+              mt: 0,
+              mb: 0,
+              p: { xs: 2, sm: 3, md: 4 },
+              bgcolor: '#1a1a1a',
+              color: '#E5E7EB',
+              borderRadius: 0,
+              border: '1px solid white',
+              borderTop: { xs: '1px solid white', md: 'none' },
+              width: '100%',
+              order: { xs: 3, md: 'unset' }
+            }}>
                 <Typography variant='h6' sx={{ mb: 1.5, fontWeight: 700, textTransform: 'uppercase', fontSize: { xs: '1rem', sm: '1.2rem' }, color: 'white' }}>Match Detail</Typography>
                 {/* Add Match Notification */}
                 <Box sx={{ mb: 2, }}>
@@ -3250,10 +3275,10 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                   {isSubmitting ? <CircularProgress size={28} sx={{ color: 'white' }} /> : 'SAVE'}
                 </Button>
               </Paper>
-            </form>
+            </Box>
           </Box>
-          {/* RIGHT PANEL */}
-          <Box sx={{ width: { xs: '100%', md: '45%' }, display: 'flex', flexDirection: 'column' }}>
+          {/* RIGHT PANEL - SECTION 2: MATCH PREVIEW / TEAM PREVIEW (Mobile Order: 2) */}
+          <Box sx={{ width: { xs: '100%', md: '45%' }, display: 'flex', flexDirection: 'column', order: { xs: 2, md: 'unset' } }}>
             {/* MATCH PREVIEW Tab Header */}
             <Box sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1.5, sm: 3 }, background: '#00a77f', textAlign: 'center', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
               <Typography sx={{ color: 'white', fontWeight: 700, fontSize: { xs: '0.95rem', sm: '1.4rem', md: '1.6rem' }, fontFamily: 'var(--font-geist-anton), "Anton", sans-serif', textTransform: 'uppercase', letterSpacing: { xs: 1, sm: 2 } }}>

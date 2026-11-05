@@ -43,6 +43,8 @@ export default function AuthSocialButtons() {
     backgroundColor: '#ffffff',
     color: '#333',
     fontSize: '0.85rem',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.03em',
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
@@ -59,7 +61,7 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('google')} 
         className="auth-social-btn"
-        aria-label="Continue with Google"
+        aria-label="CONTINUE WITH GOOGLE"
         style={{
           ...buttonStyle,
           color: '#000000',
@@ -86,7 +88,7 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('facebook')} 
         className="auth-social-btn"
-        aria-label="Continue with Facebook"
+        aria-label="CONTINUE WITH FACEBOOK"
         style={{
           ...buttonStyle,
           backgroundColor: '#0866FF',
@@ -114,7 +116,7 @@ export default function AuthSocialButtons() {
       <button 
         onClick={() => go('apple')} 
         className="auth-social-btn"
-        aria-label="Continue with Apple"
+        aria-label="CONTINUE WITH APPLE"
         style={{
           ...buttonStyle,
           backgroundColor: '#000000',

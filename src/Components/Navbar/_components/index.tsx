@@ -50,6 +50,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { logout, initializeFromStorage } from '@/lib/features/authSlice';
 import cflogo from '@/Components/images/champion football logo 3 (1).png';
+import Layer from '@/Components/images/logonavbar.webp';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -1089,6 +1090,7 @@ export default function NavigationBar() {
     }
   }, [xpStatusOpen]);
   const pathname = usePathname();
+  const isMainPage = pathname === '/';
 
   // 🔥 NOTIFICATION STATES
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -2799,59 +2801,103 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         sx={{
           background: '#0e0e0e',
           boxShadow: '0 4px 20px 0 rgba(229, 106, 22, 0.45), 0 1px 6px 0 rgba(229, 106, 22, 0.35)',
-          // px: { xs: 1, sm: 2, md: 2 }
-          //  px: { xs: 1, sm: 2, md: 2 },
           top: 0,
           zIndex: (theme) => theme.zIndex.drawer + 2,
           borderBottom: '3px solid #E56A16'
         }}
       >
-        <Toolbar sx={{
-          justifyContent: 'space-between',
-          width: '100%',
-          minWidth: 0,
-          minHeight: { xs: '60px', md: '70px' },
-          gap: { xs: 1, md: 2.4 },
-          overflowX: 'hidden',
-          position: 'relative',
-        }}>
-          {/* LOGO SECTION */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-              position: { xs: 'absolute', lg: 'static' },
-              left: { xs: '50%', lg: 'auto' },
-              top: { xs: '50%', lg: 'auto' },
-              transform: { xs: 'translate(-50%, -50%)', lg: 'none' },
-              zIndex: 1,
-            }}
-          >
-            <Link href="/home" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-              <Box sx={{ 
-                width: { xs: 260, sm: 260, md: 340, lg: 400 },
-                height: { xs: 34, sm: 48, md: 75 },
+        <Toolbar
+          disableGutters={isMainPage}
+          sx={{
+            justifyContent: isMainPage ? 'flex-start' : 'space-between',
+            width: '100%',
+            minWidth: 0,
+            minHeight: isMainPage ? { xs: '46px', sm: '54px', md: '64px', lg: '74px' } : { xs: '60px', md: '70px' },
+            py: isMainPage ? { xs: 0.5, sm: 0.6, md: 0.8 } : 0,
+            px: isMainPage ? { xs: 2, sm: 3, md: 5 } : undefined,
+            overflowX: 'hidden',
+            position: 'relative',
+          }}
+        >
+          {isMainPage ? (
+            /* MAIN / LOGIN PAGE: Align logo perfectly with the 1280px hero container with tight top/bottom gap */
+            <Box
+              sx={{
+                maxWidth: '1280px',
+                mx: 'auto',
+                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                mt: { xs: 0, md: -2 },
-              }}>
-                <Image
-                  src={cflogo}
-                  alt="Champion Footballer Logo"
-                  width={430}
-                  height={64}
-                  priority
-                  sizes="(max-width:600px) 200px, (max-width:900px) 240px, (max-width:1200px) 340px, 400px"
-                  style={{
-                    height: '100%',
-                    width: '100%',
-                    objectFit: 'contain'
-                  }}
-                />
-              </Box>
-            </Link>
-          </Box>
+                justifyContent: 'flex-start',
+              }}
+            >
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                <Box sx={{
+                  width: { xs: 240, sm: 320, md: 520, lg: 620 },
+                  height: 'auto',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
+                  <Image
+                    src={Layer}
+                    alt="Champion Footballer Logo"
+                    width={700}
+                    height={130}
+                    priority
+                    fetchPriority="high"
+                    quality={95}
+                    sizes="(max-width: 600px) 340px, 700px"
+                    style={{
+                      height: 'auto',
+                      width: '100%',
+                      maxHeight: '68px',
+                      objectFit: 'contain',
+                      objectPosition: 'left center',
+                      display: 'block'
+                    }}
+                  />
+                </Box>
+              </Link>
+            </Box>
+          ) : (
+            /* ALL OTHER PAGES: Original layout, logo positioning, and sizing */
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                flexShrink: 0,
+                position: { xs: 'absolute', lg: 'static' },
+                left: { xs: '50%', lg: 'auto' },
+                top: { xs: '50%', lg: 'auto' },
+                transform: { xs: 'translate(-50%, -50%)', lg: 'none' },
+                zIndex: 1,
+              }}
+            >
+              <Link href={isAuthenticated ? "/home" : "/"} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                <Box sx={{ 
+                  width: { xs: 260, sm: 260, md: 340, lg: 400 },
+                  height: { xs: 34, sm: 48, md: 75 },
+                  display: 'flex',
+                  alignItems: 'center',
+                  mt: { xs: 0, md: -2 },
+                }}>
+                  <Image
+                    src={cflogo}
+                    alt="Champion Footballer Logo"
+                    width={430}
+                    height={64}
+                    priority
+                    sizes="(max-width:600px) 200px, (max-width:900px) 240px, (max-width:1200px) 340px, 400px"
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      objectFit: 'contain'
+                    }}
+                  />
+                </Box>
+              </Link>
+            </Box>
+          )}
 
           {/* DESKTOP NAVIGATION (moved to right) */}
           <Box sx={{
@@ -3129,7 +3175,10 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           </Box>
         </Toolbar>
       </AppBar>
-      <Toolbar sx={{ minHeight: { xs: '60px', md: '70px' } }} />
+      <Toolbar sx={{ 
+        minHeight: isMainPage ? { xs: '46px', sm: '54px', md: '64px', lg: '74px' } : { xs: '60px', md: '70px' },
+        py: isMainPage ? { xs: 0.5, sm: 0.6, md: 0.8 } : 0,
+      }} />
 
       {isAuthenticated && (
         <Box

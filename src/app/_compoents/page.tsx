@@ -16,7 +16,6 @@ import image9 from '@/Components/images/1stpicc.jpeg';
 import image10 from '@/Components/images/2ndpicc.png';
 import image11 from '@/Components/images/3rdpicc.png';
 import image12 from '@/Components/images/4thpicc.png';
-import LogoNavbar from './logonavbar';
 
 
 import { useState, useEffect } from 'react';
@@ -116,7 +115,6 @@ export default function LandingPage() {
 
   return (
     <>
-      <LogoNavbar />
 
       {/* Black Hero Section with Grid Layout */}
       <Box
@@ -313,7 +311,7 @@ export default function LandingPage() {
                         whiteSpace: { xs: 'nowrap', md: 'normal' },
                       }}
                     >
-                      The best football app on the planet!
+                      THE BEST FOOTBALL APP ON THE PLANET!
                     </Typography>
 
                     <Button
@@ -327,8 +325,9 @@ export default function LandingPage() {
                       }}
                       sx={{
                         color: 'white',
-                        textTransform: 'none',
+                        textTransform: 'uppercase',
                         fontSize: { xs: '0.9rem', md: '0.95rem' },
+                        letterSpacing: '0.04em',
                         fontWeight: '500',
                         border: '1px solid #FFFFFF',
                         backgroundColor: 'transparent',
@@ -342,7 +341,7 @@ export default function LandingPage() {
                         py: 0.5,
                       }}
                     >
-                      {showLogin ? 'Join' : 'Login'}
+                      {showLogin ? 'JOIN' : 'LOGIN'}
                     </Button>
                   </Box>
 

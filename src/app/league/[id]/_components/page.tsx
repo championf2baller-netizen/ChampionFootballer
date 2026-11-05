@@ -5598,7 +5598,6 @@ export default function LeagueDetailPage() {
                                                                                             background: isUserAvailable ? '#00b074' : 'rgba(255, 255, 255, 0.04)',
                                                                                             color: '#ffffff',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                                            textTransform: 'none',
                                                                                             fontWeight: 700,
                                                                                             fontSize: '12px',
                                                                                             py: '8px',
@@ -5610,7 +5609,8 @@ export default function LeagueDetailPage() {
                                                                                             lineHeight: 1.2,
                                                                                             border: isUserAvailable ? '1.5px solid #00ffaa' : '1px solid rgba(255, 255, 255, 0.08)',
                                                                                             '&:hover': { background: '#008f6a' },
-                                                                                            '&.Mui-disabled': { opacity: 0.5 }
+                                                                                            '&.Mui-disabled': { opacity: 0.5 },
+                                                                                            textTransform: 'uppercase',
                                                                                         }}
                                                                                     >
                                                                                         {availabilityLoading[match.id] ? <CircularProgress size={16} color="inherit" /> : "I'm in"}
@@ -5624,7 +5624,7 @@ export default function LeagueDetailPage() {
                                                                                             background: isUserUnavailable ? '#c62828' : 'rgba(255, 255, 255, 0.04)',
                                                                                             color: '#ffffff',
                                                                                             fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                                                                                            textTransform: 'none',
+                                                                                            textTransform: 'uppercase',
                                                                                             fontWeight: 700,
                                                                                             fontSize: '12px',
                                                                                             py: '8px',
@@ -5636,7 +5636,8 @@ export default function LeagueDetailPage() {
                                                                                             lineHeight: 1.2,
                                                                                             border: isUserUnavailable ? '1.5px solid #ff6b6b' : '1px solid rgba(255, 255, 255, 0.08)',
                                                                                             '&:hover': { background: isUserUnavailable ? '#b71c1c' : 'rgba(255, 255, 255, 0.08)' },
-                                                                                            '&.Mui-disabled': { opacity: 0.5 }
+                                                                                            '&.Mui-disabled': { opacity: 0.5 },
+
                                                                                         }}
                                                                                     >
                                                                                         Can't make it
@@ -6149,7 +6150,7 @@ export default function LeagueDetailPage() {
                                                                                         </Box>
                                                                                     </Box>
 
-                                                                                        {/* 5. MOTM ROW inside sleek enclosed container */}
+                                                                                    {/* 5. MOTM ROW inside sleek enclosed container */}
                                                                                     <Box sx={{
                                                                                         mx: { xs: '14px', sm: '16px' },
                                                                                         my: 1,
@@ -6553,14 +6554,14 @@ export default function LeagueDetailPage() {
                                                                                                         '&:hover': {
                                                                                                             bgcolor: match.archived ? 'rgba(245, 179, 1, 0.18)' : 'rgba(239, 68, 68, 0.18)',
                                                                                                             borderColor: match.archived ? '#f5b301' : '#ef4444'
-                                                                                            }
-                                                                                        }}
-                                                                                    >
-                                                                                        {match.archived ? 'Restore' : 'Delete'}
-                                                                                    </Button>
-                                                                                </Box>
-                                                                            </Box>
-                                                                        )}
+                                                                                                        }
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {match.archived ? 'Restore' : 'Delete'}
+                                                                                                </Button>
+                                                                                            </Box>
+                                                                                        </Box>
+                                                                                    )}
 
                                                                                     {/* Cancelled Match Permanent Delete (Admin Only) */}
                                                                                     {match.archived && isAdmin && (
@@ -7016,7 +7017,7 @@ export default function LeagueDetailPage() {
                                             </div> */}
 
                                                         <>
-                                                            <div className="grid mt-0 grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
+                                                            <div className="grid mt-0 grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
                                                                 <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#717d8f' }}>#</div>
                                                                 <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>MOTM</div>
@@ -7024,8 +7025,8 @@ export default function LeagueDetailPage() {
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>D</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>L</div>
-                                                                <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>GD</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W%</div>
+                                                                <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>GD</div>
                                                                 <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#717d8f' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
                                                             </div>
                                                             {/* Full width border alag */}
@@ -7094,7 +7095,7 @@ export default function LeagueDetailPage() {
                                                                         <div
                                                                             key={player.id}
                                                                             onClick={(e) => { e.preventDefault(); if (league?.id) openQuickViewFromTable(String(league.id), String(player.id)); }}
-                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
+                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
                                                                         >
                                                                             {/* Rank */}
                                                                             <div className="text-center text-white font-bold league-table-sticky-rank h-full flex items-center justify-center">
@@ -7188,6 +7189,7 @@ export default function LeagueDetailPage() {
                                                                             <div className="text-center text-white font-bold">{player.wins}</div>
                                                                             <div className="text-center text-white font-bold">{player.draws}</div>
                                                                             <div className="text-center text-white font-bold">{player.losses}</div>
+                                                                            <div className="text-center text-white font-bold">{player.winPercentage}</div>
                                                                             <div className="text-center font-bold">
                                                                                 {(() => {
                                                                                     const gd = player.goalDifference ?? 0;
@@ -7196,7 +7198,6 @@ export default function LeagueDetailPage() {
                                                                                     return <span className="text-white/70">0</span>;
                                                                                 })()}
                                                                             </div>
-                                                                            <div className="text-center text-white font-bold">{player.winPercentage}</div>
                                                                             <div className="text-center font-extrabold uppercase">
                                                                                 <span className={xpPts > 0 ? 'text-[#22c55e]' : xpPts < 0 ? 'text-[#ef4444]' : 'text-white/70'}>
                                                                                     {xpPts.toLocaleString()}
@@ -7206,7 +7207,7 @@ export default function LeagueDetailPage() {
                                                                     );
                                                                 })}
                                                             {tableData.length === 0 && (
-                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_50px_55px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
+                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
                                                                     <div className="text-center text-white/80" style={{ gridColumn: '1 / -1' }}>
                                                                         No players found for this season.
                                                                     </div>
@@ -7645,8 +7646,8 @@ export default function LeagueDetailPage() {
                                                                                 key={`${metric.key}-${player.id}`}
                                                                                 href={`/player/${player.id}`}
                                                                                 className={`grid grid-cols-[28px_1fr_auto] items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 transition-colors border-b border-[#1c1d22] cursor-pointer ${isCurrentUser
-                                                                                        ? 'league-row-current-user'
-                                                                                        : 'hover:bg-[#18191e]'
+                                                                                    ? 'league-row-current-user'
+                                                                                    : 'hover:bg-[#18191e]'
                                                                                     }`}
                                                                             >
                                                                                 {/* Rank Number */}
@@ -7903,8 +7904,8 @@ export default function LeagueDetailPage() {
                                                 href={`/player/${player.id}`}
                                                 onClick={() => setDesktopLeaderboardPopupMetric(null)}
                                                 className={`grid grid-cols-[36px_1fr_auto] items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 transition-colors border-b border-[#1c1d22] cursor-pointer ${isCurrentUser
-                                                        ? 'league-row-current-user'
-                                                        : 'hover:bg-[#18191e]'
+                                                    ? 'league-row-current-user'
+                                                    : 'hover:bg-[#18191e]'
                                                     }`}
                                             >
                                                 {/* Rank Number */}

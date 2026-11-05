@@ -1283,7 +1283,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 fontWeight: "bold",
                 // fontStyle: "italic",
                 borderRadius: '7px',
-                textTransform: "none",
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
                 // letterSpacing: "0.02em",
                 "&:hover": {
                   background: "#00cc9c",
@@ -1834,7 +1835,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 color: 'white',
                 fontSize: '1.05rem',
                 fontWeight: 'bold',
-                textTransform: 'none',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
                 '&:hover': {
                   background: 'linear-gradient(177deg,rgba(229, 106, 22, 1) 26%, rgba(207, 35, 38, 1) 100%)',
                 },
@@ -1844,7 +1846,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                 },
               }}
             >
-              {registerLoading ? <CircularProgress size={24} color="inherit" /> : getCms('page_auth_register_btn', 'Register')}
+              {registerLoading ? <CircularProgress size={24} color="inherit" /> : getCms('page_auth_register_btn', 'REGISTER')}
             </Button>
 
             {/* Social auth buttons (desktop: to the right of Register; next row: FB/Apple) */}
@@ -1864,7 +1866,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
               const socialBase = {
                 height: { xs: '56px', md: `${FIGMA_HEIGHT}px` },
                 borderRadius: `${FIGMA_RADIUS}px`,
-                textTransform: 'none',
+                textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                 fontSize: '0.95rem',
                 fontWeight: 600,
               } as const
@@ -1919,7 +1922,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                       '&:disabled': { backgroundColor: '#1f1f1f', color: 'rgba(255,255,255,0.6)' },
                     }}
                   >
-                    Continue with Apple
+                    CONTINUE WITH APPLE
                   </Button>
                 </>
               )
@@ -2047,7 +2050,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   fontWeight: 700,
                   py: 1.4,
                   borderRadius: '7px',
-                  textTransform: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   fontSize: '0.95rem',
                   fontFamily: 'var(--font-woodford-bourne-pro)',
                   boxShadow: forgotPopupTheme.buttonShadow,
@@ -2055,7 +2059,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   '&:disabled': { background: forgotPopupTheme.buttonDisabled, color: 'rgba(255,255,255,0.5)' },
                 }}
               >
-                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'Send Verification Code'}
+                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'SEND VERIFICATION CODE'}
               </Button>
             </Box>
           )}
@@ -2113,7 +2117,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   fontWeight: 700,
                   py: 1.4,
                   borderRadius: '7px',
-                  textTransform: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   fontSize: '0.95rem',
                   fontFamily: 'var(--font-woodford-bourne-pro)',
                   boxShadow: forgotPopupTheme.buttonShadow,
@@ -2121,7 +2126,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   '&:disabled': { background: forgotPopupTheme.buttonDisabled, color: 'rgba(255,255,255,0.5)' },
                 }}
               >
-                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'Verify Code'}
+                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'VERIFY CODE'}
               </Button>
 
               <Button
@@ -2234,7 +2239,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   fontWeight: 700,
                   py: 1.4,
                   borderRadius: '7px',
-                  textTransform: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   fontSize: '0.95rem',
                   fontFamily: 'var(--font-woodford-bourne-pro)',
                   boxShadow: forgotPopupTheme.buttonShadow,
@@ -2242,7 +2248,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   '&:disabled': { background: forgotPopupTheme.buttonDisabled, color: 'rgba(255,255,255,0.5)' },
                 }}
               >
-                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'Set New Password'}
+                {forgotLoading ? <CircularProgress size={22} color="inherit" /> : 'SET NEW PASSWORD'}
               </Button>
             </Box>
           )}
@@ -2275,14 +2281,15 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   fontWeight: 700,
                   py: 1.4,
                   borderRadius: '7px',
-                  textTransform: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   fontSize: '0.95rem',
                   fontFamily: 'var(--font-woodford-bourne-pro)',
                   boxShadow: forgotPopupTheme.buttonShadow,
                   '&:hover': { opacity: 0.92, background: forgotPopupTheme.primaryGradient },
                 }}
               >
-                Back to Login
+                BACK TO LOGIN
               </Button>
             </Box>
           )}
@@ -2424,7 +2431,8 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   fontWeight: 700,
                   py: 1.4,
                   borderRadius: '7px',
-                  textTransform: 'none',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
                   fontSize: '0.95rem',
                   fontFamily: 'var(--font-woodford-bourne-pro)',
                   boxShadow: '0 4px 14px rgba(229,106,22,0.3)',
@@ -2432,7 +2440,7 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
                   '&:disabled': { background: 'linear-gradient(177deg, rgba(229,106,22,0.5) 26%, rgba(207,35,38,0.5) 100%)', color: 'rgba(255,255,255,0.5)' },
                 }}
               >
-                {verifyLoading ? <CircularProgress size={22} color="inherit" /> : 'Verify & Start Playing'}
+                {verifyLoading ? <CircularProgress size={22} color="inherit" /> : 'VERIFY & START PLAYING'}
               </Button>
 
               <Button

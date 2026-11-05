@@ -368,7 +368,7 @@ const TrophyCard = ({
         margin: '0 auto',
         textAlign: 'center',
         borderRadius: '6px',
-        backgroundColor: '#2a2a2a',
+        backgroundColor: '#121316',
         border: `2px solid ${color}`,
         display: 'flex',
         flexDirection: 'column',
@@ -3385,7 +3385,7 @@ export default function GlobalTrophyRoom() {
               <>
                 {/* Profile Card with Stars */}
                 <Paper sx={{
-                  background: '#1d1d22',
+                  background: '#121316',
                   borderRadius: { xs: '0 0 26px 26px', sm: '0 0 38px 38px' },
                   p: 0,
                   mb: 3,
@@ -3400,7 +3400,7 @@ export default function GlobalTrophyRoom() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     py: { xs: 1.5, sm: 2 },
-                    background: '#1d1d22',
+                    background: '#121316',
                     borderBottom: '1px solid rgba(255,255,255,0.3)',
                   }}>
                     <Box sx={{
@@ -3470,7 +3470,7 @@ export default function GlobalTrophyRoom() {
 
                       {/* Dark Background with Trophies */}
                       <Box sx={{
-                        bgcolor: '#1a1a1f',
+                        bgcolor: '#121316',
                         p: { xs: 1.25, sm: 2 },
                         pr: { xs: 1.25, sm: 2, md: 2.4 },
                         minHeight: { xs: '120px', sm: '230px' },
@@ -3563,7 +3563,7 @@ export default function GlobalTrophyRoom() {
 
                       {/* Dark Background with Trophies */}
                       <Box sx={{
-                        bgcolor: '#1a1a1f',
+                        bgcolor: '#121316',
                         p: { xs: 1.25, sm: 2 },
                         pl: { xs: 1.25, sm: 2, md: 2.4 },
                         minHeight: { xs: '120px', sm: '230px' },

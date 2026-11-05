@@ -34,6 +34,7 @@ const baseOuterSx: SystemStyleObject<Theme> = {
   left: '50%',
   transform: 'translateX(-50%)',
   bgcolor: '#0E0E0E',
+  zIndex: 30,
 };
 
 const basePaperSx: SystemStyleObject<Theme> = {
@@ -45,6 +46,7 @@ const basePaperSx: SystemStyleObject<Theme> = {
   minHeight: 'auto',
   borderRadius: 0,
   boxShadow: 'none',
+  overflow: 'visible',
 };
 
 const baseContainerSx: SystemStyleObject<Theme> = {
@@ -123,6 +125,8 @@ export default function PageHeader({
       mb: { xs: 1.5, sm: 2, md: 4 },
       width: '100%',
       bgcolor: '#0E0E0E',
+      position: 'relative',
+      zIndex: 30,
     };
 
   const dividerStyle: SystemStyleObject<Theme> = fullBleed

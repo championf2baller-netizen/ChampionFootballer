@@ -3942,7 +3942,7 @@ export default function AllMatches() {
                                                         sx={{
                                                             background: '#00af80',
                                                             color: 'white',
-                                                            textTransform: 'none',
+                                                            textTransform: 'uppercase',
                                                             fontWeight: 700,
                                                             fontSize: { xs: '0.78rem', sm: '0.85rem' },
                                                             py: 0.9,
@@ -3954,9 +3954,9 @@ export default function AllMatches() {
                                                             position: 'relative',
                                                             zIndex: isUserAvailable ? 2 : 1,
                                                             boxShadow: isUserAvailable ? '0 0 14px 4px rgba(0, 255, 170, 0.8), 0 0 22px rgba(0, 255, 170, 0.5)' : 'none',
-                                                            border: isUserAvailable ? '2px solid #00ffaa' : 'none',
-                                                            '&:hover': { background: '#008f6a' },
-                                                            '&.Mui-disabled': { opacity: 0.5 }
+                                                           border: isUserAvailable ? '1.5px solid #00ffaa' : '1px solid rgba(255, 255, 255, 0.08)',
+                                                           '&:hover': { background: '#008f6a' },
+                                                           '&.Mui-disabled': { opacity: 0.5 }
                                                         }}
                                                     >
                                                         I'm in
@@ -3969,7 +3969,7 @@ export default function AllMatches() {
                                                         sx={{
                                                             background: isUserUnavailable ? '#c62828' : '#23272f',
                                                             color: 'white',
-                                                            textTransform: 'none',
+                                                            textTransform: 'uppercase',
                                                             fontWeight: 700,
                                                             fontSize: { xs: '0.78rem', sm: '0.85rem' },
                                                             py: 0.9,
