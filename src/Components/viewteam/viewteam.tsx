@@ -957,7 +957,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
       }
-    } catch {}
+    } catch { }
 
     shareContent({
       title: `Team line-up: (${matchup})`,
@@ -1488,7 +1488,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           )}
         </Box>
         <Box sx={{ height: { xs: 2, sm: 4 } }} />
-        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : 'red', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: { xs: '48px', sm: '60px' } }}>
+        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : '#E56A16', textAlign: 'center', whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: { xs: '48px', sm: '60px' } }}>
           {player.name}
         </Typography>
       </Box>
@@ -1893,7 +1893,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                     <Box key={i} sx={{ bgcolor: '#2b2b2b', border: '1.5px solid #884a20', borderRadius: 1, px: { xs: 1, sm: 1.5 }, py: { xs: 0.8, sm: 1 }, boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1, flexWrap: 'wrap' }}>
-                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: 'red' }}>{p.name}</Typography>
+                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.82rem', sm: '0.9rem' }, color: '#E56A16' }}>{p.name}</Typography>
                           {isCap && <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#00a77f' }}>Captain</Typography>}
                         </Box>
                         {hasPublishedResult && typeof (p as Player).xp === 'number' && (
@@ -1968,43 +1968,43 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
 
         {/* Replace Dialog (fixed JSX) */}
         <Dialog open={replaceOpen} onClose={() => setReplaceOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{
-          background: '#0e0e0e',
-          color: '#fff',
-          fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
-          fontWeight: 700,
-          fontSize: { xs: '18px', sm: '22px' },
-          textTransform: 'uppercase',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          px: { xs: 2.5, md: 3.5 },
-          py: 0,
-          height: { xs: 52, sm: 58 },
-          position: 'relative',
-          borderBottom: '3px solid #E56A16',
-          flexShrink: 0
-        }}>
-          Select Replacement
-          <IconButton onClick={() => setReplaceOpen(false)} aria-label="close" sx={{
-            bgcolor: '#e6e6e6',
-            color: '#000',
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            width: { xs: 48, sm: 56 },
-            borderRadius: 0,
-            borderTopRightRadius: 'inherit',
-            transition: 'background-color 0.2s ease',
-            '&:hover': {
-              bgcolor: '#d0d0d0',
-              color: '#000',
-            }
+          <DialogTitle sx={{
+            background: '#0e0e0e',
+            color: '#fff',
+            fontFamily: 'var(--font-oswald), "Oswald", sans-serif !important',
+            fontWeight: 700,
+            fontSize: { xs: '18px', sm: '22px' },
+            textTransform: 'uppercase',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            px: { xs: 2.5, md: 3.5 },
+            py: 0,
+            height: { xs: 52, sm: 58 },
+            position: 'relative',
+            borderBottom: '3px solid #E56A16',
+            flexShrink: 0
           }}>
-            <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
-          </IconButton>
-        </DialogTitle>
+            Select Replacement
+            <IconButton onClick={() => setReplaceOpen(false)} aria-label="close" sx={{
+              bgcolor: '#e6e6e6',
+              color: '#000',
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: { xs: 48, sm: 56 },
+              borderRadius: 0,
+              borderTopRightRadius: 'inherit',
+              transition: 'background-color 0.2s ease',
+              '&:hover': {
+                bgcolor: '#d0d0d0',
+                color: '#000',
+              }
+            }}>
+              <CloseIcon sx={{ fontSize: { xs: 24, sm: 28 } }} />
+            </IconButton>
+          </DialogTitle>
           <DialogContent>
             {replaceLoading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
