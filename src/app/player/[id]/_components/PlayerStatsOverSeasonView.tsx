@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import Image from 'next/image';
-import TrofiiImg from '@/Components/images/trofii.png';
+import TrofiiImg from '@/Components/images/trofiiii.png';
 
 export interface SeasonStatsItem {
     seasonId: string;
@@ -66,13 +66,13 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
                 borderRadius: { xs: '10px', sm: '8px' },
                 border: '2px solid #3a3a3a',
                 overflow: 'hidden',
-                color: '#222',
+                color: '#fff',
             }}
         >
             {/* Header bar */}
             <Box
                 sx={{
-                    bgcolor: '#d9d9d9',
+                    bgcolor: '#383A3F',
                     borderBottom: '1px solid #bdb8b3',
                     px: { xs: 1.5, sm: 2.5 },
                     py: { xs: 1.2, sm: 1.45 },
@@ -88,21 +88,21 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
                     height={22}
                     style={{
                         objectFit: 'contain',
-                        filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)'
+                        // filter: 'brightness(0) saturate(100%) invert(17%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%)'
                     }}
                 />
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', minWidth: 0 }}>
-                    <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: { xs: 12.5, sm: 15, md: 17 }, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#222', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: { xs: 12.5, sm: 15, md: 17 }, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#fff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {currentLeagueName}
                     </Typography>
-                    <Typography sx={{ color: '#777', fontSize: { xs: 13, sm: 16 }, lineHeight: 1 }}>|</Typography>
-                    <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: { xs: 12, sm: 14.5, md: 16 }, textTransform: 'uppercase', letterSpacing: '0.7px', color: '#3d3d3d', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
+                    <Typography sx={{ color: '#ffff', fontSize: { xs: 13, sm: 16 }, lineHeight: 1 }}>|</Typography>
+                    <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 700, fontSize: { xs: 12, sm: 14.5, md: 16 }, textTransform: 'uppercase', letterSpacing: '0.7px', color: '#ffff', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
                         STATS OVER SEASONS
                     </Typography>
                     {playerName && (
                         <>
-                            <Typography sx={{ color: '#777', fontSize: { xs: 13, sm: 16 }, lineHeight: 1 }}>|</Typography>
-                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: { xs: 12.5, sm: 14.5, md: 16 }, textTransform: 'uppercase', letterSpacing: '0.75px', color: '#1f1f1f', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography sx={{ color: '#ffff', fontSize: { xs: 13, sm: 16 }, lineHeight: 1 }}>|</Typography>
+                            <Typography sx={{ fontFamily: 'var(--font-woodford-bourne-pro), sans-serif', fontWeight: 800, fontSize: { xs: 12.5, sm: 14.5, md: 16 }, textTransform: 'uppercase', letterSpacing: '0.75px', color: '#ffff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {playerName.toUpperCase()}
                             </Typography>
                         </>
