@@ -1337,51 +1337,39 @@ export default function WorldRankingTable() {
                   </TableRow>
                 )}
 
-                {/* Show More Row */}
-                {!loading && visibleLimit < filtered.length && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      sx={{
-                        p: 0,
-                        borderBottom: 'none',
-                        bgcolor: '#121316 !important',
-                      }}
-                    >
-                      <Box
-                        onClick={() => setVisibleLimit((prev) => prev + 10)}
-                        sx={{
-                          position: 'sticky',
-                          left: 0,
-                          width: { xs: 'calc(100vw - 32px)', sm: '100%' },
-                          maxWidth: 1220,
-                          py: 2.5,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 1,
-                          color: '#e56a16',
-                          fontWeight: 700,
-                          fontSize: 12,
-                          cursor: 'pointer',
-                          userSelect: 'none',
-                          letterSpacing: '0.8px',
-                          textTransform: 'uppercase',
-                          fontFamily: 'var(--font-woodford-bourne-pro)',
-                          borderTop: '1px solid #1c1d22',
-                          transition: 'all 0.15s ease',
-                          '&:hover': { color: '#f97316' },
-                        }}
-                      >
-                        <span>SHOW MORE</span>
-                        <ChevronDown size={14} color="currentColor" />
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           </TableContainer>
+
+          {/* Show More Button */}
+          {!loading && visibleLimit < filtered.length && (
+            <Box
+              onClick={() => setVisibleLimit((prev) => prev + 10)}
+              sx={{
+                width: '100%',
+                py: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1,
+                color: '#e56a16',
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: 'pointer',
+                userSelect: 'none',
+                letterSpacing: '0.8px',
+                textTransform: 'uppercase',
+                fontFamily: 'var(--font-woodford-bourne-pro)',
+                borderTop: '1px solid #1c1d22',
+                backgroundColor: '#121316',
+                transition: 'all 0.15s ease',
+                '&:hover': { color: '#f97316' },
+              }}
+            >
+              <span>SHOW MORE</span>
+              <ChevronDown size={14} color="currentColor" />
+            </Box>
+          )}
         </Card>
       </Box>
     </Box>

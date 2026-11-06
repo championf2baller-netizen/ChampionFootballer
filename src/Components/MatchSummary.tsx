@@ -348,13 +348,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                 fontWeight={700}
                 sx={{ fontSize: { xs: 12, sm: 14, md: 18, lg: 22, xl: 26 }, color: "white", lineHeight: 1.2 }}
               >
-                {homeTeamName}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ fontSize: { xs: 10, sm: 11, md: 19 }, color: '#fff', lineHeight: 1, letterSpacing: 1, mt: 1 }}
-              >
-                Home
+                {homeTeamName || 'Home'}
               </Typography>
               <Typography
                 variant="h4"
@@ -425,13 +419,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({
                 fontWeight={700}
                 sx={{ fontSize: { xs: 12, sm: 14, md: 18, lg: 22, xl: 26 }, color: "white", lineHeight: 1.2 }}
               >
-                {awayTeamName}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ fontSize: { xs: 10, sm: 11, md: 19 }, color: '#fff', lineHeight: 1, letterSpacing: 1, mt: 1 }}
-              >
-                Away
+                {awayTeamName || 'Away'}
               </Typography>
               <Typography
                 variant="h4"

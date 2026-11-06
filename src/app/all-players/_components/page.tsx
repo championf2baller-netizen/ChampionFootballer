@@ -2225,24 +2225,34 @@ const AllPlayersPage = () => {
                         );
                       })}
                     </List>
-
-                    {/* Show More Button */}
-                    {sortedPlayers.length > visibleCount && (
-                      <Box sx={{ py: 2.5, display: 'flex', justifyContent: 'center', borderTop: '1px solid #1c1d22' }}>
-                        <button
-                          type="button"
-                          onClick={() => setVisibleCount((prev) => prev + 15)}
-                          className="flex items-center justify-center gap-1.5 text-[#e56a16] hover:text-[#f97316] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer bg-transparent border-none"
-                        >
-                          <span>SHOW MORE</span>
-                          <ChevronDown size={14} />
-                        </button>
-                      </Box>
-                    )}
                   </Box>
                 )}
               </Box>
             </Box>
+
+            {/* Show More Button */}
+            {!loading && sortedPlayers.length > visibleCount && (
+              <Box
+                sx={{
+                  py: 2.5,
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderTop: '1px solid #1c1d22',
+                  backgroundColor: '#121316',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + 15)}
+                  className="flex items-center justify-center gap-1.5 text-[#e56a16] hover:text-[#f97316] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer bg-transparent border-none"
+                >
+                  <span>SHOW MORE</span>
+                  <ChevronDown size={14} />
+                </button>
+              </Box>
+            )}
           </Card>
         </Container>
       </Box>

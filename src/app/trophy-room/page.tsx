@@ -3452,7 +3452,7 @@ export default function GlobalTrophyRoom() {
                     <Box>
                       {/* Grey Header */}
                       <Box sx={{
-                        bgcolor: '#E1641A',
+                        bgcolor: '#0F1F1A',
                         py: { xs: 1, sm: 1.2 },
                         px: 2,
                       }}>
@@ -3545,7 +3545,7 @@ export default function GlobalTrophyRoom() {
                     <Box>
                       {/* Grey Header */}
                       <Box sx={{
-                        bgcolor: '#E1641A',
+                        bgcolor: '#0F1F1A',
                         py: { xs: 1, sm: 1.2 },
                         px: 2,
                       }}>

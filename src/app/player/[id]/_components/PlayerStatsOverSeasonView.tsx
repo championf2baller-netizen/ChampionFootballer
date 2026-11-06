@@ -111,16 +111,16 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
             </Box>
 
             {/* Content Body */}
-            <Box sx={{ bgcolor: '#f2f2f2', px: { xs: 1.25, sm: 2.5, md: 4 }, py: { xs: 2, md: 3 } }}>
+            <Box sx={{ bgcolor: '#232528', px: { xs: 1.25, sm: 2.5, md: 4 }, py: { xs: 2, md: 3 } }}>
                 {leagueId === 'all' ? (
                     <Box sx={{ textAlign: 'center', py: 5 }}>
-                        <Typography sx={{ color: '#777', fontSize: 14 }}>
+                        <Typography sx={{ color: '#aaa', fontSize: 14 }}>
                             Please select a specific league to view season-wise stats.
                         </Typography>
                     </Box>
                 ) : seasonWiseStats.length === 0 ? (
                     <Box sx={{ textAlign: 'center', py: 5 }}>
-                        <Typography className="empty-state-message" sx={{ color: '#555', fontSize: 16 }}>
+                        <Typography className="empty-state-message" sx={{ color: '#aaa', fontSize: 16 }}>
                             No season to compare.
                         </Typography>
                     </Box>
@@ -161,7 +161,7 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
                                             textAlign: 'start',
                                         }}>
                                             <Typography sx={{
-                                                color: isSelected ? '#2d2d2d' : '#888',
+                                                color: isSelected ? '#ffffff' : '#888',
                                                 fontWeight: isSelected ? 800 : 600,
                                                 fontSize: { xs: 13, sm: 16, md: 18 },
                                                 whiteSpace: 'nowrap',
@@ -257,7 +257,7 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
                                         <Box sx={{ minWidth: { xs: 90, sm: 130 }, textAlign: 'right' }}>
                                             <Typography
                                                 sx={{
-                                                    color: '#2d2d2d',
+                                                    color: '#ffffff',
                                                     fontWeight: 700,
                                                     fontSize: { xs: 11, sm: 13 },
                                                     textTransform: 'uppercase',
@@ -269,7 +269,7 @@ export const PlayerStatsOverSeasonView: React.FC<PlayerStatsOverSeasonViewProps>
                                             </Typography>
                                             <Typography
                                                 sx={{
-                                                    color: '#666',
+                                                    color: '#ffffff',
                                                     fontSize: { xs: 10, sm: 11.5 },
                                                     lineHeight: 1.3,
                                                 }}

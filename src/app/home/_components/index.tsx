@@ -1752,49 +1752,49 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
         (selectedLeague as any).computedStatus?.isComplete ||
         selectedLeague.status === 'completed'
       ) && (
-        <Button
-          disabled={isCreatingSeason || isFetching}
-          onClick={openCreateSeasonConfirm}
-          variant="contained"
-          fullWidth
-          sx={{
-            bgcolor: '#7f7f7f',
-            color: 'white',
-            fontWeight: 600,
-            mb: 1,
-            mt: 1,
-
-            borderRadius: 2,
-            '&:hover': { bgcolor: '#686868' },
-            width: '100%',
-            maxWidth: { xs: '100%', md: 290 },
-            mx: 'auto',
-            display: 'flex',
-            justifyContent: 'center',
-            position: 'relative',
-            px: { xs: 2, md: 3 },
-            fontSize: { xs: '15px', sm: '16px', md: '19px' },
-            minHeight: { xs: 42, md: 48 },
-            fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-            lineHeight: '100%',
-            letterSpacing: '0%',
-            textTransform: 'capitalize',
-          }}
-        >
-          <Box
-            component="span"
+          <Button
+            disabled={isCreatingSeason || isFetching}
+            onClick={openCreateSeasonConfirm}
+            variant="contained"
+            fullWidth
             sx={{
-              position: 'absolute',
-              left: { xs: 12, md: 22.5 },
-              fontSize: { xs: '20px', md: '24px' },
-              lineHeight: 1,
+              bgcolor: '#7f7f7f',
+              color: 'white',
+              fontWeight: 600,
+              mb: 1,
+              mt: 1,
+
+              borderRadius: 2,
+              '&:hover': { bgcolor: '#686868' },
+              width: '100%',
+              maxWidth: { xs: '100%', md: 290 },
+              mx: 'auto',
+              display: 'flex',
+              justifyContent: 'center',
+              position: 'relative',
+              px: { xs: 2, md: 3 },
+              fontSize: { xs: '15px', sm: '16px', md: '19px' },
+              minHeight: { xs: 42, md: 48 },
+              fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+              lineHeight: '100%',
+              letterSpacing: '0%',
+              textTransform: 'uppercase',
             }}
           >
-            +
-          </Box>
-          {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
-        </Button>
-      )}
+            <Box
+              component="span"
+              sx={{
+                position: 'absolute',
+                left: { xs: 12, md: 22.5 },
+                fontSize: { xs: '20px', md: '24px' },
+                lineHeight: 1,
+              }}
+            >
+              +
+            </Box>
+            {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
+          </Button>
+        )}
 
       <Dialog
         open={seasonConfirmOpen}
@@ -2521,7 +2521,7 @@ export default function PlayerDashboard() {
       <Paper
         elevation={0}
         sx={{
-          backgroundImage: {xs: 'none', md: `url(${dash.src})`},
+          backgroundImage: { xs: 'none', md: `url(${dash.src})` },
           backgroundColor: { xs: '#0E0E0E', md: 'none' },
           backgroundSize: { xs: 'cover', md: '100% 100%' },
           backgroundRepeat: 'no-repeat',

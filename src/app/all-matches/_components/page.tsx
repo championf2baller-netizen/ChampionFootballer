@@ -2253,7 +2253,7 @@ export default function AllMatches() {
                                                    width: { xs: '100%', sm: 'auto' },
                                                    minHeight: { xs: 42, md: 'auto' },
                                                    px: 2.5,
-                                                   textTransform: 'none',
+                                                   textTransform: 'uppercase',
                                                    whiteSpace: 'nowrap'
                                 }}
                             >

@@ -2811,7 +2811,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         <Toolbar
           disableGutters={isMainPage}
           sx={{
-            justifyContent: isMainPage ? 'flex-start' : 'space-between',
+            justifyContent: isMainPage ? { xs: 'center', md: 'flex-start' } : 'space-between',
             width: '100%',
             minWidth: 0,
             minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
@@ -2823,7 +2823,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           }}
         >
           {isMainPage ? (
-            /* MAIN / LOGIN PAGE: Align logo perfectly with the 1280px hero container with tight top/bottom gap */
+            /* MAIN / LOGIN PAGE: Centered on mobile, aligned with 1280px hero container on desktop */
             <Box
               sx={{
                 maxWidth: '1280px',
@@ -2831,16 +2831,20 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-start',
+                justifyContent: { xs: 'center', md: 'flex-start' },
               }}
             >
-              <Link href="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Box sx={{
                   width: { xs: 250, sm: 340, md: 700},
                   maxWidth: '100%',
                   // height: { xs: 36, sm: 52, md: 82, lg: 110 },
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: { xs: 'center', md: 'flex-start' },
+                  '& img': {
+                    objectPosition: { xs: 'center', md: 'left center' }
+                  }
                 }}>
                   <Image
                     src={Layer}
@@ -2855,7 +2859,6 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       height: '100%',
                       width: '100%',
                       objectFit: 'contain',
-                      objectPosition: 'left center',
                       display: 'block'
                     }}
                   />
