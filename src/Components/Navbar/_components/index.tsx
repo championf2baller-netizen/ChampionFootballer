@@ -2800,10 +2800,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         position="fixed"
         sx={{
           background: '#0e0e0e',
-          boxShadow: '0 4px 20px 0 rgba(229, 106, 22, 0.45), 0 1px 6px 0 rgba(229, 106, 22, 0.35)',
+          boxShadow: { xs: 'none', lg: '0 4px 20px 0 rgba(229, 106, 22, 0.45), 0 1px 6px 0 rgba(229, 106, 22, 0.35)' },
           top: 0,
           zIndex: (theme) => theme.zIndex.drawer + 2,
-          borderBottom: '3px solid #E56A16',
+          borderBottom: { xs: 'none', lg: '3px solid #E56A16' },
+          overflow: 'visible',
             // mb: isMainPage ? {  md : -5.5} : undefined
 
         }}
@@ -3183,6 +3184,35 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             )}
           </Box>
         </Toolbar>
+
+        {/* Mobile Glowing Gradient Line under Navbar (matching media_1794148532333_6ce82928.png) */}
+        <Box
+          sx={{
+            display: { xs: 'block', lg: 'none' },
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: '100%',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(229, 106, 22, 0.15) 8%, rgba(249, 115, 22, 0.85) 30%, #ff7a1a 50%, rgba(249, 115, 22, 0.85) 70%, rgba(229, 106, 22, 0.15) 92%, transparent 100%)',
+            filter: 'drop-shadow(0 0 5px rgba(249, 115, 22, 0.85)) drop-shadow(0 0 12px rgba(229, 106, 22, 0.5))',
+            pointerEvents: 'none',
+            zIndex: 10,
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '90%',
+              height: '18px',
+              background: 'radial-gradient(ellipse at center, rgba(249, 115, 22, 0.45) 0%, rgba(229, 106, 22, 0.18) 45%, transparent 75%)',
+              filter: 'blur(3px)',
+              pointerEvents: 'none',
+            },
+          }}
+        />
       </AppBar>
       <Toolbar sx={{ 
         minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
