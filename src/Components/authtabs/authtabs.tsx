@@ -402,6 +402,7 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
       borderRadius: '12px',
       height: { xs: '52px', sm: '56px' },
       boxSizing: 'border-box',
+      overflow: 'hidden',
       transition: 'all 0.2s ease',
       '& fieldset': {
         borderColor: 'rgba(255, 255, 255, 0.12)',
@@ -420,6 +421,11 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
         fontWeight: 500,
         fontFamily: 'var(--font-inter), Inter, sans-serif',
         padding: '0 6px',
+        border: 'none !important',
+        outline: 'none !important',
+        borderRadius: '0 !important',
+        boxShadow: 'none !important',
+        backgroundColor: 'transparent !important',
         '&::placeholder': {
           color: '#8e8e93',
           opacity: 1,
@@ -428,18 +434,41 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
           fontSize: '0.85rem',
           textTransform: 'uppercase',
         },
+        '&:focus': {
+          outline: 'none !important',
+          boxShadow: 'none !important',
+          border: 'none !important',
+        },
+        '&::-webkit-credentials-auto-fill-button': {
+          visibility: 'hidden',
+          display: 'none !important',
+          pointerEvents: 'none',
+        },
+        '&::-webkit-contacts-auto-fill-button': {
+          visibility: 'hidden',
+          display: 'none !important',
+          pointerEvents: 'none',
+        },
       },
     },
     '& input:-webkit-autofill': {
       WebkitBoxShadow: '0 0 0 1000px #0c0c0e inset !important',
+      boxShadow: '0 0 0 1000px #0c0c0e inset !important',
       WebkitTextFillColor: '#ffffff !important',
+      caretColor: '#ffffff !important',
       transition: 'background-color 5000s ease-in-out 0s',
-      borderRadius: '12px !important',
+      borderRadius: '0 !important',
+      border: 'none !important',
+      outline: 'none !important',
     },
-    '& input:-webkit-autofill:hover, & input:-webkit-autofill:focus': {
+    '& input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
       WebkitBoxShadow: '0 0 0 1000px #0c0c0e inset !important',
+      boxShadow: '0 0 0 1000px #0c0c0e inset !important',
       WebkitTextFillColor: '#ffffff !important',
-      borderRadius: '12px !important',
+      caretColor: '#ffffff !important',
+      borderRadius: '0 !important',
+      border: 'none !important',
+      outline: 'none !important',
     },
   } as const
 
