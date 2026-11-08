@@ -2881,23 +2881,26 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             >
               <Link href={isAuthenticated ? "/home" : "/"} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                 <Box sx={{ 
-                  width: { xs: 260, sm: 260, md: 340, lg: 400 },
-                  height: { xs: 34, sm: 48, md: 75 },
+                  width: { xs: 220, sm: 250, md: 320, lg: 380 },
+                  height: { xs: 28, sm: 34, md: 48, lg: 56 },
                   display: 'flex',
                   alignItems: 'center',
-                  mt: { xs: 0, md: -2 },
+                  mt: { xs: 0, md: 0 },
                 }}>
                   <Image
-                    src={cflogo}
+                    src={Layer}
                     alt="Champion Footballer Logo"
-                    width={430}
-                    height={64}
+                    width={1000}
+                    height={115}
                     priority
-                    sizes="(max-width:600px) 200px, (max-width:900px) 240px, (max-width:1200px) 340px, 400px"
+                    fetchPriority="high"
+                    quality={95}
+                    sizes="(max-width: 600px) 240px, (max-width: 900px) 300px, (max-width: 1200px) 360px, 400px"
                     style={{
                       height: '100%',
                       width: '100%',
-                      objectFit: 'contain'
+                      objectFit: 'contain',
+                      display: 'block'
                     }}
                   />
                 </Box>

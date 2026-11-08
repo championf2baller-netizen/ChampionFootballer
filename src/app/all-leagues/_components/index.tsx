@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { shareContent, buildLeagueSeasonInviteText, copyTextToClipboard } from '@/lib/utils/shareUtils';
-import { SettingsIcon, X, Trophy, ChevronDown } from 'lucide-react';
+import { SettingsIcon, X, Trophy, ChevronDown, Calendar, Users, Shield, Copy, Share2, Play, Settings, UserPlus, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 import AllLeaguesLoadingSkeleton from '@/Components/loading/AllLeaguesLoadingSkeleton';
 import leagueIcon from '@/Components/images/league icon.png';
@@ -5736,16 +5736,17 @@ function AllLeagues() {
             <Button variant="contained" onClick={() => setIsDialogOpen(true)} sx={{
               color: 'white',
               fontFamily: 'Arial, Helvetica, sans-serif',
-              fontWeight: 'semi-bold',
-              fontSize: { xs: '15px', md: '18px' },
+              fontWeight: 700,
+              fontSize: { xs: '14px', md: '17px' },
               bgcolor: '#0388E3',
               '&:hover': { bgcolor: '#0266b8' },
-              borderRadius: 1,
+              borderRadius: '12px',
               width: { xs: '100%', sm: 'auto' },
-              minHeight: { xs: 42, md: 'auto' },
+              minHeight: { xs: 46, md: 44 },
               px: 2.5,
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
+              letterSpacing: '0.5px',
             }}> {getCms('page_all_leagues_create_btn', '+ CREATE NEW LEAGUE')}</Button>
 
             {/* Grouped Invite Code + Join Button */}
@@ -5753,12 +5754,13 @@ function AllLeagues() {
               sx={{
                 display: 'flex',
                 alignItems: 'stretch',
-                width: { xs: '100%', sm: 300, md: 300 },
+                width: { xs: '100%', sm: 300, md: 320 },
                 overflow: 'hidden',
+                borderRadius: '12px',
               }}
             >
               <TextField
-                placeholder={getCms('page_all_leagues_join_placeholder', 'Enter invite code')}
+                placeholder={getCms('page_all_leagues_join_placeholder', 'ENTER LEAGUE INVITE CODE')}
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
                 inputProps={{ maxLength: 6 }}
@@ -5769,24 +5771,26 @@ function AllLeagues() {
                   flex: 1,
                   minWidth: 0,
                   backgroundColor: '#fff',
-                  borderRadius: '6px 0 0 6px',
+                  borderRadius: '12px 0 0 12px',
                   '& .MuiOutlinedInput-root': {
                     color: '#111',
-                    height: { xs: 42, md: 42 },
-                    // borderRadius: '12px 0 0 12px',
+                    height: { xs: 46, md: 44 },
+                    borderRadius: '12px 0 0 12px',
                     '& fieldset': { border: 'none' },
                     '&:hover fieldset': { border: 'none' },
                     '&.Mui-focused fieldset': { border: 'none' },
                   },
                   '& .MuiInputBase-input': {
                     padding: '0 14px',
-                    height: '42px',
-                    fontSize: { xs: '0.85rem', md: '0.95rem' },
+                    height: { xs: '46px', md: '44px' },
+                    fontSize: { xs: '0.82rem', md: '0.88rem' },
+                    fontWeight: 600,
                   },
                   '& .MuiInputBase-input::placeholder': {
-                    color: 'rgba(0,0,0,0.55)',
+                    color: '#8e96a4',
                     opacity: 1,
-                    fontSize: { xs: '0.82rem', md: '0.9rem' },
+                    fontSize: { xs: '0.78rem', md: '0.82rem' },
+                    fontWeight: 600,
                   }
                 }}
               />
@@ -5799,19 +5803,20 @@ function AllLeagues() {
                   bgcolor: '#00A896',
                   color: 'white',
                   fontFamily: 'Arial, Helvetica, sans-serif',
-                  fontWeight: 'semi-bold',
-                  fontSize: { xs: '15px', md: '18px' },
+                  fontWeight: 700,
+                  fontSize: { xs: '14px', md: '16px' },
                   '&:hover': { bgcolor: '#008c7a' },
                   '&:disabled': { bgcolor: '#00A896', opacity: 0.6 },
-                  borderRadius: '0 6px 6px 0',
+                  borderRadius: '0 12px 12px 0',
                   minWidth: { xs: 110, sm: 124 },
-                  height: { xs: 42, md: 42 },
+                  height: { xs: 46, md: 44 },
                   px: { xs: 1.5, sm: 2 },
                   whiteSpace: 'nowrap',
                   textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
                 }}
               >
-                {isJoining ? <CircularProgress size={20} sx={{ color: 'white' }} /> : getCms('page_all_leagues_join_btn', 'Join League')}
+                {isJoining ? <CircularProgress size={20} sx={{ color: 'white' }} /> : getCms('page_all_leagues_join_btn', 'JOIN LEAGUE')}
               </Button>
             </Box>
           </Box>
@@ -6120,7 +6125,9 @@ function AllLeagues() {
           justifyContent: 'center',
           alignItems: 'center',
           mt: { xs: 2, md: 3 },
-          mb: { xs: 1.5, md: 0 }
+          mb: { xs: 1.5, md: 0 },
+          px: { xs: 1, sm: 0 },
+          width: '100%',
         }}>
           <Box sx={{
             bgcolor: '#121316',
@@ -6130,7 +6137,7 @@ function AllLeagues() {
             display: 'flex',
             alignItems: 'center',
             gap: '4px',
-            width: { xs: '90%', sm: 400, md: 500 },
+            width: { xs: '100%', sm: 400, md: 460 },
             boxSizing: 'border-box',
           }}>
             <ButtonBase
@@ -6213,21 +6220,39 @@ function AllLeagues() {
         </Box>
       </PageHeader>
 
-      <Container maxWidth={false} disableGutters sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
+      <Container maxWidth={false} disableGutters sx={{ px: { xs: 1.5, sm: 2.5, md: 3 } }}>
 
-        {/* Leagues List - Card Format */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, md: 3 }, px: { xs: 1, sm: 2, md: 13 }, mt: 0 }}>
+        {/* Leagues List - Card Grid Format */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, minmax(0, 1fr))',
+              md: 'repeat(2, minmax(0, 1fr))',
+              lg: 'repeat(3, minmax(0, 1fr))',
+            },
+            gap: { xs: 1.5, sm: 2, md: 2.25 },
+            maxWidth: '1280px',
+            mx: 'auto',
+            width: '100%',
+            mt: 0,
+            pb: { xs: 4, md: 6 },
+          }}
+        >
           {loading ? (
-            <AllLeaguesLoadingSkeleton compact />
+            <Box sx={{ gridColumn: '1 / -1', width: '100%' }}>
+              <AllLeaguesLoadingSkeleton compact />
+            </Box>
           ) : leagues.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4, background: 'linear-gradient(90deg, #767676 0%, #000000 100%)', }}>
+            <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 4, background: 'linear-gradient(90deg, #767676 0%, #000000 100%)', borderRadius: 2 }}>
               <Typography variant="h6" sx={{ color: 'white', mb: 2, fontSize: { xs: '18px', md: '24px' } }}>No leagues found</Typography>
               <Typography sx={{ color: 'rgba(255,255,255,0.8)', fontSize: { xs: '14px', md: '16px' } }}>
                 Create a new league or join an existing one to get started.
               </Typography>
             </Box>
           ) : leaguesToDisplay.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 4 }}>
               <Typography className="empty-state-message" variant="h6" sx={{ color: 'white', mb: 2, fontSize: { xs: '18px', md: '24px' } }}>
                 No leagues found for selected filters
               </Typography>
@@ -6272,636 +6297,504 @@ function AllLeagues() {
                 : '';
               const leagueAdminName = foundAdminName || (league as any).adminName || 'Not available';
 
+              const playerCount = typeof league.memberCount === 'number'
+                ? league.memberCount
+                : (league.members?.length || 0);
+
+              const totalMatches = (() => {
+                const l = league as any;
+                if (typeof l.totalMatchCount === 'number') return l.totalMatchCount;
+                if (typeof l.computedStatus?.totalMatchCount === 'number') return l.computedStatus.totalMatchCount;
+                if (Array.isArray(league.matches)) {
+                  return league.matches.filter((m: any) => {
+                    const isDeleted = Boolean(m.deleted || m.isDeleted);
+                    const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase())
+                      || (m.homeTeamGoals != null && m.awayTeamGoals != null)
+                      || Boolean(m.isResult || m.hasStats);
+                    if (!isDeleted) return true;
+                    if (isDeleted && isResult) return true;
+                    return false;
+                  }).length;
+                }
+                return l.computedStatus?.matchesPlayed ?? l.computedStatus?.gamesPlayed ?? 0;
+              })();
+
+              const createdDateStr = (() => {
+                const d = league.createdAt ? new Date(league.createdAt) : null;
+                if (!d || isNaN(d.getTime())) return 'Date not available';
+                return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
+              })();
+
               return (
                 <Box
                   key={league.id}
                   onClick={() => handleNavigateToLeague(league)}
                   sx={{
-                    px: { xs: 3, md: 3 },
-                    py: { xs: 2.6, md: 2.8 },
-                    borderRadius: 3,
+                    p: { xs: 2.2, sm: 2.5 },
+                    borderRadius: '20px',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    // Default background
-                    background: isCompleted
-                      ? '#d4d4d4' // light grey for completed
-                      : 'linear-gradient(90deg, #767676 0%, #000000 100%)',
+                    transition: 'all 0.25s ease',
+                    bgcolor: '#0e1015',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
                     position: 'relative',
-                    minHeight: { xs: '140px', md: '160px' },
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'column',
+                    gap: 1.5,
                     '&:hover': {
-                      backgroundColor: isCompleted ? '#d4d4d4' : 'rgba(30, 58, 138, 1)',
-                      transform: isCompleted ? 'none' : 'translateY(-3px)',
+                      borderColor: 'rgba(229, 107, 22, 0.45)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 30px rgba(0, 0, 0, 0.65)',
                     }
                   }}
                 >
-                  {/* Mobile Switch Button (Top Left) */}
-                  <Box
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{
-                      display: { xs: 'flex', md: 'none' },
-                      position: 'absolute',
-                      top: 14,
-                      left: 14,
-                      zIndex: 5,
-                      alignItems: 'center',
-                      gap: 0.3,
-                      bgcolor: isLive ? 'rgba(0,168,150,0.95)' : 'rgba(31,41,55,0.9)',
-                      borderRadius: 999,
-                      pl: 0.7,
-                      pr: 0.25,
-                      py: 0.1,
-                      border: '1px solid rgba(255,255,255,0.35)',
-                    }}
-                  >
-                    <PowerSettingsNew sx={{ fontSize: 13, color: 'white' }} />
-                    <Switch
-                      size="small"
-                      checked={isLive}
-                      onChange={(e, checked) => {
-                        e.stopPropagation();
-                        if (!canManageLiveStatus) {
-                          toast.error('Only league admin can change the live status.');
-                          return;
-                        }
-                        void handleToggleLeagueLiveStatus(league, checked);
-                      }}
+                  {/* Top Row: Live Switch on Left, Settings on Right */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    {/* Live Switch Button */}
+                    <Box
+                      onClick={(e) => e.stopPropagation()}
                       sx={{
-                        m: 0,
-                        '& .MuiSwitch-thumb': { bgcolor: 'white' },
-                        '& .MuiSwitch-track': {
-                          borderRadius: 999,
-                          opacity: '1 !important',
-                          bgcolor: isLive ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.28)',
-                        },
-                        '& .Mui-checked + .MuiSwitch-track': {
-                          bgcolor: 'rgba(255,255,255,0.42) !important',
-                        },
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.6,
+                        bgcolor: isLive ? 'rgba(0, 168, 150, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                        border: isLive ? '1px solid rgba(0, 168, 150, 0.45)' : '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: 999,
+                        pl: 0.8,
+                        pr: 0.35,
+                        py: 0.35,
                       }}
-                    />
-                  </Box>
-
-                  {/* Settings Icon - Top Right */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: { xs: 8, md: 14 },
-                      right: { xs: 8, md: 18 },
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: { xs: 1, sm: 1.5 },
-                      zIndex: 4,
-                    }}
-                  >
-                    {isCompleted && (
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 0.5,
-                          color: '#16a34a',
+                    >
+                      <PowerSettingsNew sx={{ fontSize: 13, color: isLive ? '#00A896' : 'rgba(255,255,255,0.45)' }} />
+                      <Switch
+                        checked={isLive}
+                        disabled={isUpdatingLiveStatus}
+                        onChange={(e, checked) => {
+                          e.stopPropagation();
+                          if (!canManageLiveStatus) {
+                            toast.error('Only league admin can change the live status.');
+                            return;
+                          }
+                          void handleToggleLeagueLiveStatus(league, checked);
                         }}
-                      >
-                        <CheckCircle sx={{ color: '#16a34a', fontSize: { xs: 18, md: 22 } }} />
-                        <Chip
-                          label="Completed"
-                          size="small"
-                          sx={{
-                            bgcolor: 'rgba(22,163,74,0.1)',
-                            color: '#14532d',
-                            borderColor: '#16a34a',
-                            fontWeight: 600,
-                          }}
-                          variant="outlined"
-                        />
-                      </Box>
-                    )}
+                        sx={{
+                          width: 28,
+                          height: 16,
+                          padding: 0,
+                          display: 'flex',
+                          m: 0,
+                          '& .MuiSwitch-switchBase': {
+                            padding: '2px',
+                            '&.Mui-checked': {
+                              transform: 'translateX(12px)',
+                              color: '#ffffff',
+                              '& + .MuiSwitch-track': {
+                                bgcolor: '#00A896 !important',
+                                opacity: '1 !important',
+                              },
+                            },
+                          },
+                          '& .MuiSwitch-thumb': {
+                            width: 12,
+                            height: 12,
+                            bgcolor: '#ffffff',
+                            boxShadow: 'none',
+                          },
+                          '& .MuiSwitch-track': {
+                            borderRadius: 999,
+                            bgcolor: 'rgba(255, 255, 255, 0.22) !important',
+                            opacity: '1 !important',
+                          },
+                        }}
+                      />
+                    </Box>
 
+                    {/* Settings / Members Icon Button */}
                     <IconButton
-                      sx={{
-                        color: isCompleted ? '#111827' : 'white',
-                        '& .settings-icon': {
-                          transition: 'filter 0.2s ease',
-                          filter: isCompleted
-                            ? 'brightness(0) opacity(0.75)'
-                            : 'brightness(0) saturate(100%) invert(100%)',
-                        },
-                        '&:hover': {
-                          backgroundColor: 'transparent',
-                        },
-                        '&:hover .settings-icon': {
-                          filter: 'brightness(0) saturate(100%) invert(56%) sepia(84%) saturate(2061%) hue-rotate(354deg) brightness(95%) contrast(92%)',
-                        },
-                        p: { xs: 0.25, md: 1 },
-                        pr: { xs: 0.25, md: 1 },
-                      }}
+                      size="small"
                       onClick={(e) => {
                         e.stopPropagation();
                         const isAdmin = (league.adminId || league.administrators?.[0]?.id) === (user?.id || '');
                         if (isAdmin) {
-                          // Open standalone settings dialog for admins after loading details
                           void handleOpenAdminSettings(league);
                         } else {
                           handleOpenMembers(league);
                         }
                       }}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        bgcolor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#9ca3af',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.12)',
+                          color: '#ffffff',
+                          borderColor: 'rgba(255, 255, 255, 0.25)',
+                        }
+                      }}
                     >
-                      <Image
-                        src={setting}
-                        alt="Settings"
-                        width={24}
-                        height={24}
-                        className="settings-icon w-5 h-5 md:w-6 md:h-6"
-                        style={{ flexShrink: 0 }}
-                      />
+                      <Settings size={16} />
                     </IconButton>
                   </Box>
 
-                  {/* Grid Layout - 6/6 Split */}
-                  <Grid container spacing={{ xs: 1, md: 2 }} alignItems="center" sx={{ width: '100%' }}>
-                    {/* Left Column - Trophy, Title, Players, Created */}
-                    <Grid item xs={12} md={6}>
-                      <Grid container spacing={{ xs: 1, md: 2 }} alignItems="center">
-                        {/* Trophy Icon - 4 */}
-                        <Grid item xs={12} md={3}>
-                          <Box sx={{
-                            width: { xs: 60, sm: 80, md: 100 },
-                            height: { xs: 60, sm: 80, md: 100 },
-                            display: 'flex',
+                  {/* Center Hero: Trophy with Star & League Name */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pt: 0.4, gap: 1 }}>
+                    {hasCustomLeagueImage ? (
+                      <Box sx={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+                        <Image
+                          src={league.image!}
+                          alt={league.name}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </Box>
+                    ) : (
+                      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                        <path d="M4 22h16" />
+                        <path d="M10 14.66V17c0 .55-.45 1-1 1H8v2h8v-2h-1c-.55 0-1-.45-1-1v-2.34" />
+                        <path d="M6 4h12v5a6 6 0 0 1-12 0V4z" />
+                        <polygon points="12,6 12.7,7.5 14.3,7.7 13.1,8.9 13.4,10.5 12,9.7 10.6,10.5 10.9,8.9 9.7,7.7 11.3,7.5" fill="#ffffff" stroke="none" />
+                      </svg>
+                    )}
+                    <Typography
+                      sx={{
+                        color: isCompleted ? '#9ca3af' : '#E56B16',
+                        fontFamily: 'var(--font-oswald), "Oswald", "Arial Black", sans-serif',
+                        fontSize: { xs: '21px', sm: '23px' },
+                        fontWeight: 700,
+                        letterSpacing: '2px',
+                        textTransform: 'uppercase',
+                        textAlign: 'center',
+                        lineHeight: 1.2,
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {formatLeagueName(league.name)}
+                    </Typography>
+                  </Box>
+
+                  {/* Stats Container (3 equal columns) */}
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      bgcolor: '#090a0e',
+                      border: '1px solid rgba(255, 255, 255, 0.07)',
+                      borderRadius: '12px',
+                      py: 1.2,
+                      px: 0.5,
+                      alignItems: 'center',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {/* Column 1: Players */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+                      <Typography sx={{ color: '#ffffff', fontSize: '18px', fontWeight: 800, lineHeight: 1 }}>
+                        {playerCount}
+                      </Typography>
+                      <Typography sx={{ color: '#6b7280', fontSize: '10px', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                        PLAYERS
+                      </Typography>
+                    </Box>
+
+                    {/* Column 2: Total Seasons */}
+                    <Box sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 0.25,
+                      borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRight: '1px solid rgba(255, 255, 255, 0.08)',
+                      px: 0.5
+                    }}>
+                      <Typography sx={{ color: '#ffffff', fontSize: '18px', fontWeight: 800, lineHeight: 1 }}>
+                        {totalSeasons}
+                      </Typography>
+                      <Typography sx={{ color: '#6b7280', fontSize: '10px', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                        TOTAL SEASONS
+                      </Typography>
+                    </Box>
+
+                    {/* Column 3: Total Matches */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+                      <Typography sx={{ color: '#ffffff', fontSize: '18px', fontWeight: 800, lineHeight: 1 }}>
+                        {totalMatches}
+                      </Typography>
+                      <Typography sx={{ color: '#6b7280', fontSize: '10px', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                        TOTAL MATCHES
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Metadata List with Divider Lines under each row */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', mt: 0.2 }}>
+                    {/* Row 1: Created At */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.4,
+                        py: 1.1,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '10px',
+                          bgcolor: '#14161d',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Calendar size={17} color="#9ca3af" />
+                      </Box>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography sx={{ color: '#6b7280', fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.6px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                          CREATED AT
+                        </Typography>
+                        <Typography sx={{ color: '#ffffff', fontSize: '13px', fontWeight: 700, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {createdDateStr}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Row 2: Invite Code */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.4,
+                        py: 1.1,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '10px',
+                          bgcolor: '#14161d',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <UserPlus size={17} color="#9ca3af" />
+                      </Box>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography sx={{ color: '#6b7280', fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.6px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                          INVITE CODE
+                        </Typography>
+                        <Typography sx={{ color: '#ffffff', fontSize: '13px', fontWeight: 700, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {inviteSeasonLabel}: {inviteCodeDisplay}
+                        </Typography>
+                      </Box>
+                      {/* Copy & Share Buttons */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, flexShrink: 0 }}>
+                        <IconButton
+                          size="small"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!activeSeasonInviteCode) {
+                              toast.error('Invite code is not available for this season yet.');
+                              return;
+                            }
+                            const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
+                            const leagueName = league.name?.trim() || 'League';
+                            const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                            const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
+                            try {
+                              const copied = await copyTextToClipboard(shareText);
+                              if (copied) {
+                                toast.success('Invite copied!');
+                              } else {
+                                toast.error('Unable to copy invite right now.');
+                              }
+                            } catch {
+                              toast.error('Unable to copy invite right now.');
+                            }
+                          }}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '8px',
+                            bgcolor: '#14161d',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            color: '#9ca3af',
+                            transition: 'all 0.15s',
+                            '&:hover': {
+                              bgcolor: 'rgba(255, 255, 255, 0.1)',
+                              color: '#ffffff',
+                            }
+                          }}
+                        >
+                          <Copy size={15} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!activeSeasonInviteCode) {
+                              toast.error('Invite code is not available for this season yet.');
+                              return;
+                            }
+                            const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
+                            const leagueName = league.name?.trim() || 'League';
+                            const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
+                            const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
+                            shareContent({
+                              title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
+                              customFullText: shareText,
+                              text: shareText,
+                              url: inviteUrl,
+                            });
+                          }}
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '8px',
+                            bgcolor: '#14161d',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            color: '#9ca3af',
+                            transition: 'all 0.15s',
+                            '&:hover': {
+                              bgcolor: 'rgba(255, 255, 255, 0.1)',
+                              color: '#ffffff',
+                            }
+                          }}
+                        >
+                          <Share2 size={15} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    {/* Row 3: League Admin */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.4,
+                        py: 1.1,
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '10px',
+                          bgcolor: '#14161d',
+                          border: '1px solid rgba(255, 255, 255, 0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ShieldCheck size={17} color="#9ca3af" />
+                      </Box>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography sx={{ color: '#6b7280', fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.6px', textTransform: 'uppercase', lineHeight: 1.2 }}>
+                          LEAGUE ADMIN
+                        </Typography>
+                        <Typography sx={{ color: '#ffffff', fontSize: '13px', fontWeight: 700, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {leagueAdminName}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Bottom Row: New Season + Footballer on left, View on right */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', pt: 0.8, mt: 'auto' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      {canCreateSeason && (
+                        <ButtonBase
+                          disabled={isCreatingSeason}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isCompleted) {
+                              toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
+                              return;
+                            }
+                            openCreateSeasonConfirm(league);
+                          }}
+                          sx={{
+                            display: 'inline-flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            mx: { xs: 'auto', md: 0 },
-                            flexShrink: 0,
-                            position: 'relative',
-                            // bgcolor: 'white',
-                            borderRadius: '50%',
-                            overflow: 'visible',
-                            // border:"1px solid white",
-                          }}>
-                            <Box
-                              onClick={(e) => e.stopPropagation()}
-                              sx={{
-                                position: 'absolute',
-                                top: -33,
-                                left: -6,
-                                zIndex: 5,
-                                display: { xs: 'none', md: 'flex' },
-                                alignItems: 'center',
-                                gap: 0.3,
-                                bgcolor: isLive ? 'rgba(0,168,150,0.95)' : 'rgba(31,41,55,0.9)',
-                                borderRadius: 999,
-                                pl: 0.7,
-                                pr: 0.25,
-                                py: 0.1,
-                                border: '1px solid rgba(255,255,255,0.35)',
-                              }}
-                            >
-                              <PowerSettingsNew sx={{ fontSize: 13, color: 'white' }} />
-                              <Switch
-                                size="small"
-                                checked={isLive}
-                                onChange={(e, checked) => {
-                                  e.stopPropagation();
-                                  if (!canManageLiveStatus) {
-                                    toast.error('Only league admin can change the live status.');
-                                    return;
-                                  }
-                                  void handleToggleLeagueLiveStatus(league, checked);
-                                }}
-                                sx={{
-                                  m: 0,
-                                  // '& .MuiSwitch-switchBase': { p: 0.5 },
-                                  '& .MuiSwitch-thumb': { bgcolor: 'white' },
-                                  // ya MuiSwitch-thumb is ma add kerna hn width: 11, height: 11, 
-                                  '& .MuiSwitch-track': {
-                                    borderRadius: 999,
-                                    opacity: '1 !important',
-                                    bgcolor: isLive ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.28)',
-                                  },
-                                  '& .Mui-checked + .MuiSwitch-track': {
-                                    bgcolor: 'rgba(255,255,255,0.42) !important',
-                                  },
-                                }}
-                              />
-                            </Box>
-                            <Box
-                              sx={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%',
-                                borderRadius: '50%',
-                                overflow: 'hidden',
-                                p: hasCustomLeagueImage ? 0 : { xs: 0.8, sm: 1, md: 1.2 },
-                                boxSizing: 'border-box',
-                              }}
-                            >
-                              {isCompleted ? (
-                                <Image
-                                  src={league?.image || trofy}
-                                  alt={`${league.name} icon`}
-                                  fill
-                                  priority
-                                  sizes="(max-width: 600px) 60px, (max-width: 900px) 80px, 100px"
-                                  style={{ objectFit: hasCustomLeagueImage ? 'cover' : 'contain' }}
-                                />
-                              ) : (
-                                <Image
-                                  src={league?.image || trofyy}
-                                  alt={`${league.name} icon`}
-                                  fill
-                                  priority
-                                  sizes="(max-width: 600px) 60px, (max-width: 900px) 80px, 100px"
-                                  style={{ objectFit: hasCustomLeagueImage ? 'cover' : 'contain' }}
-                                />
-                              )}
-                            </Box>
-                          </Box>
-                        </Grid>
+                            gap: 0.5,
+                            color: '#0388E3',
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            letterSpacing: '0.8px',
+                            textTransform: 'uppercase',
+                            mb: 0.5,
+                            cursor: 'pointer',
+                            '&:hover': { opacity: 0.85 }
+                          }}
+                        >
+                          <Box component="span" sx={{ fontSize: '15px', fontWeight: 700 }}>+</Box>
+                          <Box component="span">{isCreatingSeason ? 'Creating Season...' : 'NEW SEASON'}</Box>
+                        </ButtonBase>
+                      )}
+                      <Box sx={{ width: 48, height: 48, position: 'relative', ml: 0.25 }}>
+                        <Image
+                          src={playerfull}
+                          alt="Player illustration"
+                          width={48}
+                          height={48}
+                          style={{ objectFit: 'contain' }}
+                        />
+                      </Box>
+                    </Box>
 
-                        {/* Title and Details - 8 */}
-                        <Grid item xs={12} md={9}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'center', alignItems: { xs: 'center', md: 'flex-start' }, height: '100%' }}>
-                            {/* League Title */}
-                            <Typography sx={{
-                              color: isCompleted ? '#111827' : '#E56B16',
-                              fontFamily: 'var(--font-geist-anton), "Anton", sans-serif !important',
-                              fontSize: { xs: '28px', sm: '32px', md: '36px' },
-
-                              textOverflow: 'ellipsis',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              fontWeight: 'semi-bold',
-                              lineHeight: 1.3,
-                              letterSpacing: '1px',
-                              textTransform: 'uppercase',
-                              textAlign: { xs: 'center', md: 'left' },
-                              width: '100%'
-                            }}>
-                              {formatLeagueName(league.name)}
-                            </Typography>
-
-                            {/* Players */}
-                            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-                              <Image src={faceicon} alt="Players" width={18} height={18} style={{ flexShrink: 0 }} />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                Players {(typeof league.memberCount === 'number' ? league.memberCount : (league.members?.length || 0))}
-                              </Typography>
-                            </Box>
-
-                            {/* Seasons */}
-                            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-                              <Image
-                                src={leagueIcon}
-                                alt="Seasons"
-                                width={16}
-                                height={16}
-                                style={{ flexShrink: 0, filter: isCompleted ? 'brightness(0) invert(1)' : 'none' }}
-                              />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                Total Seasons: {totalSeasons}
-                              </Typography>
-                            </Box>
-
-                            {/* Created */}
-                            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-                              <Image src={schedule} alt="Created" width={16} height={16} style={{ flexShrink: 0 }} />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                {(() => {
-                                  const d = league.createdAt ? new Date(league.createdAt) : null;
-                                  if (!d || isNaN(d.getTime())) return 'Date not available';
-                                  return `Created At ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-                                })()}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-
-                        <Grid item xs={12} sx={{ display: { xs: 'block', md: 'none' } }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.4, md: 1 } }}>
-                              <Image src={faceicon} alt="Players" width={18} height={18} style={{ flexShrink: 0 }} />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                Players {(typeof league.memberCount === 'number' ? league.memberCount : (league.members?.length || 0))}
-                              </Typography>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.4, md: 1 } }}>
-                              <Image
-                                src={leagueIcon}
-                                alt="Seasons"
-                                width={16}
-                                height={16}
-                                style={{ flexShrink: 0, filter: isCompleted ? 'brightness(0) invert(1)' : 'none' }}
-                              />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                Total Seasons: {totalSeasons}
-                              </Typography>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Image src={schedule} alt="Created" width={16} height={16} style={{ flexShrink: 0 }} />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                {(() => {
-                                  const d = league.createdAt ? new Date(league.createdAt) : null;
-                                  if (!d || isNaN(d.getTime())) return 'Date not available';
-                                  return `Created At ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`;
-                                })()}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-
-                    {/* Right Column - Code, Matches, Share, View */}
-                    <Grid item xs={12} md={6}>
-                      <Grid container spacing={0} alignItems="center">
-                        {/* Code and Matches - 8 */}
-                        <Grid item xs={12} md={8}>
-                          <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            gap: 1,
-                            mt: { xs: 0.5, md: 0 },
-                            height: '100%'
-                          }}>
-                            {/* Invite Code with Copy and Share */}
-                            {!isCompleted && (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Image src={inviteicon} alt="Invite Code" width={18} height={18} style={{ flexShrink: 0 }} />
-                                <Typography sx={{
-                                  color: 'rgba(255,255,255,0.9)',
-                                  fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                  fontWeight: 300,
-                                  fontSize: { xs: '10px', sm: '16px' }
-                                }}>
-                                  {getCms('page_all_leagues_card_invite_label', 'Invite Code:')} {inviteContextLabel}: {inviteCodeDisplay}
-                                </Typography>
-                                <IconButton
-                                  size="small"
-                                  sx={{
-                                    color: 'white',
-                                    p: { xs: 0.2, sm: 0.5 },
-                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
-                                  }}
-                                  onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (!activeSeasonInviteCode) {
-                                      toast.error('Invite code is not available for this season yet.');
-                                      return;
-                                    }
-                                    const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
-                                    const leagueName = league.name?.trim() || 'League';
-                                    const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
-                                    const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
-                                    try {
-                                      const copied = await copyTextToClipboard(shareText);
-                                      if (copied) {
-                                        toast.success('Invite copied!');
-                                      } else {
-                                        toast.error('Unable to copy invite right now.');
-                                      }
-                                    } catch {
-                                      toast.error('Unable to copy invite right now.');
-                                    }
-                                  }}
-                                >
-                                  <svg width="19" height="21" viewBox="0 0 24 24" fill="white">
-                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
-                                  </svg>
-                                </IconButton>
-                                <Box sx={{ width: '1px', height: '20px', bgcolor: 'white', mx: 0.5 }} />
-                                <IconButton
-                                  size="small"
-                                  sx={{
-                                    color: 'white',
-                                    p: { xs: 0.2, sm: 0.5 },
-                                    // background: 'linear-gradient(to right, #747474, #525252, #262626, #000000)',
-                                    // borderRadius: 1,
-                                    // '&:hover': { opacity: 0.8 }
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (!activeSeasonInviteCode) {
-                                      toast.error('Invite code is not available for this season yet.');
-                                      return;
-                                    }
-                                    const seasonNum = activeSeasonForInvite?.seasonNumber || 1;
-                                    const leagueName = league.name?.trim() || 'League';
-                                    const inviteUrl = `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(activeSeasonInviteCode)}`;
-                                    const shareText = buildLeagueSeasonInviteText(leagueName, seasonNum, activeSeasonInviteCode, inviteUrl);
-                                    shareContent({
-                                      title: `Join ${leagueName} / season ${seasonNum} | Champion Footballer`,
-                                      customFullText: shareText,
-                                      text: shareText,
-                                      url: inviteUrl,
-                                    });
-                                  }}
-                                >
-                                  <Image src={share} alt="Share" width={17} height={17} style={{ filter: 'brightness(0) invert(1)' }} />
-                                </IconButton>
-                              </Box>
-                            )}
-
-                            {/* Matches */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Image src={fotbal} alt="Matches" width={18} height={18} style={{ flexShrink: 0 }} />
-                              <Typography sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                {getCms('page_all_leagues_card_matches_label', 'Total Matches:')} {(() => {
-                                  const l = league as any;
-                                  if (typeof l.totalMatchCount === 'number') return l.totalMatchCount;
-                                  if (typeof l.computedStatus?.totalMatchCount === 'number') return l.computedStatus.totalMatchCount;
-                                  if (Array.isArray(league.matches)) {
-                                    return league.matches.filter((m: any) => {
-                                      const isDeleted = Boolean(m.deleted || m.isDeleted);
-                                      const isResult = ['RESULT_PUBLISHED', 'RESULT_UPLOADED', 'COMPLETED', 'FINISHED'].includes(String(m.status || '').toUpperCase())
-                                        || (m.homeTeamGoals != null && m.awayTeamGoals != null)
-                                        || Boolean(m.isResult || m.hasStats);
-                                      if (!isDeleted) return true;
-                                      if (isDeleted && isResult) return true;
-                                      return false;
-                                    }).length;
-                                  }
-                                  return l.computedStatus?.matchesPlayed ?? l.computedStatus?.gamesPlayed ?? 0;
-                                })()}
-                              </Typography>
-                            </Box>
-
-
-                            {/* League Admin Name */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <AdminPanelSettings sx={{ fontSize: 18, color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)', flexShrink: 0 }} />
-                              <Typography component="div" sx={{
-                                color: isCompleted ? '#111827' : 'rgba(255,255,255,0.9)',
-                                fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                fontWeight: 300,
-                                fontSize: { xs: '10px', sm: '16px' }
-                              }}>
-                                {getCms('page_all_leagues_card_admin_label', 'League Admin:')} {leagueAdminName}
-                              </Typography>
-                            </Box>
-
-                            {canCreateSeason && (
-                              <Button
-                                size="small"
-                                disabled={isCreatingSeason}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (isCompleted) {
-                                    toast.error('You cannot create a season in a completed league. You must first move this league from completed to live leagues.');
-                                    return;
-                                  }
-                                  openCreateSeasonConfirm(league);
-                                }}
-                                sx={{
-                                  alignSelf: 'flex-start',
-                                  mt: 0.4,
-                                  p: 0,
-                                  minWidth: 0,
-                                  minHeight: 28,
-                                  borderRadius: 0,
-                                  textTransform: 'none',
-                                  color: isCompleted ? '#111827' : '#0388E3',
-                                  fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                  fontWeight: 700,
-                                  fontSize: { xs: '13px', sm: '17px' },
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '6px',
-                                  backgroundColor: 'transparent',
-                                  '&:hover': {
-                                    backgroundColor: 'transparent',
-                                    opacity: 0.85,
-                                  },
-                                  '&.Mui-disabled': {
-                                    color: isCompleted ? '#111827' : '#0388E3',
-                                    opacity: 0.6,
-                                  },
-                                }}
-                              >
-                                <Box component="span" sx={{ fontSize: { xs: '16px', sm: '20px' }, fontWeight: 400, textDecoration: 'none', display: 'inline-block' }}>
-                                  +
-                                </Box>
-                                <Box component="span" sx={{ textDecoration: 'underline', textUnderlineOffset: '3px' }}>
-                                  {isCreatingSeason ? 'Creating Season...' : 'New Season'}
-                                </Box>
-                              </Button>
-                            )}
-                          </Box>
-                        </Grid>
-
-                        {/* View Button - 4 */}
-                        <Grid item xs={12} md={4} sx={{ position: 'relative', minHeight: { md: 96 } }}>
-                          <Grid container spacing={{ xs: 1, md: 2 }} mt={{ xs: 0.5, md: 2 }} alignItems="flex-end" sx={{ height: '100%' }}>
-                            {/* Image - 6 */}
-                            <Grid item xs={6} md={6}>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  justifyContent: { xs: 'flex-start', md: 'flex-start' },
-                                  alignItems: 'flex-end',
-                                  height: '100%',
-                                  ml: { xs: 0, md: -3 }
-                                }}
-                              >
-                                <Image
-                                  src={playerfull}
-                                  alt="View"
-                                  width={70}
-                                  height={70}
-                                  style={{ flexShrink: 0, width: 'clamp(50px, 12vw, 70px)', height: 'clamp(50px, 12vw, 70px)' }}
-                                />
-                              </Box>
-                            </Grid>
-
-                            {/* View Text - 6 */}
-                            <Grid item xs={6} md={6}>
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  justifyContent: { xs: 'flex-end', md: 'flex-end' },
-                                  pr: { xs: 0, md: 0 },
-                                  alignItems: 'center',
-                                  height: '100%',
-                                  cursor: 'pointer',
-                                  mt: { xs: 1, md: 0 },
-                                  '& .view-label': {
-                                    transition: 'color 0.2s ease',
-                                  },
-                                  '& .view-play-icon': {
-                                    transition: 'filter 0.2s ease',
-                                  },
-                                  '&:hover .view-label': {
-                                    color: '#E56A16 !important',
-                                  },
-                                  '&:hover .view-play-icon': {
-                                    filter: 'brightness(0) saturate(100%) invert(56%) sepia(84%) saturate(2061%) hue-rotate(354deg) brightness(95%) contrast(92%)',
-                                  },
-                                  position: { xs: 'static', md: 'absolute' },
-                                  bottom: { md: -37 },
-                                  right: { md: 6 },
-                                  zIndex: 4,
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleNavigateToLeague(league);
-                                }}
-                              >
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  <Typography className="view-label" sx={{
-                                    color: isCompleted ? '#111827' : 'white',
-                                    fontFamily: 'var(--font-league-spartan), "League Spartan", sans-serif',
-                                    fontWeight: 'semi-bold',
-                                    fontSize: { xs: '22px', md: '22px' }
-                                  }}>
-                                    {getCms('page_all_leagues_card_view_btn', 'View')}
-                                  </Typography>
-                                  <Image className="view-play-icon" src={play} alt="Play" width={15} height={15} style={{ flexShrink: 0 }} />
-                                </Box>
-                              </Box>
-                            </Grid>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
+                    {/* View Button */}
+                    <ButtonBase
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNavigateToLeague(league);
+                      }}
+                      sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.8,
+                        bgcolor: '#12141a',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '999px',
+                        px: 2.2,
+                        py: 0.7,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.08)',
+                          borderColor: '#22c55e',
+                        }
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          color: '#ffffff',
+                          fontSize: '12px',
+                          fontWeight: 800,
+                          letterSpacing: '0.8px',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        VIEW
+                      </Typography>
+                      <Play size={10} fill="#22c55e" color="#22c55e" />
+                    </ButtonBase>
+                  </Box>
                 </Box>
               )
             })
