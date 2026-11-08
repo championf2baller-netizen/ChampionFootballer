@@ -284,7 +284,7 @@ export default function LandingPage() {
                 <Paper
                   elevation={0}
                   sx={{
-                    bgcolor: '#0A0A0C',
+                    bgcolor: 'transparent',
                     p: 0,
                     display: 'flex',
                     flexDirection: 'column',
@@ -293,7 +293,7 @@ export default function LandingPage() {
                     ml: { xs: 'auto', md: 2 },
                   }}
                 >
-                  {/* Header Container: Text on Top, Join Button Below It */}
+                  {/* Header Container: Text on Top */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', mb: 1.5 }}>
                     <Typography
                       sx={{
@@ -307,47 +307,21 @@ export default function LandingPage() {
                         maxWidth: '100%',
                         width: '100%',
                         mt: 0,
-                        mb: 1,
+                        mb: 0,
                         whiteSpace: { xs: 'nowrap', md: 'normal' },
                       }}
                     >
                       THE BEST FOOTBALL APP ON THE PLANET!
                     </Typography>
-
-                    <Button
-                      variant="outlined"
-                      onClick={() => {
-                        if (showLogin) {
-                          setIsJoinModalOpen(true);
-                        } else {
-                          setShowLogin(true);
-                        }
-                      }}
-                      sx={{
-                        color: 'white',
-                        textTransform: 'uppercase',
-                        fontSize: { xs: '0.9rem', md: '0.95rem' },
-                        letterSpacing: '0.04em',
-                        fontWeight: '500',
-                        border: '1px solid #FFFFFF',
-                        backgroundColor: 'transparent',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255,255,255,0.1)',
-                          border: '1px solid #FFFFFF',
-                        },
-                        borderRadius: '7px',
-                        width: '100%',
-                        height: '42px',
-                        py: 0.5,
-                      }}
-                    >
-                      {showLogin ? 'JOIN' : 'LOGIN'}
-                    </Button>
                   </Box>
 
                   {/* Auth Tabs Form */}
                   <Box sx={{ width: '100%', overflow: 'visible', mb: 1.5 }}>
-                    <AuthTabs showLogin={showLogin} onToggleForm={() => setShowLogin(!showLogin)} />
+                    <AuthTabs
+                      showLogin={showLogin}
+                      onJoinClick={() => setIsJoinModalOpen(true)}
+                      onToggleForm={() => setShowLogin(!showLogin)}
+                    />
                   </Box>
                   {showLogin ? (
                     <Box sx={{ width: '100%' }}>

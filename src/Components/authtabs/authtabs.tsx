@@ -34,7 +34,7 @@ import {
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
 import toast from "react-hot-toast"
-import { Visibility, VisibilityOff, Apple, Close as CloseIcon, CheckCircleOutline } from "@mui/icons-material"
+import { Visibility, VisibilityOff, Apple, Close as CloseIcon, CheckCircleOutline, MailOutline, LockOutlined } from "@mui/icons-material"
 import Link from "next/link"
 import { authStorage, type UserDataShape, type UserProfile } from "@/lib/authStorage"
 import { buildSocialAuthUrl, getClientApiBaseUrl } from "@/lib/clientApiBase"
@@ -50,6 +50,7 @@ import {
 interface AuthTabsProps {
   showLogin?: boolean
   onToggleForm?: () => void
+  onJoinClick?: () => void
 }
 
 // Server payload shapes
@@ -217,7 +218,7 @@ const FacebookIcon = () => (
   </svg>
 )
 
-const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
+const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { dispatch: authDispatch } = useAuth()
@@ -389,6 +390,73 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
       WebkitBoxShadow: "0 0 0 1000px #ffffff inset !important",
       WebkitTextFillColor: "#000000 !important",
       borderRadius: '8px !important',
+    },
+  } as const
+
+  // Modern Dark Input styles matching media_1794151485324_e6208b93.png
+  const loginDarkInputSx = {
+    width: '100%',
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: '#0c0c0e',
+      color: '#ffffff',
+      borderRadius: '12px',
+      height: { xs: '52px', sm: '56px' },
+      boxSizing: 'border-box',
+      transition: 'all 0.2s ease',
+      '& fieldset': {
+        borderColor: 'rgba(255, 255, 255, 0.12)',
+        borderWidth: '1px',
+      },
+      '&:hover fieldset': {
+        borderColor: 'rgba(255, 255, 255, 0.25)',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: 'rgba(255, 255, 255, 0.45)',
+        borderWidth: '1.5px',
+      },
+      '& input': {
+        color: '#ffffff',
+        fontSize: '0.95rem',
+        fontWeight: 500,
+        fontFamily: 'var(--font-inter), Inter, sans-serif',
+        padding: '0 6px',
+        '&::placeholder': {
+          color: '#8e8e93',
+          opacity: 1,
+          letterSpacing: '1.8px',
+          fontWeight: 600,
+          fontSize: '0.85rem',
+          textTransform: 'uppercase',
+        },
+      },
+    },
+    '& input:-webkit-autofill': {
+      WebkitBoxShadow: '0 0 0 1000px #0c0c0e inset !important',
+      WebkitTextFillColor: '#ffffff !important',
+      transition: 'background-color 5000s ease-in-out 0s',
+      borderRadius: '12px !important',
+    },
+    '& input:-webkit-autofill:hover, & input:-webkit-autofill:focus': {
+      WebkitBoxShadow: '0 0 0 1000px #0c0c0e inset !important',
+      WebkitTextFillColor: '#ffffff !important',
+      borderRadius: '12px !important',
+    },
+  } as const
+
+  const passwordDarkInputSx = {
+    ...loginDarkInputSx,
+    '& .MuiOutlinedInput-root': {
+      ...loginDarkInputSx['& .MuiOutlinedInput-root'],
+      '& input': {
+        ...loginDarkInputSx['& .MuiOutlinedInput-root']['& input'],
+        '&::placeholder': {
+          color: '#8e8e93',
+          opacity: 1,
+          letterSpacing: '3px',
+          fontWeight: 700,
+          fontSize: '1rem',
+        },
+      },
     },
   } as const
 
@@ -1218,79 +1286,143 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
   return (
     <>
       {tabValue === 0 ? (
-        // Login Form
+        // Login Form - Modern Dark Card matching media_1794151485324_e6208b93.png
         <Box
           component="form"
           onSubmit={handleLoginSubmit}
-          sx={{ width: "100%", maxWidth: "100%" }}
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+            backgroundColor: "#121215",
+            border: "1.5px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: { xs: "18px", sm: "22px" },
+            p: { xs: 2.2, sm: 2.8 },
+            boxSizing: "border-box",
+            boxShadow: "0 12px 32px rgba(0, 0, 0, 0.5)",
+          }}
         >
           {loginError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2, borderRadius: "10px" }}>
               {loginError}
             </Alert>
           )}
 
-          <Stack spacing={1.5} sx={{ alignItems: 'stretch', width: '100%' }}>
+          <Stack spacing={2} sx={{ alignItems: 'stretch', width: '100%' }}>
+            {/* JOIN Button */}
+            <Button
+              variant="outlined"
+              onClick={() => {
+                if (onJoinClick) {
+                  onJoinClick();
+                } else if (onToggleForm) {
+                  onToggleForm();
+                }
+              }}
+              sx={{
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                fontSize: { xs: '0.9rem', md: '0.95rem' },
+                letterSpacing: '2.5px',
+                fontWeight: 700,
+                border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                backgroundColor: '#1a191c',
+                borderRadius: '12px',
+                width: '100%',
+                height: { xs: '50px', sm: '54px' },
+                fontFamily: 'var(--font-inter), Inter, sans-serif',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  borderColor: 'rgba(255, 255, 255, 0.38)',
+                },
+              }}
+            >
+              JOIN
+            </Button>
+
+            {/* EMAIL ADDRESS Field */}
             <TextField
               fullWidth
-              placeholder="Email address"
+              placeholder="EMAIL ADDRESS"
               name="email"
               type="email"
               autoComplete="email"
               value={loginData.email}
               onChange={handleLoginChange}
-              inputProps={{ maxLength: EMAIL_MAX_LENGTH }}
+              inputProps={{ maxLength: EMAIL_MAX_LENGTH, 'aria-label': 'Email address' }}
               required
-              sx={inputSx}
+              sx={loginDarkInputSx}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start" sx={{ mr: 1, ml: 0.5 }}>
+                    <MailOutline sx={{ color: '#8e8e93', fontSize: '21px' }} />
+                  </InputAdornment>
+                ),
+              }}
             />
 
+            {/* PASSWORD Field */}
             <TextField
               fullWidth
-              placeholder="Password"
+              placeholder="••••••••••"
               name="password"
               type={showLoginPassword ? "text" : "password"}
               autoComplete="current-password"
               value={loginData.password}
               onChange={handleLoginChange}
-              inputProps={{ maxLength: PASSWORD_MAX_LENGTH }}
+              inputProps={{ maxLength: PASSWORD_MAX_LENGTH, 'aria-label': 'Password' }}
               required
-              sx={inputSx}
+              sx={passwordDarkInputSx}
               InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start" sx={{ mr: 1, ml: 0.5 }}>
+                    <LockOutlined sx={{ color: '#8e8e93', fontSize: '21px' }} />
+                  </InputAdornment>
+                ),
                 endAdornment: (
-                  <IconButton
-                    onClick={() => setShowLoginPassword((show) => !show)}
-                    edge="end"
-                    size="small"
-                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
-                    sx={{ color: "#000000" }}
-                  >
-                    {showLoginPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
+                  <InputAdornment position="end" sx={{ mr: 0.5 }}>
+                    <IconButton
+                      onClick={() => setShowLoginPassword((show) => !show)}
+                      edge="end"
+                      size="small"
+                      aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                      sx={{
+                        color: "#8e8e93",
+                        p: 0.5,
+                        "&:hover": { color: "#ffffff" },
+                      }}
+                    >
+                      {showLoginPassword ? <VisibilityOff sx={{ fontSize: '21px' }} /> : <Visibility sx={{ fontSize: '21px' }} />}
+                    </IconButton>
+                  </InputAdornment>
                 ),
               }}
             />
 
+            {/* SIGN IN Button */}
             <Button
               type="submit"
               variant="contained"
               disabled={loginLoading || serverStatus === "offline"}
               sx={{
-                background: "#00a77f",
-                color: "#FFFF",
+                backgroundColor: "#109d6f",
+                color: "#ffffff",
                 width: '100%',
-                height: '44px',
-                fontSize: "0.95rem",
-                fontWeight: "bold",
-                // fontStyle: "italic",
-                borderRadius: '7px',
+                height: { xs: '50px', sm: '54px' },
+                fontSize: { xs: '0.9rem', md: '0.95rem' },
+                fontWeight: 700,
+                borderRadius: '12px',
                 textTransform: "uppercase",
-                letterSpacing: "0.04em",
-                // letterSpacing: "0.02em",
+                letterSpacing: "2.5px",
+                boxShadow: "0 8px 24px -2px rgba(16, 157, 111, 0.45)",
+                fontFamily: "var(--font-inter), Inter, sans-serif",
+                transition: "all 0.2s ease",
                 "&:hover": {
-                  background: "#00cc9c",
+                  backgroundColor: "#13ad7b",
+                  boxShadow: "0 8px 28px rgba(16, 157, 111, 0.65)",
                 },
                 "&:disabled": {
-                  background: "#00a77f",
+                  backgroundColor: "#0c684a",
                   color: "rgba(255, 255, 255, 0.5)",
                 },
               }}
@@ -1298,25 +1430,33 @@ const AuthTabs = ({ showLogin = true }: AuthTabsProps) => {
               {loginLoading ? <CircularProgress size={24} color="inherit" /> : getCms('page_auth_login_btn', 'SIGN IN')}
             </Button>
 
-            <Box sx={{ display: "flex", justifyContent: "center", width: '100%' }}>
+            {/* Forgot password? Link */}
+            <Box sx={{ display: "flex", justifyContent: "center", width: '100%', pt: 0.5 }}>
               <Button
                 variant="text"
                 onClick={handleForgotPassword}
                 sx={{
-                  color: "white",
+                  color: "#d4a34b",
                   textTransform: "none",
-                  fontSize: "0.85rem",
+                  fontSize: "0.92rem",
+                  fontWeight: 500,
                   width: "fit-content",
                   justifyContent: "center",
                   alignItems: "center",
                   textAlign: "center",
                   textDecoration: "underline",
-                  mt: -0.5,
-                  mb: 2,
-                  padding: 0,
+                  textUnderlineOffset: "3px",
+                  padding: "4px 8px",
+                  fontFamily: "var(--font-inter), Inter, sans-serif",
+                  transition: "color 0.2s ease",
+                  "&:hover": {
+                    color: "#e5b358",
+                    textDecoration: "underline",
+                    backgroundColor: "transparent",
+                  },
                 }}
               >
-                {getCms('page_auth_forgot_pw_link', 'Forgot your password?')}
+                {getCms('page_auth_forgot_pw_link', 'Forgot password?')}
               </Button>
             </Box>
           </Stack>

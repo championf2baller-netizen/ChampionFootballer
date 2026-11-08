@@ -57,7 +57,35 @@ export default function AuthSocialButtons() {
 
   return (
     <>
-    <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', alignItems: 'stretch', marginTop: '12px' }}>
+      <div
+        className="auth-divider-wrap"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          width: '100%',
+          marginTop: '22px',
+          marginBottom: '16px',
+          gap: '14px',
+        }}
+      >
+        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.16)' }} />
+        <span
+          style={{
+            color: 'rgba(255, 255, 255, 0.72)',
+            fontSize: '12px',
+            fontWeight: 700,
+            letterSpacing: '2px',
+            textTransform: 'uppercase',
+            fontFamily: 'var(--font-inter), Inter, sans-serif',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          OR CONTINUE WITH
+        </span>
+        <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255, 255, 255, 0.16)' }} />
+      </div>
+
+      <div className="auth-social-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', alignItems: 'stretch' }}>
       <button 
         onClick={() => go('google')} 
         className="auth-social-btn"
