@@ -9,6 +9,7 @@ import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
 import heroTopBg from '@/Components/images/hero_top_bg.png';
+import heroMobileBanner from '@/Components/images/hero_mobile_banner.jpg';
 import heroGridOrange from '@/Components/images/hero_grid_orange.png';
 import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
 import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
@@ -138,16 +139,39 @@ export default function LandingPage() {
                   gap: 1.2,
                 }}
               >
-                {/* Top Hero Banner (Taller aspect ratio matching screenshot) */}
+                {/* Mobile Hero Banner (matching media_1794152763004_36c34c0b.jpg) */}
                 <Box
                   sx={{
+                    display: { xs: 'block', md: 'none' },
                     position: 'relative',
                     width: '100%',
-                    // borderRadius: '12px',
+                    aspectRatio: '309/285',
+                    borderRadius: '16px',
                     overflow: 'hidden',
-                    aspectRatio: { xs: '16/10', md: '1.55/1' },
-                    // boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
-                    // border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+                  }}
+                >
+                  <Image
+                    src={heroMobileBanner}
+                    alt="Create your matches, track your stats, and rise through the rankings"
+                    fill
+                    priority
+                    loading="eager"
+                    fetchPriority="high"
+                    sizes="100vw"
+                    style={{ objectFit: 'cover', objectPosition: 'center center' }}
+                    quality={100}
+                  />
+                </Box>
+
+                {/* Desktop Hero Banner (Taller aspect ratio matching screenshot) */}
+                <Box
+                  sx={{
+                    display: { xs: 'none', md: 'block' },
+                    position: 'relative',
+                    width: '100%',
+                    overflow: 'hidden',
+                    aspectRatio: '1.55/1',
                   }}
                 >
                   <Image
@@ -157,16 +181,16 @@ export default function LandingPage() {
                     priority
                     loading="eager"
                     fetchPriority="high"
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 70vw, 1200px"
+                    sizes="(max-width: 1200px) 70vw, 1200px"
                     style={{ objectFit: 'cover', objectPosition: 'left center' }}
                     quality={100}
                   />
                 </Box>
 
-                {/* Bottom 2 Cards Grid */}
+                {/* Bottom 2 Cards Grid (Desktop only) */}
                 <Box
                   sx={{
-                    display: 'grid',
+                    display: { xs: 'none', md: 'grid' },
                     gridTemplateColumns: 'repeat(2, 1fr)',
                     width: '100%',
                     gap: 1.2
@@ -293,8 +317,8 @@ export default function LandingPage() {
                     ml: { xs: 'auto', md: 2 },
                   }}
                 >
-                  {/* Header Container: Text on Top */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', mb: 1.5 }}>
+                  {/* Header Container: Text on Top (Desktop only, mobile has it in hero banner) */}
+                  <Box sx={{ display: { xs: 'none', md: 'flex' }, flexDirection: 'column', alignItems: 'center', width: '100%', mb: 1.5 }}>
                     <Typography
                       sx={{
                         fontFamily: 'var(--font-inter), Inter, sans-serif !important',
