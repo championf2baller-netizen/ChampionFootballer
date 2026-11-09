@@ -71,7 +71,7 @@ import availability from '@/Components/images/availability.png'
 import teamsection from '@/Components/images/teamsection.png';
 import playmatch from '@/Components/images/playmatch.png';
 import submitresult from '@/Components/images/submitresult.png';
-import trophyroomandrewards from '@/Components/images/trophyroomandrewards.png';
+import trophyroomandrewards from '@/Components/images/4thpicc.png';
 import trackperformance from '@/Components/images/trackperformance.png';
 import individualstats from '@/Components/images/individualstats.png';
 import player from '@/Components/images/profile-user.png';

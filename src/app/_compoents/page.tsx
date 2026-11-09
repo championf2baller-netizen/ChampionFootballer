@@ -13,7 +13,7 @@ import heroMobileBanner from '@/Components/images/hero_mobile_banner.jpg';
 import heroGridOrange from '@/Components/images/hero_grid_orange.png';
 import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
 import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
-import image9 from '@/Components/images/1stpicc.jpeg';
+import image9 from '@/Components/images/1stpicc.jpg';
 import image10 from '@/Components/images/2ndpicc.png';
 import image11 from '@/Components/images/3rdpicc.png';
 import image12 from '@/Components/images/4thpicc.png';
@@ -103,6 +103,7 @@ export default function LandingPage() {
   const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
 
   const activeHeroTopBg = cmsMap['page_landing_images_hero_top_bg'] || cmsMap['hero_top_bg'] || heroTopBg;
+  const activeHeroMobileBanner = cmsMap['page_landing_images_hero_mobile_banner'] || cmsMap['hero_mobile_banner'] || heroMobileBanner;
   const activeHeroGridTeam1 = cmsMap['page_landing_images_hero_grid_team1'] || cmsMap['hero_grid_team1'] || heroGridTeam1;
   const activeHeroGridOrange = cmsMap['page_landing_images_hero_grid_orange'] || cmsMap['hero_grid_orange'] || heroGridOrange;
 
@@ -139,21 +140,116 @@ export default function LandingPage() {
                   gap: 1.2,
                 }}
               >
-                {/* Mobile Hero Banner (matching media_1794152763004_36c34c0b.jpg) */}
+                {/* Mobile Top Text Header (Matching media_1794211867841_1cd576f8.png with deep shadows & athletic font) */}
+                <Box
+                  sx={{
+                    display: { xs: 'flex', md: 'none' },
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    width: '100%',
+                    mb: 1.2,
+                    px: 1,
+                    py: { xs: 1, sm: 1.5 },
+                    background: 'radial-gradient(ellipse at 50% 100%, rgba(45, 16, 20, 0.6) 0%, rgba(20, 8, 10, 0.3) 50%, transparent 100%)',
+                    borderRadius: '16px',
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.75rem' },
+                      lineHeight: 1.1,
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: `
+                        0 2px 4px rgba(0, 0, 0, 0.95),
+                        0 4px 10px rgba(0, 0, 0, 0.85),
+                        0 8px 24px rgba(0, 0, 0, 0.75),
+                        0 0 2px rgba(0, 0, 0, 0.9)
+                      `,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line1', 'CREATE YOUR MATCHES.')}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.75rem' },
+                      lineHeight: 1.1,
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: `
+                        0 2px 4px rgba(0, 0, 0, 0.95),
+                        0 4px 10px rgba(0, 0, 0, 0.85),
+                        0 8px 24px rgba(0, 0, 0, 0.75),
+                        0 0 2px rgba(0, 0, 0, 0.9)
+                      `,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line2', 'TRACK YOUR STATS.')}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.75rem' },
+                      lineHeight: 1.1,
+                      color: '#D4B370',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: `
+                        0 2px 4px rgba(0, 0, 0, 0.95),
+                        0 4px 10px rgba(0, 0, 0, 0.85),
+                        0 8px 24px rgba(0, 0, 0, 0.75),
+                        0 0 2px rgba(0, 0, 0, 0.9)
+                      `,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line3', 'RISE THROUGH THE')}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.75rem' },
+                      lineHeight: 1.1,
+                      color: '#D4B370',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: `
+                        0 2px 4px rgba(0, 0, 0, 0.95),
+                        0 4px 10px rgba(0, 0, 0, 0.85),
+                        0 8px 24px rgba(0, 0, 0, 0.75),
+                        0 0 2px rgba(0, 0, 0, 0.9)
+                      `,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line4', 'RANKINGS.')}
+                  </Typography>
+                </Box>
+
+                {/* Mobile Hero Banner Image Card (Player & Stadium without top text - Edge-to-edge full width with no side gaps) */}
                 <Box
                   sx={{
                     display: { xs: 'block', md: 'none' },
                     position: 'relative',
-                    width: '100%',
-                    aspectRatio: '309/285',
-                    borderRadius: '16px',
+                    width: { xs: '100vw', sm: '100%' },
+                    ml: { xs: 'calc(-50vw + 50%)', sm: 0 },
+                    mr: { xs: 'calc(-50vw + 50%)', sm: 0 },
+                    aspectRatio: '333/205',
+                    borderRadius: { xs: 0, sm: '16px' },
                     overflow: 'hidden',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
                   }}
                 >
                   <Image
-                    src={heroMobileBanner}
-                    alt="Create your matches, track your stats, and rise through the rankings"
+                    src={activeHeroMobileBanner}
+                    alt="Champion Footballer"
                     fill
                     priority
                     loading="eager"
@@ -162,6 +258,37 @@ export default function LandingPage() {
                     style={{ objectFit: 'cover', objectPosition: 'center center' }}
                     quality={100}
                   />
+                  {/* Crisp Bottom Tagline (Rendered in pure sharp typography) */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      py: 1,
+                      px: 2,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      background: 'linear-gradient(to top, rgba(10, 5, 7, 0.85) 0%, rgba(10, 5, 7, 0.35) 60%, transparent 100%)',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', sans-serif !important",
+                        fontWeight: '700 !important',
+                        fontSize: { xs: '0.76rem', sm: '0.9rem' },
+                        color: '#D4B370',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        textAlign: 'center',
+                        textShadow: '0 2px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(0, 0, 0, 0.8)',
+                      }}
+                    >
+                      {getCms('page_main_mobile_hero_bottom', '— THE BEST FOOTBALL APP ON THE PLANET! —')}
+                    </Typography>
+                  </Box>
                 </Box>
 
                 {/* Desktop Hero Banner (Taller aspect ratio matching screenshot) */}
@@ -312,9 +439,9 @@ export default function LandingPage() {
                     p: 0,
                     display: 'flex',
                     flexDirection: 'column',
-                    width: { xs: '93%', sm: '94%', md: '95%' },
-                    mx: { xs: 'auto', md: 0 },
-                    ml: { xs: 'auto', md: 2 },
+                    width: { xs: '100%', sm: '94%', md: '95%' },
+                    mx: { xs: 0, sm: 'auto', md: 0 },
+                    ml: { xs: 0, md: 2 },
                   }}
                 >
                   {/* Header Container: Text on Top (Desktop only, mobile has it in hero banner) */}
