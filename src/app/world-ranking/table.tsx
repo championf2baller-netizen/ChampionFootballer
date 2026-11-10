@@ -29,7 +29,7 @@ import PageHeader from '@/Components/PageHeader';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
-import { ChevronDown, Search, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, Shield } from 'lucide-react';
 
 interface Filters {
   mode: 'total' | 'avg';
@@ -845,7 +845,7 @@ export default function WorldRankingTable() {
               PLAYERS SHOWN
             </Typography>
             <Typography sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 700, color: '#ffffff' }}>
-              {filtered.length}
+              {Math.min(visiblePlayers.length, filtered.length)}
             </Typography>
           </Box>
           <Box>
@@ -874,12 +874,11 @@ export default function WorldRankingTable() {
               e.currentTarget.classList.toggle('is-scrolled', e.currentTarget.scrollLeft > 2);
             }}
             sx={{
-              maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+              width: '100%',
               overflowX: 'auto',
-              overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'thin',
-              '&::-webkit-scrollbar': { height: '8px', width: '8px' },
+              '&::-webkit-scrollbar': { height: '8px' },
               '&::-webkit-scrollbar-track': { background: '#121316' },
               '&::-webkit-scrollbar-thumb': { background: '#22242a', borderRadius: '9999px' },
             }}
@@ -1341,10 +1340,19 @@ export default function WorldRankingTable() {
             </Table>
           </TableContainer>
 
-          {/* Show More Button */}
-          {!loading && visibleLimit < filtered.length && (
+          {/* Show More / Show Less Button */}
+          {!loading && filtered.length > 10 && (
             <Box
-              onClick={() => setVisibleLimit((prev) => prev + 10)}
+              component="button"
+              type="button"
+              onClick={() => {
+                if (visibleLimit >= filtered.length) {
+                  setVisibleLimit(10);
+                  tableContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                  setVisibleLimit((prev) => prev + 10);
+                }
+              }}
               sx={{
                 width: '100%',
                 py: 2.5,
@@ -1360,14 +1368,21 @@ export default function WorldRankingTable() {
                 letterSpacing: '0.8px',
                 textTransform: 'uppercase',
                 fontFamily: 'var(--font-woodford-bourne-pro)',
+                border: 'none',
                 borderTop: '1px solid #1c1d22',
                 backgroundColor: '#121316',
+                outline: 'none',
                 transition: 'all 0.15s ease',
-                '&:hover': { color: '#f97316' },
+                '&:hover': { color: '#f97316', backgroundColor: '#15171b' },
+                '&:active': { transform: 'scale(0.995)' },
               }}
             >
-              <span>SHOW MORE</span>
-              <ChevronDown size={14} color="currentColor" />
+              <span>{visibleLimit >= filtered.length ? 'SHOW LESS' : 'SHOW MORE'}</span>
+              {visibleLimit >= filtered.length ? (
+                <ChevronUp size={14} color="currentColor" />
+              ) : (
+                <ChevronDown size={14} color="currentColor" />
+              )}
             </Box>
           )}
         </Card>
