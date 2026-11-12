@@ -929,7 +929,7 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      pl: { xs: 2, sm: 3 },
+                      pl: { xs: '60px', sm: '76px' },
                       pr: { xs: 1, sm: 1.5 },
                       textAlign: 'left',
                       width: { xs: 170, sm: 230, md: 260 },
@@ -952,7 +952,7 @@ export default function WorldRankingTable() {
 
                   {/* Position Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
@@ -964,18 +964,19 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
+                      pl: { xs: 2, sm: 3 },
+                      textAlign: 'left !important',
                       minWidth: { xs: 75, sm: 100 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
                   >
-                    POSITION
+                    PSN
                   </TableCell>
 
                   {/* Country Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
@@ -987,7 +988,8 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
+                      pl: { xs: 2, sm: 3 },
+                      textAlign: 'left !important',
                       minWidth: { xs: 90, sm: 120 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
@@ -998,7 +1000,7 @@ export default function WorldRankingTable() {
 
                   {/* XP Status Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
@@ -1010,7 +1012,8 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
+                      pl: { xs: 2, sm: 3 },
+                      textAlign: 'left !important',
                       minWidth: { xs: 85, sm: 110 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
@@ -1022,7 +1025,7 @@ export default function WorldRankingTable() {
                   {/* Total / Avg XP Header */}
                   <TableCell
                     onClick={() => toggleSort(filters.mode === 'avg' ? 'avgXP' : 'totalXP')}
-                    className="league-table-heading league-table-heading-right"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       cursor: 'pointer',
                       position: 'sticky',
@@ -1035,8 +1038,9 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      pr: { xs: 2, sm: 3 },
-                      textAlign: 'right !important',
+                      pl: { xs: 2, sm: 3 },
+                      pr: { xs: 1, sm: 1.5 },
+                      textAlign: 'left !important',
                       minWidth: { xs: 90, sm: 120 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
@@ -1172,7 +1176,8 @@ export default function WorldRankingTable() {
                           fontWeight: 600,
                           fontSize: 13,
                           py: 1.5,
-                          textAlign: 'center',
+                          pl: { xs: 2, sm: 3 },
+                          textAlign: 'left !important',
                           minWidth: { xs: 75, sm: 100 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
@@ -1186,7 +1191,8 @@ export default function WorldRankingTable() {
                           fontSize: 13,
                           fontWeight: 500,
                           py: 1.5,
-                          textAlign: 'center',
+                          pl: { xs: 2, sm: 3 },
+                          textAlign: 'left !important',
                           minWidth: { xs: 90, sm: 120 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
@@ -1197,7 +1203,8 @@ export default function WorldRankingTable() {
                         {/* XP Status Pill */}
                         <TableCell sx={{
                           py: 1.5,
-                          textAlign: 'center',
+                          pl: { xs: 2, sm: 3 },
+                          textAlign: 'left !important',
                           minWidth: { xs: 85, sm: 110 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
@@ -1267,8 +1274,9 @@ export default function WorldRankingTable() {
                           fontSize: 15,
                           fontFamily: 'var(--font-woodford-bourne-pro)',
                           py: 1.5,
-                          pr: { xs: 2, sm: 3 },
-                          textAlign: 'right',
+                          pl: { xs: 2, sm: 3 },
+                          pr: { xs: 1, sm: 1.5 },
+                          textAlign: 'left !important',
                           minWidth: { xs: 90, sm: 120 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
@@ -1276,7 +1284,7 @@ export default function WorldRankingTable() {
                           <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'flex-end',
+                            alignItems: 'flex-start',
                             justifyContent: 'center',
                           }}>
                             <Typography sx={{
@@ -1284,7 +1292,7 @@ export default function WorldRankingTable() {
                               fontSize: { xs: 13, sm: 15 },
                               color: '#22c55e',
                               fontFamily: 'var(--font-woodford-bourne-pro)',
-                              textAlign: 'right',
+                              textAlign: 'left',
                               lineHeight: 1.2,
                             }}>
                               {filters.mode === 'avg'
@@ -1292,7 +1300,7 @@ export default function WorldRankingTable() {
                                 : formatNum(p.totalXP)}
                             </Typography>
                             {filters.mode !== 'avg' && (
-                              <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end' }}>
+                              <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-start' }}>
                                 <Box sx={{
                                   width: { xs: 55, sm: 75, md: 85 },
                                   height: 3.5,

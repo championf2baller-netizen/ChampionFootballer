@@ -2244,17 +2244,18 @@ export default function AllMatches() {
                                 onClick={handleCreateMatchClick}
                                 sx={{
                                      color: isMatchCreationDisabled ? 'rgba(255,255,255,0.45)' : 'white',
-                                                   fontFamily: 'Arial, Helvetica, sans-serif',
-                                                   fontWeight: 'semi-bold',
-                                                   fontSize: { xs: '15px', md: '18px' },
-                                                   bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.12)' : '#0388E3',
-                                                   '&:hover': { bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.18)' : '#0266b8' },
-                                                   borderRadius: 1,
-                                                   width: { xs: '100%', sm: 'auto' },
-                                                   minHeight: { xs: 42, md: 'auto' },
-                                                   px: 2.5,
-                                                   textTransform: 'uppercase',
-                                                   whiteSpace: 'nowrap'
+                                     '&:hover': { bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.18)' : '#0266b8' },
+                                     bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.12)' : '#0388E3',
+                                                              fontFamily: 'Arial, Helvetica, sans-serif',
+                                                              fontWeight: 700,
+                                                              fontSize: { xs: '14px', md: '17px' },
+                                                              borderRadius: '12px',
+                                                              width: { xs: '100%', sm: 'auto' },
+                                                              minHeight: { xs: 46, md: 44 },
+                                                              px: 2.5,
+                                     textTransform: 'uppercase',
+                                     whiteSpace: 'nowrap',
+                                     letterSpacing: '0.5px',
                                 }}
                             >
                                 {/* <Plus size={22} style={{ marginRight: 6 }} /> */}
