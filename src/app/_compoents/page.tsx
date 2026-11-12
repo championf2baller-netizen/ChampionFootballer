@@ -267,110 +267,112 @@ export default function LandingPage() {
                   />
                 </Box>
 
-                {/* Bottom 2 Cards Grid (Desktop only) */}
-                <Box
-                  sx={{
-                    display: { xs: 'none', md: 'grid' },
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    width: '100%',
-                    gap: 1.2
-
-                  }}
-                >
-                  {/* Left Card: Team Squad + Text */}
+                {/* Bottom 2 Cards Grid (Desktop only) - Commented out per request */}
+                {false && (
                   <Box
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
+                      display: { xs: 'none', md: 'grid' },
+                      gridTemplateColumns: 'repeat(2, 1fr)',
                       width: '100%',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        width: '100%',
-                        aspectRatio: '1.5/1',
-                        // borderRadius: '12px',
-                        overflow: 'hidden',
-                        // border: '1px solid rgba(255, 255, 255, 0.1)',
-                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
-                      }}
-                    >
-                      <Image
-                        src={activeHeroGridTeam1}
-                        alt="Football Team Squad"
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
-                        style={{ objectFit: 'cover', objectPosition: 'center' }}
-                        quality={100}
-                      />
-                    </Box>
-                    <Typography
-                      sx={{
-                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                        fontWeight: '900 !important',
-                        fontSize: { xs: '0.65rem', sm: '0.9rem', md: '1.15rem' },
-                        lineHeight: 1.2,
-                        color: '#FFFFFF',
-                        textTransform: 'uppercase',
-                        textAlign: 'center',
-                        mt: { xs: 1, sm: 1.5 },
-                        px: 0.5,
-                        letterSpacing: '0.01em',
-                      }}
-                    >
-                      {getCms('page_main_card1_text', '"I GOT 99 PROBLEMS BUT WINNING AIN\'T ONE"')}
-                    </Typography>
-                  </Box>
+                      gap: 1.2
 
-                  {/* Right Card: Orange Players + Text */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      width: '100%',
                     }}
                   >
+                    {/* Left Card: Team Squad + Text */}
                     <Box
                       sx={{
-                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
                         width: '100%',
-                        aspectRatio: '1.5/1',
-                        // borderRadius: '12px',
-                        overflow: 'hidden',
-                        // border: '1px solid rgba(255, 255, 255, 0.1)',
-                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                       }}
                     >
-                      <Image
-                        src={activeHeroGridOrange}
-                        alt="Champion Footballer Players"
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
-                        style={{ objectFit: 'cover', objectPosition: 'center' }}
-                        quality={100}
-                      />
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          aspectRatio: '1.5/1',
+                          // borderRadius: '12px',
+                          overflow: 'hidden',
+                          // border: '1px solid rgba(255, 255, 255, 0.1)',
+                          // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        <Image
+                          src={activeHeroGridTeam1}
+                          alt="Football Team Squad"
+                          fill
+                          loading="lazy"
+                          sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          quality={100}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                          fontWeight: '900 !important',
+                          fontSize: { xs: '0.65rem', sm: '0.9rem', md: '1.15rem' },
+                          lineHeight: 1.2,
+                          color: '#FFFFFF',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          mt: { xs: 1, sm: 1.5 },
+                          px: 0.5,
+                          letterSpacing: '0.01em',
+                        }}
+                      >
+                        {getCms('page_main_card1_text', '"I GOT 99 PROBLEMS BUT WINNING AIN\'T ONE"')}
+                      </Typography>
                     </Box>
-                    <Typography
+
+                    {/* Right Card: Orange Players + Text */}
+                    <Box
                       sx={{
-                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                        fontWeight: '900 !important',
-                        fontSize: { xs: '0.58rem', sm: '0.82rem', md: '1.05rem' },
-                        lineHeight: 1.2,
-                        color: '#FFFFFF',
-                        textTransform: 'uppercase',
-                        textAlign: 'center',
-                        mt: { xs: 1, sm: 1.5 },
-                        px: 0.5,
-                        letterSpacing: '0.01em',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
                       }}
                     >
-                      {getCms('page_main_card2_text', 'CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!')}
-                    </Typography>
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          aspectRatio: '1.5/1',
+                          // borderRadius: '12px',
+                          overflow: 'hidden',
+                          // border: '1px solid rgba(255, 255, 255, 0.1)',
+                          // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        <Image
+                          src={activeHeroGridOrange}
+                          alt="Champion Footballer Players"
+                          fill
+                          loading="lazy"
+                          sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          quality={100}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                          fontWeight: '900 !important',
+                          fontSize: { xs: '0.58rem', sm: '0.82rem', md: '1.05rem' },
+                          lineHeight: 1.2,
+                          color: '#FFFFFF',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          mt: { xs: 1, sm: 1.5 },
+                          px: 0.5,
+                          letterSpacing: '0.01em',
+                        }}
+                      >
+                        {getCms('page_main_card2_text', 'CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!')}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
+                )}
               </Box>
             </Grid>
 

@@ -922,7 +922,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
               textTransform: 'uppercase',
             }}
           >
-            Match Result
+            Match Report
           </Typography>
 
           {(() => {

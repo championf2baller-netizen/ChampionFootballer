@@ -2471,7 +2471,7 @@ export default function LeagueDetailPage() {
                 };
             });
             setLeague((prev: any) => prev ? { ...prev, matches: updateMatches(prev.matches) } : prev);
-            
+
         }
 
         setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
@@ -7035,7 +7035,7 @@ export default function LeagueDetailPage() {
                                                         },
                                                     }}
                                                 >
-                                                    <div className="w-full min-w-[640px] sm:min-w-[820px] rounded-lg league-table league-mobile-result-font">
+                                                    <div className="w-full min-w-[580px] sm:min-w-[820px] rounded-lg league-table league-mobile-result-font">
                                                         {/* Table Header */}
                                                         {/* <div className="grid mt-0 grid-cols-[50px_1fr_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-4 py-3 bg-table-header border-b border-border text-muted-foreground league-header-row league-header-inset league-table-heading">
                                                 <div className="text-center">#</div>
@@ -7051,15 +7051,15 @@ export default function LeagueDetailPage() {
                                             </div> */}
 
                                                         <>
-                                                            <div className="grid mt-0 grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
+                                                            <div className="grid mt-0 grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
                                                                 <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#717d8f' }}>#</div>
-                                                                <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
+                                                                <div className="pl-[40px] sm:pl-[96px] league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>MOTM</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>P</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>D</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>L</div>
-                                                                <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W%</div>
+                                                                <div className="hidden sm:block text-center league-table-heading" style={{ color: '#717d8f' }}>W%</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>GD</div>
                                                                 <div className="text-center league-table-heading league-table-heading-no-transform" style={{ color: '#717d8f' }}>{filteredLeague?.showPoints === true ? 'xpPTS' : 'PTS'}</div>
                                                             </div>
@@ -7129,7 +7129,7 @@ export default function LeagueDetailPage() {
                                                                         <div
                                                                             key={player.id}
                                                                             onClick={(e) => { e.preventDefault(); if (league?.id) openQuickViewFromTable(String(league.id), String(player.id)); }}
-                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
+                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
                                                                         >
                                                                             {/* Rank */}
                                                                             <div className="text-center text-white font-bold league-table-sticky-rank h-full flex items-center justify-center">
@@ -7223,7 +7223,7 @@ export default function LeagueDetailPage() {
                                                                             <div className="text-center text-white font-bold">{player.wins}</div>
                                                                             <div className="text-center text-white font-bold">{player.draws}</div>
                                                                             <div className="text-center text-white font-bold">{player.losses}</div>
-                                                                            <div className="text-center text-white font-bold">{player.winPercentage}</div>
+                                                                            <div className="hidden sm:block text-center text-white font-bold">{player.winPercentage}</div>
                                                                             <div className="text-center font-bold">
                                                                                 {(() => {
                                                                                     const gd = player.goalDifference ?? 0;
@@ -7241,7 +7241,7 @@ export default function LeagueDetailPage() {
                                                                     );
                                                                 })}
                                                             {tableData.length === 0 && (
-                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
+                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
                                                                     <div className="text-center text-white/80" style={{ gridColumn: '1 / -1' }}>
                                                                         No players found for this season.
                                                                     </div>
