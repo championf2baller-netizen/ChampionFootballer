@@ -1533,7 +1533,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           />
         </Box>
         <Box sx={{ height: { xs: 3, sm: 6 } }} />
-        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : 'red', textAlign: 'center', maxWidth: { xs: '48px', sm: '60px' } }}>
+        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : '#e56a16', textAlign: 'center', maxWidth: { xs: '48px', sm: '60px' } }}>
           {name}
         </Typography>
       </Box>

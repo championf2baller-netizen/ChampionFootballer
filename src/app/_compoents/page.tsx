@@ -85,7 +85,7 @@ export default function LandingPage() {
           setCmsMap(map);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Auto-detect inviteCode in URL for unauthenticated users
@@ -141,7 +141,7 @@ export default function LandingPage() {
                 }}
               >
                 {/* Mobile Top Text Header */}
-                <Box
+                {/* <Box
                   sx={{
                     display: { xs: 'flex', md: 'none' },
                     flexDirection: 'column',
@@ -217,15 +217,14 @@ export default function LandingPage() {
                   >
                     {getCms('page_main_mobile_hero_line4', 'RANKINGS.')}
                   </Typography>
-                </Box>
+                </Box> */}
 
-                {/* Mobile Hero Banner (champ 2.png) - Edge-to-edge full width with 0px side gaps */}
+                {/* Mobile Hero Banner (champ 2.png) - Edge-to-edge full width with natural height and no cropping */}
                 <Box
                   sx={{
                     display: { xs: 'block', md: 'none' },
                     position: 'relative',
                     width: '100%',
-                    aspectRatio: '802/456',
                     borderRadius: { xs: 0, sm: '16px' },
                     overflow: 'hidden',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
@@ -234,12 +233,17 @@ export default function LandingPage() {
                   <Image
                     src={activeHeroMobileBanner}
                     alt="Champion Footballer"
-                    fill
+                    width={723}
+                    height={689}
                     priority
                     loading="eager"
                     fetchPriority="high"
                     sizes="100vw"
-                    style={{ objectFit: 'cover', objectPosition: 'center center' }}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block',
+                    }}
                     quality={100}
                   />
                 </Box>
