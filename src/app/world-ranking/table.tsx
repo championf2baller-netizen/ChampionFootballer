@@ -929,7 +929,7 @@ export default function WorldRankingTable() {
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      pl: { xs: '60px', sm: '76px' },
+                      pl: { xs: 2, sm: 3 },
                       pr: { xs: 1, sm: 1.5 },
                       textAlign: 'left',
                       width: { xs: 170, sm: 230, md: 260 },
