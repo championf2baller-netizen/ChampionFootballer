@@ -28,7 +28,7 @@ interface User { id: string; firstName: string; lastName: string; email: string;
 interface League { id: string; name: string; members: User[]; active: boolean; }
 interface Guest { id: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; }
 interface StagedGuest { tempId: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; existingId?: string; }
-interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; notes?: string; notificationMessage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; }
+interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; notes?: string; notificationMessage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; homeWinPct?: number; awayWinPct?: number; }
 type PlayerOption = User & { isGuest?: boolean; guestTempId?: string; team?: 'home' | 'away'; existingGuestId?: string };
 interface AvailabilityRecord { userId: string; status: 'available' | 'unavailable' | 'pending'; }
 type AvailabilityStatus = AvailabilityRecord['status'];
@@ -929,6 +929,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         });
       }
 
+      if (typeof m.homeWinPct === 'number' && Number.isFinite(m.homeWinPct)) {
+        const hPct = Number(m.homeWinPct);
+        const aPct = typeof m.awayWinPct === 'number' && Number.isFinite(m.awayWinPct) ? Number(m.awayWinPct) : 100 - hPct;
+        setHomeWinChance(hPct);
+        setAwayWinChance(aPct);
+      }
+
       if (m.homeCaptainId && memberIds.has(String(m.homeCaptainId))) {
         const cap = homeUsers.find(u => u.id === m.homeCaptainId);
         if (cap) setHomeCaptain(cap as PlayerOption);
@@ -1058,8 +1065,14 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       if (!res.ok) return;
       const j = await res.json();
       if (!j?.success) return;
-      setHomeWinChance(typeof j.home?.winPct === 'number' ? j.home.winPct : null);
-      setAwayWinChance(typeof j.away?.winPct === 'number' ? j.away.winPct : null);
+      const apiHomePct = typeof j.matchupPct === 'number'
+        ? j.matchupPct
+        : (typeof j.home?.winPct === 'number' ? j.home.winPct : null);
+      const apiAwayPct = apiHomePct !== null
+        ? 100 - apiHomePct
+        : (typeof j.away?.winPct === 'number' ? j.away.winPct : null);
+      if (apiHomePct !== null) setHomeWinChance(apiHomePct);
+      if (apiAwayPct !== null) setAwayWinChance(apiAwayPct);
       setHomeStrength(typeof j.home?.average === 'number' ? Math.round(j.home.average) : null);
       setAwayStrength(typeof j.away?.average === 'number' ? Math.round(j.away.average) : null);
     } catch { }
@@ -1153,17 +1166,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
   const teamBalance = React.useMemo(() => {
     const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+    if (homeWinChance !== null && awayWinChance !== null) {
+      const homePct = clamp(homeWinChance);
+      const awayPct = 100 - homePct;
+      return {
+        homePct,
+        awayPct,
+        hasData: true,
+      };
+    }
     if (xpBased.hasPlayers) {
       return {
         homePct: clamp(xpBased.homePct),
         awayPct: clamp(xpBased.awayPct),
-        hasData: true,
-      };
-    }
-    if (homeWinChance !== null && awayWinChance !== null) {
-      return {
-        homePct: clamp(homeWinChance),
-        awayPct: clamp(awayWinChance),
         hasData: true,
       };
     }

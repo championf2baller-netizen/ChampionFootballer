@@ -576,6 +576,18 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           away: (m.removed?.away || []).map(String),
         });
 
+        if (typeof (m as any).homeWinPct === 'number' && Number.isFinite((m as any).homeWinPct)) {
+          const rawPct = Number((m as any).homeWinPct);
+          const safePct = Number.isFinite(rawPct) ? Math.max(0, Math.min(100, Math.round(rawPct))) : 50;
+          setTeamInsights(prev => prev ?? {
+            homeStrength: 0,
+            awayStrength: 0,
+            matchupPct: safePct,
+            predicted: safePct > 50 ? 'home' : (safePct < 50 ? 'away' : 'draw'),
+            predictedScore: '—',
+          });
+        }
+
         // Load saved positions from server
         const serverHome = m.positions?.home || {};
         const serverAway = m.positions?.away || {};
@@ -1061,8 +1073,8 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
   const homeBalancePct = React.useMemo(() => {
     // Keep team-balance aligned with server prediction algorithm.
     // If prediction is unavailable, show neutral 50/50 rather than a different local formula.
-    if (teamInsights && Number.isFinite(teamInsights.matchupPct) && teamInsights.matchupPct > 0) {
-      return Math.round(Math.max(1, Math.min(99, teamInsights.matchupPct)));
+    if (teamInsights && Number.isFinite(teamInsights.matchupPct) && teamInsights.matchupPct >= 0) {
+      return Math.max(0, Math.min(100, Math.round(teamInsights.matchupPct)));
     }
     return 50;
   }, [teamInsights]);
