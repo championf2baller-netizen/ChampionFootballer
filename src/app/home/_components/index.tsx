@@ -3006,8 +3006,8 @@ export default function PlayerDashboard() {
                   <TextField
                     placeholder="Enter invite code"
                     value={inviteCode}
-                    onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                    inputProps={{ maxLength: 6 }}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                    inputProps={{ maxLength: 8 }}
                     size="small"
                     variant="outlined"
                     sx={{
@@ -3247,8 +3247,8 @@ export default function PlayerDashboard() {
               <TextField
                 placeholder="Enter invite code"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                inputProps={{ maxLength: 6 }}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                inputProps={{ maxLength: 8 }}
                 size="small"
                 variant="outlined"
                 sx={{
@@ -3328,8 +3328,8 @@ export default function PlayerDashboard() {
               <TextField
                 placeholder="Enter invite code"
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                inputProps={{ maxLength: 6 }}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                inputProps={{ maxLength: 8 }}
                 size="small"
                 variant="outlined"
                 sx={{
@@ -3425,8 +3425,8 @@ export default function PlayerDashboard() {
           <TextField
             placeholder="Enter invite code"
             value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-            inputProps={{ maxLength: 6 }}
+            onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+            inputProps={{ maxLength: 8 }}
             size="small"
             variant="outlined"
             sx={{

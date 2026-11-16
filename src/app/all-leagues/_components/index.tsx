@@ -5762,8 +5762,8 @@ function AllLeagues() {
               <TextField
                 placeholder={getCms('page_all_leagues_join_placeholder', 'ENTER LEAGUE INVITE CODE')}
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                inputProps={{ maxLength: 6 }}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                inputProps={{ maxLength: 8 }}
                 size="small"
                 variant="outlined"
                 autoComplete="off"
