@@ -30,6 +30,7 @@ import { shareContent, captureElementAsFile, shareToWhatsApp } from '@/lib/utils
 import Layer from '@/Components/images/logonavbar.webp';
 import FootballIcon from '@/Components/images/football.png';
 import TableViewImg from '@/Components/images/table.png';
+import { TABLE_DARK_ICON } from '@/Components/images/tableDarkIcon';
 import PitchViewImg from '@/Components/images/footblgrond.png';
 import BulbImg from '@/Components/images/bulb.png';
 import UndoImg from '@/Components/images/undo.png';
@@ -2565,11 +2566,11 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                   }}
                 >
                   <img
-                    src={TableViewImg.src}
+                    src={TABLE_DARK_ICON}
                     alt="table"
                     width={18}
                     height={18}
-                    style={{ objectFit: 'contain', filter: 'brightness(0)' }}
+                    style={{ objectFit: 'contain' }}
                   />
                   <Typography
                     sx={{
@@ -2602,7 +2603,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
                     alt="pitch"
                     width={18}
                     height={18}
-                    style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                    style={{ objectFit: 'contain' }}
                   />
                   <Typography
                     sx={{
