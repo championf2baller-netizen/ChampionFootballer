@@ -767,6 +767,12 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     if (len > 22) return { xs: '15px', sm: '17px', md: '18px' };
     return { xs: '16px', sm: '18px', md: '19px' };
   };
+  const getLeagueButtonFontSize = (name?: string) => {
+    const len = String(name ?? '').trim().length;
+    if (len > 24) return { xs: '13px', sm: '14px', md: '16px' };
+    if (len > 18) return { xs: '14px', sm: '15px', md: '17.5px' };
+    return { xs: '15px', sm: '16px', md: '19px' };
+  };
 
   // Fetch user's leagues (now optimized for instant initial render, enrichment runs in background)
   useEffect(() => {
@@ -1430,20 +1436,23 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
             bgcolor: '#00a77f',
             color: 'white',
             '&:hover': { bgcolor: '#00A77F' },
-            minHeight: { xs: '60px', sm: '70px', md: '50px' },
+            minHeight: { xs: 44, md: 48 },
             width: '100%',
             minWidth: 0,
             maxWidth: '100%',
             boxSizing: 'border-box',
-            fontSize: { xs: '0.95rem', sm: '1.05rem', md: '15px' },
-            fontWeight: 'normal',
+            fontSize: { xs: '15px', sm: '16px', md: '19px' },
+            fontWeight: 600,
             textTransform: 'none',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'center',
             borderRadius: 2,
             boxShadow: '0 4px 12px rgba(67,160,71,0.3)',
-            border: '2px solid #fff',
+            position: 'relative',
+            px: { xs: 2, md: 3 },
+            py: 0.6,
+            border: 'none',
             ...(showDropdown && {
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
@@ -1456,98 +1465,136 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
             setShowDropdown(prev => !prev);
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, width: '100%', minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flexGrow: 1, minWidth: 0 }}>
-              {isFetching ? (
-                <CircularProgress size={20} sx={{ color: '#FFFFFF' }} />
-              ) : (
-                <Image src={selectedLeague?.image || trophy} alt='' height={24} width={24} style={{ height: 24, width: 24 }} />
-              )}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0, alignItems: 'flex-start', minWidth: 0 }}>
-                <Typography
-                  noWrap
-                  sx={{
-                    fontSize: getLeagueLabelFontSize(getDisplayLeagueName(selectedLeague)),
-                    fontWeight: 600,
-                    lineHeight: 1.2,
-                    letterSpacing: '0%',
-                    textTransform: 'capitalize',
-                    maxWidth: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
-                  }}
-                >
-                  {isFetching
-                    ? 'Loading…'
-                    : (selectedLeague?.name ? getDisplayLeagueName(selectedLeague) : 'Select a league')}
-                </Typography>
-                {!isFetching && selectedLeague?.name && (() => {
-                  const hasNoSeasons = Array.isArray(selectedLeague.seasons) && selectedLeague.seasons.length === 0;
-                  const displaySeasonNum = getDisplaySeasonNumber(selectedLeague, seasonsList.find(s => String(s.id) === selectedSeasonId));
-                  if (hasNoSeasons || displaySeasonNum <= 0) return null;
-                  return (
-                    <Typography
-                      sx={{
-                        fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.75rem' },
-                        fontWeight: 'normal',
-                        opacity: 0.9,
-                        lineHeight: 1,
-                        marginLeft: 0,
-                        cursor: 'default',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        textDecoration: 'none',
-                        '&:hover': {
-                          opacity: 1
-                        }
-                      }}
-                    >
-                      Season {displaySeasonNum}
-                    </Typography>
-                  );
-                })()}
-              </Box>
-            </Box>
+          {/* Trophy Icon - Lined up with the + on the buttons below (left: { xs: 10, md: 14 }) */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: { xs: 10, md: 14 },
+              top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: { xs: 20, md: 24 },
+              height: { xs: 20, md: 24 },
+              pointerEvents: 'none',
+            }}
+          >
+            {isFetching ? (
+              <CircularProgress size={18} sx={{ color: '#FFFFFF' }} />
+            ) : (
+              <Image
+                src={selectedLeague?.image || trophy}
+                alt=""
+                height={22}
+                width={22}
+                style={{ height: 'auto', width: 'auto', maxHeight: 22, maxWidth: 22, objectFit: 'contain' }}
+              />
+            )}
+          </Box>
 
-            <Box
+          {/* Centered League Name in ALL CAPS + Season Number underneath */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              px: { xs: 4, md: 5 },
+              minWidth: 0,
+              textAlign: 'center',
+            }}
+          >
+            <Typography
+              noWrap
               sx={{
-                color: 'white',
-                cursor: 'pointer',
-                borderRadius: '50%',
-                width: { xs: 34, md: 40 },
-                height: { xs: 34, md: 40 },
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.1)'
-                },
-                transition: 'background-color 0.2s'
-              }}
-              role="button"
-              tabIndex={0}
-              aria-haspopup="listbox"
-              aria-expanded={showDropdown}
-              aria-controls="league-dropdown-list"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isFetching) return; // Disable toggle while loading
-                setShowDropdown(prev => !prev);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (isFetching) return;
-                  setShowDropdown(prev => !prev);
-                }
+                fontSize: getLeagueButtonFontSize(getDisplayLeagueName(selectedLeague)),
+                fontWeight: 600,
+                lineHeight: 1.15,
+                letterSpacing: '0%',
+                textTransform: 'uppercase',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                color: '#FFFFFF',
+                textAlign: 'center',
               }}
             >
-              <ChevronRight size={24} style={{ transform: showDropdown ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
-            </Box>
+              {isFetching
+                ? 'LOADING…'
+                : (selectedLeague?.name ? getDisplayLeagueName(selectedLeague) : 'SELECT A LEAGUE')}
+            </Typography>
+            {!isFetching && selectedLeague?.name && (() => {
+              const hasNoSeasons = Array.isArray(selectedLeague.seasons) && selectedLeague.seasons.length === 0;
+              const displaySeasonNum = getDisplaySeasonNumber(selectedLeague, seasonsList.find(s => String(s.id) === selectedSeasonId));
+              if (hasNoSeasons || displaySeasonNum <= 0) return null;
+              return (
+                <Typography
+                  sx={{
+                    fontSize: { xs: '0.72rem', sm: '0.78rem', md: '0.75rem' },
+                    fontWeight: 500,
+                    opacity: 0.9,
+                    lineHeight: 1,
+                    mt: 0.35,
+                    cursor: 'default',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.5,
+                    color: '#E0F2FE',
+                    fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  Season {displaySeasonNum}
+                </Typography>
+              );
+            })()}
+          </Box>
+
+          {/* Dropdown Chevron Arrow on the Right */}
+          <Box
+            sx={{
+              position: 'absolute',
+              right: { xs: 8, md: 14 },
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'white',
+              cursor: 'pointer',
+              borderRadius: '50%',
+              width: { xs: 28, md: 32 },
+              height: { xs: 28, md: 32 },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.15)'
+              },
+              transition: 'background-color 0.2s'
+            }}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="listbox"
+            aria-expanded={showDropdown}
+            aria-controls="league-dropdown-list"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isFetching) return;
+              setShowDropdown(prev => !prev);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isFetching) return;
+                setShowDropdown(prev => !prev);
+              }
+            }}
+          >
+            <ChevronRight size={22} style={{ transform: showDropdown ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
           </Box>
         </Button>
 
@@ -1574,7 +1621,8 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
               borderRadius: 2,
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
-              border: '2px solid #FFFFFF',
+              border: '1px solid rgba(255,255,255,0.25)',
+              borderTop: 'none',
               boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
               backdropFilter: 'blur(8px)',
               '&::-webkit-scrollbar': {
@@ -1785,14 +1833,21 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
               component="span"
               sx={{
                 position: 'absolute',
-                left: { xs: 12, md: 22.5 },
+                left: { xs: 10, md: 14 },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: { xs: 20, md: 24 },
+                height: { xs: 20, md: 24 },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontSize: { xs: '20px', md: '24px' },
                 lineHeight: 1,
               }}
             >
               +
             </Box>
-            {isCreatingSeason ? 'Creating Season...' : 'Add New Season'}
+            {isCreatingSeason ? 'CREATING SEASON...' : 'ADD NEW SEASON'}
           </Button>
         )}
 
@@ -2747,35 +2802,46 @@ export default function PlayerDashboard() {
             flex: { xs: 'none', md: '0 0 300px' },
             width: { xs: '100%', md: '300px' },
             maxWidth: { xs: 300, sm: 340, md: 300 },
-            height: { xs: '420px', sm: '430px', md: 'auto' },
-            minHeight: { xs: '420px', sm: '430px', md: 0 },
+            height: { xs: '335px', sm: '370px', md: 'auto' },
+            minHeight: { xs: '335px', sm: '370px', md: 0 },
             display: 'flex',
-            justifyContent: { xs: 'center', md: 'center' },
-            mb: { xs: 2, md: 0 },
-            mt: { xs: 1, md: 0 },
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            mb: { xs: 1, md: 0 },
+            mt: { xs: 0.5, md: 0 },
             order: { xs: 1, md: 1 },
             alignSelf: { xs: 'center', md: 'stretch' },
-            // backgroundColor: 'red',
+            overflow: 'visible',
           }}>
-            <PlayerCard
-              name={userDisplayName}
-              number={user?.shirtNumber || '00'}
-              points={user?.xp || 0}
-              height="100%"
-              stats={{
-                DRI: user?.skills?.dribbling?.toString() || '',
-                SHO: user?.skills?.shooting?.toString() || '',
-                PAS: user?.skills?.passing?.toString() || '',
-                PAC: user?.skills?.pace?.toString() || '',
-                DEF: user?.skills?.defending?.toString() || '',
-                PHY: user?.skills?.physical?.toString() || ''
-              }}
-              foot={user?.preferredFoot === "right" ? "R" : "L"}
-              profileImage={user?.profilePicture || undefined}
-              shirtIcon=""
-              position={user?.position || 'XXX'}
-              hideShareIcon={true}
-            />
+            <Box sx={{
+              transform: { xs: 'scale(0.80)', sm: 'scale(0.88)', md: 'none' },
+              transformOrigin: 'top center',
+              display: 'flex',
+              justifyContent: 'center',
+              width: 'auto',
+              height: 'auto',
+            }}>
+              <PlayerCard
+                name={userDisplayName}
+                number={user?.shirtNumber || '00'}
+                points={user?.xp || 0}
+                height={410}
+                width={260}
+                stats={{
+                  DRI: user?.skills?.dribbling?.toString() || '',
+                  SHO: user?.skills?.shooting?.toString() || '',
+                  PAS: user?.skills?.passing?.toString() || '',
+                  PAC: user?.skills?.pace?.toString() || '',
+                  DEF: user?.skills?.defending?.toString() || '',
+                  PHY: user?.skills?.physical?.toString() || ''
+                }}
+                foot={user?.preferredFoot === "right" ? "R" : "L"}
+                profileImage={user?.profilePicture || undefined}
+                shirtIcon=""
+                position={user?.position || 'XXX'}
+                hideShareIcon={true}
+              />
+            </Box>
           </Box>
 
           {/* Right Div - White Card */}
@@ -2816,7 +2882,7 @@ export default function PlayerDashboard() {
                   color: 'black',
                   fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                 }}>{homeCmsContent.home_welcome_text?.content || 'Welcome,'}</Typography>
-                <Typography sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.2rem' }, fontWeight: 550, fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
+                <Typography sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.2rem' }, fontWeight: 550, color: 'black', fontFamily: 'var(--font-woodford-bourne-pro), sans-serif' }}>
                   {userDisplayName}
                 </Typography>
               </Box>
@@ -2893,6 +2959,7 @@ export default function PlayerDashboard() {
                     mx: 'auto',
                     display: 'flex',
                     justifyContent: 'center',
+                    alignItems: 'center',
                     px: { xs: 2.5, md: 3 },
                     fontSize: { xs: '15px', md: '19px' },
                     minHeight: { xs: 42, md: 48 },
@@ -2900,14 +2967,21 @@ export default function PlayerDashboard() {
                     fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                     lineHeight: '100%',
                     letterSpacing: '0%',
-                    textTransform: 'capitalize',
+                    textTransform: 'uppercase',
                   }}
                 >
                   <Box
                     component="span"
                     sx={{
                       position: 'absolute',
-                      left: { xs: 12, md: 22.5 },
+                      left: { xs: 10, md: 14 },
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: { xs: 20, md: 24 },
+                      height: { xs: 20, md: 24 },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       fontSize: { xs: '20px', md: '24px' },
                       lineHeight: 1,
                     }}
@@ -2951,7 +3025,8 @@ export default function PlayerDashboard() {
                       '& .MuiInputBase-input': {
                         height: '42px',
                         padding: { xs: '0 10px', md: '0 12px' },
-                        fontSize: { xs: '13px', md: '14px' }
+                        fontSize: { xs: '13px', md: '14px' },
+                        color: '#111',
                       },
                       '& .MuiInputBase-input::placeholder': {
                         color: 'rgba(0,0,0,0.55)',
@@ -2972,7 +3047,7 @@ export default function PlayerDashboard() {
                       fontSize: { xs: '15px', sm: '16px', md: '17px' },
                       flexShrink: 0,
                       color: 'white',
-                      fontFamily: 'Arial, Helvetica, sans-serif',
+                      fontFamily: 'var(--font-woodford-bourne-pro), sans-serif',
                       fontWeight: 600,
                       textTransform: 'none',
                       whiteSpace: 'nowrap'

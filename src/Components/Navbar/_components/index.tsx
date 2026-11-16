@@ -1090,7 +1090,7 @@ export default function NavigationBar() {
     }
   }, [xpStatusOpen]);
   const pathname = usePathname();
-  const isMainPage = pathname === '/';
+  const isMainPage = pathname === '/' || pathname === '';
 
   // 🔥 NOTIFICATION STATES
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -2816,7 +2816,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             width: '100%',
             minWidth: 0,
             minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
-            px: isMainPage ? { xs: 2, sm: 3, md: 5 } : undefined,
+            px: isMainPage ? { xs: 0, sm: 3, md: 5 } : undefined,
             overflowX: 'hidden',
             position: 'relative',
             mt: isMainPage ? {  md : -2} : undefined ,
@@ -2835,7 +2835,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 justifyContent: { xs: 'center', md: 'flex-start' },
               }}
             >
-              <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexShrink: 0 }}>
                 <Box sx={{
                   width: { xs: 250, sm: 340, md: 700},
                   maxWidth: '100%',
@@ -2844,7 +2844,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   alignItems: 'center',
                   justifyContent: { xs: 'center', md: 'flex-start' },
                   '& img': {
-                    objectPosition: { xs: 'center', md: 'left center' }
+                    objectPosition: { xs: 'center !important', md: 'left center !important' }
                   }
                 }}>
                   <Image
@@ -2911,7 +2911,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 
           {/* DESKTOP NAVIGATION (moved to right) */}
           <Box sx={{
-            display: { xs: 'none', lg: 'flex' },
+            display: isMainPage ? 'none' : { xs: 'none', lg: 'flex' },
             alignItems: 'center',
             justifyContent: 'flex-end',
             flex: 1,
@@ -2926,7 +2926,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 
           {/* RIGHT SIDE CONTROLS */}
           <Box sx={{ 
-            display: 'flex', 
+            display: isMainPage ? 'none' : 'flex', 
             alignItems: 'center',
             // gap: { xs: 0.5, md: 1 },
             flexShrink: 0,

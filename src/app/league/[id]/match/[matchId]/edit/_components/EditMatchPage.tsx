@@ -2797,9 +2797,9 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
-                              '& fieldset': { borderColor: '#e56a16', borderRadius: 1 },
-                              '&:hover fieldset': { borderColor: '#e56a16' },
-                              '&.Mui-focused fieldset': { borderColor: '#e56a16' },
+                              '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
+                              '&:hover fieldset': { borderColor: '#00a77f' },
+                              '&.Mui-focused fieldset': { borderColor: '#00a77f' },
                               '&.Mui-disabled': {
                                 '& fieldset': { borderColor: '#717274 !important' }
                               },

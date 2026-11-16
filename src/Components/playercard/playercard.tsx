@@ -476,7 +476,7 @@ const PlayerCard = ({
     <Box
       sx={{
         width: width || 260,
-        height: height || 390,
+        height: height || 410,
         position: 'relative',
         fontWeight: 'bold',
         color: '#fff',
@@ -493,7 +493,7 @@ const PlayerCard = ({
           height: '100%',
           
           backgroundImage: `url(${typeof vectorImg === 'string' ? vectorImg : (vectorImg as any)?.src || ''})`,
-          backgroundSize: 'cover',
+          backgroundSize: '100% 100%',
           backgroundPosition: 'top center',
           backgroundRepeat: 'no-repeat',
         }}
@@ -509,7 +509,7 @@ const PlayerCard = ({
             left: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'fill',
             objectPosition: 'top center',
             zIndex: 0,
             pointerEvents: 'none',

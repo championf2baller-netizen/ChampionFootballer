@@ -26,7 +26,8 @@ import FlagIcon from '@mui/icons-material/Flag';
 import toast from 'react-hot-toast';
 import Shirt from '@/Components/images/viewteamhome.png';
 import Shirtaway from '@/Components/images/viewteamaway.png';
-import { shareContent } from '@/lib/utils/shareUtils';
+import { shareContent, captureElementAsFile, shareToWhatsApp } from '@/lib/utils/shareUtils';
+import Layer from '@/Components/images/logonavbar.webp';
 import FootballIcon from '@/Components/images/football.png';
 import TableViewImg from '@/Components/images/table.png';
 import PitchViewImg from '@/Components/images/footblgrond.png';
@@ -376,6 +377,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
 
   const pitchRef = React.useRef<HTMLDivElement | null>(null);
   const wrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const shareExportPitchRef = React.useRef<HTMLDivElement | null>(null);
   const [pitchW, setPitchW] = React.useState(850);
   const PITCH_VIEWBOX_WIDTH = 1014;
   const PITCH_VIEWBOX_HEIGHT = 1600;
@@ -903,7 +905,27 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
       ? `${homeTeamName} vs ${awayTeamName}`
       : 'Home Team vs Away Team';
 
-    return `Champion Footballer \nWhere Champions Are Made!\nTeam line-up: (${matchup}) \n[show team preview here]\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com`;
+    const homeNames = [
+      ...homePlayers.map(p => p.name || 'Player'),
+      ...homeGuests.map(g => formatGuestDisplayName(g))
+    ].filter(Boolean);
+
+    const awayNames = [
+      ...awayPlayers.map(p => p.name || 'Player'),
+      ...awayGuests.map(g => formatGuestDisplayName(g))
+    ].filter(Boolean);
+
+    let details = `*Champion Footballer*\nWhere Champions Are Made!\n\n⚽ *Team Line-up: ${matchup}*`;
+    if (homeNames.length > 0) {
+      details += `\n🟢 *${homeTeamName || 'Home'} (${homeNames.length}):* ${homeNames.join(', ')}`;
+    }
+    if (awayNames.length > 0) {
+      details += `\n🟠 *${awayTeamName || 'Away'} (${awayNames.length}):* ${awayNames.join(', ')}`;
+    }
+
+    details += `\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.co.uk`;
+
+    return details;
   };
 
   const copyTeamContent = async () => {
@@ -935,7 +957,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     }
 
     if (copied) {
-      toast.success('Team line-up copied to clipboard!');
+      toast.success('Team line-up details copied to clipboard!');
     } else {
       toast.error('Unable to copy to clipboard.');
     }
@@ -949,13 +971,33 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     setShareMenuAnchor(null);
   };
 
-  const handleShareWhatsApp = () => {
+  const handleShareWhatsApp = async () => {
     handleShareClose();
-    const text = getShareMessage();
-    if (typeof window !== 'undefined') {
-      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
+    const matchup = (homeTeamName && awayTeamName && homeTeamName !== 'Home' && awayTeamName !== 'Away')
+      ? `${homeTeamName} vs ${awayTeamName}`
+      : 'Home Team vs Away Team';
+    const cleanMatchup = matchup.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const fileName = `${cleanMatchup}_pitch.png`;
+    const message = getShareMessage();
+
+    const toastId = toast.loading('Preparing pitch line-up for sharing...');
+    let fileToShare: File | null = null;
+    const targetEl = shareExportPitchRef.current || wrapperRef.current;
+    if (targetEl) {
+      try {
+        fileToShare = await captureElementAsFile(targetEl, fileName, { backgroundColor: '#2b2b2b' });
+      } catch (err) {
+        console.warn('Failed to capture pitch line-up:', err);
+      }
     }
+    toast.dismiss(toastId);
+
+    await shareToWhatsApp({
+      title: `Team line-up: ${matchup} | Champion Footballer`,
+      message,
+      file: fileToShare,
+      fileName,
+    });
   };
 
   const handleShareNative = async () => {
@@ -963,18 +1005,27 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     const matchup = (homeTeamName && awayTeamName && homeTeamName !== 'Home' && awayTeamName !== 'Away')
       ? `${homeTeamName} vs ${awayTeamName}`
       : 'Home Team vs Away Team';
-    const text = getShareMessage();
+    const cleanMatchup = matchup.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const fileName = `${cleanMatchup}_pitch.png`;
+    const message = getShareMessage();
 
-    try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
+    const toastId = toast.loading('Preparing pitch line-up for sharing...');
+    let fileToShare: File | null = null;
+    const targetEl = shareExportPitchRef.current || wrapperRef.current;
+    if (targetEl) {
+      try {
+        fileToShare = await captureElementAsFile(targetEl, fileName, { backgroundColor: '#2b2b2b' });
+      } catch (err) {
+        console.warn('Failed to capture pitch line-up:', err);
       }
-    } catch { }
+    }
+    toast.dismiss(toastId);
 
     shareContent({
-      title: `Team line-up: (${matchup})`,
-      customFullText: text,
+      title: `Team line-up: ${matchup} | Champion Footballer`,
+      customFullText: message,
       url: 'https://www.championfootballer.co.uk',
+      files: fileToShare ? [fileToShare] : undefined,
     });
   };
 
@@ -1546,6 +1597,149 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
         </Box>
         <Box sx={{ height: { xs: 3, sm: 6 } }} />
         <Typography sx={{ fontSize: { xs: 8, sm: 10 }, fontWeight: 600, color: teamSide === 'home' ? '#00a77f' : '#e56a16', textAlign: 'center', maxWidth: { xs: '48px', sm: '60px' } }}>
+          {name}
+        </Typography>
+      </Box>
+    );
+  };
+
+  const ExportShirtDot = ({ player, teamSide }: { player: Player; teamSide: 'home' | 'away' }) => {
+    const pid = String(player.id || player.name);
+    const positions = teamSide === 'home' ? homePositions : awayPositions;
+    const pos = positions[pid];
+    if (!pos) return null;
+    const isCap = String(teamSide === 'home' ? (homeCaptainId || '') : (awayCaptainId || '')) === pid;
+    const shirtImage = teamSide === 'away' ? Shirtaway : Shirt;
+    const teamColor = teamSide === 'home' ? '#00a77f' : '#E56A16';
+
+    return (
+      <Box
+        sx={{
+          position: 'absolute',
+          left: `${pos.x * 100}%`,
+          top: `${pos.y * 100}%`,
+          transform: 'translate(-50%, -50%) rotate(90deg)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ position: 'relative', width: 52, height: 52 }}>
+          <img
+            src={shirtImage.src}
+            alt="shirt"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+          {hasPublishedResult && typeof player.xp === 'number' && (
+            <Box
+              sx={{
+                position: 'absolute',
+                left: '50%',
+                top: '52%',
+                transform: 'translate(-50%, -50%)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                lineHeight: 0.95,
+                textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+              }}
+            >
+              <Typography sx={{ fontSize: 11, fontWeight: 700 }}>
+                {Math.round(player.xp).toLocaleString()}
+              </Typography>
+              <Typography sx={{ fontSize: 9, fontWeight: 700 }}>
+                xp
+              </Typography>
+            </Box>
+          )}
+          {isCap && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 22,
+                right: -2,
+                backgroundColor: teamSide === 'home' ? 'green' : 'red',
+                color: 'white',
+                fontSize: 8,
+                fontWeight: 700,
+                width: 10,
+                height: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+              }}
+            >
+              C
+            </Box>
+          )}
+        </Box>
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: teamColor,
+            textAlign: 'center',
+            mt: 0.5,
+            maxWidth: 68,
+            textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.1,
+          }}
+        >
+          {player.name}
+        </Typography>
+      </Box>
+    );
+  };
+
+  const ExportGuestDot = ({ guestId, name, teamSide }: { guestId: string; name: string; teamSide: 'home' | 'away' }) => {
+    const pid = String(guestId);
+    const positions = teamSide === 'home' ? homePositions : awayPositions;
+    const guestRowPositions = teamSide === 'home' ? homeGuestRowPositions : awayGuestRowPositions;
+    const pos = positions[pid] || guestRowPositions[pid];
+    if (!pos) return null;
+    const shirtImage = teamSide === 'away' ? Shirtaway : Shirt;
+    const teamColor = teamSide === 'home' ? '#00a77f' : '#E56A16';
+
+    return (
+      <Box
+        sx={{
+          position: 'absolute',
+          left: `${pos.x * 100}%`,
+          top: `${pos.y * 100}%`,
+          transform: 'translate(-50%, -50%) rotate(90deg)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Box sx={{ position: 'relative', width: 52, height: 52 }}>
+          <img
+            src={shirtImage.src}
+            alt="shirt"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </Box>
+        <Typography
+          sx={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: teamColor,
+            textAlign: 'center',
+            mt: 0.5,
+            maxWidth: 68,
+            textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            lineHeight: 1.1,
+          }}
+        >
           {name}
         </Typography>
       </Box>
@@ -2234,6 +2428,439 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
           </Typography>
         )}
         <Box sx={{ height: { xs: 16, sm: 40 } }} />
+
+        {/* Dedicated off-screen Pitch Export Card matching exactly the View Teams modal popup */}
+        <div
+          ref={shareExportPitchRef}
+          data-share-export="pitch"
+          style={{
+            position: 'fixed',
+            left: '-9999px',
+            top: 0,
+            width: '840px',
+            zIndex: -9999,
+            pointerEvents: 'none',
+            opacity: 1,
+            backgroundColor: '#2b2b2b',
+            borderRadius: '6px',
+            overflow: 'hidden',
+            boxSizing: 'border-box',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+          }}
+        >
+          {/* Top Modal Header Bar (#d1d1d1) */}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              bgcolor: '#d1d1d1',
+              position: 'relative',
+              py: 1,
+              height: 48,
+              boxSizing: 'border-box',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  fontSize: '1.4rem',
+                  color: '#000',
+                  lineHeight: 1,
+                }}
+              >
+                TEAMS
+              </Typography>
+              <img
+                src={FootballIcon.src}
+                alt="football"
+                width={24}
+                height={24}
+                style={{ objectFit: 'contain' }}
+              />
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  letterSpacing: '1px',
+                  textTransform: 'uppercase',
+                  fontSize: '1.4rem',
+                  color: '#000',
+                  lineHeight: 1,
+                }}
+              >
+                MATCH {matchNumber ?? 1}
+              </Typography>
+            </Box>
+
+            {/* Close Button Replica */}
+            <Box
+              sx={{
+                color: '#000',
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 56,
+                bgcolor: '#e6e6e6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CloseIcon sx={{ color: '#000', fontSize: 22 }} />
+            </Box>
+          </Box>
+
+          {/* Modal Content Body */}
+          <Box sx={{ p: '16px 24px 20px 24px', bgcolor: '#2b2b2b' }}>
+            {/* View toggle row: Home count | Table/Pitch buttons | Away count */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 1.5,
+                width: '100%',
+              }}
+            >
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1.4rem',
+                  color: '#00a77f',
+                  whiteSpace: 'nowrap',
+                  minWidth: 160,
+                  textAlign: 'left',
+                }}
+              >
+                {homeTeamName} ({homeTeamGoals !== null ? homeTeamGoals : (homePlayers.length + homeGuests.length)})
+              </Typography>
+
+              <Box
+                sx={{
+                  bgcolor: '#fff',
+                  borderRadius: 0.6,
+                  p: 0.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.8,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                    px: 1.8,
+                    py: 0.6,
+                    border: '1px solid #212121',
+                    borderRadius: 1,
+                    bgcolor: '#fff',
+                    minHeight: 44,
+                    minWidth: 140,
+                  }}
+                >
+                  <img
+                    src={TableViewImg.src}
+                    alt="table"
+                    width={18}
+                    height={18}
+                    style={{ objectFit: 'contain', filter: 'brightness(0)' }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '1.05rem',
+                      fontWeight: 700,
+                      color: '#555',
+                      lineHeight: 1.1,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Table View
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                    px: 1.8,
+                    py: 0.6,
+                    borderRadius: 1,
+                    bgcolor: '#00a77f',
+                    minHeight: 44,
+                    minWidth: 140,
+                  }}
+                >
+                  <img
+                    src={PitchViewImg.src}
+                    alt="pitch"
+                    width={18}
+                    height={18}
+                    style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '1.05rem',
+                      fontWeight: 700,
+                      color: '#fff',
+                      lineHeight: 1.1,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Pitch View
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1.4rem',
+                  color: '#c95c1a',
+                  whiteSpace: 'nowrap',
+                  minWidth: 160,
+                  textAlign: 'right',
+                }}
+              >
+                {awayTeamName} ({awayTeamGoals !== null ? awayTeamGoals : (awayPlayers.length + awayGuests.length)})
+              </Typography>
+            </Box>
+
+            {/* Tactical Pitch Box */}
+            <Box
+              sx={{
+                width: '780px',
+                height: '494px',
+                bgcolor: '#222222',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                position: 'relative',
+                mx: 'auto',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+              }}
+            >
+              <Box
+                sx={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  width: '494px',
+                  height: '780px',
+                  transform: 'translate(-50%, -50%) rotate(-90deg)',
+                  bgcolor: '#222222',
+                }}
+              >
+                {/* Pitch SVG */}
+                <svg
+                  viewBox={`0 0 ${PITCH_VIEWBOX_WIDTH} ${PITCH_VIEWBOX_HEIGHT}`}
+                  preserveAspectRatio="none"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  <g fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="butt" strokeLinejoin="miter">
+                    <rect x="8" y="8" width="998" height="1584" />
+                    <line x1="8" y1="800" x2="1006" y2="800" />
+                    <circle cx="507" cy="800" r="165" />
+
+                    <rect x="227" y="8" width="560" height="220" />
+                    <rect x="332" y="8" width="350" height="120" />
+                    <path d="M 405.5 228 A 125 125 0 0 0 608.5 228" />
+
+                    <rect x="227" y="1372" width="560" height="220" />
+                    <rect x="332" y="1472" width="350" height="120" />
+                    <path d="M 405.5 1372 A 125 125 0 0 1 608.5 1372" />
+
+                    {/* Corner edges */}
+                    <path d="M 8 44 A 36 36 0 0 0 44 8" />
+                    <path d="M 970 8 A 36 36 0 0 0 1006 44" />
+                    <path d="M 8 1556 A 36 36 0 0 1 44 1592" />
+                    <path d="M 970 1592 A 36 36 0 0 1 1006 1556" />
+                  </g>
+                </svg>
+
+                {awaitingTeams ? (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'rgba(0,0,0,0.20)',
+                    }}
+                  >
+                    <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: 18, transform: 'rotate(90deg)' }}>
+                      Awaiting admin to generate teams
+                    </Typography>
+                  </Box>
+                ) : (
+                  <>
+                    {homePlayers.map((p) => (
+                      <ExportShirtDot key={`exp-home-${p.id || p.name}-${p.number}`} player={p} teamSide="home" />
+                    ))}
+                    {homeGuests.map((g) => (
+                      <ExportGuestDot
+                        key={`exp-home-guest-${g.id}`}
+                        guestId={String(g.id)}
+                        name={formatGuestDisplayName(g)}
+                        teamSide="home"
+                      />
+                    ))}
+
+                    {awayPlayers.map((p) => (
+                      <ExportShirtDot key={`exp-away-${p.id || p.name}-${p.number}`} player={p} teamSide="away" />
+                    ))}
+                    {awayGuests.map((g) => (
+                      <ExportGuestDot
+                        key={`exp-away-guest-${g.id}`}
+                        guestId={String(g.id)}
+                        name={formatGuestDisplayName(g)}
+                        teamSide="away"
+                      />
+                    ))}
+                  </>
+                )}
+              </Box>
+            </Box>
+
+            {/* Bottom Actions Row: Undo | Match Predictions | Share */}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'stretch',
+                gap: 1.5,
+                mt: 1.5,
+                width: '100%',
+              }}
+            >
+              {/* Left: Undo button replica */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, flexShrink: 0 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '3px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: 0.45,
+                  }}
+                >
+                  <img src={UndoImg.src} alt="undo" width={22} height={22} style={{ objectFit: 'contain' }} />
+                </Box>
+              </Box>
+
+              {/* Center: Match Predictions */}
+              <Paper
+                elevation={0}
+                sx={{
+                  px: 3,
+                  py: 1.4,
+                  border: '1.5px solid #fff',
+                  borderRadius: 1,
+                  bgcolor: '#2b2b2b',
+                  textAlign: 'center',
+                  flex: 1,
+                  mx: { xs: 0, sm: 8 },
+                }}
+              >
+                <Typography sx={{ fontSize: 17, fontWeight: 700, color: '#FF007F', lineHeight: 1.1, mb: 0.4 }}>
+                  Match Predictions
+                </Typography>
+                <Typography sx={{ fontSize: 16, fontWeight: 700, lineHeight: 1.1, mb: 0.4 }}>
+                  <span
+                    style={{
+                      color: teamInsights
+                        ? teamInsights.predicted === 'home'
+                          ? '#00a77f'
+                          : teamInsights.predicted === 'away'
+                            ? '#c95c1a'
+                            : '#fff'
+                        : '#00a77f',
+                    }}
+                  >
+                    {teamInsights
+                      ? teamInsights.predicted === 'home'
+                        ? homeTeamName
+                        : teamInsights.predicted === 'away'
+                          ? awayTeamName
+                          : 'Draw'
+                      : 'Draw'}
+                  </span>{' '}
+                  <span style={{ color: '#fff' }}>
+                    {teamInsights
+                      ? teamInsights.predicted === 'draw'
+                        ? 'is predicted (draw).'
+                        : 'is predicted to win.'
+                      : 'is predicted (draw).'}
+                  </span>
+                </Typography>
+                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#fff', lineHeight: 1.1 }}>
+                  Predicted score is{' '}
+                  <span
+                    style={{
+                      color: teamInsights
+                        ? teamInsights.predicted === 'home'
+                          ? '#00a77f'
+                          : teamInsights.predicted === 'away'
+                            ? '#c95c1a'
+                            : primaryColor
+                        : '#FF6B00',
+                    }}
+                  >
+                    {teamInsights ? teamInsights.predictedScore : '0 - 0'}
+                  </span>
+                </Typography>
+              </Paper>
+
+              {/* Right: Share button replica */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, flexShrink: 0 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '3px',
+                    bgcolor: '#00a77f',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ShareIcon sx={{ color: '#fff', fontSize: 22 }} />
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Bottom Helper Tip */}
+            <Typography
+              sx={{
+                fontSize: 14,
+                color: '#fff',
+                mt: 1.5,
+                lineHeight: 1.2,
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 0.8,
+              }}
+            >
+              <img src={BulbImg.src} alt="tip" width={16} height={16} style={{ objectFit: 'contain' }} />
+              Admins/Captains can drag players and save formation.
+            </Typography>
+          </Box>
+        </div>
 
       </Box>
     </Box>
