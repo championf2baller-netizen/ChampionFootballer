@@ -2835,7 +2835,7 @@ export default function PlayerDashboard() {
                   DEF: user?.skills?.defending?.toString() || '',
                   PHY: user?.skills?.physical?.toString() || ''
                 }}
-                foot={user?.preferredFoot === "right" ? "R" : "L"}
+                foot={(user?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (user?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R'}
                 profileImage={user?.profilePicture || undefined}
                 shirtIcon=""
                 position={user?.position || 'XXX'}
@@ -3155,7 +3155,7 @@ export default function PlayerDashboard() {
                 DEF: user?.skills?.defending?.toString() || '',
                 PHY: user?.skills?.physical?.toString() || ''
               }}
-              foot={user?.preferredFoot === "right" ? "R" : "L"}
+              foot={(user?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (user?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R'}
               profileImage={user?.profilePicture || undefined}
               shirtIcon={''}
               position={user?.position || 'XXX'}

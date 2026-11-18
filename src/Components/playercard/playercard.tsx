@@ -150,7 +150,12 @@ const PlayerCard = ({
   const avatarInitials = getAvatarInitials({ name: normalizedName });
   const avatarBg = getAvatarBackgroundColor(normalizedName || displayCardName);
   const normalizedFoot = typeof foot === 'string' ? foot.trim().toUpperCase() : '';
-  const footLabel = normalizedFoot === 'RIGHT' ? 'R' : normalizedFoot === 'LEFT' ? 'L' : (normalizedFoot || '-');
+  const footLabel =
+    normalizedFoot === 'LEFT' || normalizedFoot === 'L'
+      ? 'L'
+      : normalizedFoot === 'RIGHT' || normalizedFoot === 'R'
+      ? 'R'
+      : (normalizedFoot || 'R');
   const isRightFoot = footLabel === 'R';
   // Pick the correct vector image based on color
   const Title = vectorMap[color] || vectorDefault;
@@ -647,7 +652,7 @@ const PlayerCard = ({
         </Box>
 
         {/* Name and Title (from static logic) */}
-        <Box sx={{ mt: disableImagePopup ? 1 : 2, mb: disableImagePopup ? 0.9 : 0.5 }}>
+        <Box sx={{ mt: disableImagePopup ? 0.6 : 0.6, mb: disableImagePopup ? 0.4 : 0.35 }}>
           <Typography
             fontSize="16px"
             fontWeight="bold"
@@ -664,8 +669,8 @@ const PlayerCard = ({
           fontWeight="bold"
           color="#fff"
           sx={{
-            mt: { xs: 0.45, sm: disableImagePopup ? 1.05 : 0.5 },
-            mb: 0.5,
+            mt: { xs: 0.3, sm: disableImagePopup ? 0.6 : 0.35 },
+            mb: 0.35,
             lineHeight: 1
           }}
         >
@@ -685,7 +690,7 @@ const PlayerCard = ({
           <Box
             sx={{
               width: '1px',
-              height: '80px',
+              height: '76px',
               bgcolor: '#fff',
               mx: 1,
             }}

@@ -2264,7 +2264,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       transition: 'all .25s ease'
                     }}
                   >
-                    Add Guest
+                    Add Guest Player
                   </Button>
                   <Button
                     startIcon={<Scale size={18} />}
@@ -4058,7 +4058,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, bgcolor: 'rgba(15,15,15,0.95)' }}>
           <Button onClick={() => setGuestDialogOpen(false)} sx={{ color: '#9CA3AF' }}>Cancel</Button>
-          <Button onClick={handleAddGuest} variant='contained' sx={{ background: 'linear-gradient(135deg,#e56a16,#cf2326)', '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)' } }}>Add Guest</Button>
+          <Button onClick={handleAddGuest} variant='contained' sx={{ background: 'linear-gradient(135deg,#e56a16,#cf2326)', '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)' } }}>Add Guest Player</Button>
         </DialogActions>
       </Dialog>
 

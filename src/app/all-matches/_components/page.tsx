@@ -1254,7 +1254,7 @@ export default function AllMatches() {
                 DEF: player?.skills?.defending?.toString() || '',
                 PHY: player?.skills?.physical?.toString() || ''
             },
-            foot: player?.preferredFoot === 'right' ? 'R' : 'L',
+            foot: (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R',
             profileImage: player?.profilePicture ? (player.profilePicture.startsWith('http') ? player.profilePicture : `${process.env.NEXT_PUBLIC_API_URL}${player.profilePicture.startsWith('/') ? player.profilePicture : `/${player.profilePicture}`}`) : undefined,
             shirtIcon: ''
         };
@@ -5020,7 +5020,7 @@ export default function AllMatches() {
 //                 DEF: player?.skills?.defending?.toString() || '',
 //                 PHY: player?.skills?.physical?.toString() || ''
 //             },
-//             foot: player?.preferredFoot === 'right' ? 'R' : 'L',
+//             foot: (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R',
 //             profileImage: player?.profilePicture ? (player.profilePicture.startsWith('http') ? player.profilePicture : `${process.env.NEXT_PUBLIC_API_URL}${player.profilePicture.startsWith('/') ? player.profilePicture : `/${player.profilePicture}`}`) : undefined,
 //             shirtIcon: ''
 //         };
