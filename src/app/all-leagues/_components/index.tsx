@@ -225,6 +225,9 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
   }
 
   const rawStatusStr = typeof raw['status'] === 'string' ? raw['status'].toLowerCase().trim() : '';
+  if (raw['deleted'] === true || raw['isDeleted'] === true || rawStatusStr === 'deleted') {
+    return null;
+  }
   if (isCompleteVal || isCompletedVal || rawStatusStr === 'completed' || rawStatusStr === 'inactive') {
     activeVal = false;
   }
@@ -3710,6 +3713,7 @@ function AllLeagues() {
   );
 
   const isLeagueCompleted = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     const withFlags = l as LeagueWithStatus & {
       isComplete?: boolean;
       isCompleted?: boolean;
@@ -3771,12 +3775,14 @@ function AllLeagues() {
   }, [completedStatusTokens]);
 
   const isLeagueLive = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     if (isLeagueCompleted(l)) return false;
     if (Boolean((l as LeagueWithStatus & { archived?: boolean }).archived)) return false;
     return true;
   }, [isLeagueCompleted]);
 
   const isArchivedLeague = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     return Boolean((l as LeagueWithStatus & { archived?: boolean }).archived);
   }, []);
 
@@ -3818,7 +3824,7 @@ function AllLeagues() {
       if (leaguesData) {
         const normalizedLeagues: League[] = leaguesData
           .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
-          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
+          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name && !(league as any).deleted && (league as any).status !== 'deleted'));
 
         const sortedLeagues = sortLeaguesByRecency(normalizedLeagues);
         const currentExcluded = Array.from(new Set([...locallyDeletedLeagueIds, ...locallyDeletedLeagueIdsRef.current]));

@@ -520,6 +520,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
 
   const shouldShowLeagueInDropdown = (l: LeagueWithComputed): boolean => {
     if (!l) return false;
+    if ((l as any).deleted === true || (l as any).status === 'deleted') return false;
     if (l.archived === true) return false;
     if (l.active === false) return false;
     if (leagueIsCompleted(l)) return false;
@@ -832,7 +833,9 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
             .filter((id) => id !== 'undefined')
         );
 
-        const leagues: ApiLeague[] = leaguesUnknown.filter(isApiLeague);
+        const leagues: ApiLeague[] = leaguesUnknown
+          .filter(isApiLeague)
+          .filter((l: any) => !l.deleted && l.status !== 'deleted' && !l.archived);
         const uniqueLeagues: ApiLeague[] = Array.from(new Map<string, ApiLeague>(leagues.map(league => [String(league.id), league])).values());
 
         // 1) Show minimal list immediately (no extra awaits)
@@ -1215,9 +1218,9 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
           : undefined,
       }));
 
-      const userJoinedMinimal = currentUserId != null
+      const userJoinedMinimal = (currentUserId != null
         ? minimal.filter((l) => isUserMemberOrAdmin(l, currentUserId))
-        : minimal;
+        : minimal).filter((l) => !(l as any).deleted && (l as any).status !== 'deleted');
 
       if (userJoinedMinimal.length) {
         setUserLeagues((prev) => prev.length ? prev : userJoinedMinimal);

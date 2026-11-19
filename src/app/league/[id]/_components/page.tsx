@@ -2026,7 +2026,7 @@ export default function LeagueDetailPage() {
 
                 // Keep leagues visible for switching, including completed ones.
                 const visibleLeagues = simpleLeagues.filter(
-                    (l) => l.archived !== true
+                    (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
                 );
 
                 // Sort newest to oldest by createdAt timestamp or Mongo ObjectId

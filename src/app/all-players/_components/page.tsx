@@ -659,9 +659,9 @@ const AllPlayersPage = () => {
         );
 
         // Keep leagues visible for switching, including inactive ones.
-        // Only hide archived leagues.
+        // Only hide archived and deleted leagues.
         const activeLeagues = enrichedLeagues.filter(
-          (l) => l.archived !== true
+          (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
         );
 
         // Sort newest to oldest by createdAt timestamp
