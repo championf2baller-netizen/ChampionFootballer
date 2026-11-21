@@ -1885,15 +1885,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
     const registeredCount = new Set<string>([...newHomeIds, ...newAwayIds]).size;
     const totalCount = registeredCount + homeGuestsPayload.length + awayGuestsPayload.length;
-    if (registeredCount < MIN_REGISTERED_PLAYERS_FOR_TEAM_UPLOAD) {
-      toast.error(MIN_REGISTERED_PLAYERS_MESSAGE);
-      setIsSubmitting(false);
-      return;
-    }
-    if (totalCount < MIN_TOTAL_PLAYERS_FOR_TEAM_UPLOAD) {
-      toast.error('A minimum of 8 total players (including at least 6 registered league players) is required to save teams.');
-      setIsSubmitting(false);
-      return;
+    if (totalCount > 0) {
+      if (registeredCount < MIN_REGISTERED_PLAYERS_FOR_TEAM_UPLOAD) {
+        toast.error(MIN_REGISTERED_PLAYERS_MESSAGE);
+        setIsSubmitting(false);
+        return;
+      }
+      if (totalCount < MIN_TOTAL_PLAYERS_FOR_TEAM_UPLOAD) {
+        toast.error('A minimum of 8 total players (including at least 6 registered league players) is required to save teams.');
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     const hasHomeCaptainSelected = Boolean(homeCaptain && !homeCaptain.isGuest);
