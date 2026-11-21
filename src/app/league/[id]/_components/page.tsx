@@ -3170,7 +3170,7 @@ export default function LeagueDetailPage() {
             .filter(m => isResultMatch(m) && m.homeTeamGoals != null && m.awayTeamGoals != null);
 
         let fallbackPriorRanks: Map<string, number> | null = null;
-        if (resultMatches.length > 0) {
+        if (resultMatches.length > 1) {
             const sortedMatches = [...resultMatches].sort((a, b) => {
                 const dateA = new Date((a as any).date || (a as any).createdAt || 0).getTime();
                 const dateB = new Date((b as any).date || (b as any).createdAt || 0).getTime();
@@ -3234,7 +3234,11 @@ export default function LeagueDetailPage() {
         const finalList = list.map((p, idx) => {
             const currRank = idx + 1;
             let rankChange = p.rankChange;
-            if (typeof rankChange !== 'number') {
+            if (resultMatches.length <= 1) {
+                // In the first match of the season, there is no prior match to compare against;
+                // rank movement only starts counting from the 2nd match onwards.
+                rankChange = 0;
+            } else if (typeof rankChange !== 'number') {
                 if (fallbackPriorRanks && fallbackPriorRanks.has(p.id)) {
                     const prevRank = fallbackPriorRanks.get(p.id)!;
                     rankChange = prevRank - currRank;
