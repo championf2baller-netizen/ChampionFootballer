@@ -404,27 +404,52 @@ interface MotmPlayerInfo {
 }
 
 const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlayerInfo | null => {
-    const votes = match.manOfTheMatchVotes;
-    if (!votes || typeof votes !== 'object') return null;
-
-    const voteEntries = Object.entries(votes as Record<string, unknown>);
-    if (voteEntries.length === 0) return null;
-
     const voteCounts: Record<string, number> = {};
-    const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
 
-    if (valuesAreCounts) {
-        voteEntries.forEach(([playerId, count]) => {
-            const normalizedId = normalizeId(playerId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+    // 1. Check match.votes array if available (filter for MOTM category)
+    if (Array.isArray((match as any).votes) && (match as any).votes.length > 0) {
+        (match as any).votes.forEach((v: any) => {
+            if (v && (!v.category || v.category === 'motm') && v.votedForId) {
+                const normalizedId = normalizeId(v.votedForId);
+                if (normalizedId) {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                }
+            }
         });
-    } else {
-        voteEntries.forEach(([, votedForId]) => {
-            const normalizedId = normalizeId(votedForId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
-        });
+    }
+
+    // 2. If no votes found from array, check match.manOfTheMatchVotes object
+    if (Object.keys(voteCounts).length === 0 && match.manOfTheMatchVotes && typeof match.manOfTheMatchVotes === 'object') {
+        const voteEntries = Object.entries(match.manOfTheMatchVotes as Record<string, unknown>);
+        if (voteEntries.length > 0) {
+            const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
+            if (valuesAreCounts) {
+                voteEntries.forEach(([playerId, count]) => {
+                    const normalizedId = normalizeId(playerId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+                });
+            } else {
+                voteEntries.forEach(([, votedForId]) => {
+                    const normalizedId = normalizeId(votedForId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                });
+            }
+        }
+    }
+
+    // 3. Fallback to (match as any).playerVotes or (match as any).motmVotes if present
+    if (Object.keys(voteCounts).length === 0) {
+        const altVotes = (match as any).playerVotes || (match as any).motmVotes;
+        if (altVotes && typeof altVotes === 'object') {
+            Object.entries(altVotes as Record<string, unknown>).forEach(([pid, val]) => {
+                const normalizedId = normalizeId(pid);
+                if (normalizedId && typeof val === 'number') {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(val || 0);
+                }
+            });
+        }
     }
 
     let topPlayerId = '';
@@ -454,6 +479,7 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
     const allPlayers: User[] = [
         ...(match.homeTeamUsers || []),
         ...(match.awayTeamUsers || []),
+        ...((match as any).availableUsers || []),
         ...fallbackPlayers,
         ...guestUsers
     ];
@@ -463,7 +489,13 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
         return playerId === topPlayerId || comparableId(playerId) === comparableId(topPlayerId);
     });
 
-    if (!winningPlayer) return null;
+    if (!winningPlayer) {
+        return {
+            name: 'MOTM Winner',
+            initial: 'M',
+            picture: null,
+        };
+    }
     const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName) || winningPlayer.firstName || 'Player';
     const initial = (winningPlayer.firstName?.[0] || winnerName[0] || 'M').toUpperCase();
     return {
@@ -1139,6 +1171,7 @@ export default function LeagueDetailPage() {
         xp?: number;
         cleanSheets?: number;
         motmCount?: number;
+        motmVotes?: number;
         defensiveImpact?: number;
         mentality?: number;
         lastFive?: Array<{ result: 'W' | 'D' | 'L' }>;
@@ -3490,11 +3523,15 @@ export default function LeagueDetailPage() {
         window.addEventListener('match-stats-updated', handleLiveUpdate);
         window.addEventListener('match-updated', handleLiveUpdate);
         window.addEventListener('league-updated', handleLiveUpdate);
+        window.addEventListener('vote-submitted', handleLiveUpdate);
+        window.addEventListener('votes-updated', handleLiveUpdate);
 
         return () => {
             window.removeEventListener('match-stats-updated', handleLiveUpdate);
             window.removeEventListener('match-updated', handleLiveUpdate);
             window.removeEventListener('league-updated', handleLiveUpdate);
+            window.removeEventListener('vote-submitted', handleLiveUpdate);
+            window.removeEventListener('votes-updated', handleLiveUpdate);
         };
     }, [leagueId, fetchLeagueDetails]);
 
@@ -4112,6 +4149,7 @@ export default function LeagueDetailPage() {
                 profileXP: Number(fullPlayer?.xp ?? fullPlayer?.totalXP ?? fullPlayer?.totalXp ?? data.profileXP ?? data.player?.xp ?? 0),
                 cleanSheets: Number(matchStats?.cleanSheets ?? data.cleanSheets ?? 0),
                 motmCount: Number(data.motmCount ?? 0),
+                motmVotes: Number(matchStats?.motmVotes ?? matchStats?.motm ?? data.motmVotes ?? data.motmCount ?? 0),
                 defensiveImpact: Number(matchStats?.defensiveImpact ?? data.defensiveImpact ?? 0),
                 mentality: Number(matchStats?.mentality ?? data.mentality ?? 0),
                 lastFive: Array.isArray(data.lastFive) ? data.lastFive : [],
@@ -7495,7 +7533,6 @@ export default function LeagueDetailPage() {
                                                                         sx={{
                                                                             p: { xs: 1, sm: 1.5 },
                                                                             borderRadius: 1.5,
-                                                                            border: '1px solid rgba(245,158,11,0.35)',
                                                                             background: 'linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.07) 100%)',
                                                                         }}
                                                                     >
@@ -8539,7 +8576,7 @@ export default function LeagueDetailPage() {
                                         { img: Goals, label: 'Goals', shortLabel: 'Goals', value: quickView.stats?.goals ?? 0 },
                                         { img: Assist, label: 'Assists', shortLabel: 'Assist', value: quickView.stats?.assists ?? 0 },
                                         { img: Cleansheet, label: 'Clean Sheets', shortLabel: 'Clean', value: quickView.cleanSheets ?? 0 },
-                                        { img: Momt, label: 'MOTM Votes', shortLabel: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                                        { img: Momt, label: 'MOTM Votes', shortLabel: 'MOTM Votes', value: quickView.motmVotes ?? quickView.motmCount ?? 0 },
                                         { img: DefensiveImpact, label: 'Def Impact', shortLabel: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
                                         { img: Mentality, label: 'Mental Impact', shortLabel: 'Mental Impact', value: quickView.mentality ?? 0 },
                                     ].map((it, i) => (
@@ -8810,7 +8847,7 @@ export default function LeagueDetailPage() {
                                             { img: Goals, label: 'Goals', value: quickView.stats?.goals ?? 0 },
                                             { img: Assist, label: 'Assists', value: quickView.stats?.assists ?? 0 },
                                             { img: Cleansheet, label: 'Clean Sheets', value: quickView.cleanSheets ?? 0 },
-                                            { img: Momt, label: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                                            { img: Momt, label: 'MOTM Votes', value: quickView.motmVotes ?? quickView.motmCount ?? 0 },
                                             { img: DefensiveImpact, label: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
                                             { img: Mentality, label: 'Mental Impact', value: quickView.mentality ?? 0 },
                                         ].map((it, i) => (

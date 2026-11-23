@@ -1916,6 +1916,24 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     if (voteResponse.ok && voteApiSuccess !== false) {
                         if (typeof window !== 'undefined') {
                             window.dispatchEvent(new CustomEvent('refresh-notifications'));
+                            window.dispatchEvent(new CustomEvent('votes-updated', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
+                            window.dispatchEvent(new CustomEvent('vote-submitted', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
+                            window.dispatchEvent(new CustomEvent('match-updated', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
                         }
                     } else {
                         errors.push(

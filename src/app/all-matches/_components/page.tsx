@@ -374,27 +374,52 @@ interface MotmPlayerInfo {
 }
 
 const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlayerInfo | null => {
-    const votes = match.manOfTheMatchVotes;
-    if (!votes || typeof votes !== 'object') return null;
-
-    const voteEntries = Object.entries(votes as Record<string, unknown>);
-    if (voteEntries.length === 0) return null;
-
     const voteCounts: Record<string, number> = {};
-    const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
 
-    if (valuesAreCounts) {
-        voteEntries.forEach(([playerId, count]) => {
-            const normalizedId = normalizeId(playerId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+    // 1. Check match.votes array if available (filter for MOTM category)
+    if (Array.isArray((match as any).votes) && (match as any).votes.length > 0) {
+        (match as any).votes.forEach((v: any) => {
+            if (v && (!v.category || v.category === 'motm') && v.votedForId) {
+                const normalizedId = normalizeId(v.votedForId);
+                if (normalizedId) {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                }
+            }
         });
-    } else {
-        voteEntries.forEach(([, votedForId]) => {
-            const normalizedId = normalizeId(votedForId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
-        });
+    }
+
+    // 2. If no votes found from array, check match.manOfTheMatchVotes object
+    if (Object.keys(voteCounts).length === 0 && match.manOfTheMatchVotes && typeof match.manOfTheMatchVotes === 'object') {
+        const voteEntries = Object.entries(match.manOfTheMatchVotes as Record<string, unknown>);
+        if (voteEntries.length > 0) {
+            const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
+            if (valuesAreCounts) {
+                voteEntries.forEach(([playerId, count]) => {
+                    const normalizedId = normalizeId(playerId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+                });
+            } else {
+                voteEntries.forEach(([, votedForId]) => {
+                    const normalizedId = normalizeId(votedForId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                });
+            }
+        }
+    }
+
+    // 3. Fallback to (match as any).playerVotes or (match as any).motmVotes if present
+    if (Object.keys(voteCounts).length === 0) {
+        const altVotes = (match as any).playerVotes || (match as any).motmVotes;
+        if (altVotes && typeof altVotes === 'object') {
+            Object.entries(altVotes as Record<string, unknown>).forEach(([pid, val]) => {
+                const normalizedId = normalizeId(pid);
+                if (normalizedId && typeof val === 'number') {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(val || 0);
+                }
+            });
+        }
     }
 
     let topPlayerId = '';
@@ -422,6 +447,7 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
     const allPlayers: User[] = [
         ...(match.homeTeamUsers || []),
         ...(match.awayTeamUsers || []),
+        ...((match as any).availableUsers || []),
         ...fallbackPlayers,
         ...guestUsers
     ];
@@ -432,7 +458,13 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
         return playerId === topPlayerId || comparableId(playerId) === comparableId(topPlayerId);
     });
 
-    if (!winningPlayer) return null;
+    if (!winningPlayer) {
+        return {
+            name: 'MOTM Winner',
+            initial: 'M',
+            picture: null,
+        };
+    }
     const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName) || winningPlayer.firstName || 'Player';
     const initial = (winningPlayer.firstName?.[0] || winnerName[0] || 'M').toUpperCase();
     return {
