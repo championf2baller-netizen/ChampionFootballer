@@ -1710,8 +1710,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             const mentalityContribution = isMentalityPick ? 5 : 0;
             const raw = goalContribution + assistContribution + cleanSheetContribution + defensiveContribution + mentalityContribution;
 
-            // Participation default when no contribution action exists.
-            if (raw <= 0) return 15;
             return Math.max(0, Math.min(100, Math.round(raw)));
         },
         []
