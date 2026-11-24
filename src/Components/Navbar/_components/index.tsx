@@ -3176,7 +3176,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Image src={logoutpic} alt="sign out" width={20} height={20} style={{ filter: 'brightness(0) invert(1)' }} />
-                      <Box>Sign out</Box>
+                      <Box>Sign Out</Box>
                     </Box>
                   </MenuItem>
                 </Menu>
@@ -4365,7 +4365,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       '& .MuiButton-startIcon': { marginRight: 1 },
                     }}
                   >
-                    Sign out
+                    Sign Out
                   </Button>
                 </ListItem>
               </>

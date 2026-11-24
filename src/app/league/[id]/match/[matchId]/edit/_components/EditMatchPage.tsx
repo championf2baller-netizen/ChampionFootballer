@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Typography, Paper, Button, TextField, CircularProgress, Autocomplete, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, RadioGroup, FormControlLabel, Radio, LinearProgress, Chip, Grid, InputAdornment, Alert, Menu, MenuItem, ListItemIcon, ListItemText, type PaperProps } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
@@ -389,8 +389,144 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const markerRef = useRef<LeafletMarker | null>(null);
   const [homeTeamUsers, setHomeTeamUsers] = useState<PlayerOption[]>([]);
   const [awayTeamUsers, setAwayTeamUsers] = useState<PlayerOption[]>([]);
+  const [homeSelectOpen, setHomeSelectOpen] = useState(false);
+  const [awaySelectOpen, setAwaySelectOpen] = useState(false);
   const [homeCaptain, setHomeCaptain] = useState<PlayerOption | null>(null);
   const [awayCaptain, setAwayCaptain] = useState<PlayerOption | null>(null);
+
+  // Stable Paper component for Home player selection with Done button
+  const HomePlayerPaper = useMemo(() => {
+    return function HomePaper(props: PaperProps) {
+      return (
+        <Paper
+          {...props}
+          elevation={0}
+          sx={{
+            bgcolor: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            ...props.sx,
+          }}
+        >
+          {props.children}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: 1,
+              px: 1.5,
+              borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+              bgcolor: '#0a0a0a',
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              size="small"
+              variant="contained"
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setHomeSelectOpen(false);
+                if (typeof document !== 'undefined') {
+                  (document.activeElement as HTMLElement)?.blur();
+                }
+              }}
+              sx={{
+                bgcolor: '#00a77f',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                px: 2.5,
+                py: 0.5,
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 167, 127, 0.4)',
+                '&:hover': {
+                  bgcolor: '#008f6c',
+                },
+              }}
+            >
+              Done
+            </Button>
+          </Box>
+        </Paper>
+      );
+    };
+  }, []);
+
+  // Stable Paper component for Away player selection with Done button
+  const AwayPlayerPaper = useMemo(() => {
+    return function AwayPaper(props: PaperProps) {
+      return (
+        <Paper
+          {...props}
+          elevation={0}
+          sx={{
+            bgcolor: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            ...props.sx,
+          }}
+        >
+          {props.children}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: 1,
+              px: 1.5,
+              borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+              bgcolor: '#0a0a0a',
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              size="small"
+              variant="contained"
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAwaySelectOpen(false);
+                if (typeof document !== 'undefined') {
+                  (document.activeElement as HTMLElement)?.blur();
+                }
+              }}
+              sx={{
+                bgcolor: '#00a77f',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                px: 2.5,
+                py: 0.5,
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 167, 127, 0.4)',
+                '&:hover': {
+                  bgcolor: '#008f6c',
+                },
+              }}
+            >
+              Done
+            </Button>
+          </Box>
+        </Paper>
+      );
+    };
+  }, []);
 
   // Match Notification
   const [showNotificationBox, setShowNotificationBox] = useState(false);
@@ -2350,6 +2486,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     <Autocomplete
                       key="home-players-autocomplete"
                       multiple
+                      open={homeSelectOpen}
+                      onOpen={() => setHomeSelectOpen(true)}
+                      onClose={(_, reason) => {
+                        if (reason === 'selectOption') return;
+                        setHomeSelectOpen(false);
+                      }}
                       options={homePlayerOptions}
                       disableCloseOnSelect
                       blurOnSelect={false}
@@ -2363,7 +2505,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         }
                         return String(o.id || '').trim() === String(v.id || '').trim();
                       }}
-                      PaperComponent={BlackPaper}
+                      PaperComponent={HomePlayerPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
                         sx: {
@@ -2371,7 +2513,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
-                          bgcolor: '#000'
+                          bgcolor: '#000',
+                          maxHeight: { xs: '260px', sm: '320px' }
                         }
                       }}
                       renderOption={(props, option, { selected }) => {
@@ -2550,12 +2693,46 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
+                              paddingRight: '42px !important',
+                              position: 'relative',
                               '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
                               '&:hover fieldset': { borderColor: '#00a77f' },
                               '&.Mui-focused fieldset': { borderColor: '#00a77f' }
                             },
-                            '& .MuiAutocomplete-clearIndicator': { color: 'white' },
-                            '& .MuiAutocomplete-popupIndicator': { color: 'white' }
+                            '& .MuiAutocomplete-endAdornment': {
+                              position: 'absolute !important',
+                              top: '6px !important',
+                              bottom: '6px !important',
+                              right: '6px !important',
+                              height: 'calc(100% - 12px) !important',
+                              display: 'flex !important',
+                              flexDirection: 'column !important',
+                              justifyContent: 'space-between !important',
+                              alignItems: 'center !important',
+                              width: '32px !important',
+                              zIndex: 2,
+                            },
+                            '& .MuiAutocomplete-clearIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginBottom: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            },
+                            '& .MuiAutocomplete-popupIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginTop: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              },
+                              '&:only-child': {
+                                margin: 'auto 0 !important',
+                              }
+                            }
                           }}
                         />
                       )}
@@ -2566,6 +2743,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     <Autocomplete
                       key="away-players-autocomplete"
                       multiple
+                      open={awaySelectOpen}
+                      onOpen={() => setAwaySelectOpen(true)}
+                      onClose={(_, reason) => {
+                        if (reason === 'selectOption') return;
+                        setAwaySelectOpen(false);
+                      }}
                       options={awayPlayerOptions}
                       disableCloseOnSelect
                       blurOnSelect={false}
@@ -2580,7 +2763,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         }
                         return String(o.id || '').trim() === String(v.id || '').trim();
                       }}
-                      PaperComponent={BlackPaper}
+                      PaperComponent={AwayPlayerPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
                         sx: {
@@ -2588,7 +2771,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
-                          bgcolor: '#000'
+                          bgcolor: '#000',
+                          maxHeight: { xs: '260px', sm: '320px' }
                         }
                       }}
                       renderOption={(props, option, { selected }) => {
@@ -2766,12 +2950,46 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
+                              paddingRight: '42px !important',
+                              position: 'relative',
                               '& fieldset': { borderColor: '#e56a16', borderRadius: 1 },
                               '&:hover fieldset': { borderColor: '#e56a16' },
                               '&.Mui-focused fieldset': { borderColor: '#e56a16' }
                             },
-                            '& .MuiAutocomplete-clearIndicator': { color: 'white' },
-                            '& .MuiAutocomplete-popupIndicator': { color: 'white' }
+                            '& .MuiAutocomplete-endAdornment': {
+                              position: 'absolute !important',
+                              top: '6px !important',
+                              bottom: '6px !important',
+                              right: '6px !important',
+                              height: 'calc(100% - 12px) !important',
+                              display: 'flex !important',
+                              flexDirection: 'column !important',
+                              justifyContent: 'space-between !important',
+                              alignItems: 'center !important',
+                              width: '32px !important',
+                              zIndex: 2,
+                            },
+                            '& .MuiAutocomplete-clearIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginBottom: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            },
+                            '& .MuiAutocomplete-popupIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginTop: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              },
+                              '&:only-child': {
+                                margin: 'auto 0 !important',
+                              }
+                            }
                           }}
                         />
                       )}

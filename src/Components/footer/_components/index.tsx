@@ -223,7 +223,7 @@ export default function Footer() {
       boxShadow: '0 -2px 24px 0 rgba(30, 58, 138, 0.12)',
 
     }}>
-      <Container maxWidth="md">
+      <Container maxWidth="md" sx={{ px: { xs: 1, sm: 2 } }}>
         <Stack spacing={3} alignItems="center" justifyContent="center">
           {/* Dynamic Social Icons */}
           {activePlatforms.length > 0 && (
@@ -271,7 +271,7 @@ export default function Footer() {
           <Divider sx={{ width: '60%', borderColor: '#00A77F', borderBottomWidth: 2 }} />
 
           {/* Footer Links */}
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" justifyContent="center" useFlexGap>
+          <Stack direction="row" spacing={{ xs: 0.25, sm: 0.5 }} flexWrap="wrap" justifyContent="center" useFlexGap>
             <Button
               component={Link}
               href="/terms"
@@ -280,8 +280,10 @@ export default function Footer() {
                 textTransform: 'none',
                 color: 'white',
                 fontWeight: 500,
-                fontSize: { xs: 12, sm: 15, md: 18 },
-                px: { xs: 1, md: 2 },
+                fontSize: { xs: '11.5px', sm: 15, md: 18 },
+                px: { xs: 0.6, sm: 1, md: 2 },
+                minWidth: 'auto',
+                whiteSpace: 'nowrap',
                 '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
               }}
             >
@@ -295,27 +297,14 @@ export default function Footer() {
                 textTransform: 'none',
                 color: 'white',
                 fontWeight: 500,
-                fontSize: { xs: 12, sm: 15, md: 18 },
-                px: { xs: 1, md: 2 },
+                fontSize: { xs: '11.5px', sm: 15, md: 18 },
+                px: { xs: 0.6, sm: 1, md: 2 },
+                minWidth: 'auto',
+                whiteSpace: 'nowrap',
                 '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
               }}
             >
               Privacy Policy
-            </Button>
-            <Button
-              component={Link}
-              href="/contact"
-              disableRipple
-              sx={{
-                textTransform: 'none',
-                color: 'white',
-                fontWeight: 500,
-                fontSize: { xs: 12, sm: 15, md: 18 },
-                px: { xs: 1, md: 2 },
-                '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
-              }}
-            >
-              Contact Us
             </Button>
             <Button
               component={Link}
@@ -325,17 +314,37 @@ export default function Footer() {
                 textTransform: 'none',
                 color: 'white',
                 fontWeight: 500,
-                fontSize: { xs: 12, sm: 15, md: 18 },
-                px: { xs: 1, md: 2 },
+                fontSize: { xs: '11.5px', sm: 15, md: 18 },
+                px: { xs: 0.6, sm: 1, md: 2 },
+                minWidth: 'auto',
+                whiteSpace: 'nowrap',
                 '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
               }}
             >
               About Us
             </Button>
+            <Button
+              component={Link}
+              href="/contact"
+              disableRipple
+              sx={{
+                textTransform: 'none',
+                color: 'white',
+                fontWeight: 500,
+                fontSize: { xs: '11.5px', sm: 15, md: 18 },
+                px: { xs: 0.6, sm: 1, md: 2 },
+                minWidth: 'auto',
+                whiteSpace: 'nowrap',
+                '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' },
+              }}
+            >
+              Contact Us
+            </Button>
             {isAuthenticated ? (
               <Button
                 onClick={handleSignOut}
                 sx={{
+                  display: { xs: 'none', sm: 'inline-flex' },
                   textTransform: 'none',
                   color: '#fff',
                   fontWeight: 500,
@@ -356,6 +365,7 @@ export default function Footer() {
                 component={Link}
                 href="/"
                 sx={{
+                  display: { xs: 'none', sm: 'inline-flex' },
                   textTransform: 'none',
                   color: '#fff',
                   fontWeight: 500,
