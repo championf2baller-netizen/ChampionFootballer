@@ -369,6 +369,16 @@ const comparableId = (value: unknown): string => {
     return normalized.startsWith('guest-') ? normalized.slice(6) : normalized;
 };
 
+const sameId = (a: unknown, b: unknown): boolean => {
+    if (a === null || a === undefined || b === null || b === undefined) return false;
+    const rawA = typeof a === 'object' ? ((a as any)?.id ?? (a as any)?._id) : a;
+    const rawB = typeof b === 'object' ? ((b as any)?.id ?? (b as any)?._id) : b;
+    if (rawA === null || rawA === undefined || rawB === null || rawB === undefined) return false;
+    const sa = comparableId(rawA).toLowerCase();
+    const sb = comparableId(rawB).toLowerCase();
+    return Boolean(sa && sb && sa === sb);
+};
+
 const formatPlayerName = (firstName?: string, lastName?: string): string => {
     return formatPlayerDisplayName(firstName, lastName);
 };
@@ -1420,15 +1430,42 @@ export default function LeagueDetailPage() {
         }
     }, [isAuthenticated]);
 
-    // Declare isMember and isAdmin here so they are available for useEffect and logic below
-    const isMember = league && league.members && user && league.members.some((m: User) => m.id === user.id);
-    const isAdmin = !!(
-        league &&
-        user &&
-        (
-            (league.adminId && league.adminId === user.id) ||
-            (league.administrators && league.administrators.some((a: User) => a.id === user.id))
-        )
+    // Robust admin & membership resolution for current user
+    const currentUserId = user?.id || (user as any)?._id;
+    const userRoleStr = String((user as unknown as Record<string, unknown>)?.role || '').toUpperCase();
+    const isSuperAdmin = userRoleStr === 'SUPER_ADMIN';
+    const isGlobalAdmin = isSuperAdmin || userRoleStr === 'ADMIN' || Boolean((user as any)?.isAdmin || (user as any)?.is_admin);
+
+    const leagueUserRoleStr = String(league?.userRole || (league as any)?.role || '').toUpperCase();
+    const isLeagueRoleAdmin = leagueUserRoleStr === 'ADMIN';
+    const isLeagueFlagAdmin = Boolean((league as any)?.isAdmin || (league as any)?.is_admin);
+
+    const isLeagueAdminById = Boolean(
+        (league?.adminId && sameId(league.adminId, currentUserId)) ||
+        ((league as any)?.admin_id && sameId((league as any).admin_id, currentUserId)) ||
+        ((league as any)?.createdById && sameId((league as any).createdById, currentUserId)) ||
+        ((league as any)?.creatorId && sameId((league as any).creatorId, currentUserId)) ||
+        ((league as any)?.createdBy && sameId((league as any).createdBy, currentUserId))
+    );
+
+    const isLeagueAdminInList = Boolean(
+        Array.isArray(league?.administrators) &&
+        league.administrators.some((a: any) => sameId(a, currentUserId))
+    );
+
+    const isAdmin = Boolean(
+        isGlobalAdmin ||
+        isLeagueRoleAdmin ||
+        isLeagueFlagAdmin ||
+        isLeagueAdminById ||
+        isLeagueAdminInList
+    );
+
+    const isMember = Boolean(
+        isAdmin ||
+        isLeagueRoleAdmin ||
+        leagueUserRoleStr === 'MEMBER' ||
+        (Array.isArray(league?.members) && league.members.some((m: any) => sameId(m, currentUserId)))
     );
 
 
@@ -4162,17 +4199,10 @@ export default function LeagueDetailPage() {
 
 
 
-    const userRole = String((user as unknown as Record<string, unknown>)?.role || '').toUpperCase();
-    const userIsSuperAdmin = userRole === 'SUPER_ADMIN';
-    const userIsAdmin =
-        userIsSuperAdmin ||
-        userRole === 'ADMIN' ||
-        league?.userRole === 'ADMIN' ||
-        (league?.administrators ? league.administrators.some((a: User) => String(a.id) === String(user?.id)) : false);
-    const userIsMember =
-        userIsAdmin ||
-        (league?.members ? league.members.some((m: User) => String(m.id) === String(user?.id)) : false) ||
-        league?.userRole === 'MEMBER';
+    const userRole = userRoleStr;
+    const userIsSuperAdmin = isSuperAdmin;
+    const userIsAdmin = isAdmin;
+    const userIsMember = isMember;
 
     const routeLeagueLoaded = !!league && String(league.id) === String(leagueId);
     const leagueAccessCheckReady =
@@ -5784,6 +5814,59 @@ export default function LeagueDetailPage() {
                                                                                     flex: 1,
                                                                                     minWidth: 0
                                                                                 }}>
+                                                                                    <Button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setSelectedMatchIdForDialog(match.id);
+                                                                                            setShouldShowAdminGoals(true);
+                                                                                            setMatchStatsOpen(true);
+                                                                                        }}
+                                                                                        disabled={match.archived || !league?.active || !isMatchSeasonActiveForStats(match)}
+                                                                                        startIcon={<Plus size={13} color="#3b6ff5" strokeWidth={2.5} />}
+                                                                                        sx={{
+                                                                                            color: '#ffffff',
+                                                                                            bgcolor: 'rgba(255, 255, 255, 0.035)',
+                                                                                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                                                            borderRadius: '9px',
+                                                                                            px: { xs: '8px', sm: '12px', md: '14px' },
+                                                                                            py: '7.5px',
+                                                                                            fontSize: { xs: '10.5px', sm: '11px' },
+                                                                                            fontWeight: 700,
+                                                                                            letterSpacing: '0.025em',
+                                                                                            textTransform: 'uppercase',
+                                                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                                                            minWidth: 0,
+                                                                                            flex: '1 1 auto',
+                                                                                            whiteSpace: 'nowrap',
+                                                                                            display: 'inline-flex',
+                                                                                            alignItems: 'center',
+                                                                                            justifyContent: 'center',
+                                                                                            lineHeight: 1.2,
+                                                                                            verticalAlign: 'middle',
+                                                                                            '& .MuiButton-startIcon': {
+                                                                                                display: 'inline-flex',
+                                                                                                alignItems: 'center',
+                                                                                                justifyContent: 'center',
+                                                                                                mr: { xs: 0.35, sm: 0.45 },
+                                                                                                ml: 0,
+                                                                                                my: 0,
+                                                                                                '& svg': { display: 'block' }
+                                                                                            },
+                                                                                            '&:hover': {
+                                                                                                bgcolor: 'rgba(59, 111, 245, 0.15)',
+                                                                                                borderColor: '#3b6ff5'
+                                                                                            },
+                                                                                            '&.Mui-disabled': {
+                                                                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                                                                borderColor: 'rgba(255, 255, 255, 0.05)',
+                                                                                                '& .MuiButton-startIcon': {
+                                                                                                    opacity: 0.4
+                                                                                                }
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        Add Score
+                                                                                    </Button>
                                                                                     <Button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
