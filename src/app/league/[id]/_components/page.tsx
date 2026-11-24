@@ -638,7 +638,7 @@ const LEADERBOARD_METRIC_CONFIG = [
         label: 'CONTRIBUTION INDEX %',
         icon: Imapct,
         infoSummary: 'Shows overall contribution as a percentage.',
-        infoFormula: "Measures a player's contribution towards winning matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions for the selected league and season.",
+        infoFormula: "Measures a player's contribution towards matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions for the selected league and season.",
     },
 ] as const;
 
@@ -6884,14 +6884,14 @@ export default function LeagueDetailPage() {
                                                             if (leftDef) {
                                                                 addPlayerToPitch(
                                                                     leftDef,
-                                                                    { left: { xs: '8%', sm: '17%', md: '30%' }, top: { xs: '70%', sm: '70%', md: '67%' } },
+                                                                    { left: { xs: '20%', sm: '20%', md: '30%' }, top: { xs: '67%', sm: '67%', md: '67%' } },
                                                                     `def-left-${leftDef.id}`
                                                                 );
                                                             }
                                                             if (rightDef) {
                                                                 addPlayerToPitch(
                                                                     rightDef,
-                                                                    { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } },
+                                                                    { left: { xs: '62%', sm: '62%', md: '52%' }, top: { xs: '75.5%', sm: '75.5%', md: '80%' } },
                                                                     `def-right-${rightDef.id}`
                                                                 );
                                                             }
@@ -6921,14 +6921,14 @@ export default function LeagueDetailPage() {
                                                             if (leftMid) {
                                                                 addPlayerToPitch(
                                                                     leftMid,
-                                                                    { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } },
+                                                                    { left: { xs: '47%', sm: '47%', md: '44%' }, top: { xs: '63%', sm: '63%', md: '62%' } },
                                                                     `mid-left-${leftMid.id}`
                                                                 );
                                                             }
                                                             if (rightMid) {
                                                                 addPlayerToPitch(
                                                                     rightMid,
-                                                                    { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } },
+                                                                    { left: { xs: '83%', sm: '83%', md: '63%' }, top: { xs: '68%', sm: '68%', md: '70%' } },
                                                                     `mid-right-${rightMid.id}`
                                                                 );
                                                             }
@@ -6939,7 +6939,7 @@ export default function LeagueDetailPage() {
                                                             if (unusedFwd) {
                                                                 addPlayerToPitch(
                                                                     unusedFwd,
-                                                                    { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } },
+                                                                    { left: { xs: '68%', sm: '60%', md: '55%' }, top: { xs: '59%', sm: '63%', md: '61%' } },
                                                                     `fwd-${unusedFwd.id}`
                                                                 );
                                                             }
