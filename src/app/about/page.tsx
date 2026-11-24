@@ -45,22 +45,47 @@ export default function AboutCF() {
           ) : (
             <>
               <p>
-                {`Champion Footballer is where football becomes more than just a kickabout with friends it becomes your journey to greatness!`}
+                {`Welcome to Champion Footballer, where football, competition and bragging rights come together. Every match counts, every performance matters and every player has the opportunity to make their mark.`}
               </p>
               <p>
-                {` Whether you're playing 5 or 7-a-side under the lights, dominating the local cage, or enjoying a weekend match at the park, CF turns every game into a competitive and unforgettable experience.`}
+                {`Whether you're playing for fun, competing with friends, taking on rivals or chasing the top spot, this is your game. Make your contribution, deliver winning performances, earn XP and climb the rankings. Whatever your position, ability or experience, there's always something to play for.`}
+              </p>
+              <p className="font-bold text-white uppercase tracking-wide">
+                {`OUR JOURNEY: FROM 2015 TO A NEW ERA OF FOOTBALL.`}
               </p>
               <p>
-                {`Create your player card, organise matches with ease, choose teams from a live player availability list, and track every goal, win, result, and rivalry as you build your football legacy. Keep the competition alive with real stats, rankings, league tables, and match history where every performance counts and every goal matters.`}
+                {`Our journey began in 2015 with a vision to bring grassroots football and competition together. Following the launch of our first web app in 2022, Champion Footballer now enters its next chapter with a dedicated mobile app, bringing the entire experience straight to your fingertips.`}
+              </p>
+              <p className="font-bold text-white uppercase tracking-wide">
+                {`YOUR GAME. YOUR STATS. YOUR LEGACY.`}
               </p>
               <p>
-                {`Fight for the top spot, dominate your league, and prove who truly deserves Player of the Match. After every game, vote for standout players, earn virtual awards, and climb your way to football bragging rights.`}
+                {`Create your player profile, organise matches with ease, build your squads and bring your competitions to life. Track your appearances, wins, performances and individual statistics. Earn XP, unlock achievements and climb the rankings. Celebrate your success in your very own Trophy Room, where every match adds another chapter to your football story.`}
+              </p>
+              <p className="font-bold text-white uppercase tracking-wide">
+                {`DON'T JUST PLAY THE GAME. OWN YOUR RANKING.`}
               </p>
               <p>
-                {`CF combines the energy of football, competition, and social gaming into one experience built for true football fans. Connect with players, create unforgettable matches, and bring the beautiful game to life every time you step onto the pitch.`}
+                {`Every performance is an opportunity to rise. Compete in league tables, challenge your rivals and fight for the number one spot. With player rankings, match history, virtual awards and our unique Match Win Contribution Index, we recognise more than just goals and assists. Every tackle, save, pass, interception and contribution can make a difference.`}
               </p>
-              <p className="font-bold text-white">{`Play hard! Compete harder!`}</p>
-              <p className="font-bold text-white -mt-6">{`Become Champion Footballer!`}</p>
+              <p>
+                {`Earn Player of the Match, collect achievements, build your reputation and give your rivals something to chase. From your first XP milestone to the top of the leaderboard, there's always another challenge to take on and another achievement to unlock.`}
+              </p>
+              <p className="font-bold text-white uppercase tracking-wide">
+                {`EVERY PLAYER HAS A STORY. EVERY MATCH BUILDS A LEGACY.`}
+              </p>
+              <p>
+                {`Champion Footballer brings together the passion of grassroots football, the excitement of competition and the spirit of playing with friends.`}
+              </p>
+              <p>
+                {`It's where casual kickabouts become competitions, friendships become rivalries and every player gets the opportunity to be recognised.`}
+              </p>
+              <p>
+                {`Your matches. Your achievements. Your rankings. Your legacy.`}
+              </p>
+              <p className="font-bold text-white">
+                {`The final whistle might end the match. The competition never stops.`}
+              </p>
             </>
           )}
         </div>
