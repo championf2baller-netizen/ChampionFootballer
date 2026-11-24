@@ -4908,7 +4908,18 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>League Point Scoring Description</TableCell>
                       <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Winning Team</TableCell>
                       <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Losing Team</TableCell>
-                      <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Classic Scoring</TableCell>
+                      <TableCell align="center" sx={{
+                        bgcolor: '#2b2b2b !important',
+                        color: '#F1C40F !important',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-woodford-bourne-pro)',
+                        fontSize: { xs: '0.85rem', md: '0.95rem' },
+                        py: 2,
+                        whiteSpace: 'nowrap',
+                        borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                        borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                        borderTop: '1.5px solid rgba(241, 196, 15, 0.4)',
+                      }}>Classic Scoring</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -4994,7 +5005,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             color: row.points.startsWith('0') ? 'rgba(255,255,255,0.4)' : '#F1C40F',
                             fontWeight: 800,
                             fontSize: '0.9rem',
-                            py: 1.5
+                            py: 1.5,
+                            borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            bgcolor: 'rgba(241, 196, 15, 0.04)',
+                            ...(idx === rows.length - 1 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
                           }}>
                             {row.points}
                           </TableCell>
@@ -5063,7 +5078,16 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                           <TableCell colSpan={2} align="center" sx={{ color: '#00a896', fontWeight: 800, fontSize: '0.95rem', bgcolor: 'rgba(0,168,150,0.05)', py: 1.5 }}>
                             {row.xp}
                           </TableCell>
-                          <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem', py: 1.5 }}>
+                          <TableCell align="center" sx={{
+                            color: 'rgba(255,255,255,0.4)',
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            py: 1.5,
+                            borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            bgcolor: 'rgba(241, 196, 15, 0.04)',
+                            ...(idx === 2 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
+                          }}>
                             {row.points}
                           </TableCell>
                         </TableRow>
