@@ -63,6 +63,7 @@ import { isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { TokenManager } from '@/lib/tokenManager';
 import { getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
+import { extractSubmittedStatUserIds, getMatchStatsProgress } from '@/lib/matchStatsProgress';
 import PLAYERIMAGE from '@/Components/images/players.png'
 import HomeTeamImage from '@/Components/images/hometeamshirt.png'
 import AwayTeamImage from '@/Components/images/awayteamshirt.png'
@@ -542,72 +543,6 @@ const isUserInMatch = (match: Match, uid?: string | null): boolean => {
     return false;
 };
 
-const hasPlayerAddedStats = (stat: any): boolean => {
-    if (!stat) return false;
-    if (typeof stat === 'boolean') return stat;
-    if (typeof stat.hasSubmittedStats === 'boolean') return stat.hasSubmittedStats;
-
-    const goals = Number(stat.goals) || 0;
-    const assists = Number(stat.assists) || 0;
-    const cleanSheets = Number(stat.cleanSheets ?? stat.clean_sheets) || 0;
-    const defence = Number(stat.defence) || 0;
-    const penalties = Number(stat.penalties) || 0;
-    const freeKicks = Number(stat.freeKicks ?? stat.free_kicks) || 0;
-    const yellowCards = Number(stat.yellowCards ?? stat.yellow_cards) || 0;
-    const redCards = Number(stat.redCards ?? stat.red_cards) || 0;
-
-    if (goals > 0 || assists > 0 || cleanSheets > 0 || defence > 0 || penalties > 0 || freeKicks > 0 || yellowCards > 0 || redCards > 0) {
-        return true;
-    }
-
-    const impact = Number(stat.impact) || 0;
-    const minutes = Number(stat.minutesPlayed ?? stat.minutes_played) || 0;
-    const rating = Number(stat.rating) || 0;
-
-    if (impact > 0 && minutes === 0 && rating === 0) {
-        return true;
-    }
-
-    return false;
-};
-
-const getMatchStatsProgress = (match: Match, statsCountFallback?: number) => {
-    const rawGuests = (match.guests && match.guests.length > 0 ? match.guests : match.guestPlayers) || [];
-    const homeCount = match.homeTeamUsers?.length || 0;
-    const awayCount = match.awayTeamUsers?.length || 0;
-    const guestCount = rawGuests.length;
-    let totalPlayers = homeCount + awayCount + guestCount;
-    if (totalPlayers === 0) {
-        totalPlayers = match.availableUsers?.length || 14;
-    }
-
-    let statsCount = 0;
-    const ps = (match as any).playerStats || (match as any).statistics || (match as any).stats;
-    if (Array.isArray(ps) && ps.length > 0) {
-        const validStats = ps.filter(hasPlayerAddedStats);
-        const uniqueUserIds = new Set(
-            validStats.map((s: any) => String(s?.userId || s?.user_id || s?.user?.id || s?.id || '')).filter(Boolean)
-        );
-        statsCount = uniqueUserIds.size > 0 ? uniqueUserIds.size : validStats.length;
-    } else if (ps && typeof ps === 'object' && !Array.isArray(ps) && Object.keys(ps).length > 0) {
-        const validStats = Object.values(ps).filter(hasPlayerAddedStats);
-        statsCount = validStats.length;
-    } else if (typeof statsCountFallback === 'number' && statsCountFallback >= 0) {
-        statsCount = statsCountFallback;
-    }
-
-    const effectiveTotal = Math.max(totalPlayers, statsCount, 1);
-    const displayTotal = totalPlayers > 0 ? totalPlayers : effectiveTotal;
-    const displayCount = Math.min(statsCount, displayTotal);
-    const percent = Math.min(100, Math.round((displayCount / displayTotal) * 100));
-
-    return {
-        count: displayCount,
-        total: displayTotal,
-        percent,
-    };
-};
-
 const LEADERBOARD_METRIC_CONFIG = [
     {
         key: 'goals',
@@ -761,7 +696,7 @@ export default function LeagueDetailPage() {
     const [hasCommonLeague, setHasCommonLeague] = useState(false);
     const [checkedCommonLeague, setCheckedCommonLeague] = useState(false);
     const [userLeagueXP, setUserLeagueXP] = useState<Record<string, number>>({});
-    const [matchStatsMap, setMatchStatsMap] = useState<Record<string, number>>({});
+    const [matchStatsMap, setMatchStatsMap] = useState<Record<string, string[]>>({});
 
     // Fetch stats for completed matches if not already provided in match.playerStats
     useEffect(() => {
@@ -777,11 +712,18 @@ export default function LeagueDetailPage() {
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data.success && Array.isArray(data.stats)) {
-                    const validStats = data.stats.filter(hasPlayerAddedStats);
-                    const uniqueCount = new Set(
-                        validStats.map((s: any) => String(s?.userId || s?.user_id || s?.user?.id || s?.id || '')).filter(Boolean)
-                    ).size;
-                    setMatchStatsMap(prev => (prev[m.id] === uniqueCount ? prev : { ...prev, [m.id]: uniqueCount }));
+                    const statUserIds = extractSubmittedStatUserIds(data.stats);
+                    const voterIds = Array.isArray(data.voterIds)
+                        ? data.voterIds.map((id: unknown) => String(id ?? '').trim()).filter(Boolean)
+                        : [];
+                    const combinedIds = Array.from(new Set([...statUserIds, ...voterIds])).sort();
+                    setMatchStatsMap(prev => {
+                        const existing = prev[m.id];
+                        if (existing && existing.length === combinedIds.length && existing.every((id, idx) => id === combinedIds[idx])) {
+                            return prev;
+                        }
+                        return { ...prev, [m.id]: combinedIds };
+                    });
                 }
             } catch { }
         });

@@ -49,6 +49,8 @@ export function useCombinedMatchRefresh(
     window.addEventListener('match-deleted', handleMatchEvent);
     window.addEventListener('match-stats-updated', handleMatchEvent);
     window.addEventListener('vote-updated', handleMatchEvent);
+    window.addEventListener('votes-updated', handleMatchEvent);
+    window.addEventListener('vote-submitted', handleMatchEvent);
     window.addEventListener('league-updated', handleMatchEvent);
     window.addEventListener('data-mutated', handleMatchEvent);
     window.addEventListener('xp-updated', handleMatchEvent);
@@ -60,6 +62,8 @@ export function useCombinedMatchRefresh(
       window.removeEventListener('match-deleted', handleMatchEvent);
       window.removeEventListener('match-stats-updated', handleMatchEvent);
       window.removeEventListener('vote-updated', handleMatchEvent);
+      window.removeEventListener('votes-updated', handleMatchEvent);
+      window.removeEventListener('vote-submitted', handleMatchEvent);
       window.removeEventListener('league-updated', handleMatchEvent);
       window.removeEventListener('data-mutated', handleMatchEvent);
       window.removeEventListener('xp-updated', handleMatchEvent);
