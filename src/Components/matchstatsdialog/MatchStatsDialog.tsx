@@ -1709,8 +1709,6 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             const mentalityContribution = isMentalityPick ? 5 : 0;
             const raw = goalContribution + assistContribution + cleanSheetContribution + defensiveContribution + mentalityContribution;
 
-            // Participation default when no contribution action exists.
-            if (raw <= 0) return 15;
             return Math.max(0, Math.min(100, Math.round(raw)));
         },
         []
@@ -1915,6 +1913,24 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     if (voteResponse.ok && voteApiSuccess !== false) {
                         if (typeof window !== 'undefined') {
                             window.dispatchEvent(new CustomEvent('refresh-notifications'));
+                            window.dispatchEvent(new CustomEvent('votes-updated', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
+                            window.dispatchEvent(new CustomEvent('vote-submitted', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
+                            window.dispatchEvent(new CustomEvent('match-updated', {
+                                detail: {
+                                    matchId: resolvedMatchId,
+                                    leagueId: resolvedLeagueId || match?.leagueId || '',
+                                }
+                            }));
                         }
                     } else {
                         errors.push(

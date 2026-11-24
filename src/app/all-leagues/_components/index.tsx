@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { AdminPanelSettings, Close, Delete, ExitToApp, People, CloudUpload, CheckCircle, Search, ExpandMore, Add as AddIcon, PowerSettingsNew } from '@mui/icons-material'
 import { Box, Button, ButtonBase, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField, Typography, Container, List, ListItem, ListItemAvatar, Avatar, ListItemText, Divider, useTheme, useMediaQuery, Fade, Chip, CircularProgress, MenuItem, InputAdornment, FormControl, Select, RadioGroup, Radio, Switch, FormControlLabel, Grid, Menu, ListItemIcon, Alert } from '@mui/material'
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { shareContent, buildLeagueSeasonInviteText, copyTextToClipboard } from '@/lib/utils/shareUtils';
 import { SettingsIcon, X, Trophy, ChevronDown, Calendar, Users, Shield, Copy, Share2, Play, Settings, UserPlus, ShieldCheck } from 'lucide-react';
@@ -226,6 +226,9 @@ const normalizeLeagueFromPayload = (payload: unknown): League | null => {
   }
 
   const rawStatusStr = typeof raw['status'] === 'string' ? raw['status'].toLowerCase().trim() : '';
+  if (raw['deleted'] === true || raw['isDeleted'] === true || rawStatusStr === 'deleted') {
+    return null;
+  }
   if (isCompleteVal || isCompletedVal || rawStatusStr === 'completed' || rawStatusStr === 'inactive') {
     activeVal = false;
   }
@@ -3488,6 +3491,7 @@ function AllLeagues() {
   const [seasonConfirmOpen, setSeasonConfirmOpen] = useState(false);
   const [pendingSeasonLeague, setPendingSeasonLeague] = useState<LeagueWithStatus | null>(null);
   const [locallyDeletedLeagueIds, setLocallyDeletedLeagueIds] = useState<string[]>([]);
+  const locallyDeletedLeagueIdsRef = useRef<string[]>([]);
 
   const dispatchLeagueMutationEvent = useCallback(
     (eventName: 'league-created' | 'league-updated' | 'league-deleted', detail: Record<string, unknown>) => {
@@ -3709,6 +3713,7 @@ function AllLeagues() {
   );
 
   const isLeagueCompleted = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     const withFlags = l as LeagueWithStatus & {
       isComplete?: boolean;
       isCompleted?: boolean;
@@ -3770,12 +3775,14 @@ function AllLeagues() {
   }, [completedStatusTokens]);
 
   const isLeagueLive = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     if (isLeagueCompleted(l)) return false;
     if (Boolean((l as LeagueWithStatus & { archived?: boolean }).archived)) return false;
     return true;
   }, [isLeagueCompleted]);
 
   const isArchivedLeague = useCallback((l: LeagueWithStatus): boolean => {
+    if ((l as any)?.deleted === true || (l as any)?.isDeleted === true || (l as any)?.status === 'deleted') return false;
     return Boolean((l as LeagueWithStatus & { archived?: boolean }).archived);
   }, []);
 
@@ -3817,11 +3824,12 @@ function AllLeagues() {
       if (leaguesData) {
         const normalizedLeagues: League[] = leaguesData
           .map((leaguePayload) => normalizeLeagueFromPayload(leaguePayload))
-          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name));
+          .filter((league): league is League => Boolean(league && league.id && String(league.id) !== 'null' && league.name && !(league as any).deleted && (league as any).status !== 'deleted'));
 
         const sortedLeagues = sortLeaguesByRecency(normalizedLeagues);
-        const finalLeagues = locallyDeletedLeagueIds.length > 0
-          ? sortedLeagues.filter((leagueItem) => !locallyDeletedLeagueIds.map(String).includes(String(leagueItem.id)))
+        const currentExcluded = Array.from(new Set([...locallyDeletedLeagueIds, ...locallyDeletedLeagueIdsRef.current]));
+        const finalLeagues = currentExcluded.length > 0
+          ? sortedLeagues.filter((leagueItem) => !currentExcluded.map(String).includes(String(leagueItem.id)))
           : sortedLeagues;
 
         setLeagues(finalLeagues);
@@ -4174,6 +4182,7 @@ function AllLeagues() {
           return sortLeaguesByRecency([enriched, ...filtered]);
         });
         setLocallyDeletedLeagueIds(prev => prev.filter((id) => id !== String(joined.id)));
+        locallyDeletedLeagueIdsRef.current = locallyDeletedLeagueIdsRef.current.filter((id) => id !== String(joined.id));
         dispatchLeagueMutationEvent('league-created', { leagueId: String(joined.id), reason: 'joined-league' });
         dispatchLeagueMutationEvent('league-updated', { leagueId: String(joined.id), reason: 'joined-league' });
         console.log('Joined league successfully:', joined.name);
@@ -4391,8 +4400,8 @@ function AllLeagues() {
     setArchivedLeagueActionId(leagueId);
     try {
       const endpoints = [
-        `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${leagueId}`,
-        `${process.env.NEXT_PUBLIC_API_URL}/leagues/${leagueId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/leagues/${leagueId}?mode=hard&permanent=true`,
+        `${process.env.NEXT_PUBLIC_API_URL}/leagues/${leagueId}?mode=hard&permanent=true`,
       ];
 
       let success = false;
@@ -4422,8 +4431,12 @@ function AllLeagues() {
       if (!success) throw new Error(errorMessage);
 
       toast.success('League permanently deleted');
+      locallyDeletedLeagueIdsRef.current = Array.from(new Set([...locallyDeletedLeagueIdsRef.current, leagueId]));
       setLeagues(prev => prev.filter(l => String(l.id) !== leagueId));
       setLocallyDeletedLeagueIds((prev) => (prev.includes(leagueId) ? prev : [...prev, leagueId]));
+      try {
+        leagueAPI.invalidateCache();
+      } catch { }
       dispatchLeagueMutationEvent('league-deleted', { leagueId, reason: 'archived-permanent-delete' });
 
       if (selectedLeague && String(selectedLeague.id) === leagueId) {
@@ -5307,8 +5320,10 @@ function AllLeagues() {
         dispatchLeagueMutationEvent('league-updated', { leagueId: deletedLeagueId, reason: 'settings-archive' });
       } else {
         toast.success('League deleted');
+        locallyDeletedLeagueIdsRef.current = Array.from(new Set([...locallyDeletedLeagueIdsRef.current, deletedLeagueId]));
         setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
         setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
+        try { leagueAPI.invalidateCache(); } catch { }
         dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'settings-delete' });
       }
       setOpenMembers(false);
@@ -5602,8 +5617,10 @@ function AllLeagues() {
         dispatchLeagueMutationEvent('league-updated', { leagueId: deletedLeagueId, reason: 'admin-settings-archive' });
       } else {
         toast.success('League deleted');
+        locallyDeletedLeagueIdsRef.current = Array.from(new Set([...locallyDeletedLeagueIdsRef.current, deletedLeagueId]));
         setLeagues(prev => prev.filter(l => String(l.id) !== deletedLeagueId));
         setLocallyDeletedLeagueIds((prev) => (prev.includes(deletedLeagueId) ? prev : [...prev, deletedLeagueId]));
+        try { leagueAPI.invalidateCache(); } catch { }
         dispatchLeagueMutationEvent('league-deleted', { leagueId: deletedLeagueId, reason: 'admin-settings-delete' });
       }
       setAdminSettingsLeague(null);
@@ -5777,8 +5794,8 @@ function AllLeagues() {
               <TextField
                 placeholder={getCms('page_all_leagues_join_placeholder', 'ENTER LEAGUE INVITE CODE')}
                 value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                inputProps={{ maxLength: 6 }}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                inputProps={{ maxLength: 8 }}
                 size="small"
                 variant="outlined"
                 autoComplete="off"

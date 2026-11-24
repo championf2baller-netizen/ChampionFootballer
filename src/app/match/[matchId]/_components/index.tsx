@@ -642,23 +642,39 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
     setEditStatsSaving(true);
     try {
       const apiPlayerId = toApiPlayerId(editingPlayer.id);
-      // Compute contribution % to match backend/client formula
-      const isHome = editingPlayer.__team
-        ? editingPlayer.__team === 'home'
-        : (match?.homeTeamUsers ?? []).some(p => p.id === apiPlayerId);
-      const teamGoals = isHome ? (match?.homeTeamGoals ?? 0) : (match?.awayTeamGoals ?? 0);
-      const goalContribution = teamGoals > 0 ? (editStats.goals / teamGoals) * 100 : 0;
-      const assistContribution = teamGoals > 0 ? (editStats.assists / teamGoals) * 50 : 0;
-      const cleanSheetContribution = editStats.cleanSheets > 0 ? 15 * editStats.cleanSheets : 0;
-      const rawContribution = goalContribution + assistContribution + cleanSheetContribution;
-      const impact = rawContribution > 0 ? Math.max(0, Math.min(100, Math.round(rawContribution))) : 15;
+      // Compute contribution % to match backend/client formula (using match total goals as baseline)
+      const matchTotalGoals = Math.max(0, Number(match?.homeTeamGoals || 0) + Number(match?.awayTeamGoals || 0));
+      const isDefensive =
+        String(match?.homeDefensiveImpactId || '') === String(apiPlayerId) ||
+        String(match?.awayDefensiveImpactId || '') === String(apiPlayerId);
+      const isMentality =
+        String(match?.homeMentalityId || '') === String(apiPlayerId) ||
+        String(match?.awayMentalityId || '') === String(apiPlayerId);
+      const safeGoals = Math.max(0, Number(editStats.goals) || 0);
+      const safeAssists = Math.max(0, Number(editStats.assists) || 0);
+      const safeCleanSheets = Math.max(0, Number(editStats.cleanSheets) || 0);
+
+      const goalContribution = matchTotalGoals > 0 ? (safeGoals / matchTotalGoals) * 100 : 0;
+      const assistContribution = matchTotalGoals > 0 ? (safeAssists / matchTotalGoals) * 50 : 0;
+      const cleanSheetContribution = safeCleanSheets > 0 ? 15 * safeCleanSheets : 0;
+      const defensiveContribution = isDefensive ? 10 : 0;
+      const mentalityContribution = isMentality ? 5 : 0;
+      const rawContribution =
+        goalContribution +
+        assistContribution +
+        cleanSheetContribution +
+        defensiveContribution +
+        mentalityContribution;
+      const impact = Math.max(0, Math.min(100, Math.round(rawContribution)));
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/stats`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           playerId: apiPlayerId,
-          ...editStats,
+          goals: safeGoals,
+          assists: safeAssists,
+          cleanSheets: safeCleanSheets,
           defence: 0,
           penalties: 0,
           freeKicks: 0,
@@ -922,7 +938,7 @@ export default function MatchDetailsPage({ matchIdProp }: { matchIdProp?: string
               textTransform: 'uppercase',
             }}
           >
-            Match Result
+            Match Report
           </Typography>
 
           {(() => {

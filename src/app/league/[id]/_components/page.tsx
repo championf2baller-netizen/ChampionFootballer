@@ -370,6 +370,16 @@ const comparableId = (value: unknown): string => {
     return normalized.startsWith('guest-') ? normalized.slice(6) : normalized;
 };
 
+const sameId = (a: unknown, b: unknown): boolean => {
+    if (a === null || a === undefined || b === null || b === undefined) return false;
+    const rawA = typeof a === 'object' ? ((a as any)?.id ?? (a as any)?._id) : a;
+    const rawB = typeof b === 'object' ? ((b as any)?.id ?? (b as any)?._id) : b;
+    if (rawA === null || rawA === undefined || rawB === null || rawB === undefined) return false;
+    const sa = comparableId(rawA).toLowerCase();
+    const sb = comparableId(rawB).toLowerCase();
+    return Boolean(sa && sb && sa === sb);
+};
+
 const formatPlayerName = (firstName?: string, lastName?: string): string => {
     return formatPlayerDisplayName(firstName, lastName);
 };
@@ -405,27 +415,52 @@ interface MotmPlayerInfo {
 }
 
 const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlayerInfo | null => {
-    const votes = match.manOfTheMatchVotes;
-    if (!votes || typeof votes !== 'object') return null;
-
-    const voteEntries = Object.entries(votes as Record<string, unknown>);
-    if (voteEntries.length === 0) return null;
-
     const voteCounts: Record<string, number> = {};
-    const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
 
-    if (valuesAreCounts) {
-        voteEntries.forEach(([playerId, count]) => {
-            const normalizedId = normalizeId(playerId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+    // 1. Check match.votes array if available (filter for MOTM category)
+    if (Array.isArray((match as any).votes) && (match as any).votes.length > 0) {
+        (match as any).votes.forEach((v: any) => {
+            if (v && (!v.category || v.category === 'motm') && v.votedForId) {
+                const normalizedId = normalizeId(v.votedForId);
+                if (normalizedId) {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                }
+            }
         });
-    } else {
-        voteEntries.forEach(([, votedForId]) => {
-            const normalizedId = normalizeId(votedForId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
-        });
+    }
+
+    // 2. If no votes found from array, check match.manOfTheMatchVotes object
+    if (Object.keys(voteCounts).length === 0 && match.manOfTheMatchVotes && typeof match.manOfTheMatchVotes === 'object') {
+        const voteEntries = Object.entries(match.manOfTheMatchVotes as Record<string, unknown>);
+        if (voteEntries.length > 0) {
+            const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
+            if (valuesAreCounts) {
+                voteEntries.forEach(([playerId, count]) => {
+                    const normalizedId = normalizeId(playerId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+                });
+            } else {
+                voteEntries.forEach(([, votedForId]) => {
+                    const normalizedId = normalizeId(votedForId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                });
+            }
+        }
+    }
+
+    // 3. Fallback to (match as any).playerVotes or (match as any).motmVotes if present
+    if (Object.keys(voteCounts).length === 0) {
+        const altVotes = (match as any).playerVotes || (match as any).motmVotes;
+        if (altVotes && typeof altVotes === 'object') {
+            Object.entries(altVotes as Record<string, unknown>).forEach(([pid, val]) => {
+                const normalizedId = normalizeId(pid);
+                if (normalizedId && typeof val === 'number') {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(val || 0);
+                }
+            });
+        }
     }
 
     let topPlayerId = '';
@@ -455,6 +490,7 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
     const allPlayers: User[] = [
         ...(match.homeTeamUsers || []),
         ...(match.awayTeamUsers || []),
+        ...((match as any).availableUsers || []),
         ...fallbackPlayers,
         ...guestUsers
     ];
@@ -464,7 +500,13 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
         return playerId === topPlayerId || comparableId(playerId) === comparableId(topPlayerId);
     });
 
-    if (!winningPlayer) return null;
+    if (!winningPlayer) {
+        return {
+            name: 'MOTM Winner',
+            initial: 'M',
+            picture: null,
+        };
+    }
     const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName) || winningPlayer.firstName || 'Player';
     const initial = (winningPlayer.firstName?.[0] || winnerName[0] || 'M').toUpperCase();
     return {
@@ -607,7 +649,7 @@ const LEADERBOARD_METRIC_CONFIG = [
         label: 'CONTRIBUTION INDEX %',
         icon: Imapct,
         infoSummary: 'Shows overall contribution as a percentage.',
-        infoFormula: "Measures a player's contribution towards winning matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions for the selected league and season.",
+        infoFormula: "Measures a player's contribution towards matches, expressed as a percentage, based on goals, assists, clean sheets, MOTM votes, and other key match actions for the selected league and season.",
     },
 ] as const;
 
@@ -1140,6 +1182,7 @@ export default function LeagueDetailPage() {
         xp?: number;
         cleanSheets?: number;
         motmCount?: number;
+        motmVotes?: number;
         defensiveImpact?: number;
         mentality?: number;
         lastFive?: Array<{ result: 'W' | 'D' | 'L' }>;
@@ -1388,15 +1431,42 @@ export default function LeagueDetailPage() {
         }
     }, [isAuthenticated]);
 
-    // Declare isMember and isAdmin here so they are available for useEffect and logic below
-    const isMember = league && league.members && user && league.members.some((m: User) => m.id === user.id);
-    const isAdmin = !!(
-        league &&
-        user &&
-        (
-            (league.adminId && league.adminId === user.id) ||
-            (league.administrators && league.administrators.some((a: User) => a.id === user.id))
-        )
+    // Robust admin & membership resolution for current user
+    const currentUserId = user?.id || (user as any)?._id;
+    const userRoleStr = String((user as unknown as Record<string, unknown>)?.role || '').toUpperCase();
+    const isSuperAdmin = userRoleStr === 'SUPER_ADMIN';
+    const isGlobalAdmin = isSuperAdmin || userRoleStr === 'ADMIN' || Boolean((user as any)?.isAdmin || (user as any)?.is_admin);
+
+    const leagueUserRoleStr = String(league?.userRole || (league as any)?.role || '').toUpperCase();
+    const isLeagueRoleAdmin = leagueUserRoleStr === 'ADMIN';
+    const isLeagueFlagAdmin = Boolean((league as any)?.isAdmin || (league as any)?.is_admin);
+
+    const isLeagueAdminById = Boolean(
+        (league?.adminId && sameId(league.adminId, currentUserId)) ||
+        ((league as any)?.admin_id && sameId((league as any).admin_id, currentUserId)) ||
+        ((league as any)?.createdById && sameId((league as any).createdById, currentUserId)) ||
+        ((league as any)?.creatorId && sameId((league as any).creatorId, currentUserId)) ||
+        ((league as any)?.createdBy && sameId((league as any).createdBy, currentUserId))
+    );
+
+    const isLeagueAdminInList = Boolean(
+        Array.isArray(league?.administrators) &&
+        league.administrators.some((a: any) => sameId(a, currentUserId))
+    );
+
+    const isAdmin = Boolean(
+        isGlobalAdmin ||
+        isLeagueRoleAdmin ||
+        isLeagueFlagAdmin ||
+        isLeagueAdminById ||
+        isLeagueAdminInList
+    );
+
+    const isMember = Boolean(
+        isAdmin ||
+        isLeagueRoleAdmin ||
+        leagueUserRoleStr === 'MEMBER' ||
+        (Array.isArray(league?.members) && league.members.some((m: any) => sameId(m, currentUserId)))
     );
 
 
@@ -2023,7 +2093,7 @@ export default function LeagueDetailPage() {
 
                 // Keep leagues visible for switching, including completed ones.
                 const visibleLeagues = simpleLeagues.filter(
-                    (l) => l.archived !== true
+                    (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
                 );
 
                 // Sort newest to oldest by createdAt timestamp or Mongo ObjectId
@@ -2460,7 +2530,7 @@ export default function LeagueDetailPage() {
                 };
             });
             setLeague((prev: any) => prev ? { ...prev, matches: updateMatches(prev.matches) } : prev);
-            
+
         }
 
         setAvailabilityLoading(prev => ({ ...prev, [matchId]: true }));
@@ -3159,7 +3229,7 @@ export default function LeagueDetailPage() {
             .filter(m => isResultMatch(m) && m.homeTeamGoals != null && m.awayTeamGoals != null);
 
         let fallbackPriorRanks: Map<string, number> | null = null;
-        if (resultMatches.length > 0) {
+        if (resultMatches.length > 1) {
             const sortedMatches = [...resultMatches].sort((a, b) => {
                 const dateA = new Date((a as any).date || (a as any).createdAt || 0).getTime();
                 const dateB = new Date((b as any).date || (b as any).createdAt || 0).getTime();
@@ -3223,7 +3293,11 @@ export default function LeagueDetailPage() {
         const finalList = list.map((p, idx) => {
             const currRank = idx + 1;
             let rankChange = p.rankChange;
-            if (typeof rankChange !== 'number') {
+            if (resultMatches.length <= 1) {
+                // In the first match of the season, there is no prior match to compare against;
+                // rank movement only starts counting from the 2nd match onwards.
+                rankChange = 0;
+            } else if (typeof rankChange !== 'number') {
                 if (fallbackPriorRanks && fallbackPriorRanks.has(p.id)) {
                     const prevRank = fallbackPriorRanks.get(p.id)!;
                     rankChange = prevRank - currRank;
@@ -3475,11 +3549,15 @@ export default function LeagueDetailPage() {
         window.addEventListener('match-stats-updated', handleLiveUpdate);
         window.addEventListener('match-updated', handleLiveUpdate);
         window.addEventListener('league-updated', handleLiveUpdate);
+        window.addEventListener('vote-submitted', handleLiveUpdate);
+        window.addEventListener('votes-updated', handleLiveUpdate);
 
         return () => {
             window.removeEventListener('match-stats-updated', handleLiveUpdate);
             window.removeEventListener('match-updated', handleLiveUpdate);
             window.removeEventListener('league-updated', handleLiveUpdate);
+            window.removeEventListener('vote-submitted', handleLiveUpdate);
+            window.removeEventListener('votes-updated', handleLiveUpdate);
         };
     }, [leagueId, fetchLeagueDetails]);
 
@@ -4097,6 +4175,7 @@ export default function LeagueDetailPage() {
                 profileXP: Number(fullPlayer?.xp ?? fullPlayer?.totalXP ?? fullPlayer?.totalXp ?? data.profileXP ?? data.player?.xp ?? 0),
                 cleanSheets: Number(matchStats?.cleanSheets ?? data.cleanSheets ?? 0),
                 motmCount: Number(data.motmCount ?? 0),
+                motmVotes: Number(matchStats?.motmVotes ?? matchStats?.motm ?? data.motmVotes ?? data.motmCount ?? 0),
                 defensiveImpact: Number(matchStats?.defensiveImpact ?? data.defensiveImpact ?? 0),
                 mentality: Number(matchStats?.mentality ?? data.mentality ?? 0),
                 lastFive: Array.isArray(data.lastFive) ? data.lastFive : [],
@@ -4109,17 +4188,10 @@ export default function LeagueDetailPage() {
 
 
 
-    const userRole = String((user as unknown as Record<string, unknown>)?.role || '').toUpperCase();
-    const userIsSuperAdmin = userRole === 'SUPER_ADMIN';
-    const userIsAdmin =
-        userIsSuperAdmin ||
-        userRole === 'ADMIN' ||
-        league?.userRole === 'ADMIN' ||
-        (league?.administrators ? league.administrators.some((a: User) => String(a.id) === String(user?.id)) : false);
-    const userIsMember =
-        userIsAdmin ||
-        (league?.members ? league.members.some((m: User) => String(m.id) === String(user?.id)) : false) ||
-        league?.userRole === 'MEMBER';
+    const userRole = userRoleStr;
+    const userIsSuperAdmin = isSuperAdmin;
+    const userIsAdmin = isAdmin;
+    const userIsMember = isMember;
 
     const routeLeagueLoaded = !!league && String(league.id) === String(leagueId);
     const leagueAccessCheckReady =
@@ -5734,6 +5806,59 @@ export default function LeagueDetailPage() {
                                                                                     <Button
                                                                                         onClick={(e) => {
                                                                                             e.stopPropagation();
+                                                                                            setSelectedMatchIdForDialog(match.id);
+                                                                                            setShouldShowAdminGoals(true);
+                                                                                            setMatchStatsOpen(true);
+                                                                                        }}
+                                                                                        disabled={match.archived || !league?.active || !isMatchSeasonActiveForStats(match)}
+                                                                                        startIcon={<Plus size={13} color="#3b6ff5" strokeWidth={2.5} />}
+                                                                                        sx={{
+                                                                                            color: '#ffffff',
+                                                                                            bgcolor: 'rgba(255, 255, 255, 0.035)',
+                                                                                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                                                                                            borderRadius: '9px',
+                                                                                            px: { xs: '8px', sm: '12px', md: '14px' },
+                                                                                            py: '7.5px',
+                                                                                            fontSize: { xs: '10.5px', sm: '11px' },
+                                                                                            fontWeight: 700,
+                                                                                            letterSpacing: '0.025em',
+                                                                                            textTransform: 'uppercase',
+                                                                                            fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                                                                            minWidth: 0,
+                                                                                            flex: '1 1 auto',
+                                                                                            whiteSpace: 'nowrap',
+                                                                                            display: 'inline-flex',
+                                                                                            alignItems: 'center',
+                                                                                            justifyContent: 'center',
+                                                                                            lineHeight: 1.2,
+                                                                                            verticalAlign: 'middle',
+                                                                                            '& .MuiButton-startIcon': {
+                                                                                                display: 'inline-flex',
+                                                                                                alignItems: 'center',
+                                                                                                justifyContent: 'center',
+                                                                                                mr: { xs: 0.35, sm: 0.45 },
+                                                                                                ml: 0,
+                                                                                                my: 0,
+                                                                                                '& svg': { display: 'block' }
+                                                                                            },
+                                                                                            '&:hover': {
+                                                                                                bgcolor: 'rgba(59, 111, 245, 0.15)',
+                                                                                                borderColor: '#3b6ff5'
+                                                                                            },
+                                                                                            '&.Mui-disabled': {
+                                                                                                color: 'rgba(255, 255, 255, 0.35)',
+                                                                                                borderColor: 'rgba(255, 255, 255, 0.05)',
+                                                                                                '& .MuiButton-startIcon': {
+                                                                                                    opacity: 0.4
+                                                                                                }
+                                                                                            }
+                                                                                        }}
+                                                                                    >
+                                                                                        Add Score
+                                                                                    </Button>
+                                                                                    <Button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
                                                                                             setEditMatchId(match.id);
                                                                                             setEditMatchDialogOpen(true);
                                                                                         }}
@@ -6213,7 +6338,7 @@ export default function LeagueDetailPage() {
                                                                                                     textOverflow: 'ellipsis',
                                                                                                     whiteSpace: 'nowrap'
                                                                                                 }}>
-                                                                                                    {motm ? motm.name : 'Select the MOTM'}
+                                                                                                    {motm ? motm.name : 'MOTM'}
                                                                                                 </Typography>
                                                                                                 <Typography sx={{
                                                                                                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -6234,7 +6359,7 @@ export default function LeagueDetailPage() {
                                                                                     {/* 6. PLAYER STATS PROGRESS */}
                                                                                     <Box sx={{ px: { xs: '14px', sm: '16px' }, pt: 0.2, pb: 0.6 }}>
                                                                                         <Typography sx={{ fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#8b90a0', fontSize: '11px', fontWeight: 500, mb: 0.5 }}>
-                                                                                            Stats added for {count} of {total} players
+                                                                                            Stats added by {count} of {total} players
                                                                                         </Typography>
                                                                                         <Box sx={{
                                                                                             width: '100%',
@@ -6831,14 +6956,14 @@ export default function LeagueDetailPage() {
                                                             if (leftDef) {
                                                                 addPlayerToPitch(
                                                                     leftDef,
-                                                                    { left: { xs: '8%', sm: '17%', md: '30%' }, top: { xs: '70%', sm: '70%', md: '67%' } },
+                                                                    { left: { xs: '20%', sm: '20%', md: '30%' }, top: { xs: '67%', sm: '67%', md: '67%' } },
                                                                     `def-left-${leftDef.id}`
                                                                 );
                                                             }
                                                             if (rightDef) {
                                                                 addPlayerToPitch(
                                                                     rightDef,
-                                                                    { left: { xs: '52%', sm: '52%', md: '52%' }, top: { xs: '79.5%', sm: '79.5%', md: '80%' } },
+                                                                    { left: { xs: '62%', sm: '62%', md: '52%' }, top: { xs: '75.5%', sm: '75.5%', md: '80%' } },
                                                                     `def-right-${rightDef.id}`
                                                                 );
                                                             }
@@ -6868,14 +6993,14 @@ export default function LeagueDetailPage() {
                                                             if (leftMid) {
                                                                 addPlayerToPitch(
                                                                     leftMid,
-                                                                    { left: { xs: '34%', sm: '34%', md: '44%' }, top: { xs: '65%', sm: '65%', md: '62%' } },
+                                                                    { left: { xs: '47%', sm: '47%', md: '44%' }, top: { xs: '63%', sm: '63%', md: '62%' } },
                                                                     `mid-left-${leftMid.id}`
                                                                 );
                                                             }
                                                             if (rightMid) {
                                                                 addPlayerToPitch(
                                                                     rightMid,
-                                                                    { left: { xs: '69%', sm: '69%', md: '63%' }, top: { xs: '73%', sm: '73%', md: '70%' } },
+                                                                    { left: { xs: '83%', sm: '83%', md: '63%' }, top: { xs: '68%', sm: '68%', md: '70%' } },
                                                                     `mid-right-${rightMid.id}`
                                                                 );
                                                             }
@@ -6886,7 +7011,7 @@ export default function LeagueDetailPage() {
                                                             if (unusedFwd) {
                                                                 addPlayerToPitch(
                                                                     unusedFwd,
-                                                                    { left: { xs: '60%', sm: '60%', md: '55%' }, top: { xs: '63%', sm: '63%', md: '61%' } },
+                                                                    { left: { xs: '68%', sm: '60%', md: '55%' }, top: { xs: '59%', sm: '63%', md: '61%' } },
                                                                     `fwd-${unusedFwd.id}`
                                                                 );
                                                             }
@@ -7024,7 +7149,7 @@ export default function LeagueDetailPage() {
                                                         },
                                                     }}
                                                 >
-                                                    <div className="w-full min-w-[640px] sm:min-w-[820px] rounded-lg league-table league-mobile-result-font">
+                                                    <div className="w-full min-w-[630px] sm:min-w-[820px] rounded-lg league-table league-mobile-result-font">
                                                         {/* Table Header */}
                                                         {/* <div className="grid mt-0 grid-cols-[50px_1fr_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-4 py-3 bg-table-header border-b border-border text-muted-foreground league-header-row league-header-inset league-table-heading">
                                                 <div className="text-center">#</div>
@@ -7040,9 +7165,9 @@ export default function LeagueDetailPage() {
                                             </div> */}
 
                                                         <>
-                                                            <div className="grid mt-0 grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
+                                                            <div className="grid mt-0 grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-3 bg-table-header league-header-row league-header-inset font-bold sticky top-0 z-20">
                                                                 <div className="text-center league-table-heading league-table-sticky-rank" style={{ color: '#717d8f' }}>#</div>
-                                                                <div className="pl-2 sm:pl-3 league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
+                                                                <div className="pl-[40px] sm:pl-[96px] league-table-heading league-table-heading-left league-table-sticky-name" style={{ color: '#717d8f' }}>PLAYER</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>MOTM</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>P</div>
                                                                 <div className="text-center league-table-heading" style={{ color: '#717d8f' }}>W</div>
@@ -7118,7 +7243,7 @@ export default function LeagueDetailPage() {
                                                                         <div
                                                                             key={player.id}
                                                                             onClick={(e) => { e.preventDefault(); if (league?.id) openQuickViewFromTable(String(league.id), String(player.id)); }}
-                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(140px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
+                                                                            className={`league-table-row-text group grid grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center px-0 py-0 cursor-pointer transition-colors ${isCurrentUser ? 'league-row-current-user' : ''} league-row league-row-inset mb-0 font-bold text-white border-b border-[#1c1d22]`}
                                                                         >
                                                                             {/* Rank */}
                                                                             <div className="text-center text-white font-bold league-table-sticky-rank h-full flex items-center justify-center">
@@ -7230,7 +7355,7 @@ export default function LeagueDetailPage() {
                                                                     );
                                                                 })}
                                                             {tableData.length === 0 && (
-                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(125px,1fr)_70px_45px_45px_45px_45px_55px_50px_60px] sm:grid-cols-[32px_minmax(180px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
+                                                                <div className="league-table-row-text grid grid-cols-[28px_minmax(160px,1fr)_70px_45px_45px_45px_45px_50px_50px_60px] sm:grid-cols-[32px_minmax(190px,1fr)_80px_60px_60px_60px_60px_70px_70px_80px] items-center h-[58px] min-h-[58px] sm:h-[72px] sm:min-h-[72px] px-0 py-0 bg-table-row-even font-bold text-white">
                                                                     <div className="text-center text-white/80" style={{ gridColumn: '1 / -1' }}>
                                                                         No players found for this season.
                                                                     </div>
@@ -7480,7 +7605,6 @@ export default function LeagueDetailPage() {
                                                                         sx={{
                                                                             p: { xs: 1, sm: 1.5 },
                                                                             borderRadius: 1.5,
-                                                                            border: '1px solid rgba(245,158,11,0.35)',
                                                                             background: 'linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(245,158,11,0.07) 100%)',
                                                                         }}
                                                                     >
@@ -8524,7 +8648,7 @@ export default function LeagueDetailPage() {
                                         { img: Goals, label: 'Goals', shortLabel: 'Goals', value: quickView.stats?.goals ?? 0 },
                                         { img: Assist, label: 'Assists', shortLabel: 'Assist', value: quickView.stats?.assists ?? 0 },
                                         { img: Cleansheet, label: 'Clean Sheets', shortLabel: 'Clean', value: quickView.cleanSheets ?? 0 },
-                                        { img: Momt, label: 'MOTM Votes', shortLabel: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                                        { img: Momt, label: 'MOTM Votes', shortLabel: 'MOTM Votes', value: quickView.motmVotes ?? quickView.motmCount ?? 0 },
                                         { img: DefensiveImpact, label: 'Def Impact', shortLabel: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
                                         { img: Mentality, label: 'Mental Impact', shortLabel: 'Mental Impact', value: quickView.mentality ?? 0 },
                                     ].map((it, i) => (
@@ -8795,7 +8919,7 @@ export default function LeagueDetailPage() {
                                             { img: Goals, label: 'Goals', value: quickView.stats?.goals ?? 0 },
                                             { img: Assist, label: 'Assists', value: quickView.stats?.assists ?? 0 },
                                             { img: Cleansheet, label: 'Clean Sheets', value: quickView.cleanSheets ?? 0 },
-                                            { img: Momt, label: 'MOTM Votes', value: quickView.motmCount ?? 0 },
+                                            { img: Momt, label: 'MOTM Votes', value: quickView.motmVotes ?? quickView.motmCount ?? 0 },
                                             { img: DefensiveImpact, label: 'Def Impact', value: quickView.defensiveImpact ?? 0 },
                                             { img: Mentality, label: 'Mental Impact', value: quickView.mentality ?? 0 },
                                         ].map((it, i) => (

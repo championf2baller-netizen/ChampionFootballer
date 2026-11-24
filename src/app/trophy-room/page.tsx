@@ -248,7 +248,7 @@ const topTrophies: Omit<TrophyType, 'winner' | 'winnerId' | 'leagueId' | 'league
 const bottomTrophies: Omit<TrophyType, 'winner' | 'winnerId' | 'leagueId' | 'leagueName'>[] = [
   { title: 'Golden Boot', description: 'Player With The Highest Number Of Goals Scored', image: GoldenBootImg, color: '#00FF85' },
   { title: 'King Playmaker', description: 'Player With The Highest Number Of Goals Assisted', image: KingPlayMakerImg, color: '#FF007F' },
-  { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: 'blue' },
+  { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: '#1E5B84' },
   { title: 'Dark Horse', description: 'Player Outside Of The Top 3 League Position With The Highest Frequency Of MOTM Votes', image: DarkHorseImg, color: '#e10600' },
   { title: 'Star Keeper', description: 'Player With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: '#00d1c1' },
 ];
@@ -1891,9 +1891,9 @@ export default function GlobalTrophyRoom() {
             } as League;
           });
 
-          // Show all non-archived leagues (including completed leagues)
+          // Show all non-archived leagues (excluding deleted leagues)
           const activeLeagues = enrichedLeagues.filter(
-            (l) => l.archived !== true
+            (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
           );
 
           // Sort newest to oldest by createdAt timestamp

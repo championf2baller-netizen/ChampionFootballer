@@ -772,6 +772,34 @@ const PlayerProfileCard = () => {
   // We keep whatever is in DB/user selection; RadioGroup will show none selected
   // if the current style isn't in the options for the chosen position type.
 
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior })
+      } catch {
+        window.scrollTo(0, 0)
+      }
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0
+      }
+      if (document.body) {
+        document.body.scrollTop = 0
+      }
+      const mainEl = document.getElementById('main-content')
+      if (mainEl) {
+        mainEl.scrollTop = 0
+      }
+    }
+  }
+
+  useEffect(() => {
+    scrollToTop()
+    const rafId = requestAnimationFrame(() => {
+      scrollToTop()
+    })
+    return () => cancelAnimationFrame(rafId)
+  }, [step])
+
   // Required UX order: Profile Overview -> Skills & Attributes -> Brief Details
   const handleNext = () => {
     setStep((s) => {
@@ -779,6 +807,7 @@ const PlayerProfileCard = () => {
       if (s === 3) return 2
       return 2
     })
+    scrollToTop()
   }
 
   const handlePrevious = () => {
@@ -787,6 +816,7 @@ const PlayerProfileCard = () => {
       if (s === 3) return 1
       return 1
     })
+    scrollToTop()
   }
 
   const handlePasswordChange = (value: string) => {

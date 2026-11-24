@@ -148,9 +148,9 @@ export default function LeaderBoardPage() {
             } as League;
           });
 
-          // Show all non-archived leagues (including completed leagues)
+          // Show all non-archived leagues (excluding deleted leagues)
           const activeLeagues = simpleLeagues.filter(
-            (l) => l.archived !== true
+            (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
           );
 
           // Sort newest to oldest by createdAt timestamp

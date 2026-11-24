@@ -1402,9 +1402,11 @@ export default function PlayerStatsPage() {
                 ).length
             });
             // Count how many votes this player received (votedForId is the player who received the vote)
-            const votesForPlayer = votes.filter((vote: any) =>
-                String(vote.votedForId) === String(playerId)
-            ).length;
+            const votesForPlayer = votes.filter((vote: any) => {
+                const cat = String(vote?.category || '').toLowerCase().trim();
+                if (cat && cat !== 'motm' && cat !== 'man_of_the_match') return false;
+                return String(vote.votedForId) === String(playerId);
+            }).length;
             return acc + votesForPlayer;
         }, 0);
         console.log('✅ Total MOTM votes for player:', count);
@@ -1415,9 +1417,11 @@ export default function PlayerStatsPage() {
     const careerMotmVotesCount = useMemo(() => {
         const count = careerMatches.reduce((acc, match) => {
             const votes = (match as any).votes || [];
-            const votesForPlayer = votes.filter((vote: any) =>
-                String(vote.votedForId) === String(playerId)
-            ).length;
+            const votesForPlayer = votes.filter((vote: any) => {
+                const cat = String(vote?.category || '').toLowerCase().trim();
+                if (cat && cat !== 'motm' && cat !== 'man_of_the_match') return false;
+                return String(vote.votedForId) === String(playerId);
+            }).length;
             return acc + votesForPlayer;
         }, 0);
         console.log('✅ Total Career MOTM votes for player:', count);
@@ -1816,9 +1820,11 @@ export default function PlayerStatsPage() {
             // Count MOTM votes
             const motmVotes = matches.reduce((acc, match) => {
                 const votes = (match as any).votes || [];
-                const votesForPlayer = votes.filter((vote: any) =>
-                    String(vote.votedForId) === String(playerId)
-                ).length;
+                const votesForPlayer = votes.filter((vote: any) => {
+                    const cat = String(vote?.category || '').toLowerCase().trim();
+                    if (cat && cat !== 'motm' && cat !== 'man_of_the_match') return false;
+                    return String(vote.votedForId) === String(playerId);
+                }).length;
                 return acc + votesForPlayer;
             }, 0);
 

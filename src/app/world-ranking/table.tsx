@@ -29,7 +29,7 @@ import PageHeader from '@/Components/PageHeader';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { isRegisteredPlayerRecord, getPositionShortForm } from '@/lib/playerIdentity';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
-import { ChevronDown, Search, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search } from 'lucide-react';
 
 interface Filters {
   mode: 'total' | 'avg';
@@ -845,7 +845,7 @@ export default function WorldRankingTable() {
               PLAYERS SHOWN
             </Typography>
             <Typography sx={{ fontSize: { xs: 14, sm: 16 }, fontWeight: 700, color: '#ffffff' }}>
-              {filtered.length}
+              {Math.min(visiblePlayers.length, filtered.length)}
             </Typography>
           </Box>
           <Box>
@@ -874,17 +874,16 @@ export default function WorldRankingTable() {
               e.currentTarget.classList.toggle('is-scrolled', e.currentTarget.scrollLeft > 2);
             }}
             sx={{
-              maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
+              width: '100%',
               overflowX: 'auto',
-              overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'thin',
-              '&::-webkit-scrollbar': { height: '8px', width: '8px' },
+              '&::-webkit-scrollbar': { height: '8px' },
               '&::-webkit-scrollbar-track': { background: '#121316' },
               '&::-webkit-scrollbar-thumb': { background: '#22242a', borderRadius: '9999px' },
             }}
           >
-            <Table stickyHeader size="small" sx={{ minWidth: 680, borderCollapse: 'separate' }}>
+            <Table stickyHeader size="small" sx={{ minWidth: { xs: 460, sm: 610, md: 725 }, borderCollapse: 'separate' }}>
               <TableHead>
                 <TableRow className="league-header-row font-bold" sx={{ bgcolor: '#121316 !important' }}>
                   {/* Rank Header */}
@@ -896,16 +895,16 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
                       px: 0,
                       textAlign: 'center',
-                      width: { xs: 32, sm: 40 },
-                      minWidth: { xs: 32, sm: 40 },
-                      maxWidth: { xs: 32, sm: 40 },
+                      width: { xs: 30, sm: 36, md: 40 },
+                      minWidth: { xs: 30, sm: 36, md: 40 },
+                      maxWidth: { xs: 30, sm: 36, md: 40 },
                       position: 'sticky',
                       top: 0,
                       left: 0,
@@ -925,20 +924,20 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      pl: { xs: 2, sm: 3 },
-                      pr: { xs: 1, sm: 1.5 },
+                      pl: { xs: 1, sm: 2, md: 3 },
+                      pr: { xs: 0.5, sm: 1, md: 1.5 },
                       textAlign: 'left',
-                      width: { xs: 170, sm: 230, md: 260 },
-                      minWidth: { xs: 170, sm: 230, md: 260 },
-                      maxWidth: { xs: 170, sm: 230, md: 260 },
+                      width: { xs: 140, sm: 200, md: 240 },
+                      minWidth: { xs: 140, sm: 200, md: 240 },
+                      maxWidth: { xs: 140, sm: 200, md: 240 },
                       position: 'sticky',
                       top: 0,
-                      left: { xs: 32, sm: 40 },
+                      left: { xs: 30, sm: 36, md: 40 },
                       zIndex: 35,
                       borderBottom: '1px solid #22242a',
                       boxShadow: 'none',
@@ -953,43 +952,49 @@ export default function WorldRankingTable() {
 
                   {/* Position Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
-                      minWidth: { xs: 75, sm: 100 },
+                      pl: { xs: 1, sm: 1.5, md: 2.5 },
+                      pr: { xs: 0.5, sm: 1, md: 1.5 },
+                      textAlign: 'left !important',
+                      width: { xs: 45, sm: 65, md: 80 },
+                      minWidth: { xs: 45, sm: 65, md: 80 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
                   >
-                    POSITION
+                    PSN
                   </TableCell>
 
                   {/* Country Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
-                      minWidth: { xs: 90, sm: 120 },
+                      pl: { xs: 1, sm: 1.5, md: 2.5 },
+                      pr: { xs: 0.5, sm: 1, md: 1.5 },
+                      textAlign: 'left !important',
+                      width: { xs: 85, sm: 105, md: 120 },
+                      minWidth: { xs: 85, sm: 105, md: 120 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
@@ -999,20 +1004,23 @@ export default function WorldRankingTable() {
 
                   {/* XP Status Header */}
                   <TableCell
-                    className="league-table-heading"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       position: 'sticky',
                       top: 0,
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      textAlign: 'center',
-                      minWidth: { xs: 85, sm: 110 },
+                      pl: { xs: 1, sm: 1.5, md: 2.5 },
+                      pr: { xs: 0.5, sm: 1, md: 1.5 },
+                      textAlign: 'left !important',
+                      width: { xs: 80, sm: 95, md: 110 },
+                      minWidth: { xs: 80, sm: 95, md: 110 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
@@ -1023,7 +1031,7 @@ export default function WorldRankingTable() {
                   {/* Total / Avg XP Header */}
                   <TableCell
                     onClick={() => toggleSort(filters.mode === 'avg' ? 'avgXP' : 'totalXP')}
-                    className="league-table-heading league-table-heading-right"
+                    className="league-table-heading league-table-heading-left"
                     sx={{
                       cursor: 'pointer',
                       position: 'sticky',
@@ -1031,14 +1039,16 @@ export default function WorldRankingTable() {
                       bgcolor: '#121316 !important',
                       color: '#717d8f !important',
                       fontWeight: 700,
-                      fontSize: { xs: 16, sm: 15 },
+                      fontSize: { xs: 14, sm: 15 },
                       fontFamily: 'var(--font-woodford-bourne-pro), Arial, Helvetica, sans-serif !important',
                       textTransform: 'uppercase',
                       paddingTop: '12px !important',
                       paddingBottom: '12px !important',
-                      pr: { xs: 2, sm: 3 },
-                      textAlign: 'right !important',
-                      minWidth: { xs: 90, sm: 120 },
+                      pl: { xs: 1, sm: 1.5, md: 2.5 },
+                      pr: { xs: 1, sm: 1.5 },
+                      textAlign: 'left !important',
+                      width: { xs: 80, sm: 95, md: 115 },
+                      minWidth: { xs: 80, sm: 95, md: 115 },
                       borderBottom: '1px solid #22242a',
                       zIndex: 20,
                     }}
@@ -1083,11 +1093,11 @@ export default function WorldRankingTable() {
                             fontWeight: 700,
                             fontSize: { xs: 12, sm: 13.5 },
                             textAlign: 'center',
-                            py: 1.5,
+                            py: { xs: 1, sm: 1.5 },
                             px: 0,
-                            width: { xs: 32, sm: 40 },
-                            minWidth: { xs: 32, sm: 40 },
-                            maxWidth: { xs: 32, sm: 40 },
+                            width: { xs: 30, sm: 36, md: 40 },
+                            minWidth: { xs: 30, sm: 36, md: 40 },
+                            maxWidth: { xs: 30, sm: 36, md: 40 },
                             position: 'sticky',
                             left: 0,
                             zIndex: 10,
@@ -1106,14 +1116,14 @@ export default function WorldRankingTable() {
                         {/* Player */}
                         <TableCell
                           sx={{
-                            py: 1.5,
-                            pl: { xs: 2, sm: 3 },
-                            pr: { xs: 1, sm: 1.5 },
-                            width: { xs: 170, sm: 230, md: 260 },
-                            minWidth: { xs: 170, sm: 230, md: 260 },
-                            maxWidth: { xs: 170, sm: 230, md: 260 },
+                            py: { xs: 1, sm: 1.5 },
+                            pl: { xs: 1, sm: 2, md: 3 },
+                            pr: { xs: 0.5, sm: 1, md: 1.5 },
+                            width: { xs: 140, sm: 200, md: 240 },
+                            minWidth: { xs: 140, sm: 200, md: 240 },
+                            maxWidth: { xs: 140, sm: 200, md: 240 },
                             position: 'sticky',
-                            left: { xs: 32, sm: 40 },
+                            left: { xs: 30, sm: 36, md: 40 },
                             zIndex: 9,
                             backgroundColor: isHighlighted ? '#183328 !important' : '#121316 !important',
                             boxShadow: 'none',
@@ -1128,12 +1138,12 @@ export default function WorldRankingTable() {
                             },
                           }}
                         >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1.25, sm: 1.75 }, overflow: 'hidden' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.25, md: 1.75 }, overflow: 'hidden' }}>
                             <Avatar
                               src={p.profilePicture}
                               sx={{
-                                width: { xs: 34, sm: 38 },
-                                height: { xs: 34, sm: 38 },
+                                width: { xs: 30, sm: 36, md: 38 },
+                                height: { xs: 30, sm: 36, md: 38 },
                                 bgcolor: p.profilePicture ? 'transparent' : getAvatarBackgroundColor(p.name),
                                 color: '#fff',
                                 fontSize: 13,
@@ -1144,7 +1154,7 @@ export default function WorldRankingTable() {
                             >
                               {!p.profilePicture && getAvatarInitials({ name: p.name })}
                             </Avatar>
-                            <Box sx={{ minWidth: 0, display: 'flex', alignItems: 'center', gap: 0.6, overflow: 'hidden' }}>
+                            <Box sx={{ minWidth: 0, display: 'flex', alignItems: 'center', overflow: 'hidden' }}>
                               <Link
                                 href={`/player/${p.id}`}
                                 style={{
@@ -1160,9 +1170,6 @@ export default function WorldRankingTable() {
                               >
                                 {p.name}
                               </Link>
-                              {isRegisteredPlayerRecord(p) && (
-                                <Shield size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
-                              )}
                             </Box>
                           </Box>
                         </TableCell>
@@ -1172,9 +1179,12 @@ export default function WorldRankingTable() {
                           color: '#9ca3af',
                           fontWeight: 600,
                           fontSize: 13,
-                          py: 1.5,
-                          textAlign: 'center',
-                          minWidth: { xs: 75, sm: 100 },
+                          py: { xs: 1, sm: 1.5 },
+                          pl: { xs: 1, sm: 1.5, md: 2.5 },
+                          pr: { xs: 0.5, sm: 1, md: 1.5 },
+                          textAlign: 'left !important',
+                          width: { xs: 45, sm: 65, md: 80 },
+                          minWidth: { xs: 45, sm: 65, md: 80 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
                         }}>
@@ -1186,20 +1196,34 @@ export default function WorldRankingTable() {
                           color: p.country ? '#d1d5db' : '#6b7280',
                           fontSize: 13,
                           fontWeight: 500,
-                          py: 1.5,
-                          textAlign: 'center',
-                          minWidth: { xs: 90, sm: 120 },
+                          py: { xs: 1, sm: 1.5 },
+                          pl: { xs: 1, sm: 1.5, md: 2.5 },
+                          pr: { xs: 0.5, sm: 1, md: 1.5 },
+                          textAlign: 'left !important',
+                          width: { xs: 85, sm: 105, md: 120 },
+                          minWidth: { xs: 85, sm: 105, md: 120 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
                         }}>
-                          {p.country || '-'}
+                          <Box component="span" sx={{
+                            display: 'block',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            maxWidth: { xs: 80, sm: 105, md: 120 }
+                          }}>
+                            {p.country || '-'}
+                          </Box>
                         </TableCell>
 
                         {/* XP Status Pill */}
                         <TableCell sx={{
-                          py: 1.5,
-                          textAlign: 'center',
-                          minWidth: { xs: 85, sm: 110 },
+                          py: { xs: 1, sm: 1.5 },
+                          pl: { xs: 1, sm: 1.5, md: 2.5 },
+                          pr: { xs: 0.5, sm: 1, md: 1.5 },
+                          textAlign: 'left !important',
+                          width: { xs: 80, sm: 95, md: 110 },
+                          minWidth: { xs: 80, sm: 95, md: 110 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
                         }}>
@@ -1243,16 +1267,17 @@ export default function WorldRankingTable() {
                                 component="span"
                                 sx={{
                                   display: 'inline-block',
-                                  px: 1.5,
-                                  py: 0.3,
+                                  px: { xs: 1, sm: 1.5 },
+                                  py: { xs: 0.2, sm: 0.3 },
                                   borderRadius: '9999px',
-                                  fontSize: 12,
+                                  fontSize: { xs: 11, sm: 12 },
                                   fontWeight: 700,
                                   bgcolor: bg,
                                   color: color,
                                   border: border,
                                   lineHeight: 1.2,
                                   textTransform: 'capitalize',
+                                  whiteSpace: 'nowrap',
                                 }}
                               >
                                 {statusTitle}
@@ -1267,17 +1292,19 @@ export default function WorldRankingTable() {
                           fontWeight: 800,
                           fontSize: 15,
                           fontFamily: 'var(--font-woodford-bourne-pro)',
-                          py: 1.5,
-                          pr: { xs: 2, sm: 3 },
-                          textAlign: 'right',
-                          minWidth: { xs: 90, sm: 120 },
+                          py: { xs: 1, sm: 1.5 },
+                          pl: { xs: 1, sm: 1.5, md: 2.5 },
+                          pr: { xs: 1, sm: 1.5 },
+                          textAlign: 'left !important',
+                          width: { xs: 80, sm: 95, md: 115 },
+                          minWidth: { xs: 80, sm: 95, md: 115 },
                           borderBottom: '1px solid #1c1d22',
                           backgroundColor: 'transparent !important',
                         }}>
                           <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'flex-end',
+                            alignItems: 'flex-start',
                             justifyContent: 'center',
                           }}>
                             <Typography sx={{
@@ -1285,7 +1312,7 @@ export default function WorldRankingTable() {
                               fontSize: { xs: 13, sm: 15 },
                               color: '#22c55e',
                               fontFamily: 'var(--font-woodford-bourne-pro)',
-                              textAlign: 'right',
+                              textAlign: 'left',
                               lineHeight: 1.2,
                             }}>
                               {filters.mode === 'avg'
@@ -1293,7 +1320,7 @@ export default function WorldRankingTable() {
                                 : formatNum(p.totalXP)}
                             </Typography>
                             {filters.mode !== 'avg' && (
-                              <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-end' }}>
+                              <Box sx={{ width: '100%', mt: 0.6, display: { xs: 'none', sm: 'flex' }, justifyContent: 'flex-start' }}>
                                 <Box sx={{
                                   width: { xs: 55, sm: 75, md: 85 },
                                   height: 3.5,
@@ -1341,10 +1368,19 @@ export default function WorldRankingTable() {
             </Table>
           </TableContainer>
 
-          {/* Show More Button */}
-          {!loading && visibleLimit < filtered.length && (
+          {/* Show More / Show Less Button */}
+          {!loading && filtered.length > 10 && (
             <Box
-              onClick={() => setVisibleLimit((prev) => prev + 10)}
+              component="button"
+              type="button"
+              onClick={() => {
+                if (visibleLimit >= filtered.length) {
+                  setVisibleLimit(10);
+                  tableContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                  setVisibleLimit((prev) => prev + 10);
+                }
+              }}
               sx={{
                 width: '100%',
                 py: 2.5,
@@ -1360,14 +1396,21 @@ export default function WorldRankingTable() {
                 letterSpacing: '0.8px',
                 textTransform: 'uppercase',
                 fontFamily: 'var(--font-woodford-bourne-pro)',
+                border: 'none',
                 borderTop: '1px solid #1c1d22',
                 backgroundColor: '#121316',
+                outline: 'none',
                 transition: 'all 0.15s ease',
-                '&:hover': { color: '#f97316' },
+                '&:hover': { color: '#f97316', backgroundColor: '#15171b' },
+                '&:active': { transform: 'scale(0.995)' },
               }}
             >
-              <span>SHOW MORE</span>
-              <ChevronDown size={14} color="currentColor" />
+              <span>{visibleLimit >= filtered.length ? 'SHOW LESS' : 'SHOW MORE'}</span>
+              {visibleLimit >= filtered.length ? (
+                <ChevronUp size={14} color="currentColor" />
+              ) : (
+                <ChevronDown size={14} color="currentColor" />
+              )}
             </Box>
           )}
         </Card>

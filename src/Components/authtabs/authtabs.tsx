@@ -223,7 +223,6 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
   const dispatch = useAppDispatch()
   const { dispatch: authDispatch } = useAuth()
   const [tabValue, setTabValue] = useState(showLogin ? 0 : 1)
-  const [serverStatus, setServerStatus] = useState<"checking" | "online" | "offline">("checking")
   const { isAuthenticated } = useSelector((state: RootState) => state.auth) as { isAuthenticated: boolean }
   const [cmsMap, setCmsMap] = useState<Record<string, string>>({})
 
@@ -529,18 +528,6 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
   } as const
 
   useEffect(() => {
-    const checkServerConnection = async () => {
-      try {
-        const res = await fetch(process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000")
-        setServerStatus(res.ok ? "online" : "offline")
-      } catch {
-        setServerStatus("offline")
-      }
-    }
-    checkServerConnection()
-  }, [])
-
-  useEffect(() => {
     // Commented out to avoid double redirect issues
     // if (isAuthenticated) {
     //   router.push('/dashboard');
@@ -826,7 +813,10 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
     setLoginError("")
     setLoginLoading(true)
 
-    if (!loginData.email || !loginData.password) {
+    const cleanEmail = (loginData.email || "").trim().toLowerCase()
+    const cleanPassword = loginData.password || ""
+
+    if (!cleanEmail || !cleanPassword) {
       const msg = "Please fill in all fields"
       setLoginError(msg)
       toast.error(msg)
@@ -834,7 +824,7 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
       return
     }
 
-    if (loginData.password === loginData.email) {
+    if (cleanPassword === cleanEmail) {
       const msg = "It looks like you entered your email in the password field. Please enter your actual password."
       setLoginError(msg)
       toast.error(msg)
@@ -843,7 +833,7 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (emailRegex.test(loginData.password)) {
+    if (emailRegex.test(cleanPassword)) {
       const msg = "It looks like you entered an email address in the password field. Please enter your actual password."
       setLoginError(msg)
       toast.error(msg)
@@ -852,7 +842,7 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
     }
 
     try {
-      const result = await authDispatch(login(loginData)).unwrap()
+      const result = await authDispatch(login({ email: cleanEmail, password: cleanPassword })).unwrap()
       console.log("[AuthTabs] Login result from server:", result)
       if (result.success) {
         if (result.token && result.data) {
@@ -1432,7 +1422,7 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
             <Button
               type="submit"
               variant="contained"
-              disabled={loginLoading || serverStatus === "offline"}
+              disabled={loginLoading}
               sx={{
                 backgroundColor: "#109d6f",
                 color: "#ffffff",

@@ -117,7 +117,10 @@ export async function shareToWhatsApp({
       await copyImageToClipboard(file);
     } catch { }
     downloadBlob(file, fileName);
-    toast.success('Card image downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.', {
+    const itemLabel = (fileName || '').toLowerCase().includes('pitch') || (fileName || '').toLowerCase().includes('lineup')
+      ? 'Pitch line-up image'
+      : 'Card image';
+    toast.success(`${itemLabel} downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.`, {
       duration: 6000,
     });
   }
@@ -207,7 +210,10 @@ export async function shareContent(options: ShareOptions): Promise<void> {
     const file = options.files[0];
     await copyImageToClipboard(file);
     downloadBlob(file, file.name);
-    toast.success('Card image downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.', { duration: 6000 });
+    const itemLabel = (file.name || '').toLowerCase().includes('pitch') || (file.name || '').toLowerCase().includes('lineup')
+      ? 'Pitch line-up image'
+      : 'Card image';
+    toast.success(`${itemLabel} downloaded & copied! In WhatsApp, press Ctrl+V or attach the image.`, { duration: 6000 });
   } else {
     try {
       const copied = await copyTextToClipboard(fullText);
@@ -259,7 +265,8 @@ async function toDataUrl(src: string): Promise<string> {
  */
 export async function captureElementAsFile(
   element: HTMLElement,
-  fileName: string = 'player-card.png'
+  fileName: string = 'player-card.png',
+  options?: { backgroundColor?: string | null; scale?: number }
 ): Promise<File | null> {
   if (!element || typeof window === 'undefined') return null;
 
@@ -288,12 +295,12 @@ export async function captureElementAsFile(
     );
 
     // 2. Render using html2canvas directly to HTML5 canvas
-    const width = element.offsetWidth || 480;
-    const height = element.offsetHeight || 445;
+    const width = element.offsetWidth || Math.round(element.getBoundingClientRect().width) || 480;
+    const height = Math.max(element.offsetHeight || 0, element.scrollHeight || 0, Math.round(element.getBoundingClientRect().height || 0)) || 445;
 
     const canvas = await html2canvas(element, {
-      backgroundColor: '#ffffff',
-      scale: 2,
+      backgroundColor: options?.backgroundColor !== undefined ? options.backgroundColor : '#ffffff',
+      scale: options?.scale || 2,
       useCORS: true,
       allowTaint: true,
       logging: false,
@@ -409,8 +416,8 @@ export async function captureElementAsFile(
   // Fallback to toBlob (html-to-image) if html2canvas fails
   try {
     const blob = await toBlob(element, {
-      backgroundColor: '#ffffff',
-      pixelRatio: 2,
+      backgroundColor: options?.backgroundColor !== undefined && options.backgroundColor !== null ? options.backgroundColor : '#ffffff',
+      pixelRatio: options?.scale || 2,
       cacheBust: false,
       skipFonts: true,
       filter: (node) => (node as HTMLElement)?.dataset?.shareExclude !== 'true',

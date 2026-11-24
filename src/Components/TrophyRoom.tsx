@@ -90,7 +90,7 @@ const TROPHY_META: Array<Omit<TrophyType, 'winner' | 'winnerId' | 'leagueId' | '
   { title: 'GOAT', description: 'Player With The Highest Win Ratio & Total MOTM Votes', image: GoatImg, color: '#F44336' },
   { title: 'Golden Boot', description: 'Player With The Highest Number Of Goals Scored', image: GoldenBootImg, color: '#FF9800' },
   { title: 'King Playmaker', description: 'Player With The Highest Number Of Goals Assisted', image: KingPlayMakerImg, color: '#FF007F' },
-  { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: '#00BFFF' },
+  { title: 'Legendary Shield', description: 'Player With The Highest Number Of Defensive Impact Votes', image: ShieldImg, color: '#1E5B84' },
   { title: 'The Dark Horse', description: 'Player Outside Of The Top 3 League Position With The Highest Frequency Of MOTM Votes', image: DarkHorseImg, color: '#607D8B' },
   // New
   { title: 'Star Keeper', description: 'Player With The Highest Number Of Clean Sheets', image: StarKeeperImg, color: BLUE_HEX },

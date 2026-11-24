@@ -71,7 +71,7 @@ import availability from '@/Components/images/availability.png'
 import teamsection from '@/Components/images/teamsection.png';
 import playmatch from '@/Components/images/playmatch.png';
 import submitresult from '@/Components/images/submitresult.png';
-import trophyroomandrewards from '@/Components/images/trophyroomandrewards.png';
+import trophyroomandrewards from '@/Components/images/4thpicc.png';
 import trackperformance from '@/Components/images/trackperformance.png';
 import individualstats from '@/Components/images/individualstats.png';
 import player from '@/Components/images/profile-user.png';
@@ -1091,7 +1091,7 @@ export default function NavigationBar() {
     }
   }, [xpStatusOpen]);
   const pathname = usePathname();
-  const isMainPage = pathname === '/';
+  const isMainPage = pathname === '/' || pathname === '';
 
   // 🔥 NOTIFICATION STATES
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -2823,7 +2823,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
             width: '100%',
             minWidth: 0,
             minHeight: isMainPage ? { xs: '48px', sm: '66px', md: '96px', lg: '122px' } : { xs: '60px', md: '70px' },
-            px: isMainPage ? { xs: 2, sm: 3, md: 5 } : undefined,
+            px: isMainPage ? { xs: 0, sm: 3, md: 5 } : undefined,
             overflowX: 'hidden',
             position: 'relative',
             mt: isMainPage ? {  md : -2} : undefined ,
@@ -2842,7 +2842,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 justifyContent: { xs: 'center', md: 'flex-start' },
               }}
             >
-              <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Link href="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexShrink: 0 }}>
                 <Box sx={{
                   width: { xs: 250, sm: 340, md: 700},
                   maxWidth: '100%',
@@ -2851,7 +2851,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   alignItems: 'center',
                   justifyContent: { xs: 'center', md: 'flex-start' },
                   '& img': {
-                    objectPosition: { xs: 'center', md: 'left center' }
+                    objectPosition: { xs: 'center !important', md: 'left center !important' }
                   }
                 }}>
                   <Image
@@ -2918,7 +2918,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 
           {/* DESKTOP NAVIGATION (moved to right) */}
           <Box sx={{
-            display: { xs: 'none', lg: 'flex' },
+            display: isMainPage ? 'none' : { xs: 'none', lg: 'flex' },
             alignItems: 'center',
             justifyContent: 'flex-end',
             flex: 1,
@@ -2933,7 +2933,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
 
           {/* RIGHT SIDE CONTROLS */}
           <Box sx={{ 
-            display: 'flex', 
+            display: isMainPage ? 'none' : 'flex', 
             alignItems: 'center',
             // gap: { xs: 0.5, md: 1 },
             flexShrink: 0,
@@ -3132,7 +3132,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <GavelOutlinedIcon sx={{ fontSize: 20, color: '#fff' }} />
-                      <Box>Game Rules</Box>
+                      <Box>Scoring System</Box>
                     </Box>
                   </MenuItem>
                   <MenuItem
@@ -3183,7 +3183,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Image src={logoutpic} alt="sign out" width={20} height={20} style={{ filter: 'brightness(0) invert(1)' }} />
-                      <Box>Sign out</Box>
+                      <Box>Sign Out</Box>
                     </Box>
                   </MenuItem>
                 </Menu>
@@ -4302,7 +4302,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       '& .MuiButton-startIcon': { marginRight: 1 },
                     }}
                   >
-                    Game rules
+                    Scoring System
                   </Button>
                 </ListItem>
                 <ListItem disablePadding>
@@ -4372,7 +4372,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       '& .MuiButton-startIcon': { marginRight: 1 },
                     }}
                   >
-                    Sign out
+                    Sign Out
                   </Button>
                 </ListItem>
               </>
@@ -4805,7 +4805,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           borderBottom: '3px solid #E56A16',
           flexShrink: 0
         }}>
-          Game Rules
+          Scoring System
           <IconButton
             aria-label="close"
             onClick={() => setGameRulesOpen(false)}
@@ -4915,7 +4915,18 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>League Point Scoring Description</TableCell>
                       <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Winning Team</TableCell>
                       <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Losing Team</TableCell>
-                      <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Classic Scoring</TableCell>
+                      <TableCell align="center" sx={{
+                        bgcolor: '#2b2b2b !important',
+                        color: '#F1C40F !important',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-woodford-bourne-pro)',
+                        fontSize: { xs: '0.85rem', md: '0.95rem' },
+                        py: 2,
+                        whiteSpace: 'nowrap',
+                        borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                        borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                        borderTop: '1.5px solid rgba(241, 196, 15, 0.4)',
+                      }}>Classic Scoring</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -5001,7 +5012,11 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             color: row.points.startsWith('0') ? 'rgba(255,255,255,0.4)' : '#F1C40F',
                             fontWeight: 800,
                             fontSize: '0.9rem',
-                            py: 1.5
+                            py: 1.5,
+                            borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            bgcolor: 'rgba(241, 196, 15, 0.04)',
+                            ...(idx === rows.length - 1 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
                           }}>
                             {row.points}
                           </TableCell>
@@ -5070,7 +5085,16 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                           <TableCell colSpan={2} align="center" sx={{ color: '#00a896', fontWeight: 800, fontSize: '0.95rem', bgcolor: 'rgba(0,168,150,0.05)', py: 1.5 }}>
                             {row.xp}
                           </TableCell>
-                          <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 800, fontSize: '0.9rem', py: 1.5 }}>
+                          <TableCell align="center" sx={{
+                            color: 'rgba(255,255,255,0.4)',
+                            fontWeight: 800,
+                            fontSize: '0.9rem',
+                            py: 1.5,
+                            borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
+                            bgcolor: 'rgba(241, 196, 15, 0.04)',
+                            ...(idx === 2 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
+                          }}>
                             {row.points}
                           </TableCell>
                         </TableRow>

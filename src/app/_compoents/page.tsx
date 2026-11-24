@@ -9,11 +9,11 @@ import NewImg from '@/Components/images/Done1.webp';
 import Newimg from '@/Components/images/Done2.webp';
 import mobile from '@/Components/images/mobile.webp';
 import heroTopBg from '@/Components/images/hero_top_bg.png';
-import heroMobileBanner from '@/Components/images/hero_mobile_banner.jpg';
+import champ2 from '@/Components/images/champ 2.png';
 import heroGridOrange from '@/Components/images/hero_grid_orange.png';
 import heroGridTeam1 from '@/Components/images/hero_grid_team1.png';
 import heroGridTeam2 from '@/Components/images/hero_grid_team2.png';
-import image9 from '@/Components/images/1stpicc.jpeg';
+import image9 from '@/Components/images/1stpicc.jpg';
 import image10 from '@/Components/images/2ndpicc.png';
 import image11 from '@/Components/images/3rdpicc.png';
 import image12 from '@/Components/images/4thpicc.png';
@@ -85,7 +85,7 @@ export default function LandingPage() {
           setCmsMap(map);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Auto-detect inviteCode in URL for unauthenticated users
@@ -103,6 +103,7 @@ export default function LandingPage() {
   const getCms = (key: string, fallback: string) => cmsMap[key] || fallback;
 
   const activeHeroTopBg = cmsMap['page_landing_images_hero_top_bg'] || cmsMap['hero_top_bg'] || heroTopBg;
+  const activeHeroMobileBanner = cmsMap['page_landing_images_hero_mobile_banner'] || cmsMap['hero_mobile_banner'] || champ2;
   const activeHeroGridTeam1 = cmsMap['page_landing_images_hero_grid_team1'] || cmsMap['hero_grid_team1'] || heroGridTeam1;
   const activeHeroGridOrange = cmsMap['page_landing_images_hero_grid_orange'] || cmsMap['hero_grid_orange'] || heroGridOrange;
 
@@ -123,12 +124,12 @@ export default function LandingPage() {
           width: '100%',
           backgroundColor: '#0a0a0c',
           overflowX: 'hidden',
-          px: { xs: 2, sm: 3, md: 5 },
-          py: { xs: 3, md: 3 },
+          px: { xs: 0, sm: 3, md: 5 },
+          py: { xs: 2.5, md: 3 },
         }}
       >
         <Box sx={{ maxWidth: '1280px', mx: 'auto', width: '100%' }}>
-          <Grid container spacing={{ xs: 2, md: 2 }}>
+          <Grid container spacing={{ xs: 0, sm: 2, md: 2 }}>
             {/* Left Side - 7.5 columns (Hero Image & Collage) */}
             <Grid item xs={12} md={8}>
               <Box
@@ -136,30 +137,113 @@ export default function LandingPage() {
                   color: 'white',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 1.2,
+                  gap: { xs: 0, md: 1.2 },
                 }}
               >
-                {/* Mobile Hero Banner (matching media_1794152763004_36c34c0b.jpg) */}
+                {/* Mobile Top Text Header */}
+                {/* <Box
+                  sx={{
+                    display: { xs: 'flex', md: 'none' },
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    width: '100%',
+                    mb: 1.5,
+                    px: 2,
+                    pt: 0.5,
+                  }}
+                >
+                  <Typography
+                    component="h1"
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.8rem' },
+                      lineHeight: 1.1,
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.95), 0 4px 10px rgba(0,0,0,0.85), 0 8px 24px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                      m: 0,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line1', 'CREATE YOUR MATCHES.')}
+                  </Typography>
+                  <Typography
+                    component="h1"
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.8rem' },
+                      lineHeight: 1.1,
+                      color: '#FFFFFF',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.95), 0 4px 10px rgba(0,0,0,0.85), 0 8px 24px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                      m: 0,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line2', 'TRACK YOUR STATS.')}
+                  </Typography>
+                  <Typography
+                    component="h1"
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.8rem' },
+                      lineHeight: 1.1,
+                      color: '#D4B370',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.95), 0 4px 10px rgba(0,0,0,0.85), 0 8px 24px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                      m: 0,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line3', 'RISE THROUGH THE')}
+                  </Typography>
+                  <Typography
+                    component="h1"
+                    sx={{
+                      fontFamily: "var(--font-oswald), 'Oswald', var(--font-geist-anton), 'Anton', 'Impact', sans-serif !important",
+                      fontWeight: '700 !important',
+                      fontSize: { xs: '1.45rem', sm: '1.8rem' },
+                      lineHeight: 1.1,
+                      color: '#D4B370',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.02em',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.95), 0 4px 10px rgba(0,0,0,0.85), 0 8px 24px rgba(0,0,0,0.75), 0 0 2px rgba(0,0,0,0.9)',
+                      m: 0,
+                    }}
+                  >
+                    {getCms('page_main_mobile_hero_line4', 'RANKINGS.')}
+                  </Typography>
+                </Box> */}
+
+                {/* Mobile Hero Banner (champ 2.png) - Edge-to-edge full width with natural height and no cropping */}
                 <Box
                   sx={{
                     display: { xs: 'block', md: 'none' },
                     position: 'relative',
                     width: '100%',
-                    aspectRatio: '309/285',
-                    borderRadius: '16px',
+                    borderRadius: { xs: 0, sm: '16px' },
                     overflow: 'hidden',
                     boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
                   }}
                 >
                   <Image
-                    src={heroMobileBanner}
-                    alt="Create your matches, track your stats, and rise through the rankings"
-                    fill
+                    src={activeHeroMobileBanner}
+                    alt="Champion Footballer"
+                    width={723}
+                    height={689}
                     priority
                     loading="eager"
                     fetchPriority="high"
                     sizes="100vw"
-                    style={{ objectFit: 'cover', objectPosition: 'center center' }}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block',
+                    }}
                     quality={100}
                   />
                 </Box>
@@ -187,115 +271,117 @@ export default function LandingPage() {
                   />
                 </Box>
 
-                {/* Bottom 2 Cards Grid (Desktop only) */}
-                <Box
-                  sx={{
-                    display: { xs: 'none', md: 'grid' },
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    width: '100%',
-                    gap: 1.2
-
-                  }}
-                >
-                  {/* Left Card: Team Squad + Text */}
+                {/* Bottom 2 Cards Grid (Desktop only) - Commented out per request */}
+                {false && (
                   <Box
                     sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
+                      display: { xs: 'none', md: 'grid' },
+                      gridTemplateColumns: 'repeat(2, 1fr)',
                       width: '100%',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        width: '100%',
-                        aspectRatio: '1.5/1',
-                        // borderRadius: '12px',
-                        overflow: 'hidden',
-                        // border: '1px solid rgba(255, 255, 255, 0.1)',
-                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
-                      }}
-                    >
-                      <Image
-                        src={activeHeroGridTeam1}
-                        alt="Football Team Squad"
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
-                        style={{ objectFit: 'cover', objectPosition: 'center' }}
-                        quality={100}
-                      />
-                    </Box>
-                    <Typography
-                      sx={{
-                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                        fontWeight: '900 !important',
-                        fontSize: { xs: '0.65rem', sm: '0.9rem', md: '1.15rem' },
-                        lineHeight: 1.2,
-                        color: '#FFFFFF',
-                        textTransform: 'uppercase',
-                        textAlign: 'center',
-                        mt: { xs: 1, sm: 1.5 },
-                        px: 0.5,
-                        letterSpacing: '0.01em',
-                      }}
-                    >
-                      {getCms('page_main_card1_text', '"I GOT 99 PROBLEMS BUT WINNING AIN\'T ONE"')}
-                    </Typography>
-                  </Box>
+                      gap: 1.2
 
-                  {/* Right Card: Orange Players + Text */}
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      width: '100%',
                     }}
                   >
+                    {/* Left Card: Team Squad + Text */}
                     <Box
                       sx={{
-                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
                         width: '100%',
-                        aspectRatio: '1.5/1',
-                        // borderRadius: '12px',
-                        overflow: 'hidden',
-                        // border: '1px solid rgba(255, 255, 255, 0.1)',
-                        // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                       }}
                     >
-                      <Image
-                        src={activeHeroGridOrange}
-                        alt="Champion Footballer Players"
-                        fill
-                        loading="lazy"
-                        sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
-                        style={{ objectFit: 'cover', objectPosition: 'center' }}
-                        quality={100}
-                      />
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          aspectRatio: '1.5/1',
+                          // borderRadius: '12px',
+                          overflow: 'hidden',
+                          // border: '1px solid rgba(255, 255, 255, 0.1)',
+                          // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        <Image
+                          src={activeHeroGridTeam1}
+                          alt="Football Team Squad"
+                          fill
+                          loading="lazy"
+                          sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          quality={100}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                          fontWeight: '900 !important',
+                          fontSize: { xs: '0.65rem', sm: '0.9rem', md: '1.15rem' },
+                          lineHeight: 1.2,
+                          color: '#FFFFFF',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          mt: { xs: 1, sm: 1.5 },
+                          px: 0.5,
+                          letterSpacing: '0.01em',
+                        }}
+                      >
+                        {getCms('page_main_card1_text', '"I GOT 99 PROBLEMS BUT WINNING AIN\'T ONE"')}
+                      </Typography>
                     </Box>
-                    <Typography
+
+                    {/* Right Card: Orange Players + Text */}
+                    <Box
                       sx={{
-                        fontFamily: 'var(--font-inter), Inter, sans-serif !important',
-                        fontWeight: '900 !important',
-                        fontSize: { xs: '0.58rem', sm: '0.82rem', md: '1.05rem' },
-                        lineHeight: 1.2,
-                        color: '#FFFFFF',
-                        textTransform: 'uppercase',
-                        textAlign: 'center',
-                        mt: { xs: 1, sm: 1.5 },
-                        px: 0.5,
-                        letterSpacing: '0.01em',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        width: '100%',
                       }}
                     >
-                      {getCms('page_main_card2_text', 'CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!')}
-                    </Typography>
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          width: '100%',
+                          aspectRatio: '1.5/1',
+                          // borderRadius: '12px',
+                          overflow: 'hidden',
+                          // border: '1px solid rgba(255, 255, 255, 0.1)',
+                          // boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        }}
+                      >
+                        <Image
+                          src={activeHeroGridOrange}
+                          alt="Champion Footballer Players"
+                          fill
+                          loading="lazy"
+                          sizes="(max-width: 600px) 50vw, (max-width: 1200px) 40vw, 600px"
+                          style={{ objectFit: 'cover', objectPosition: 'center' }}
+                          quality={100}
+                        />
+                      </Box>
+                      <Typography
+                        sx={{
+                          fontFamily: 'var(--font-inter), Inter, sans-serif !important',
+                          fontWeight: '900 !important',
+                          fontSize: { xs: '0.58rem', sm: '0.82rem', md: '1.05rem' },
+                          lineHeight: 1.2,
+                          color: '#FFFFFF',
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          mt: { xs: 1, sm: 1.5 },
+                          px: 0.5,
+                          letterSpacing: '0.01em',
+                        }}
+                      >
+                        {getCms('page_main_card2_text', 'CHAMPION FOOTBALLER IS YOUR ULTIMATE HUB FOR FOOTBALL, PERFORMANCE, AND BRAGGING RIGHTS!')}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
+                )}
               </Box>
             </Grid>
 
             {/* Right Side - 3.8 columns (Auth Sidebar Cards) */}
-            <Grid item xs={12} md={3.8}>
+            <Grid item xs={12} md={3.8} sx={{ px: { xs: 2, sm: 0 }, mt: { xs: 2.5, md: 0 } }}>
               <Box
                 sx={{
                   display: 'flex',
@@ -312,9 +398,9 @@ export default function LandingPage() {
                     p: 0,
                     display: 'flex',
                     flexDirection: 'column',
-                    width: { xs: '93%', sm: '94%', md: '95%' },
-                    mx: { xs: 'auto', md: 0 },
-                    ml: { xs: 'auto', md: 2 },
+                    width: { xs: '100%', sm: '94%', md: '95%' },
+                    mx: { xs: 0, sm: 'auto', md: 0 },
+                    ml: { xs: 0, md: 2 },
                   }}
                 >
                   {/* Header Container: Text on Top (Desktop only, mobile has it in hero banner) */}

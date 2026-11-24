@@ -653,9 +653,9 @@ const AllPlayersPage = () => {
         );
 
         // Keep leagues visible for switching, including inactive ones.
-        // Only hide archived leagues.
+        // Only hide archived and deleted leagues.
         const activeLeagues = enrichedLeagues.filter(
-          (l) => l.archived !== true
+          (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
         );
 
         // Sort newest to oldest by createdAt timestamp
@@ -1700,13 +1700,10 @@ const AllPlayersPage = () => {
               sx={{
                 width: '100%',
                 overflowX: 'auto',
-                overflowY: 'auto',
-                maxHeight: { xs: '68vh', sm: '70vh', md: '72vh' },
                 WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'thin',
                 '&::-webkit-scrollbar': {
                   height: '8px',
-                  width: '8px',
                 },
                 '&::-webkit-scrollbar-track': {
                   background: '#121316',
@@ -2223,8 +2220,8 @@ const AllPlayersPage = () => {
               </Box>
             </Box>
 
-            {/* Show More Button */}
-            {!loading && sortedPlayers.length > visibleCount && (
+            {/* Show More / Show Less Button */}
+            {!loading && sortedPlayers.length > 10 && (
               <Box
                 sx={{
                   py: 2.5,
@@ -2238,11 +2235,17 @@ const AllPlayersPage = () => {
               >
                 <button
                   type="button"
-                  onClick={() => setVisibleCount((prev) => prev + 15)}
+                  onClick={() => {
+                    if (visibleCount >= sortedPlayers.length) {
+                      setVisibleCount(10);
+                    } else {
+                      setVisibleCount((prev) => prev + 15);
+                    }
+                  }}
                   className="flex items-center justify-center gap-1.5 text-[#e56a16] hover:text-[#f97316] font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer bg-transparent border-none"
                 >
-                  <span>SHOW MORE</span>
-                  <ChevronDown size={14} />
+                  <span>{visibleCount >= sortedPlayers.length ? 'SHOW LESS' : 'SHOW MORE'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${visibleCount >= sortedPlayers.length ? 'rotate-180' : ''}`} />
                 </button>
               </Box>
             )}

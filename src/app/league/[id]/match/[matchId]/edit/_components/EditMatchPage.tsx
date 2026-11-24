@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Typography, Paper, Button, TextField, CircularProgress, Autocomplete, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, RadioGroup, FormControlLabel, Radio, LinearProgress, Chip, Grid, InputAdornment, Alert, Menu, MenuItem, ListItemIcon, ListItemText, type PaperProps } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
@@ -28,7 +28,7 @@ interface User { id: string; firstName: string; lastName: string; email: string;
 interface League { id: string; name: string; members: User[]; active: boolean; }
 interface Guest { id: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; }
 interface StagedGuest { tempId: string; team: 'home' | 'away'; firstName: string; lastName: string; shirtNumber?: string; existingId?: string; }
-interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; notes?: string; notificationMessage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; }
+interface MatchResp { id: string; homeTeamName: string; awayTeamName: string; location: string; date: string; start: string; end: string; status: string; homeCaptainId?: string; awayCaptainId?: string; homeTeamImage?: string; awayTeamImage?: string; notes?: string; notificationMessage?: string; homeTeamUsers: User[]; awayTeamUsers: User[]; guests?: Guest[]; homeWinPct?: number; awayWinPct?: number; }
 type PlayerOption = User & { isGuest?: boolean; guestTempId?: string; team?: 'home' | 'away'; existingGuestId?: string };
 interface AvailabilityRecord { userId: string; status: 'available' | 'unavailable' | 'pending'; }
 type AvailabilityStatus = AvailabilityRecord['status'];
@@ -389,8 +389,144 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
   const markerRef = useRef<LeafletMarker | null>(null);
   const [homeTeamUsers, setHomeTeamUsers] = useState<PlayerOption[]>([]);
   const [awayTeamUsers, setAwayTeamUsers] = useState<PlayerOption[]>([]);
+  const [homeSelectOpen, setHomeSelectOpen] = useState(false);
+  const [awaySelectOpen, setAwaySelectOpen] = useState(false);
   const [homeCaptain, setHomeCaptain] = useState<PlayerOption | null>(null);
   const [awayCaptain, setAwayCaptain] = useState<PlayerOption | null>(null);
+
+  // Stable Paper component for Home player selection with Done button
+  const HomePlayerPaper = useMemo(() => {
+    return function HomePaper(props: PaperProps) {
+      return (
+        <Paper
+          {...props}
+          elevation={0}
+          sx={{
+            bgcolor: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            ...props.sx,
+          }}
+        >
+          {props.children}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: 1,
+              px: 1.5,
+              borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+              bgcolor: '#0a0a0a',
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              size="small"
+              variant="contained"
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setHomeSelectOpen(false);
+                if (typeof document !== 'undefined') {
+                  (document.activeElement as HTMLElement)?.blur();
+                }
+              }}
+              sx={{
+                bgcolor: '#00a77f',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                px: 2.5,
+                py: 0.5,
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 167, 127, 0.4)',
+                '&:hover': {
+                  bgcolor: '#008f6c',
+                },
+              }}
+            >
+              Done
+            </Button>
+          </Box>
+        </Paper>
+      );
+    };
+  }, []);
+
+  // Stable Paper component for Away player selection with Done button
+  const AwayPlayerPaper = useMemo(() => {
+    return function AwayPaper(props: PaperProps) {
+      return (
+        <Paper
+          {...props}
+          elevation={0}
+          sx={{
+            bgcolor: '#000',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            ...props.sx,
+          }}
+        >
+          {props.children}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              p: 1,
+              px: 1.5,
+              borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+              bgcolor: '#0a0a0a',
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              size="small"
+              variant="contained"
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAwaySelectOpen(false);
+                if (typeof document !== 'undefined') {
+                  (document.activeElement as HTMLElement)?.blur();
+                }
+              }}
+              sx={{
+                bgcolor: '#00a77f',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                px: 2.5,
+                py: 0.5,
+                borderRadius: '6px',
+                boxShadow: '0 2px 8px rgba(0, 167, 127, 0.4)',
+                '&:hover': {
+                  bgcolor: '#008f6c',
+                },
+              }}
+            >
+              Done
+            </Button>
+          </Box>
+        </Paper>
+      );
+    };
+  }, []);
 
   // Match Notification
   const [showNotificationBox, setShowNotificationBox] = useState(false);
@@ -929,6 +1065,13 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         });
       }
 
+      if (typeof m.homeWinPct === 'number' && Number.isFinite(m.homeWinPct)) {
+        const hPct = Number(m.homeWinPct);
+        const aPct = typeof m.awayWinPct === 'number' && Number.isFinite(m.awayWinPct) ? Number(m.awayWinPct) : 100 - hPct;
+        setHomeWinChance(hPct);
+        setAwayWinChance(aPct);
+      }
+
       if (m.homeCaptainId && memberIds.has(String(m.homeCaptainId))) {
         const cap = homeUsers.find(u => u.id === m.homeCaptainId);
         if (cap) setHomeCaptain(cap as PlayerOption);
@@ -1058,8 +1201,14 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
       if (!res.ok) return;
       const j = await res.json();
       if (!j?.success) return;
-      setHomeWinChance(typeof j.home?.winPct === 'number' ? j.home.winPct : null);
-      setAwayWinChance(typeof j.away?.winPct === 'number' ? j.away.winPct : null);
+      const apiHomePct = typeof j.matchupPct === 'number'
+        ? j.matchupPct
+        : (typeof j.home?.winPct === 'number' ? j.home.winPct : null);
+      const apiAwayPct = apiHomePct !== null
+        ? 100 - apiHomePct
+        : (typeof j.away?.winPct === 'number' ? j.away.winPct : null);
+      if (apiHomePct !== null) setHomeWinChance(apiHomePct);
+      if (apiAwayPct !== null) setAwayWinChance(apiAwayPct);
       setHomeStrength(typeof j.home?.average === 'number' ? Math.round(j.home.average) : null);
       setAwayStrength(typeof j.away?.average === 'number' ? Math.round(j.away.average) : null);
     } catch { }
@@ -1153,17 +1302,19 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
   const teamBalance = React.useMemo(() => {
     const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
+    if (homeWinChance !== null && awayWinChance !== null) {
+      const homePct = clamp(homeWinChance);
+      const awayPct = 100 - homePct;
+      return {
+        homePct,
+        awayPct,
+        hasData: true,
+      };
+    }
     if (xpBased.hasPlayers) {
       return {
         homePct: clamp(xpBased.homePct),
         awayPct: clamp(xpBased.awayPct),
-        hasData: true,
-      };
-    }
-    if (homeWinChance !== null && awayWinChance !== null) {
-      return {
-        homePct: clamp(homeWinChance),
-        awayPct: clamp(awayWinChance),
         hasData: true,
       };
     }
@@ -1870,15 +2021,17 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
 
     const registeredCount = new Set<string>([...newHomeIds, ...newAwayIds]).size;
     const totalCount = registeredCount + homeGuestsPayload.length + awayGuestsPayload.length;
-    if (registeredCount < MIN_REGISTERED_PLAYERS_FOR_TEAM_UPLOAD) {
-      toast.error(MIN_REGISTERED_PLAYERS_MESSAGE);
-      setIsSubmitting(false);
-      return;
-    }
-    if (totalCount < MIN_TOTAL_PLAYERS_FOR_TEAM_UPLOAD) {
-      toast.error('A minimum of 8 total players (including at least 6 registered league players) is required to save teams.');
-      setIsSubmitting(false);
-      return;
+    if (totalCount > 0) {
+      if (registeredCount < MIN_REGISTERED_PLAYERS_FOR_TEAM_UPLOAD) {
+        toast.error(MIN_REGISTERED_PLAYERS_MESSAGE);
+        setIsSubmitting(false);
+        return;
+      }
+      if (totalCount < MIN_TOTAL_PLAYERS_FOR_TEAM_UPLOAD) {
+        toast.error('A minimum of 8 total players (including at least 6 registered league players) is required to save teams.');
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     const hasHomeCaptainSelected = Boolean(homeCaptain && !homeCaptain.isGuest);
@@ -2249,7 +2402,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                       transition: 'all .25s ease'
                     }}
                   >
-                    Add Guest
+                    Add Guest Player
                   </Button>
                   <Button
                     startIcon={<Scale size={18} />}
@@ -2333,6 +2486,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     <Autocomplete
                       key="home-players-autocomplete"
                       multiple
+                      open={homeSelectOpen}
+                      onOpen={() => setHomeSelectOpen(true)}
+                      onClose={(_, reason) => {
+                        if (reason === 'selectOption') return;
+                        setHomeSelectOpen(false);
+                      }}
                       options={homePlayerOptions}
                       disableCloseOnSelect
                       blurOnSelect={false}
@@ -2346,7 +2505,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         }
                         return String(o.id || '').trim() === String(v.id || '').trim();
                       }}
-                      PaperComponent={BlackPaper}
+                      PaperComponent={HomePlayerPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
                         sx: {
@@ -2354,7 +2513,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
-                          bgcolor: '#000'
+                          bgcolor: '#000',
+                          maxHeight: { xs: '260px', sm: '320px' }
                         }
                       }}
                       renderOption={(props, option, { selected }) => {
@@ -2533,12 +2693,46 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
+                              paddingRight: '42px !important',
+                              position: 'relative',
                               '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
                               '&:hover fieldset': { borderColor: '#00a77f' },
                               '&.Mui-focused fieldset': { borderColor: '#00a77f' }
                             },
-                            '& .MuiAutocomplete-clearIndicator': { color: 'white' },
-                            '& .MuiAutocomplete-popupIndicator': { color: 'white' }
+                            '& .MuiAutocomplete-endAdornment': {
+                              position: 'absolute !important',
+                              top: '6px !important',
+                              bottom: '6px !important',
+                              right: '6px !important',
+                              height: 'calc(100% - 12px) !important',
+                              display: 'flex !important',
+                              flexDirection: 'column !important',
+                              justifyContent: 'space-between !important',
+                              alignItems: 'center !important',
+                              width: '32px !important',
+                              zIndex: 2,
+                            },
+                            '& .MuiAutocomplete-clearIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginBottom: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            },
+                            '& .MuiAutocomplete-popupIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginTop: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              },
+                              '&:only-child': {
+                                margin: 'auto 0 !important',
+                              }
+                            }
                           }}
                         />
                       )}
@@ -2549,6 +2743,12 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                     <Autocomplete
                       key="away-players-autocomplete"
                       multiple
+                      open={awaySelectOpen}
+                      onOpen={() => setAwaySelectOpen(true)}
+                      onClose={(_, reason) => {
+                        if (reason === 'selectOption') return;
+                        setAwaySelectOpen(false);
+                      }}
                       options={awayPlayerOptions}
                       disableCloseOnSelect
                       blurOnSelect={false}
@@ -2563,7 +2763,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                         }
                         return String(o.id || '').trim() === String(v.id || '').trim();
                       }}
-                      PaperComponent={BlackPaper}
+                      PaperComponent={AwayPlayerPaper}
                       ListboxComponent={ScrollPreservingListbox}
                       ListboxProps={{
                         sx: {
@@ -2571,7 +2771,8 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                           gridTemplateColumns: { xs: 'repeat(4, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)' },
                           gap: 1,
                           p: 1,
-                          bgcolor: '#000'
+                          bgcolor: '#000',
+                          maxHeight: { xs: '260px', sm: '320px' }
                         }
                       }}
                       renderOption={(props, option, { selected }) => {
@@ -2749,12 +2950,46 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
+                              paddingRight: '42px !important',
+                              position: 'relative',
                               '& fieldset': { borderColor: '#e56a16', borderRadius: 1 },
                               '&:hover fieldset': { borderColor: '#e56a16' },
                               '&.Mui-focused fieldset': { borderColor: '#e56a16' }
                             },
-                            '& .MuiAutocomplete-clearIndicator': { color: 'white' },
-                            '& .MuiAutocomplete-popupIndicator': { color: 'white' }
+                            '& .MuiAutocomplete-endAdornment': {
+                              position: 'absolute !important',
+                              top: '6px !important',
+                              bottom: '6px !important',
+                              right: '6px !important',
+                              height: 'calc(100% - 12px) !important',
+                              display: 'flex !important',
+                              flexDirection: 'column !important',
+                              justifyContent: 'space-between !important',
+                              alignItems: 'center !important',
+                              width: '32px !important',
+                              zIndex: 2,
+                            },
+                            '& .MuiAutocomplete-clearIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginBottom: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              }
+                            },
+                            '& .MuiAutocomplete-popupIndicator': {
+                              color: '#ffffff !important',
+                              padding: '4px !important',
+                              margin: '0 !important',
+                              marginTop: 'auto !important',
+                              '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                              },
+                              '&:only-child': {
+                                margin: 'auto 0 !important',
+                              }
+                            }
                           }}
                         />
                       )}
@@ -2782,9 +3017,9 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
                             '& .MuiOutlinedInput-root': {
                               ...autocompleteStyles['& .MuiOutlinedInput-root'],
                               borderRadius: 1,
-                              '& fieldset': { borderColor: '#e56a16', borderRadius: 1 },
-                              '&:hover fieldset': { borderColor: '#e56a16' },
-                              '&.Mui-focused fieldset': { borderColor: '#e56a16' },
+                              '& fieldset': { borderColor: '#00a77f', borderRadius: 1 },
+                              '&:hover fieldset': { borderColor: '#00a77f' },
+                              '&.Mui-focused fieldset': { borderColor: '#00a77f' },
                               '&.Mui-disabled': {
                                 '& fieldset': { borderColor: '#717274 !important' }
                               },
@@ -4043,7 +4278,7 @@ export default function EditMatchPage({ leagueIdProp, matchIdProp, isDialog, onC
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, bgcolor: 'rgba(15,15,15,0.95)' }}>
           <Button onClick={() => setGuestDialogOpen(false)} sx={{ color: '#9CA3AF' }}>Cancel</Button>
-          <Button onClick={handleAddGuest} variant='contained' sx={{ background: 'linear-gradient(135deg,#e56a16,#cf2326)', '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)' } }}>Add Guest</Button>
+          <Button onClick={handleAddGuest} variant='contained' sx={{ background: 'linear-gradient(135deg,#e56a16,#cf2326)', '&:hover': { background: 'linear-gradient(135deg,#d32f2f,#b71c1c)' } }}>Add Guest Player</Button>
         </DialogActions>
       </Dialog>
 

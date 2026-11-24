@@ -973,7 +973,7 @@ export default function RewardsPage() {
         });
         const data = await res.json();
         if (res.ok && data?.success && Array.isArray(data.leagues)) {
-          setLeagues(data.leagues);
+          setLeagues(data.leagues.filter((l: any) => !l.deleted && l.status !== 'deleted' && !l.archived));
           setError(null);
         } else {
           console.error('[Rewards] Failed to load leagues', { status: res.status, data });

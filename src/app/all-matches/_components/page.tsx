@@ -375,27 +375,52 @@ interface MotmPlayerInfo {
 }
 
 const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlayerInfo | null => {
-    const votes = match.manOfTheMatchVotes;
-    if (!votes || typeof votes !== 'object') return null;
-
-    const voteEntries = Object.entries(votes as Record<string, unknown>);
-    if (voteEntries.length === 0) return null;
-
     const voteCounts: Record<string, number> = {};
-    const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
 
-    if (valuesAreCounts) {
-        voteEntries.forEach(([playerId, count]) => {
-            const normalizedId = normalizeId(playerId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+    // 1. Check match.votes array if available (filter for MOTM category)
+    if (Array.isArray((match as any).votes) && (match as any).votes.length > 0) {
+        (match as any).votes.forEach((v: any) => {
+            if (v && (!v.category || v.category === 'motm') && v.votedForId) {
+                const normalizedId = normalizeId(v.votedForId);
+                if (normalizedId) {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                }
+            }
         });
-    } else {
-        voteEntries.forEach(([, votedForId]) => {
-            const normalizedId = normalizeId(votedForId);
-            if (!normalizedId) return;
-            voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
-        });
+    }
+
+    // 2. If no votes found from array, check match.manOfTheMatchVotes object
+    if (Object.keys(voteCounts).length === 0 && match.manOfTheMatchVotes && typeof match.manOfTheMatchVotes === 'object') {
+        const voteEntries = Object.entries(match.manOfTheMatchVotes as Record<string, unknown>);
+        if (voteEntries.length > 0) {
+            const valuesAreCounts = voteEntries.every(([, value]) => typeof value === 'number');
+            if (valuesAreCounts) {
+                voteEntries.forEach(([playerId, count]) => {
+                    const normalizedId = normalizeId(playerId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(count || 0);
+                });
+            } else {
+                voteEntries.forEach(([, votedForId]) => {
+                    const normalizedId = normalizeId(votedForId);
+                    if (!normalizedId) return;
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + 1;
+                });
+            }
+        }
+    }
+
+    // 3. Fallback to (match as any).playerVotes or (match as any).motmVotes if present
+    if (Object.keys(voteCounts).length === 0) {
+        const altVotes = (match as any).playerVotes || (match as any).motmVotes;
+        if (altVotes && typeof altVotes === 'object') {
+            Object.entries(altVotes as Record<string, unknown>).forEach(([pid, val]) => {
+                const normalizedId = normalizeId(pid);
+                if (normalizedId && typeof val === 'number') {
+                    voteCounts[normalizedId] = (voteCounts[normalizedId] || 0) + Number(val || 0);
+                }
+            });
+        }
     }
 
     let topPlayerId = '';
@@ -423,6 +448,7 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
     const allPlayers: User[] = [
         ...(match.homeTeamUsers || []),
         ...(match.awayTeamUsers || []),
+        ...((match as any).availableUsers || []),
         ...fallbackPlayers,
         ...guestUsers
     ];
@@ -433,7 +459,13 @@ const getTopMotmPlayer = (match: Match, fallbackPlayers: User[] = []): MotmPlaye
         return playerId === topPlayerId || comparableId(playerId) === comparableId(topPlayerId);
     });
 
-    if (!winningPlayer) return null;
+    if (!winningPlayer) {
+        return {
+            name: 'MOTM Winner',
+            initial: 'M',
+            picture: null,
+        };
+    }
     const winnerName = formatPlayerName(winningPlayer.firstName, winningPlayer.lastName) || winningPlayer.firstName || 'Player';
     const initial = (winningPlayer.firstName?.[0] || winnerName[0] || 'M').toUpperCase();
     return {
@@ -843,7 +875,7 @@ export default function AllMatches() {
 
                 // Keep leagues visible for switching, including completed ones.
                 const visibleLeagues = simpleLeagues.filter(
-                    (l) => l.archived !== true
+                    (l) => l.archived !== true && (l as any).deleted !== true && (l as any).status !== 'deleted'
                 );
 
                 // Sort newest to oldest by createdAt timestamp
@@ -1253,7 +1285,7 @@ export default function AllMatches() {
                 DEF: player?.skills?.defending?.toString() || '',
                 PHY: player?.skills?.physical?.toString() || ''
             },
-            foot: player?.preferredFoot === 'right' ? 'R' : 'L',
+            foot: (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R',
             profileImage: player?.profilePicture ? (player.profilePicture.startsWith('http') ? player.profilePicture : `${process.env.NEXT_PUBLIC_API_URL}${player.profilePicture.startsWith('/') ? player.profilePicture : `/${player.profilePicture}`}`) : undefined,
             shirtIcon: ''
         };
@@ -2243,17 +2275,18 @@ export default function AllMatches() {
                                 onClick={handleCreateMatchClick}
                                 sx={{
                                      color: isMatchCreationDisabled ? 'rgba(255,255,255,0.45)' : 'white',
-                                                   fontFamily: 'Arial, Helvetica, sans-serif',
-                                                   fontWeight: 'semi-bold',
-                                                   fontSize: { xs: '15px', md: '18px' },
-                                                   bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.12)' : '#0388E3',
-                                                   '&:hover': { bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.18)' : '#0266b8' },
-                                                   borderRadius: 1,
-                                                   width: { xs: '100%', sm: 'auto' },
-                                                   minHeight: { xs: 42, md: 'auto' },
-                                                   px: 2.5,
-                                                   textTransform: 'uppercase',
-                                                   whiteSpace: 'nowrap'
+                                     '&:hover': { bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.18)' : '#0266b8' },
+                                     bgcolor: isMatchCreationDisabled ? 'rgba(255,255,255,0.12)' : '#0388E3',
+                                                              fontFamily: 'Arial, Helvetica, sans-serif',
+                                                              fontWeight: 700,
+                                                              fontSize: { xs: '14px', md: '17px' },
+                                                              borderRadius: '12px',
+                                                              width: { xs: '100%', sm: 'auto' },
+                                                              minHeight: { xs: 46, md: 44 },
+                                                              px: 2.5,
+                                     textTransform: 'uppercase',
+                                     whiteSpace: 'nowrap',
+                                     letterSpacing: '0.5px',
                                 }}
                             >
                                 {/* <Plus size={22} style={{ marginRight: 6 }} /> */}
@@ -3235,7 +3268,7 @@ export default function AllMatches() {
                                                                         textOverflow: 'ellipsis',
                                                                         whiteSpace: 'nowrap'
                                                                     }}>
-                                                                        {motm ? motm.name : 'Select the MOTM'}
+                                                                        {motm ? motm.name : 'MOTM'}
                                                                     </Typography>
                                                                     <Typography sx={{
                                                                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -3254,7 +3287,7 @@ export default function AllMatches() {
                                                         {/* 6. PLAYER STATS PROGRESS */}
                                                         <Box sx={{ px: { xs: '14px', sm: '16px' }, pt: 0.2, pb: 0.6 }}>
                                                             <Typography sx={{ fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#8b90a0', fontSize: '11px', fontWeight: 500, mb: 0.5 }}>
-                                                                Stats added for {count} of {total} players
+                                                                Stats added by {count} of {total} players
                                                             </Typography>
                                                             <Box sx={{
                                                                 width: '100%',
@@ -5018,7 +5051,7 @@ export default function AllMatches() {
 //                 DEF: player?.skills?.defending?.toString() || '',
 //                 PHY: player?.skills?.physical?.toString() || ''
 //             },
-//             foot: player?.preferredFoot === 'right' ? 'R' : 'L',
+//             foot: (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'left' || (player?.preferredFoot ?? '').toString().trim().toLowerCase() === 'l' ? 'L' : 'R',
 //             profileImage: player?.profilePicture ? (player.profilePicture.startsWith('http') ? player.profilePicture : `${process.env.NEXT_PUBLIC_API_URL}${player.profilePicture.startsWith('/') ? player.profilePicture : `/${player.profilePicture}`}`) : undefined,
 //             shirtIcon: ''
 //         };

@@ -1,16 +1,15 @@
 // ULTRA-FAST HTTP CLIENT WITH CONNECTION POOLING & REQUEST OPTIMIZATION
 // Optimized for both local and production environments
 import { getAuthToken } from './tokenManager';
+import { getClientApiBaseUrl } from './clientApiBase';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const IS_HTTPS = API_BASE_URL.startsWith('https://');
 const NO_CACHE_MODE = !['0', 'false', 'no', 'off'].includes(
   (process.env.NEXT_PUBLIC_NO_CACHE || 'true').toLowerCase()
 );
 
 // Production-specific optimizations
-const PRODUCTION_TIMEOUT = IS_HTTPS ? 15000 : 10000; // HTTPS may need more time for TLS
+const PRODUCTION_TIMEOUT = 15000;
 const DNS_PREFETCH_ENABLED = IS_PRODUCTION && typeof window !== 'undefined';
 
 // Request queue for batching and deduplication
@@ -45,7 +44,8 @@ const DEFAULT_TIMEOUT = IS_PRODUCTION ? PRODUCTION_TIMEOUT : 30000;
 // DNS Prefetch for production
 if (DNS_PREFETCH_ENABLED) {
   try {
-    const apiDomain = new URL(API_BASE_URL).hostname;
+    const currentBase = getClientApiBaseUrl();
+    const apiDomain = new URL(currentBase).hostname;
     const link = document.createElement('link');
     link.rel = 'dns-prefetch';
     link.href = `//${apiDomain}`;
@@ -54,7 +54,7 @@ if (DNS_PREFETCH_ENABLED) {
     // Also add preconnect for faster connection
     const preconnect = document.createElement('link');
     preconnect.rel = 'preconnect';
-    preconnect.href = API_BASE_URL;
+    preconnect.href = currentBase;
     preconnect.crossOrigin = 'use-credentials';
     document.head.appendChild(preconnect);
 
@@ -79,7 +79,8 @@ export async function optimizedFetch(
   options: RequestInit = {},
   timeout: number = DEFAULT_TIMEOUT
 ): Promise<Response> {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  const baseUrl = getClientApiBaseUrl();
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
   const method = options.method || 'GET';
   const requestKey = `${method}:${url}:${JSON.stringify(options.body || '')}`;
 
