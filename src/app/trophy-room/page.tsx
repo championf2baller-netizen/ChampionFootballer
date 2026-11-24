@@ -53,6 +53,7 @@ import PlayerCard from '@/Components/playercard/playercard';
 import XPStarMilestoneCard from '@/Components/XPStarMilestoneCard';
 import { formatPlayerDisplayName } from '@/lib/playerIdentity';
 import PageHeader from '@/Components/PageHeader';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 // import { achievementsAPI } from '@/lib/api';
 
@@ -1649,7 +1650,6 @@ export default function GlobalTrophyRoom() {
   const { user, token } = useAuth();
   const [serverBadges, setServerBadges] = useState<Badge[] | null>(null);
   const [trophyRefreshKey, setTrophyRefreshKey] = useState(0);
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -1768,11 +1768,7 @@ export default function GlobalTrophyRoom() {
     }
     setSelectedLeagueId(newId);
     if (newId !== 'all') {
-      try {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, newId);
-      } catch (err) {
-        console.error('[Trophy Room] Failed to save preferred league:', err);
-      }
+      setPreferredLeagueId(newId);
     }
     // Reset season state — the fetchSeasons effect will re-fetch and auto-select
     setSelectedSeasonId(undefined);
@@ -1931,13 +1927,17 @@ export default function GlobalTrophyRoom() {
 
           // Auto-select preferred league from localStorage or first league
           if (activeLeagues.length > 0) {
-            const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            const preferred = storedId ? activeLeagues.find(l => l.id === storedId) : null;
+            const storedId = getPreferredLeagueId();
+            const preferred = findPreferredLeague(activeLeagues, storedId);
             if (preferred) {
-              setSelectedLeagueId(preferred.id);
+              setSelectedLeagueId(String(preferred.id));
             } else {
               // Select first league by default
-              setSelectedLeagueId(activeLeagues[0].id);
+              const fallbackId = String(activeLeagues[0].id);
+              setSelectedLeagueId(fallbackId);
+              if (!storedId) {
+                setPreferredLeagueId(fallbackId);
+              }
             }
           }
 
@@ -2018,8 +2018,8 @@ export default function GlobalTrophyRoom() {
   // Ensure selectedLeagueId remains visible in filtered set; if not, choose first
   useEffect(() => {
     if (!filteredLeagues.length) return;
-    if (selectedLeagueId && selectedLeagueId !== 'all' && filteredLeagues.some(l => l.id === selectedLeagueId)) return;
-    setSelectedLeagueId(filteredLeagues[0].id);
+    if (selectedLeagueId && selectedLeagueId !== 'all' && filteredLeagues.some(l => String(l.id) === String(selectedLeagueId))) return;
+    setSelectedLeagueId(String(filteredLeagues[0].id));
     // Keep season selection scoped per league when this auto-switch runs.
     setSelectedSeasonId(undefined);
     setLeagueSeasons([]);

@@ -17,6 +17,7 @@ import Link from 'next/link';
 import ShirtImg from '@/Components/images/shirtimg.png';
 import CloseButton from '@/Components/CloseButton';
 import LeaderBoardLoadingSkeleton from '@/Components/loading/LeaderBoardLoadingSkeleton';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 
 interface Player {
@@ -82,7 +83,6 @@ export default function LeaderBoardPage() {
   const [leaguesDropdownOpen, setLeaguesDropdownOpen] = useState(false);
   const [leaguesDropdownAnchor, setLeaguesDropdownAnchor] = useState<null | HTMLElement>(null);
   const { token } = useAuth();
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
 
   // Helper: determine if a league is completed (season-aware)
   const leagueIsCompleted = React.useCallback((l: League): boolean => {
@@ -183,9 +183,13 @@ export default function LeaderBoardPage() {
 
           // Auto-select preferred league from localStorage or first league
           if (activeLeagues.length > 0) {
-            const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            const preferred = storedId ? activeLeagues.find(l => l.id === storedId) : null;
-            setSelectedLeague(preferred ? preferred.id : activeLeagues[0].id);
+            const storedId = getPreferredLeagueId();
+            const preferred = findPreferredLeague(activeLeagues, storedId);
+            const chosenId = preferred ? String(preferred.id) : String(activeLeagues[0].id);
+            setSelectedLeague(chosenId);
+            if (!storedId) {
+              setPreferredLeagueId(chosenId);
+            }
           }
         }
       } catch (error) {
@@ -299,9 +303,7 @@ export default function LeaderBoardPage() {
   const handleLeagueSelect = (leagueId: string) => {
     if (leagueId !== selectedLeague) {
       setSelectedLeague(leagueId);
-      try {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, leagueId);
-      } catch {}
+      setPreferredLeagueId(leagueId);
     }
     handleLeaguesDropdownClose();
   };

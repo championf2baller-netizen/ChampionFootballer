@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 import {
   Box,
   Typography,
@@ -358,7 +359,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
   };
 
   // Persist selection across navigation
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
+  const userSelectedLeagueRef = useRef(false);
 
   const dispatchLeagueMutationEvent = useCallback(
     (eventName: 'league-created' | 'league-updated' | 'league-deleted', detail: Record<string, unknown>) => {
@@ -375,17 +376,6 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
     },
     []
   );
-
-  // Auto-save any selected league as the preferred league
-  useEffect(() => {
-    try {
-      if (selectedLeague?.id) {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, String(selectedLeague.id));
-      }
-    } catch {
-      // ignore storage errors (quota/SSG)
-    }
-  }, [selectedLeague?.id]);
 
   // Fetch/hydrate seasons for selected league
   useEffect(() => {
@@ -893,21 +883,25 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
           : minimalList;
 
         if (combinedList.length > 0) {
+          const storedId = getPreferredLeagueId();
+          const preferred = findPreferredLeague(combinedList, storedId);
+          const visibleList = combinedList.filter(shouldShowLeagueInDropdown);
+          const selectionList = visibleList.length > 0 ? visibleList : combinedList;
+          const latest = [...selectionList].sort((a, b) => timeOf(b) - timeOf(a))[0] || null;
+
           setSelectedLeague((prev) => {
+            if (!userSelectedLeagueRef.current && preferred) {
+              return preferred;
+            }
             if (prev) {
               const existing = combinedList.find((leagueItem) => String(leagueItem.id) === String(prev.id));
               if (existing) return existing;
-              // If prev is no longer in combinedList (because it was deleted in DB), fall through to pick a valid remaining league!
             }
-
-            const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            const preferred = storedId ? combinedList.find(l => String(l.id) === String(storedId)) || null : null;
             if (preferred) return preferred;
-
-            const visibleList = combinedList.filter(shouldShowLeagueInDropdown);
-            const selectionList = visibleList.length > 0 ? visibleList : combinedList;
-            const latest = [...selectionList].sort((a, b) => timeOf(b) - timeOf(a))[0];
-            return latest || null;
+            if (latest && !storedId) {
+              setPreferredLeagueId(latest.id);
+            }
+            return latest;
           });
         } else {
           // If combinedList is empty (all leagues deleted from DB), reset selectedLeague to null
@@ -1217,8 +1211,7 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
         setUserLeagues((prev) => prev.length ? prev : userJoinedMinimal);
         const visible = userJoinedMinimal.filter(shouldShowLeagueInDropdown);
         const selectionList = visible.length > 0 ? visible : userJoinedMinimal;
-        const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-        const preferred = storedId ? selectionList.find(l => String(l.id) === String(storedId)) || null : null;
+        const preferred = findPreferredLeague(selectionList, getPreferredLeagueId());
         if (preferred) {
           setSelectedLeague((prev) => prev ?? preferred);
         } else {
@@ -1234,11 +1227,8 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
   useEffect(() => {
     if (!createdLeague || !createdLeague.id) return;
     // Save as preferred league immediately so it's remembered across navigations
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, String(createdLeague.id));
-      }
-    } catch { }
+    userSelectedLeagueRef.current = true;
+    setPreferredLeagueId(createdLeague.id);
     setUserLeagues(prev => {
       const map = new Map(prev.map(l => [String(l.id), l]));
       const entry: LeagueWithComputed = {
@@ -1623,9 +1613,10 @@ const LeagueSelectionComponent = ({ refreshKey, createdLeague, currentUserId, on
                 >
                   <MenuItem
                     onClick={() => {
+                      userSelectedLeagueRef.current = true;
+                      setPreferredLeagueId(league.id);
                       try {
                         if (typeof window !== 'undefined') {
-                          localStorage.setItem(PREFERRED_LEAGUE_KEY, String(league.id));
                           if (option.seasonId) {
                             localStorage.setItem(`preferredSeasonId_${league.id}`, String(option.seasonId));
                             localStorage.setItem('preferredSeasonId', String(option.seasonId));

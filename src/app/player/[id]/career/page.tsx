@@ -38,6 +38,7 @@ import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdent
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/lib/store';
 import { fetchPlayerStats, setLeagueFilter, setYearFilter } from '@/lib/features/playerStatsSlice';
+import { getPreferredLeagueId } from '@/lib/preferredLeague';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 import {
@@ -2543,7 +2544,7 @@ export default function CareerPage(props?: any) {
   const preferredAppliedRef = useRef(false);
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setPreferredLeagueId(localStorage.getItem('preferredLeagueId'));
+      setPreferredLeagueId(getPreferredLeagueId());
     }
   }, []);
   // If no league is passed in URL, auto-select preferredLeagueId on this page

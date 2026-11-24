@@ -32,6 +32,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { optimizedFetch } from '@/lib/utils/optimizedFetch';
 import { mutateWithRefresh } from '@/lib/utils/cacheManager';
 import MatchDetailModal from '@/Components/MatchDetailModal';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 // Lazy load heavy components
 const PlayerCard = dynamic(() => import('@/Components/playercard/playercard'), {
@@ -540,15 +541,15 @@ export default function AllMatches() {
     const [leagues, setLeagues] = useState<League[]>([]);
     const [selectedLeague, setSelectedLeague] = useState<string>(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('preferredLeagueId') || 'all';
+            return getPreferredLeagueId() || 'all';
         }
         return 'all';
     });
     const [seasons, setSeasons] = useState<SeasonOption[]>([]);
     const [selectedSeason, setSelectedSeason] = useState<string>(() => {
         if (typeof window !== 'undefined') {
-            const leagueId = localStorage.getItem('preferredLeagueId');
-            if (leagueId && leagueId !== 'all') {
+            const leagueId = getPreferredLeagueId();
+            if (leagueId) {
                 const storedForLeague = localStorage.getItem('preferredSeasonId_' + leagueId);
                 if (storedForLeague && storedForLeague !== 'all') return storedForLeague;
             }
@@ -562,23 +563,17 @@ export default function AllMatches() {
     // Ensure state synchronizes with localStorage on mount (handles client-side navigation / hydration)
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            const storedLeague = localStorage.getItem('preferredLeagueId');
-            if (storedLeague && storedLeague !== 'all' && storedLeague !== selectedLeague) {
+            const storedLeague = getPreferredLeagueId();
+            if (storedLeague && storedLeague !== selectedLeague) {
                 setSelectedLeague(storedLeague);
             }
-            const leagueKey = storedLeague && storedLeague !== 'all' ? storedLeague : selectedLeague;
+            const leagueKey = storedLeague || selectedLeague;
             const storedSeason = (leagueKey && leagueKey !== 'all' ? localStorage.getItem('preferredSeasonId_' + leagueKey) : null) || localStorage.getItem('preferredSeasonId');
             if (storedSeason && storedSeason !== 'all' && storedSeason !== selectedSeason) {
                 setSelectedSeason(storedSeason);
             }
         }
     }, []);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined' && selectedLeague && selectedLeague !== 'all') {
-            try { localStorage.setItem('preferredLeagueId', selectedLeague); } catch {}
-        }
-    }, [selectedLeague]);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && selectedSeason && selectedSeason !== 'all') {
@@ -693,8 +688,6 @@ export default function AllMatches() {
         return arr;
     }, [filteredLeagues]);
     
-    // Persist selection key - same as home page
-    const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
     const completedStatusTokens = React.useMemo(
         () => new Set([
             'completed',
@@ -987,15 +980,21 @@ export default function AllMatches() {
     // Add this effect for auto-select
     useEffect(() => {
         if (filteredLeagues.length > 0) {
-            const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-            if (storedId && storedId !== 'all' && filteredLeagues.some(l => l.id === storedId)) {
-                if (selectedLeague !== storedId) {
+            const storedId = getPreferredLeagueId();
+            const preferred = findPreferredLeague(filteredLeagues, storedId);
+            if (preferred) {
+                const preferredId = String(preferred.id);
+                if (selectedLeague !== preferredId) {
                     setLoading(true);
-                    setSelectedLeague(storedId);
+                    setSelectedLeague(preferredId);
                 }
-            } else if (selectedLeague === 'all' || !filteredLeagues.some(l => l.id === selectedLeague)) {
+            } else if (selectedLeague === 'all' || !filteredLeagues.some(l => String(l.id) === String(selectedLeague))) {
+                const fallbackId = String(filteredLeagues[0].id);
                 setLoading(true);
-                setSelectedLeague(filteredLeagues[0].id);
+                setSelectedLeague(fallbackId);
+                if (!storedId) {
+                    setPreferredLeagueId(fallbackId);
+                }
             }
         }
     }, [filteredLeagues, selectedLeague]);
@@ -1765,8 +1764,8 @@ export default function AllMatches() {
     // Replace handleLeagueSelect to only update state and close the menu
     const handleLeagueSelect = (selectedLeagueId: string) => {
         if (selectedLeagueId !== selectedLeague) {
-            // Persist preference so other pages/components (e.g., Match Stats Dialog) can auto-select this league
-            try { if (typeof window !== 'undefined') localStorage.setItem(PREFERRED_LEAGUE_KEY, String(selectedLeagueId)); } catch {}
+            // Persist preference globally so all pages/components sync to this league
+            setPreferredLeagueId(selectedLeagueId);
             setSelectedLeague(selectedLeagueId);
             const storedForLeague = typeof window !== 'undefined' ? localStorage.getItem('preferredSeasonId_' + selectedLeagueId) : null;
             if (storedForLeague && storedForLeague !== 'all') {

@@ -41,6 +41,7 @@ import AllPlayersLoadingSkeleton from '@/Components/loading/AllPlayersLoadingSke
 import { isGuestPlayerRecord, isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import { useAuth } from '@/lib/hooks';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 // Lazy load CloseButton
 const CloseButton = dynamic(() => import('@/Components/CloseButton'), {
@@ -154,15 +155,15 @@ const AllPlayersPage = () => {
   const [leaguesLoading, setLeaguesLoading] = useState<boolean>(false);
   const [selectedLeague, setSelectedLeague] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('preferredLeagueId') || 'all';
+      return getPreferredLeagueId() || 'all';
     }
     return 'all';
   });
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [selectedSeason, setSelectedSeason] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const leagueId = localStorage.getItem('preferredLeagueId');
-      if (leagueId && leagueId !== 'all') {
+      const leagueId = getPreferredLeagueId();
+      if (leagueId) {
         const storedForLeague = localStorage.getItem('preferredSeasonId_' + leagueId);
         if (storedForLeague && storedForLeague !== 'all') return storedForLeague;
       }
@@ -175,23 +176,17 @@ const AllPlayersPage = () => {
   // Ensure state synchronizes with localStorage on mount (handles client-side navigation / hydration)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedLeague = localStorage.getItem('preferredLeagueId');
-      if (storedLeague && storedLeague !== 'all' && storedLeague !== selectedLeague) {
+      const storedLeague = getPreferredLeagueId();
+      if (storedLeague && storedLeague !== selectedLeague) {
         setSelectedLeague(storedLeague);
       }
-      const leagueKey = storedLeague && storedLeague !== 'all' ? storedLeague : selectedLeague;
+      const leagueKey = storedLeague || selectedLeague;
       const storedSeason = (leagueKey && leagueKey !== 'all' ? localStorage.getItem('preferredSeasonId_' + leagueKey) : null) || localStorage.getItem('preferredSeasonId');
       if (storedSeason && storedSeason !== 'all' && storedSeason !== selectedSeason) {
         setSelectedSeason(storedSeason);
       }
     }
   }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && selectedLeague && selectedLeague !== 'all') {
-      try { localStorage.setItem('preferredLeagueId', selectedLeague); } catch { }
-    }
-  }, [selectedLeague]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && selectedSeason && selectedSeason !== 'all') {
@@ -236,7 +231,6 @@ const AllPlayersPage = () => {
   }, []);
 
   const getCms = useCallback((key: string, fallback: string) => cmsMap[key] || fallback, [cmsMap]);
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
   const completedStatusTokens = React.useMemo(
     () => new Set([
       'completed',
@@ -694,9 +688,13 @@ const AllPlayersPage = () => {
 
         // Auto-select preferred league from localStorage or first league
         if (activeLeagues.length > 0) {
-          const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-          const preferred = storedId ? activeLeagues.find(l => l.id === storedId) : null;
-          setSelectedLeague(preferred ? preferred.id : activeLeagues[0].id);
+          const storedId = getPreferredLeagueId();
+          const preferred = findPreferredLeague(activeLeagues, storedId);
+          const chosenId = preferred ? String(preferred.id) : String(activeLeagues[0].id);
+          setSelectedLeague(chosenId);
+          if (!storedId) {
+            setPreferredLeagueId(chosenId);
+          }
         }
 
         console.log('[All Players] Total:', enrichedLeagues.length, 'Active:', activeLeagues.length);
@@ -744,15 +742,10 @@ const AllPlayersPage = () => {
       if (selectedLeague !== 'all' && !currentLeagueExists) {
         // Try to get preferred league from localStorage
         let leagueToSelect = filteredLeagues[0].id;
-        try {
-          if (typeof window !== 'undefined') {
-            const preferredLeagueId = localStorage.getItem(PREFERRED_LEAGUE_KEY);
-            // Check if preferred league exists in filtered leagues
-            if (preferredLeagueId && filteredLeagues.some(l => l.id === preferredLeagueId)) {
-              leagueToSelect = preferredLeagueId;
-            }
-          }
-        } catch { }
+        const preferred = findPreferredLeague(filteredLeagues, getPreferredLeagueId());
+        if (preferred) {
+          leagueToSelect = preferred.id;
+        }
 
         setSelectedLeague(leagueToSelect);
       }
@@ -1099,7 +1092,7 @@ const AllPlayersPage = () => {
     handleLeagueMenuClose();
     try {
       if (typeof window !== 'undefined' && leagueId !== 'all') {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, leagueId);
+        setPreferredLeagueId(leagueId);
         const storedSeasonId = localStorage.getItem('preferredSeasonId_' + leagueId);
         if (storedSeasonId && storedSeasonId !== 'all') {
           setSelectedSeason(storedSeasonId);

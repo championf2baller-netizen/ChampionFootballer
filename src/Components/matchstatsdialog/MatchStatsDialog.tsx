@@ -51,6 +51,7 @@ import MENTALITY from '@/Components/images/metality.png'
 import Image from 'next/image'
 import MatchStatsPopupLoadingSkeleton from '@/Components/loading/MatchStatsPopupLoadingSkeleton';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
+import { getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 const MAX_GOALS_EXCEEDED_MESSAGE = `The maximum number of goals has already been recorded by the players. You cannot add more goals than the total match goals.
 
@@ -1124,7 +1125,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                     setLoading(false);
                     return;
                 }
-                const stored = localStorage.getItem('preferredLeagueId');
+                const stored = getPreferredLeagueId();
                 if (!stored) {
                     setLoading(false);
                     return;
@@ -1286,12 +1287,10 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
 
         // Persist as preferred league for future auto-selection
         if (typeof window !== 'undefined') {
-            try {
-                localStorage.setItem('preferredLeagueId', leagueId);
-                // Update ref immediately so if user reopens dialog, it uses this league
-                preferredAppliedRef.current = leagueId;
-                console.log('[MatchStats] Manually selected league:', leagueId);
-            } catch { /* ignore quota errors */ }
+            setPreferredLeagueId(leagueId);
+            // Update ref immediately so if user reopens dialog, it uses this league
+            preferredAppliedRef.current = leagueId;
+            console.log('[MatchStats] Manually selected league:', leagueId);
         }
 
         // reset UI state
@@ -1368,7 +1367,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             }
             // Skip if preferred league was already applied (preferred league useEffect handles it)
             if (typeof window !== 'undefined') {
-                const stored = localStorage.getItem('preferredLeagueId');
+                const stored = getPreferredLeagueId();
                 if (stored && preferredAppliedRef.current === stored) {
                     console.log('MatchStatsDialog: preferred league already applied, skipping embedded auto-select');
                     return;
@@ -1407,7 +1406,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                 // Check for preferred league first, otherwise pick latest
                 let chosenLeague: League | null = null;
                 if (typeof window !== 'undefined') {
-                    const stored = localStorage.getItem('preferredLeagueId');
+                    const stored = getPreferredLeagueId();
                     if (stored) {
                         const preferred = allLeagues.find(l => String(l.id) === stored);
                         if (preferred) {

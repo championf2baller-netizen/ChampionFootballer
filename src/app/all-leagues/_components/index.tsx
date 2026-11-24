@@ -33,6 +33,7 @@ import Slide, { SlideProps } from '@mui/material/Slide';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { TokenManager } from '@/lib/tokenManager';
 import PageHeader from '@/Components/PageHeader';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 
 // Lazy load heavy components
@@ -3476,6 +3477,7 @@ function AllLeagues() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [completionTab, setCompletionTab] = useState<'completed' | 'live'>('live');
   const [selectedLeagueId, setSelectedLeagueId] = useState<string>('all');
+  const preferredLeagueAppliedRef = React.useRef(false);
   const [showArchived, setShowArchived] = useState(false);
   const [showArchivedSeasons, setShowArchivedSeasons] = useState(false);
   const [archivedSeasonActionId, setArchivedSeasonActionId] = useState<string | null>(null);
@@ -3486,8 +3488,6 @@ function AllLeagues() {
   const [seasonConfirmOpen, setSeasonConfirmOpen] = useState(false);
   const [pendingSeasonLeague, setPendingSeasonLeague] = useState<LeagueWithStatus | null>(null);
   const [locallyDeletedLeagueIds, setLocallyDeletedLeagueIds] = useState<string[]>([]);
-  // Persist preferred league selection across app
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
 
   const dispatchLeagueMutationEvent = useCallback(
     (eventName: 'league-created' | 'league-updated' | 'league-deleted', detail: Record<string, unknown>) => {
@@ -3519,7 +3519,7 @@ function AllLeagues() {
 
     try {
       if (typeof window !== 'undefined') {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, leagueIdStr);
+        setPreferredLeagueId(leagueIdStr);
         localStorage.setItem('selectedLeagueId', leagueIdStr);
         if (targetSeasonId) {
           localStorage.setItem(`preferredSeasonId_${leagueIdStr}`, targetSeasonId);
@@ -4077,10 +4077,25 @@ function AllLeagues() {
   }, [filteredLeagues, selectedLeagueId]);
 
   useEffect(() => {
+    if (loading || preferredLeagueAppliedRef.current) return;
+    preferredLeagueAppliedRef.current = true;
+    const nonArchived = leagues.filter((l) => !isArchivedLeague(l));
+    if (nonArchived.length === 0) return;
+
+    const preferredId = getPreferredLeagueId();
+    const matched = findPreferredLeague(nonArchived, preferredId);
+    if (matched) {
+      setCompletionTab(isLeagueCompleted(matched) ? 'completed' : 'live');
+      setSelectedLeagueId(String(matched.id));
+    }
+  }, [loading, leagues, isArchivedLeague, isLeagueCompleted]);
+
+  useEffect(() => {
+    if (loading || !preferredLeagueAppliedRef.current) return;
     if (selectedLeagueId === 'all') return;
     const stillExists = filteredLeagues.some(l => String(l.id) === selectedLeagueId);
     if (!stillExists) setSelectedLeagueId('all');
-  }, [filteredLeagues, selectedLeagueId]);
+  }, [loading, filteredLeagues, selectedLeagueId]);
 
   useEffect(() => {
     if (selectedYear === 'all') return;
@@ -4151,7 +4166,7 @@ function AllLeagues() {
 
       if (joined) {
         // Save joined league as preferred immediately
-        try { if (typeof window !== 'undefined') localStorage.setItem(PREFERRED_LEAGUE_KEY, String(joined.id)); } catch { }
+        setPreferredLeagueId(joined.id);
         // Update local state with new league at the TOP
         setLeagues(prev => {
           const filtered = prev.filter(l => String(l.id) !== String(joined.id));
@@ -4670,7 +4685,7 @@ function AllLeagues() {
       if (createdSeasonId) params.set('seasonId', createdSeasonId);
       try {
         if (typeof window !== 'undefined') {
-          localStorage.setItem(PREFERRED_LEAGUE_KEY, String(leagueId));
+          setPreferredLeagueId(leagueId);
           localStorage.setItem('selectedLeagueId', String(leagueId));
           if (createdSeasonId) {
             localStorage.setItem(`preferredSeasonId_${leagueId}`, String(createdSeasonId));
@@ -4789,7 +4804,7 @@ function AllLeagues() {
           };
 
           // Save created league as preferred immediately
-          try { if (typeof window !== 'undefined') localStorage.setItem(PREFERRED_LEAGUE_KEY, String(normalized.id)); } catch { }
+          setPreferredLeagueId(normalized.id);
 
           // Add new league at TOP
           setLeagues(prevLeagues => {
@@ -6027,7 +6042,11 @@ function AllLeagues() {
                     <MenuItem
                       key={leagueItem.id}
                       onClick={() => {
-                        setSelectedLeagueId(String(leagueItem.id));
+                        const nextId = String(leagueItem.id);
+                        setSelectedLeagueId(nextId);
+                        if (nextId !== 'all') {
+                          setPreferredLeagueId(nextId);
+                        }
                         setLeagueDropdownOpen(false);
                       }}
                       sx={{

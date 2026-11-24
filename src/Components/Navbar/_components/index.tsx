@@ -91,6 +91,7 @@ import PlayMatchPagee from '@/Components/matchstatsdialog/MatchStatsDialog';
 import MatchDetailModal from '@/Components/MatchDetailModal';
 import { leagueAPI } from '@/lib/api-ultra-fast';
 import NotificationMenuLoadingSkeleton from '@/Components/loading/NotificationMenuLoadingSkeleton';
+import { getPreferredLeagueId, subscribePreferredLeagueChange } from '@/lib/preferredLeague';
 // import PlayerStatsDialog from '@/Components/PlayerStatsDialog';
 type NotificationKind =
   | 'MATCH_CREATED'
@@ -2636,6 +2637,15 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
     },
   ];
 
+  const [preferredLeagueHrefId, setPreferredLeagueHrefId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPreferredLeagueHrefId(getPreferredLeagueId());
+    return subscribePreferredLeagueChange((nextId) => {
+      setPreferredLeagueHrefId(nextId);
+    });
+  }, []);
+
   function getNavHref(label: string, fallbackHref: string): string {
     if (label === 'TABLE') {
       const currentLeagueMatch = pathname?.match(/^\/league\/([^/?#]+)/);
@@ -2644,10 +2654,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
         return `/league/${encodeURIComponent(currentLeagueId)}?tab=table`;
       }
       if (typeof window === 'undefined') return fallbackHref;
-      const preferredLeagueId =
-        localStorage.getItem('preferredLeagueId') ||
-        localStorage.getItem('prefferdLeagueId');
-      const leagueId = preferredLeagueId?.trim();
+      const leagueId = preferredLeagueHrefId || getPreferredLeagueId();
       if (!leagueId) return '/all-leagues';
       return `/league/${encodeURIComponent(leagueId)}?tab=table`;
     }

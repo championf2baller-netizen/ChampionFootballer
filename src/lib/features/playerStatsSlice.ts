@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { playerAPI } from '../api';
+import { setPreferredLeagueId } from '../preferredLeague';
 
 // --- Interfaces ---
 interface PlayerDetails {
@@ -88,9 +89,7 @@ const playerStatsSlice = createSlice({
   reducers: {
     setLeagueFilter: (state, action: PayloadAction<string>) => {
       state.filters.leagueId = action.payload;
-      if (typeof window !== 'undefined' && action.payload) {
-        try { localStorage.setItem('preferredLeagueId', action.payload); } catch {}
-      }
+      setPreferredLeagueId(action.payload);
     },
     setYearFilter: (state, action: PayloadAction<string>) => {
       state.filters.year = action.payload;

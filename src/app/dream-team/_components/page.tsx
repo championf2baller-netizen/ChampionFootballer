@@ -13,6 +13,7 @@ import { optimizedFetch, invalidateCache } from '@/lib/utils/optimizedFetch';
 import PageHeader from '@/Components/PageHeader';
 import DreamTeamLoadingSkeleton from '@/Components/loading/DreamTeamLoadingSkeleton';
 import { formatPlayerDisplayName } from '@/lib/playerIdentity';
+import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 
 
 interface Player {
@@ -174,12 +175,8 @@ const DreamTeamPage = () => {
   const handleLeaguesDropdownClose = () => setLeaguesDropdownAnchor(null);
   const handleLeagueSelect = useCallback((id: string) => {
     setSelectedLeague(id);
-    // Persist selection
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(PREFERRED_LEAGUE_KEY, id);
-      }
-    } catch {}
+    // Persist selection globally across all pages
+    setPreferredLeagueId(id);
     handleLeaguesDropdownClose();
     
     // Invalidate dream team cache for new league
@@ -276,7 +273,6 @@ const DreamTeamPage = () => {
     return defaults[type] || '?';
   };
 
-  const PREFERRED_LEAGUE_KEY = 'preferredLeagueId';
   const leagueIsCompleted = useCallback((l: League): boolean => {
     if (l?.computedStatus?.isCompleted === true) return true;
     if (l?.archived === true) return true;
@@ -364,9 +360,13 @@ const DreamTeamPage = () => {
 
       // Auto-select preferred league
       if (activeLeagues.length > 0) {
-        const storedId = typeof window !== 'undefined' ? localStorage.getItem(PREFERRED_LEAGUE_KEY) : null;
-        const preferred = storedId ? activeLeagues.find(l => l.id === storedId) : null;
-        setSelectedLeague(preferred ? preferred.id : activeLeagues[0].id);
+        const storedId = getPreferredLeagueId();
+        const preferred = findPreferredLeague(activeLeagues, storedId);
+        const chosenId = preferred ? String(preferred.id) : String(activeLeagues[0].id);
+        setSelectedLeague(chosenId);
+        if (!storedId) {
+          setPreferredLeagueId(chosenId);
+        }
       } else {
         setSelectedLeague('');
         setLoading(false);

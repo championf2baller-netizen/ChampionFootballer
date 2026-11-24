@@ -62,6 +62,7 @@ import PageHeader from '@/Components/PageHeader';
 import { isRegisteredPlayerRecord, getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import { getXPTier } from '@/Components/XPStarMilestoneCard';
 import { TokenManager } from '@/lib/tokenManager';
+import { getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
 import PLAYERIMAGE from '@/Components/images/players.png'
 import HomeTeamImage from '@/Components/images/hometeamshirt.png'
 import AwayTeamImage from '@/Components/images/awayteamshirt.png'
@@ -1041,7 +1042,7 @@ export default function LeagueDetailPage() {
 
     useEffect(() => {
         if (typeof window !== 'undefined' && leagueId) {
-            try { localStorage.setItem('preferredLeagueId', String(leagueId)); } catch { }
+            setPreferredLeagueId(leagueId);
         }
     }, [leagueId]);
 
@@ -1572,13 +1573,9 @@ export default function LeagueDetailPage() {
                     console.warn('⚠️ Could not fetch league XP map:', xpErr);
                 }
 
-                try {
-                    const preferredId = String((fetchedLeague as unknown as Record<string, unknown>)?.id || leagueId || '').trim();
-                    if (preferredId) {
-                        localStorage.setItem('preferredLeagueId', preferredId);
-                    }
-                } catch {
-                    // ignore localStorage errors
+                const preferredId = String((fetchedLeague as unknown as Record<string, unknown>)?.id || leagueId || '').trim();
+                if (preferredId) {
+                    setPreferredLeagueId(preferredId);
                 }
                 console.log('League state updated successfully');
             } else {
@@ -2178,13 +2175,9 @@ export default function LeagueDetailPage() {
         if (currentLeagueExists) return;
 
         let fallbackLeagueId = '';
-        try {
-            const preferredLeagueId = localStorage.getItem('preferredLeagueId');
-            if (preferredLeagueId && allLeagues.some((leagueItem) => String(leagueItem.id) === String(preferredLeagueId))) {
-                fallbackLeagueId = preferredLeagueId;
-            }
-        } catch {
-            // ignore localStorage errors
+        const preferredLeagueId = getPreferredLeagueId();
+        if (preferredLeagueId && allLeagues.some((leagueItem) => String(leagueItem.id) === String(preferredLeagueId))) {
+            fallbackLeagueId = preferredLeagueId;
         }
 
         if (!fallbackLeagueId) {
@@ -2192,11 +2185,7 @@ export default function LeagueDetailPage() {
         }
         if (!fallbackLeagueId) return;
 
-        try {
-            localStorage.setItem('preferredLeagueId', fallbackLeagueId);
-        } catch {
-            // ignore localStorage errors
-        }
+        setPreferredLeagueId(fallbackLeagueId);
 
         setError(null);
         router.replace(`/league/${encodeURIComponent(fallbackLeagueId)}?tab=table`, { scroll: false });
@@ -2405,7 +2394,7 @@ export default function LeagueDetailPage() {
             setLeagueDetailsAttempted(false);
             setLeagueDetailsLoading(true);
             try {
-                localStorage.setItem('preferredLeagueId', String(selectedLeagueId));
+                setPreferredLeagueId(selectedLeagueId);
                 localStorage.removeItem(`preferredSeasonId_${selectedLeagueId}`);
                 localStorage.removeItem('preferredSeasonId');
             } catch {

@@ -51,6 +51,7 @@ import PlayerProfileLoadingSkeleton from '@/Components/loading/PlayerProfileLoad
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { getPositionShortForm, formatPlayerDisplayName } from '@/lib/playerIdentity';
 import PageHeader from '@/Components/PageHeader';
+import { getPreferredLeagueId, setPreferredLeagueId as persistPreferredLeagueId } from '@/lib/preferredLeague';
 
 import PlayerOverviewContainer from './PlayerOverviewContainer';
 import PlayerViewToggle, { PlayerViewType } from './PlayerViewToggle';
@@ -514,8 +515,8 @@ export default function PlayerStatsPage() {
 
     const [selectedSeason, setSelectedSeason] = useState<string>(() => {
         if (typeof window !== 'undefined') {
-            const storedLeague = localStorage.getItem('preferredLeagueId');
-            if (storedLeague && storedLeague !== 'all') {
+            const storedLeague = getPreferredLeagueId();
+            if (storedLeague) {
                 const storedForLeague = localStorage.getItem('preferredSeasonId_' + storedLeague);
                 if (storedForLeague && storedForLeague !== 'all') return storedForLeague;
             }
@@ -585,7 +586,7 @@ export default function PlayerStatsPage() {
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            setPreferredLeagueId(localStorage.getItem('preferredLeagueId'));
+            setPreferredLeagueId(getPreferredLeagueId());
             const params = new URLSearchParams(window.location.search);
             const viewParam = params.get('view');
             const isDesktopScreen = window.innerWidth >= 900;
@@ -2013,7 +2014,7 @@ export default function PlayerStatsPage() {
         dispatch(setLeagueFilter(value));
         if (typeof window !== 'undefined' && value) {
             try {
-                localStorage.setItem('preferredLeagueId', value);
+                persistPreferredLeagueId(value);
                 if (value !== 'all') {
                     const storedSeasonId = localStorage.getItem('preferredSeasonId_' + value);
                     if (storedSeasonId && storedSeasonId !== 'all') {
