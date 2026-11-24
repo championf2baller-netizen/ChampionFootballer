@@ -3269,7 +3269,7 @@ export default function AllMatches() {
                                                                         textOverflow: 'ellipsis',
                                                                         whiteSpace: 'nowrap'
                                                                     }}>
-                                                                        {motm ? motm.name : 'Select the MOTM'}
+                                                                        {motm ? motm.name : 'MOTM'}
                                                                     </Typography>
                                                                     <Typography sx={{
                                                                         fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
