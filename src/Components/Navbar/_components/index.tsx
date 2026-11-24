@@ -3125,7 +3125,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <GavelOutlinedIcon sx={{ fontSize: 20, color: '#fff' }} />
-                      <Box>Game Rules</Box>
+                      <Box>Scoring System</Box>
                     </Box>
                   </MenuItem>
                   <MenuItem
@@ -4295,7 +4295,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       '& .MuiButton-startIcon': { marginRight: 1 },
                     }}
                   >
-                    Game rules
+                    Scoring System
                   </Button>
                 </ListItem>
                 <ListItem disablePadding>
@@ -4798,7 +4798,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
           borderBottom: '3px solid #E56A16',
           flexShrink: 0
         }}>
-          Game Rules
+          Scoring System
           <IconButton
             aria-label="close"
             onClick={() => setGameRulesOpen(false)}

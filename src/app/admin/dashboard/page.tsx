@@ -1525,7 +1525,7 @@ const formatTeamNameWithTeam = (name?: string | null): string => {
           )}
           {editItem?.key === 'game_rules' && (
             <Alert severity="info" sx={{ bgcolor: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)', fontWeight: 600 }}>
-              ⚽ <b>Game Rules Editor Guide:</b><br />
+              ⚽ <b>Scoring System (Game Rules) Editor Guide:</b><br />
               Edit the JSON array in the <b>Text Content</b> box to update point scoring descriptions, XP awards, and classic scoring points for each action.
             </Alert>
           )}
