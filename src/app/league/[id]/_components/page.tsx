@@ -6301,7 +6301,7 @@ export default function LeagueDetailPage() {
                                                                                     {/* 6. PLAYER STATS PROGRESS */}
                                                                                     <Box sx={{ px: { xs: '14px', sm: '16px' }, pt: 0.2, pb: 0.6 }}>
                                                                                         <Typography sx={{ fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#8b90a0', fontSize: '11px', fontWeight: 500, mb: 0.5 }}>
-                                                                                           Stats add "/ votes" {count} of {total} players
+                                                                                          Stats / votes added by {count} of {total} players
                                                                                         </Typography>
                                                                                         <Box sx={{
                                                                                             width: '100%',
