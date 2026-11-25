@@ -33,7 +33,7 @@ import Slide, { SlideProps } from '@mui/material/Slide';
 import { getAvatarBackgroundColor, getAvatarInitials } from '@/lib/avatarInitials';
 import { TokenManager } from '@/lib/tokenManager';
 import PageHeader from '@/Components/PageHeader';
-import { findPreferredLeague, getPreferredLeagueId, setPreferredLeagueId } from '@/lib/preferredLeague';
+import { setPreferredLeagueId } from '@/lib/preferredLeague';
 
 
 // Lazy load heavy components
@@ -3480,7 +3480,6 @@ function AllLeagues() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [completionTab, setCompletionTab] = useState<'completed' | 'live'>('live');
   const [selectedLeagueId, setSelectedLeagueId] = useState<string>('all');
-  const preferredLeagueAppliedRef = React.useRef(false);
   const [showArchived, setShowArchived] = useState(false);
   const [showArchivedSeasons, setShowArchivedSeasons] = useState(false);
   const [archivedSeasonActionId, setArchivedSeasonActionId] = useState<string | null>(null);
@@ -4085,21 +4084,7 @@ function AllLeagues() {
   }, [filteredLeagues, selectedLeagueId]);
 
   useEffect(() => {
-    if (loading || preferredLeagueAppliedRef.current) return;
-    preferredLeagueAppliedRef.current = true;
-    const nonArchived = leagues.filter((l) => !isArchivedLeague(l));
-    if (nonArchived.length === 0) return;
-
-    const preferredId = getPreferredLeagueId();
-    const matched = findPreferredLeague(nonArchived, preferredId);
-    if (matched) {
-      setCompletionTab(isLeagueCompleted(matched) ? 'completed' : 'live');
-      setSelectedLeagueId(String(matched.id));
-    }
-  }, [loading, leagues, isArchivedLeague, isLeagueCompleted]);
-
-  useEffect(() => {
-    if (loading || !preferredLeagueAppliedRef.current) return;
+    if (loading) return;
     if (selectedLeagueId === 'all') return;
     const stillExists = filteredLeagues.some(l => String(l.id) === selectedLeagueId);
     if (!stillExists) setSelectedLeagueId('all');
