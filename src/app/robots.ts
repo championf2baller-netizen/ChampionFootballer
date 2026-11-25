@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://championfootballer.co.uk/sitemap.xml',
+    sitemap: 'https://championfootballer.com/sitemap.xml',
   };
 }

@@ -924,7 +924,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
       details += `\n🟠 *${awayTeamName || 'Away'} (${awayNames.length}):* ${awayNames.join(', ')}`;
     }
 
-    details += `\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.co.uk`;
+    details += `\n\n*Create Matches. Track Performance. Claim Bragging Rights*\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
 
     return details;
   };
@@ -1025,7 +1025,7 @@ export default function TeamPreviewScreen({ leagueId, matchId }: { leagueId?: st
     shareContent({
       title: `Team line-up: ${matchup} | Champion Footballer`,
       customFullText: message,
-      url: 'https://www.championfootballer.co.uk',
+      url: 'https://www.championfootballer.com',
       files: fileToShare ? [fileToShare] : undefined,
     });
   };

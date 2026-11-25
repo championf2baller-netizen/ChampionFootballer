@@ -38,10 +38,10 @@ export async function copyTextToClipboard(text: string): Promise<boolean> {
  * Where Champions Are Made!
  * Join {leagueName} / season {seasonNumber}. Use invite code: {inviteCode} or 
  * click link to join:
- * https://championfootballer.co.uk/home?nvitecode={inviteCode}
+ * https://championfootballer.com/home?nvitecode={inviteCode}
  * Create Matches. Track Performance. Claim Bragging Rights
  * Join Champion Footballer today:
- * www.championfootballer.co.uk
+ * www.championfootballer.com
  */
 export function buildLeagueSeasonInviteText(
   leagueName: string,
@@ -52,8 +52,8 @@ export function buildLeagueSeasonInviteText(
   const cleanLeague = (leagueName || 'League').trim();
   const cleanCode = (inviteCode || '').trim();
   const sNum = seasonNumber || 1;
-  const url = inviteUrl || `https://championfootballer.co.uk/home?nvitecode=${encodeURIComponent(cleanCode)}`;
-  return `Champion Footballer \nWhere Champions Are Made!\nJoin ${cleanLeague} / season ${sNum}. Use invite code: ${cleanCode} or \nclick link to join:\n${url}\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.co.uk`;
+  const url = inviteUrl || `https://championfootballer.com/home?nvitecode=${encodeURIComponent(cleanCode)}`;
+  return `Champion Footballer \nWhere Champions Are Made!\nJoin ${cleanLeague} / season ${sNum}. Use invite code: ${cleanCode} or \nclick link to join:\n${url}\nCreate Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nwww.championfootballer.com`;
 }
 
 export interface ShareOptions {

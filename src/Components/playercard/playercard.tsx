@@ -743,7 +743,7 @@ const PlayerCard = ({
               const playerName = name || 'Player';
               const xp = points || 0;
               const playerLine = playerName && playerName !== 'Player' ? `Player: ${playerName} (${xp} XP)\n` : '';
-              const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.co.uk`;
+              const shareMessage = `Champion Footballer \nWhere Champions Are Made!\n${playerLine}Create Matches. Track Performance. Claim Bragging Rights\nJoin Champion Footballer today:\nhttps://www.championfootballer.com`;
 
               let fileToShare: File | null = null;
               if (cardContainerRef.current) {
@@ -753,7 +753,7 @@ const PlayerCard = ({
               shareContent({
                 title: `${playerName} | Champion Footballer`,
                 customFullText: shareMessage,
-                url: 'https://www.championfootballer.co.uk',
+                url: 'https://www.championfootballer.com',
                 files: fileToShare ? [fileToShare] : undefined,
               });
             }}
