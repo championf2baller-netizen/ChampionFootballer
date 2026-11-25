@@ -1947,6 +1947,7 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
             // 3. Save Defensive Impact / Mentality picks
             if (captainApiAvailable && (captainPicks.defence !== undefined || captainPicks.influence !== undefined)) {
                 try {
+                    let captainPickSaved = false;
                     // Save Defensive Impact pick
                     if (captainPicks.defence !== undefined) {
                         const defResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/matches/${resolvedMatchId}/captain-picks`, {
@@ -1963,6 +1964,8 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     ? defData.message
                                     : 'Failed to save Defensive Impact pick'
                             );
+                        } else {
+                            captainPickSaved = true;
                         }
                     }
 
@@ -1982,7 +1985,30 @@ const PlayMatchPagee: React.FC<EmbeddedControlProps> = (props) => {
                                     ? menData.message
                                     : 'Failed to save + Mentality pick'
                             );
+                        } else {
+                            captainPickSaved = true;
                         }
+                    }
+
+                    if (captainPickSaved && typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('votes-updated', {
+                            detail: {
+                                matchId: resolvedMatchId,
+                                leagueId: resolvedLeagueId || match?.leagueId || '',
+                            }
+                        }));
+                        window.dispatchEvent(new CustomEvent('vote-submitted', {
+                            detail: {
+                                matchId: resolvedMatchId,
+                                leagueId: resolvedLeagueId || match?.leagueId || '',
+                            }
+                        }));
+                        window.dispatchEvent(new CustomEvent('match-updated', {
+                            detail: {
+                                matchId: resolvedMatchId,
+                                leagueId: resolvedLeagueId || match?.leagueId || '',
+                            }
+                        }));
                     }
                 } catch {
                     errors.push('Failed to save captain picks');

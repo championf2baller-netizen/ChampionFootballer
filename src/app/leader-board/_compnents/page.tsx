@@ -9,6 +9,7 @@ import Imapct from '@/Components/images/imapct.png'
 import Assist from '@/Components/images/Assist.png'
 import MOTM from '@/Components/images/MOTM.png'
 import CleanSheet from '@/Components/images/cleansheet.png'
+import Mentality from '@/Components/images/metality.png'
 import FirstBadge from '@/Components/images/1st.png';
 import SecondBadge from '@/Components/images/2nd.png';
 import ThirdBadge from '@/Components/images/3rd.png';
@@ -69,6 +70,7 @@ const metrics = [
   { key: 'assists', label: 'Assists', icon: Assist },
   { key: 'motm', label: 'MOTM', icon: MOTM },
   { key: 'impact', label: 'Impact', icon: Imapct },
+  { key: 'mentality', label: 'Mentality', icon: Mentality },
   { key: 'cleanSheet', label: 'Clean Sheet', icon: CleanSheet },
 ];
 
@@ -346,7 +348,7 @@ export default function LeaderBoardPage() {
         sx={{
           display: 'grid',
           // Remove empty space left by removed Defence metric
-          gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
+          gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(6, 1fr)' },
           gap: 1.5,
           mb: 3,
           background: 'linear-gradient(90deg, #767676 0%, #000000 100%)',

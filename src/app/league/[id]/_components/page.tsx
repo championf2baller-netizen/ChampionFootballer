@@ -573,6 +573,13 @@ const LEADERBOARD_METRIC_CONFIG = [
         infoFormula: 'Counts the number of votes a player recieved for their Defensive Impact in the selected league and season.',
     },
     {
+        key: 'mentality',
+        label: '+ MENTALITY VOTES',
+        icon: Mentality,
+        infoSummary: 'Ranks players by + Mentality vote selections.',
+        infoFormula: 'Counts the number of votes a player received for their + Mentality in the selected league and season.',
+    },
+    {
         key: 'cleanSheet',
         label: 'CLEAN SHEETS',
         icon: CleanSheet,
@@ -602,6 +609,7 @@ const getMetricValueHeader = (key: string): string => {
             return 'INDEX';
         case 'motm':
         case 'impact':
+        case 'mentality':
         default:
             return 'VOTES';
     }
@@ -3547,7 +3555,7 @@ export default function LeagueDetailPage() {
 
         Promise.all(
             metrics.map(async (metric) => {
-                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=100&refresh=1&_t=${Date.now()}`;
+                const urlAll = `${baseUrl}?metric=${metric}&leagueId=${leagueId}&limit=200&refresh=1&_t=${Date.now()}`;
                 const urlSeason = selectedSeasonId ? `${urlAll}&seasonId=${selectedSeasonId}` : urlAll;
                 const requestInit: RequestInit = {
                     credentials: 'include',
