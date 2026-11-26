@@ -2072,35 +2072,81 @@ const AuthTabs = ({ showLogin = true, onToggleForm, onJoinClick }: AuthTabsProps
             </Box>
 
             {/* TERMS */}
-            <Box sx={{ gridColumn: '1 / -1', mt: { xs: 0.25, md: 0.25 } }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={acceptTerms}
-                    onChange={(e) => setAcceptTerms(e.target.checked)}
-                    icon={<RadioButtonUnchecked sx={{ fontSize: 22, color: 'rgba(255, 255, 255, 0.22)' }} />}
-                    checkedIcon={<CheckCircle sx={{ fontSize: 22, color: '#2d7ef7' }} />}
-                    sx={{
-                      p: 0.75,
-                      mr: 0.5,
-                    }}
-                  />
-                }
-                label={
-                  <Typography
-                    component="span"
-                    sx={{
-                      color: '#e5e7eb',
-                      fontSize: { xs: '0.84rem', md: '0.9rem' },
-                      fontWeight: 500,
-                      fontFamily: 'var(--font-inter), Inter, sans-serif',
-                    }}
-                  >
-                    {getCms('page_auth_terms_label', 'I accept the terms and conditions')}
-                  </Typography>
-                }
-                sx={{ ml: -0.75 }}
+            <Box
+              sx={{
+                gridColumn: '1 / -1',
+                mt: { xs: 0.25, md: 0.25 },
+                ml: -0.75,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Checkbox
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                inputProps={{ 'aria-label': 'Accept terms and conditions' }}
+                icon={<RadioButtonUnchecked sx={{ fontSize: 22, color: 'rgba(255, 255, 255, 0.22)' }} />}
+                checkedIcon={<CheckCircle sx={{ fontSize: 22, color: '#2d7ef7' }} />}
+                sx={{
+                  p: 0.75,
+                  mr: 0.5,
+                }}
               />
+              <Typography
+                component="span"
+                onClick={() => setAcceptTerms((prev) => !prev)}
+                sx={{
+                  color: '#e5e7eb',
+                  fontSize: { xs: '0.84rem', md: '0.9rem' },
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-inter), Inter, sans-serif',
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                }}
+              >
+                {(() => {
+                  const termsText = getCms('page_auth_terms_label', 'I accept the terms and conditions');
+                  const match = termsText.match(/(terms\s*(?:&|and)\s*conditions)/i);
+                  const renderTermsLink = (labelText: string) => (
+                    <Box
+                      component={Link}
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      sx={{
+                        color: '#10b981',
+                        fontWeight: 600,
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '3px',
+                        '&:hover': {
+                          color: '#34d399',
+                        },
+                      }}
+                    >
+                      {labelText}
+                    </Box>
+                  );
+                  if (match && match.index !== undefined) {
+                    const before = termsText.slice(0, match.index);
+                    const matchedText = match[0];
+                    const after = termsText.slice(match.index + matchedText.length);
+                    return (
+                      <>
+                        {before}
+                        {renderTermsLink(matchedText)}
+                        {after}
+                      </>
+                    );
+                  }
+                  return (
+                    <>
+                      {termsText}{' '}
+                      {renderTermsLink('Terms & Conditions')}
+                    </>
+                  );
+                })()}
+              </Typography>
             </Box>
 
             {/* REGISTER BUTTON */}

@@ -40,7 +40,6 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
-import Star from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -4872,7 +4871,6 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                 case 'Winning Team Bonus': return <CheckCircleOutlineIcon sx={{ color: '#00a896', fontSize: '1.25rem' }} />;
                 case 'Draw': return <HandshakeOutlinedIcon sx={{ color: '#e56a16', fontSize: '1.25rem' }} />;
                 case 'Losing Team Consolation': return <HighlightOffIcon sx={{ color: '#f87171', fontSize: '1.25rem' }} />;
-                case 'Man of the Match (MOTM)': return <Star sx={{ color: '#FFD700', fontSize: '1.4rem' }} />;
                 case 'Clean Sheets':
                 case 'Clean Sheets (Goalkeeper)': return <Image src={CleanSheetIcon} alt="Clean Sheets" width={22} height={22} style={{ objectFit: 'contain' }} />;
                 case 'Goal Scored': return <Image src={GoalsIcon} alt="Goal Scored" width={22} height={22} style={{ objectFit: 'contain' }} />;
@@ -4912,9 +4910,38 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                         minWidth: { xs: '145px', md: '170px' },
                         maxWidth: { xs: '145px', md: '170px' },
                       }}>Action</TableCell>
-                      <TableCell sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>League Point Scoring Description</TableCell>
-                      <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Winning Team</TableCell>
-                      <TableCell align="center" sx={{ bgcolor: '#2b2b2b !important', color: '#00a896 !important', fontWeight: 800, fontFamily: 'var(--font-woodford-bourne-pro)', fontSize: { xs: '0.85rem', md: '0.95rem' }, py: 2, whiteSpace: 'nowrap' }}>Losing Team</TableCell>
+                      <TableCell sx={{
+                        bgcolor: '#2b2b2b !important',
+                        color: '#00a896 !important',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-woodford-bourne-pro)',
+                        fontSize: { xs: '0.85rem', md: '0.95rem' },
+                        py: 2,
+                        whiteSpace: 'nowrap',
+                        borderTop: '1.5px solid #ef4444',
+                        borderLeft: '1.5px solid #ef4444',
+                      }}>League Point Scoring Description:</TableCell>
+                      <TableCell align="center" sx={{
+                        bgcolor: '#2b2b2b !important',
+                        color: '#00a896 !important',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-woodford-bourne-pro)',
+                        fontSize: { xs: '0.85rem', md: '0.95rem' },
+                        py: 2,
+                        whiteSpace: 'nowrap',
+                        borderTop: '1.5px solid #ef4444',
+                      }}>Winning Team</TableCell>
+                      <TableCell align="center" sx={{
+                        bgcolor: '#2b2b2b !important',
+                        color: '#00a896 !important',
+                        fontWeight: 800,
+                        fontFamily: 'var(--font-woodford-bourne-pro)',
+                        fontSize: { xs: '0.85rem', md: '0.95rem' },
+                        py: 2,
+                        whiteSpace: 'nowrap',
+                        borderTop: '1.5px solid #ef4444',
+                        borderRight: '1.5px solid #ef4444',
+                      }}>Losing Team</TableCell>
                       <TableCell align="center" sx={{
                         bgcolor: '#2b2b2b !important',
                         color: '#F1C40F !important',
@@ -4935,7 +4962,6 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                         { action: 'Winning Team Bonus', desc: 'Winning a match', winning: '20 xp', losing: '', isLosingEmpty: true, points: '3 Points' },
                         { action: 'Draw', desc: 'Drawing a match', winning: '15 xp', losing: '15 xp', isMerged: true, points: '1 Point' },
                         { action: 'Losing Team Consolation', desc: 'Losing a match', winning: '', isWinningEmpty: true, losing: '10 xp', points: '0 Points' },
-                        { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '', losing: '', points: '0 Points' },
                         { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '3 xp', losing: '3 xp', points: '0 Points' },
                         { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '2 xp', losing: '2 xp', points: '0 Points' },
                         { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '2 xp', points: '0 Points' },
@@ -4946,13 +4972,17 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       if (gameRulesCmsData?.content) {
                         try {
                           const parsed = typeof gameRulesCmsData.content === 'string' ? JSON.parse(gameRulesCmsData.content) : gameRulesCmsData.content;
-                          if (Array.isArray(parsed) && parsed.length > 0) rows = parsed;
+                          if (Array.isArray(parsed) && parsed.length > 0) {
+                            rows = parsed.filter((r: any) => r?.action !== 'Man of the Match (MOTM)');
+                          }
                         } catch (e) {
                           console.warn('Game rules CMS parse failed, using fallback:', e);
                         }
                       }
                       return rows.map((row: any, idx: number) => {
                       const rowBg = idx % 2 === 0 ? '#242424' : '#1e1e1e';
+                      const isLastMainRow = idx === rows.length - 1;
+                      const redBottomBorder = isLastMainRow ? { borderBottom: '1.5px solid #ef4444 !important' } : {};
                       return (
                         <TableRow key={idx} sx={{ bgcolor: rowBg, '&:hover': { bgcolor: '#2c2c2c' }, transition: 'background-color 0.15s' }}>
                           <TableCell sx={{
@@ -4979,11 +5009,25 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                               <Typography sx={{ color: 'white', fontWeight: 700, fontSize: '0.9rem', fontFamily: 'var(--font-woodford-bourne-pro)' }}>{row.action}</Typography>
                             </Box>
                           </TableCell>
-                          <TableCell sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', py: 1.5 }}>
+                          <TableCell sx={{
+                            color: 'rgba(255,255,255,0.85)',
+                            fontSize: '0.85rem',
+                            py: 1.5,
+                            borderLeft: '1.5px solid #ef4444',
+                            ...redBottomBorder,
+                          }}>
                             {row.desc}
                           </TableCell>
                           {row.isMerged ? (
-                            <TableCell colSpan={2} align="center" sx={{ color: '#00a896', fontWeight: 800, fontSize: '0.95rem', bgcolor: 'rgba(0,168,150,0.05)', py: 1.5 }}>
+                            <TableCell colSpan={2} align="center" sx={{
+                              color: '#00a896',
+                              fontWeight: 800,
+                              fontSize: '0.95rem',
+                              bgcolor: 'rgba(0,168,150,0.05)',
+                              py: 1.5,
+                              borderRight: '1.5px solid #ef4444',
+                              ...redBottomBorder,
+                            }}>
                               {row.winning}
                             </TableCell>
                           ) : (
@@ -4993,7 +5037,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                                 fontWeight: row.winning ? 800 : 400,
                                 fontSize: '0.9rem',
                                 bgcolor: row.isWinningEmpty ? '#151515' : 'transparent',
-                                py: 1.5
+                                py: 1.5,
+                                ...redBottomBorder,
                               }}>
                                 {row.winning || '-'}
                               </TableCell>
@@ -5002,7 +5047,9 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                                 fontWeight: row.losing ? 800 : 400,
                                 fontSize: '0.9rem',
                                 bgcolor: row.isLosingEmpty ? '#151515' : 'transparent',
-                                py: 1.5
+                                py: 1.5,
+                                borderRight: '1.5px solid #ef4444',
+                                ...redBottomBorder,
                               }}>
                                 {row.losing || '-'}
                               </TableCell>
@@ -5016,7 +5063,7 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
                             borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
                             bgcolor: 'rgba(241, 196, 15, 0.04)',
-                            ...(idx === rows.length - 1 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
+                            ...(isLastMainRow ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4) !important' } : {}),
                           }}>
                             {row.points}
                           </TableCell>
@@ -5055,6 +5102,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                       { action: 'Streak Bonuses: Played at least 75% of league matches', desc: 'Player reaching a milestone for participating in 75% of the total league matches.', xp: '75 XP', points: '0 Points' }
                     ].map((row, idx) => {
                       const rowBg = idx % 2 === 0 ? '#242424' : '#1e1e1e';
+                      const streakRedTop = idx === 0 ? { borderTop: '1.5px solid #ef4444' } : {};
+                      const streakRedBottom = idx === 2 ? { borderBottom: '1.5px solid #ef4444 !important' } : {};
                       return (
                         <TableRow key={`streak-${idx}`} sx={{ bgcolor: rowBg, '&:hover': { bgcolor: '#2c2c2c' }, transition: 'background-color 0.2s' }}>
                           <TableCell sx={{
@@ -5079,10 +5128,26 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                               {row.action}
                             </Typography>
                           </TableCell>
-                          <TableCell sx={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.85rem', py: 1.5 }}>
+                          <TableCell sx={{
+                            color: 'rgba(255,255,255,0.85)',
+                            fontSize: '0.85rem',
+                            py: 1.5,
+                            borderLeft: '1.5px solid #ef4444',
+                            ...streakRedTop,
+                            ...streakRedBottom,
+                          }}>
                             {row.desc}
                           </TableCell>
-                          <TableCell colSpan={2} align="center" sx={{ color: '#00a896', fontWeight: 800, fontSize: '0.95rem', bgcolor: 'rgba(0,168,150,0.05)', py: 1.5 }}>
+                          <TableCell colSpan={2} align="center" sx={{
+                            color: '#00a896',
+                            fontWeight: 800,
+                            fontSize: '0.95rem',
+                            bgcolor: 'rgba(0,168,150,0.05)',
+                            py: 1.5,
+                            borderRight: '1.5px solid #ef4444',
+                            ...streakRedTop,
+                            ...streakRedBottom,
+                          }}>
                             {row.xp}
                           </TableCell>
                           <TableCell align="center" sx={{
@@ -5093,7 +5158,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                             borderLeft: '1.5px solid rgba(241, 196, 15, 0.4)',
                             borderRight: '1.5px solid rgba(241, 196, 15, 0.4)',
                             bgcolor: 'rgba(241, 196, 15, 0.04)',
-                            ...(idx === 2 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
+                            ...(idx === 0 ? { borderTop: '1.5px solid rgba(241, 196, 15, 0.4)' } : {}),
+                            ...(idx === 2 ? { borderBottom: '1.5px solid rgba(241, 196, 15, 0.4) !important' } : {}),
                           }}>
                             {row.points}
                           </TableCell>
