@@ -4932,15 +4932,15 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                   <TableBody>
                     {(() => {
                       let rows = [
-                        { action: 'Winning Team Bonus', desc: 'Winning a match', winning: '30 xp', losing: '', isLosingEmpty: true, points: '3 Points' },
+                        { action: 'Winning Team Bonus', desc: 'Winning a match', winning: '20 xp', losing: '', isLosingEmpty: true, points: '3 Points' },
                         { action: 'Draw', desc: 'Drawing a match', winning: '15 xp', losing: '15 xp', isMerged: true, points: '1 Point' },
                         { action: 'Losing Team Consolation', desc: 'Losing a match', winning: '', isWinningEmpty: true, losing: '10 xp', points: '0 Points' },
-                        { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '10 xp', losing: '5 xp', points: '0 Points' },
-                        { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '5 xp', losing: '5 xp', isMerged: true, points: '0 Points' },
-                        { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '3 xp', losing: '2 xp', points: '0 Points' },
-                        { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '1 xp', points: '0 Points' },
-                        { action: 'Man of the Match Votes', desc: 'Player receiving individual count of votes per match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
-                        { action: 'Defensive Impact', desc: 'Decisive defensive or goalkeeping performance in the match', winning: '2 xp', losing: '1 xp', points: '0 Points' },
+                        { action: 'Man of the Match (MOTM)', desc: 'Player with the most count of Man of the Match votes in a single Match', winning: '', losing: '', points: '0 Points' },
+                        { action: 'Clean Sheets', desc: 'Player keeping a clean sheet during their total episodes in goal', winning: '3 xp', losing: '3 xp', points: '0 Points' },
+                        { action: 'Goal Scored', desc: 'Total number of goals scored by a player', winning: '2 xp', losing: '2 xp', points: '0 Points' },
+                        { action: 'Assist', desc: 'Total number of goal assists made by a player', winning: '2 xp', losing: '2 xp', points: '0 Points' },
+                        { action: 'Man of the Match Votes', desc: 'Player receiving individual count of votes per match', winning: '2 xp', losing: '2 xp', points: '0 Points' },
+                        { action: 'Defensive Impact', desc: 'Decisive defensive or goalkeeping performance in the match', winning: '2 xp', losing: '2 xp', points: '0 Points' },
                         { action: '+ Mentality', desc: 'Recognise positive mentality and sportsmanship in the match.', winning: '2 xp', losing: '2 xp', points: '0 Points' }
                       ];
                       if (gameRulesCmsData?.content) {
@@ -4989,8 +4989,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                           ) : (
                             <>
                               <TableCell align="center" sx={{
-                                color: row.isWinningEmpty ? 'rgba(255,255,255,0.15)' : 'white',
-                                fontWeight: row.isWinningEmpty ? 400 : 700,
+                                color: row.isWinningEmpty ? 'rgba(255,255,255,0.15)' : (row.winning ? '#00a896' : 'rgba(255,255,255,0.45)'),
+                                fontWeight: row.winning ? 800 : 400,
                                 fontSize: '0.9rem',
                                 bgcolor: row.isWinningEmpty ? '#151515' : 'transparent',
                                 py: 1.5
@@ -4998,8 +4998,8 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                                 {row.winning || '-'}
                               </TableCell>
                               <TableCell align="center" sx={{
-                                color: row.isLosingEmpty ? 'rgba(255,255,255,0.15)' : 'white',
-                                fontWeight: row.isLosingEmpty ? 400 : 700,
+                                color: row.isLosingEmpty ? 'rgba(255,255,255,0.15)' : (row.losing ? '#00a896' : 'rgba(255,255,255,0.45)'),
+                                fontWeight: row.losing ? 800 : 400,
                                 fontSize: '0.9rem',
                                 bgcolor: row.isLosingEmpty ? '#151515' : 'transparent',
                                 py: 1.5
@@ -5050,9 +5050,9 @@ const getUsersTeamName = (match: MatchLike, userId: string): string | undefined 
                     </TableRow>
 
                     {[
-                      { action: 'Streak Bonuses: Played 25% of league matches in a row', desc: 'Player reaching a milestone for participating in 25% of the total league matches.', xp: '15 XP', points: '0 Points' },
+                      { action: 'Streak Bonuses: Played 25% of league matches in a row', desc: 'Player reaching a milestone for participating in 25% of the total league matches.', xp: '25 XP', points: '0 Points' },
                       { action: 'Streak Bonuses: Played at least 50% of league matches', desc: 'Player reaching a milestone for participating in 50% of the total league matches.', xp: '50 XP', points: '0 Points' },
-                      { action: 'Streak Bonuses: Played at least 75% of league matches', desc: 'Player reaching a milestone for participating in 75% of the total league matches.', xp: '100 XP', points: '0 Points' }
+                      { action: 'Streak Bonuses: Played at least 75% of league matches', desc: 'Player reaching a milestone for participating in 75% of the total league matches.', xp: '75 XP', points: '0 Points' }
                     ].map((row, idx) => {
                       const rowBg = idx % 2 === 0 ? '#242424' : '#1e1e1e';
                       return (
