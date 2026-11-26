@@ -446,6 +446,14 @@ export default function LandingPage() {
                   open={isJoinModalOpen}
                   onClose={() => setIsJoinModalOpen(false)}
                   keepMounted={false}
+                  slotProps={{
+                    backdrop: {
+                      sx: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.78)',
+                        backdropFilter: 'blur(4px)',
+                      },
+                    },
+                  }}
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -455,16 +463,17 @@ export default function LandingPage() {
                   <Paper
                     elevation={8}
                     sx={{
-                      width: { xs: '92vw', sm: '600px', md: '730px' },
-                      maxWidth: '92vw',
-                      height: { xs: '90vh', md: '1129px' },
-                      maxHeight: '90vh',
+                      width: { xs: '94vw', sm: '600px', md: '730px' },
+                      maxWidth: { xs: '94vw', md: '92vw' },
+                      height: 'auto',
+                      maxHeight: '92vh',
                       overflowY: 'auto',
-                      borderRadius: '15px',
-                      bgcolor: '#f5f6f6',
-                      p: { xs: 3, md: 4 },
+                      borderRadius: { xs: '18px', md: '16px' },
+                      bgcolor: '#121316',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      p: { xs: '18px 16px 20px', sm: 3, md: 3.5 },
                       position: 'relative',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+                      boxShadow: '0 24px 64px rgba(0,0,0,0.75)',
                       '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari/Opera
                       scrollbarWidth: 'none', // Hide scrollbar for Firefox
                       msOverflowStyle: 'none', // Hide scrollbar for IE/Edge
@@ -476,18 +485,23 @@ export default function LandingPage() {
                       aria-label="Close modal"
                       sx={{
                         position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: 'grey.500',
-                        '&:hover': { bgcolor: 'rgba(0,0,0,0.1)' }
+                        right: { xs: 10, md: 12 },
+                        top: { xs: 10, md: 12 },
+                        color: '#8e939d',
+                        zIndex: 2,
+                        p: 0.75,
+                        '&:hover': {
+                          color: '#ffffff',
+                          bgcolor: 'rgba(255,255,255,0.08)',
+                        },
                       }}
                     >
-                      <CloseIcon />
+                      <CloseIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     {/* Auth Tabs - Register form */}
                     <Box sx={{ width: '100%', overflow: 'visible' }}>
-                      <AuthTabs showLogin={false} onToggleForm={() => { }} />
+                      <AuthTabs showLogin={false} onToggleForm={() => setIsJoinModalOpen(false)} />
                     </Box>
                   </Paper>
                 </Modal>
