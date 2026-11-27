@@ -134,6 +134,7 @@ interface PlayerMatchStats {
   freeKicks?: number;
   penalties?: number;
   xpAwarded?: number;
+  achievementXp?: number;
   result?: 'W' | 'L' | 'D';
 }
 
@@ -271,6 +272,7 @@ const getLeagueRoleTag = (league: any, targetPlayerId?: string): 'Admin' | 'Memb
   return 'Member';
 };
 interface PlayerStatsData {
+  player?: { rating?: number; xp?: number; name?: string; position?: string };
   leagues?: LeagueWithMatches[];
   years?: Array<number | string>;
   allYears?: Array<number | string>;
@@ -697,8 +699,10 @@ const StrengthRow = ({ title, you, diff, up, showComparison }: {
 // ---------- HELPERS ----------
 function calcPoints(ps: PlayerMatchStats | undefined): number {
   if (!ps) return 0;
-  // Canonical dashboard points = per-match XP already calculated by backend.
-  return typeof ps.xpAwarded === 'number' ? ps.xpAwarded : 0;
+  // Canonical dashboard points = per-match XP + achievement XP unlocked on that match.
+  const matchXp = typeof ps.xpAwarded === 'number' ? ps.xpAwarded : 0;
+  const achXp = typeof ps.achievementXp === 'number' ? ps.achievementXp : 0;
+  return matchXp + achXp;
 }
 
 const toRoundedInt = (value: number): number => {
@@ -709,6 +713,33 @@ const toRoundedInt = (value: number): number => {
 const toStatNumber = (value: unknown): number => {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+};
+
+const formatXpWithCommas = (value: unknown): string => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return String(value ?? '');
+  return Math.round(n).toLocaleString('en-US');
+};
+
+const getNiceCumulativeScale = (rawMax: number): { max: number; ticks: number[] } => {
+  if (!Number.isFinite(rawMax) || rawMax <= 0) {
+    return { max: 100, ticks: [0, 25, 50, 75, 100] };
+  }
+  const target = rawMax * 1.05;
+  const roughStep = target / 4;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(Math.max(roughStep, 1))));
+  const normalized = roughStep / magnitude;
+  let niceFactor = 1;
+  if (normalized <= 1) niceFactor = 1;
+  else if (normalized <= 1.25) niceFactor = 1.25;
+  else if (normalized <= 1.5) niceFactor = 1.5;
+  else if (normalized <= 2) niceFactor = 2;
+  else if (normalized <= 2.5) niceFactor = 2.5;
+  else if (normalized <= 5) niceFactor = 5;
+  else niceFactor = 10;
+  const step = Math.max(1, Math.ceil(niceFactor * magnitude));
+  const max = step * 4;
+  return { max, ticks: [0, step, step * 2, step * 3, max] };
 };
 
 const createEmptyLeagueMetrics = (): LeagueMetricValues => ({
@@ -1241,6 +1272,7 @@ export default function CareerPage(props?: any) {
     if (!playerId) return;
 
     const triggerRefresh = () => {
+      setCareerData(null);
       setRefreshNonce((prev) => prev + 1);
     };
 
@@ -1271,6 +1303,10 @@ export default function CareerPage(props?: any) {
       (!filters.leagueId || filters.leagueId === 'all') &&
       (!filters.year || filters.year === 'all');
     const source = careerData || (canUseVisibleDataAsAll ? data : null);
+    const timelineMatches = (source as { careerTimelineMatches?: LeagueMatch[] } | null)?.careerTimelineMatches;
+    if (Array.isArray(timelineMatches) && timelineMatches.length > 0) {
+      return [...timelineMatches].sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
+    }
     return (source?.leagues || [])
       .flatMap((l: LeagueWithMatches) => (l.matches || []).map((m) => ({ ...m, leagueId: l.id } as LeagueMatch)))
       .sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf());
@@ -1951,12 +1987,16 @@ export default function CareerPage(props?: any) {
     return max > 0 ? Math.ceil(max * 1.05) : 100;
   }, [chartData, performanceData]);
 
-  const maxCumulativePoints = useMemo(() => {
+  const { max: maxCumulativePoints, ticks: cumulativeTicks } = useMemo(() => {
     const activeData = chartData.length > 0 ? chartData : performanceData;
-    if (!activeData.length) return 100;
+    if (!activeData.length) return getNiceCumulativeScale(0);
     const max = Math.max(...activeData.map(d => toStatNumber(d.cumulativePoints)), 0);
-    return max > 0 ? Math.ceil(max * 1.05) : 100;
+    return getNiceCumulativeScale(max);
   }, [chartData, performanceData]);
+
+  const careerTotalXp = useMemo(() => {
+    return toStatNumber(careerData?.player?.rating ?? data?.player?.rating ?? 0);
+  }, [careerData?.player?.rating, data?.player?.rating]);
 
   // Reset range if data length changes
   useEffect(() => {
@@ -3479,7 +3519,7 @@ export default function CareerPage(props?: any) {
                         {/* Sticky Left Y-Axis */}
                         <Box
                           sx={{
-                            width: 65,
+                            width: 74,
                             flexShrink: 0,
                             height: '100%',
                             background: '#232528',
@@ -3487,16 +3527,17 @@ export default function CareerPage(props?: any) {
                             position: 'relative',
                           }}
                         >
-                          <ResponsiveContainer width={65} height="100%">
+                          <ResponsiveContainer width={74} height="100%">
                             <ComposedChart
                               data={chartData.length > 0 ? chartData : performanceData}
-                              margin={{ top: 10, left: 15, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                              margin={{ top: 10, left: 16, right: 0, bottom: groupMode === 'monthly' ? 65 : 75 }}
                             >
                               <YAxis
                                 yAxisId="avg"
                                 stroke={themeColors.textDim}
                                 tick={{ fontSize: 10, fill: themeColors.textDim }}
-                                width={50}
+                                tickFormatter={formatXpWithCommas}
+                                width={58}
                                 tickLine={{ stroke: themeColors.border }}
                                 axisLine={{ stroke: themeColors.border }}
                                 domain={[0, maxTotalPoints]}
@@ -3618,7 +3659,7 @@ export default function CareerPage(props?: any) {
                                             <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
                                               <Box sx={{ width: 8, height: 8, borderRadius: '50%', background: entry.color || entry.fill || themeColors.chartLine }} />
                                               <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
-                                                {displayName}: <span style={{ color: themeColors.text, fontWeight: 'bold' }}>{entry.value}</span>
+                                                {displayName}: <span style={{ color: themeColors.text, fontWeight: 'bold' }}>{formatXpWithCommas(entry.value)}</span>
                                               </Typography>
                                             </Box>
                                           );
@@ -3659,7 +3700,7 @@ export default function CareerPage(props?: any) {
                         {/* Sticky Right Y-Axis */}
                         <Box
                           sx={{
-                            width: 70,
+                            width: 88,
                             flexShrink: 0,
                             height: '100%',
                             background: '#232528',
@@ -3667,10 +3708,10 @@ export default function CareerPage(props?: any) {
                             position: 'relative',
                           }}
                         >
-                          <ResponsiveContainer width={70} height="100%">
+                          <ResponsiveContainer width={88} height="100%">
                             <ComposedChart
                               data={chartData.length > 0 ? chartData : performanceData}
-                              margin={{ top: 10, left: 0, right: 15, bottom: groupMode === 'monthly' ? 65 : 75 }}
+                              margin={{ top: 10, left: 0, right: 18, bottom: groupMode === 'monthly' ? 65 : 75 }}
                             >
                               <YAxis
                                 yAxisId="avg"
@@ -3682,12 +3723,13 @@ export default function CareerPage(props?: any) {
                                 orientation="right"
                                 stroke={themeColors.textDim}
                                 tick={{ fontSize: 10, fill: themeColors.textDim }}
-                                width={55}
+                                tickFormatter={formatXpWithCommas}
+                                width={70}
                                 tickLine={{ stroke: themeColors.border }}
                                 axisLine={{ stroke: themeColors.border }}
                                 domain={[0, maxCumulativePoints]}
                                 tickCount={5}
-                                ticks={Array.from({ length: 5 }, (_, i) => Math.round((maxCumulativePoints / 4) * i))}
+                                ticks={cumulativeTicks}
                                 label={{ value: 'Cumulative XP', angle: 90, position: 'insideRight', style: { fill: themeColors.textDim, fontSize: 10, textAnchor: 'middle' } }}
                               />
                               {/* Dummy XAxis to reserve identical bottom spacing */}
@@ -3714,8 +3756,8 @@ export default function CareerPage(props?: any) {
                   {chartHasHorizontalOverflow && (
                     <Box
                       sx={{
-                        pl: '65px',
-                        pr: '70px',
+                        pl: '74px',
+                        pr: '88px',
                         mt: -4,
                         pb: 2,
                         display: { xs: 'block', sm: 'none' },
@@ -3731,7 +3773,10 @@ export default function CareerPage(props?: any) {
                   <Box sx={{
                     display: 'flex',
                     justifyContent: 'center',
-                    gap: 3,
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: { xs: 2, sm: 3 },
+                    px: 1.5,
                     pb: 2,
                     pt: 2,
                     backgroundColor: '#383a3f',
@@ -3749,6 +3794,16 @@ export default function CareerPage(props?: any) {
                         {getCms('page_player_career_cumulative_xp_legend', 'Cumulative XP Points')}
                       </Typography>
                     </Box>
+                    {chartLeague === 'all' && (!filters.year || filters.year === 'all') && careerTotalXp > 0 && (() => {
+                      const activeData = chartData.length > 0 ? chartData : performanceData;
+                      const latestMatchCumulative = activeData.length > 0 ? toStatNumber(activeData[activeData.length - 1]?.cumulativePoints) : 0;
+                      if (careerTotalXp <= latestMatchCumulative) return null;
+                      return (
+                        <Typography sx={{ fontSize: 11, color: themeColors.textDim }}>
+                          Career Total XP (incl. achievements): <span style={{ color: themeColors.text, fontWeight: 700 }}>{formatXpWithCommas(careerTotalXp)}</span>
+                        </Typography>
+                      );
+                    })()}
                   </Box>
                 </Box>
               </GlassCard>
